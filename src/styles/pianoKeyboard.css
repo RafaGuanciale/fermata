@@ -1,0 +1,102 @@
+.pianoKeyboard {
+  --key-w: 52px;
+  --key-h: 180px;
+  --black-w: 32px;
+  --black-h: 112px;
+  position: relative;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  padding: var(--space-2) var(--space-2) 10px;
+  border-radius: var(--radius-s);
+  background: var(--key-body);
+}
+
+.pianoKeyboard__white {
+  position: relative;
+  width: var(--key-w);
+  height: var(--key-h);
+  margin: 0 1px;
+  padding: 0 0 14px;
+  border: 0;
+  border-radius: 0 0 var(--radius-key) var(--radius-key);
+  background: var(--key-white);
+  color: var(--color-ebony);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font: 600 12px/1 var(--font-body);
+  cursor: pointer;
+  transition: background-color 90ms, transform 90ms;
+}
+
+.pianoKeyboard__black {
+  position: absolute;
+  top: var(--space-2);
+  /* --slot = quantas teclas brancas ficam à esquerda; cada branca ocupa a largura + 2px de margem */
+  left: calc(var(--space-2) + var(--slot) * (var(--key-w) + 2px) - var(--black-w) / 2);
+  width: var(--black-w);
+  height: var(--black-h);
+  padding: 0 0 10px;
+  border: 0;
+  border-radius: 0 0 var(--radius-key) var(--radius-key);
+  background: var(--key-black);
+  color: var(--on-key-lit);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font: 600 11px/1 var(--font-body);
+  cursor: pointer;
+  z-index: 1;
+  box-shadow: 0 0 0 1px var(--key-body);
+  transition: background-color 90ms;
+}
+
+.pianoKeyboard__white:active,
+.pianoKeyboard__black:active {
+  transform: translateY(1px);
+}
+
+.pianoKeyboard__white-lit,
+.pianoKeyboard__black-lit {
+  background: var(--key-lit);
+  color: var(--on-key-lit);
+}
+
+.pianoKeyboard__white-miss,
+.pianoKeyboard__black-miss {
+  background: var(--miss);
+  color: var(--color-ebony);
+}
+
+.pianoKeyboard__hint {
+  font: 500 10px/1 var(--font-body);
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+.pianoKeyboard-small {
+  --key-w: 36px;
+  --key-h: 128px;
+  --black-w: 22px;
+  --black-h: 80px;
+}
+
+.pianoKeyboard-small .pianoKeyboard__white {
+  padding-bottom: 12px;
+}
+
+.pianoKeyboard-static .pianoKeyboard__white,
+.pianoKeyboard-static .pianoKeyboard__black {
+  cursor: default;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .pianoKeyboard {
+    --key-w: 38px;
+    --key-h: 140px;
+    --black-w: 24px;
+    --black-h: 88px;
+  }
+}

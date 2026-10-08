@@ -1,0 +1,15 @@
+/* CSS principal: todo estilo entra por aqui, nunca importado dentro de componentes. */
+@import url("./styles/tokens.css");
+@import url("./styles/page.css");
+
+/* Componentes */
+@import url("./styles/sideNav.css");
+@import url("./styles/button.css");
+@import url("./styles/segmented.css");
+@import url("./styles/staff.css");
+@import url("./styles/pianoKeyboard.css");
+
+/* Páginas */
+@import url("./styles/today.css");
+@import url("./styles/drill.css");
+@import url("./styles/upcoming.css");

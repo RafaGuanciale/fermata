@@ -1,0 +1,112 @@
+.sideNav {
+  flex: 1 1 220px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--space-6);
+  border-right: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sideNav__brand {
+  display: grid;
+  gap: 2px;
+  text-decoration: none;
+}
+
+.sideNav__wordmark {
+  font: 600 20px/24px var(--font-wordmark);
+  letter-spacing: 0.14em;
+}
+
+.sideNav__endorse {
+  font: 500 11px/14px var(--font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sideNav__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sideNav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  font: 500 14px/1 var(--font-body);
+  color: var(--text-muted);
+}
+
+.sideNav__link:hover {
+  background: var(--surface-sunk);
+  color: var(--text);
+}
+
+.sideNav__link-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.sideNav__icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.sideNav__foot {
+  margin-top: auto;
+  display: grid;
+  gap: var(--space-3);
+  font: 400 12px/16px var(--font-body);
+  color: var(--text-muted);
+}
+
+/* No celular a navegação vira uma barra inferior com as mesmas áreas. */
+@media (max-width: 720px) {
+  .sideNav {
+    position: fixed;
+    inset: auto 0 0 0;
+    max-width: none;
+    height: auto;
+    flex-direction: row;
+    padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+    border-right: 0;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .sideNav__brand,
+  .sideNav__foot {
+    display: none;
+  }
+
+  .sideNav__list {
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .sideNav__link {
+    flex-direction: column;
+    gap: var(--space-1);
+    min-height: 52px;
+    padding: var(--space-2);
+    font-size: 11px;
+    border-radius: var(--radius-s);
+  }
+}

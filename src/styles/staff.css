@@ -1,0 +1,78 @@
+.staff {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.staff__svg {
+  display: block;
+  margin: 0 auto;
+  max-width: none;
+}
+
+.staff__line {
+  stroke: var(--text);
+  stroke-width: 1.5;
+  opacity: 0.85;
+}
+
+.staff__ledger {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.staff__clef {
+  fill: var(--text);
+  font-family: var(--font-music);
+}
+
+.staff__head,
+.staff__stem {
+  transition: fill 120ms, stroke 120ms, opacity 120ms;
+}
+
+.staff__head {
+  fill: var(--text);
+}
+
+.staff__stem {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.staff__head-hit {
+  fill: var(--hit);
+}
+
+.staff__stem-hit {
+  stroke: var(--hit);
+}
+
+.staff__head-miss {
+  fill: var(--miss);
+}
+
+.staff__stem-miss {
+  stroke: var(--miss);
+}
+
+.staff__head-upcoming,
+.staff__stem-upcoming {
+  opacity: 0.5;
+}
+
+.staff__halo {
+  fill: none;
+  stroke: var(--key-lit);
+  stroke-width: 3;
+}
+
+.staff__name {
+  fill: var(--text-muted);
+  font: 500 13px var(--font-body);
+  text-anchor: middle;
+}
+
+.staff__name-current {
+  fill: var(--text);
+  font-weight: 600;
+}

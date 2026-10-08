@@ -1,0 +1,114 @@
+.today__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  border-radius: var(--radius-l);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-raised);
+}
+
+.today__heroText {
+  flex: 1 1 360px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.today__heroTitle {
+  font: 500 30px/36px var(--font-display);
+  text-wrap: balance;
+}
+
+.today__heroBody {
+  color: var(--text-muted);
+  max-width: 52ch;
+}
+
+.today__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.today__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.today__empty {
+  padding: var(--space-6);
+  border-radius: var(--radius-m);
+  border: 1px dashed var(--line-strong);
+  color: var(--text-muted);
+}
+
+/* Cartão de métrica */
+.statTile {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.statTile__label {
+  font: 600 11px/14px var(--font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.statTile__value {
+  font: 500 30px/34px var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.statTile__unit {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.statTile__delta {
+  font: 500 13px/18px var(--font-body);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.statTile__delta-good {
+  color: var(--hit);
+}
+
+.statTile__spark {
+  width: 100%;
+  height: 40px;
+  margin-top: var(--space-2);
+}
+
+.statTile__sparkArea {
+  fill: var(--hit-soft);
+}
+
+.statTile__sparkLine {
+  fill: none;
+  stroke: var(--hit);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.statTile__sparkBase {
+  stroke: var(--line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}

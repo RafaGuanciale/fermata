@@ -1,0 +1,65 @@
+/* Escolha de modo (Notas soltas / Música) e opções de liga/desliga. */
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  border: 1px solid var(--line);
+}
+
+.segmented__option {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font: 500 13px/1 var(--font-body);
+  cursor: pointer;
+}
+
+.segmented__option:hover {
+  color: var(--text);
+}
+
+.segmented__option-active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text);
+  font: 500 13px/1 var(--font-body);
+  cursor: pointer;
+}
+
+.pill:hover {
+  background: var(--surface-sunk);
+}
+
+.pill__icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  flex: none;
+}
+
+.pill__dot-on {
+  background: var(--hit);
+}

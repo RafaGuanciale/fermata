@@ -1,0 +1,86 @@
+/*
+  Fermata — tokens do design system.
+  Seis cores-base (iguais nos dois temas); todo o resto deriva delas com color-mix().
+  Escuro é o padrão; o claro entra com data-theme="light" no <html>.
+*/
+
+:root {
+  /* Cores-base */
+  --color-champagne: #f1e0c5;
+  --color-khaki: #c9b79c;
+  --color-off-white: #fafaf8;
+  --color-petrol: #2c5a64;
+  --color-ebony: #1b1d21;
+  --color-blush: #da667b;
+
+  /* Tema escuro (padrão) */
+  --bg: var(--color-ebony);
+  --surface: color-mix(in srgb, var(--color-ebony) 85%, var(--color-petrol));
+  --surface-raised: color-mix(in srgb, var(--color-ebony) 75%, var(--color-petrol));
+  --surface-sunk: color-mix(in srgb, var(--color-ebony) 80%, black);
+  --text: var(--color-champagne);
+  --text-muted: var(--color-khaki);
+  --line: color-mix(in srgb, var(--color-champagne) 14%, var(--color-ebony));
+  --line-strong: color-mix(in srgb, var(--color-khaki) 60%, var(--color-ebony));
+  --focus: var(--color-champagne);
+  --primary: var(--color-champagne);
+  --on-primary: var(--color-ebony);
+  --hit: color-mix(in srgb, var(--color-petrol) 55%, var(--color-off-white));
+  --hit-soft: color-mix(in srgb, var(--color-petrol) 40%, var(--color-ebony));
+  --miss: var(--color-blush);
+  --miss-ink: color-mix(in srgb, var(--color-blush) 70%, var(--color-off-white));
+  --miss-soft: color-mix(in srgb, var(--color-blush) 22%, var(--color-ebony));
+  --neutral-soft: color-mix(in srgb, var(--color-khaki) 20%, var(--color-ebony));
+  --key-white: var(--color-champagne);
+  --key-black: var(--color-ebony);
+  --key-body: color-mix(in srgb, var(--color-ebony) 70%, black);
+  --key-lit: var(--color-petrol);
+  --on-key-lit: var(--color-off-white);
+  --shadow-raised: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+  /* Tipografia (a mesma do Permana) */
+  --font-wordmark: "Cinzel", "Trajan Pro", serif;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Montserrat", system-ui, sans-serif;
+  --font-music: "Noto Music", serif;
+
+  /* Espaço, cantos */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --radius-key: 5px;
+  --radius-s: 8px;
+  --radius-m: 15px;
+  --radius-l: 20px;
+  --radius-pill: 999px;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: color-mix(in srgb, var(--color-off-white) 80%, var(--color-champagne));
+  --surface: var(--color-off-white);
+  --surface-raised: var(--color-off-white);
+  --surface-sunk: color-mix(in srgb, var(--color-off-white) 55%, var(--color-champagne));
+  --text: var(--color-ebony);
+  --text-muted: color-mix(in srgb, var(--color-ebony) 60%, var(--color-khaki));
+  --line: color-mix(in srgb, var(--color-khaki) 45%, var(--color-off-white));
+  --line-strong: color-mix(in srgb, var(--color-ebony) 45%, var(--color-khaki));
+  --focus: var(--color-petrol);
+  --primary: var(--color-petrol);
+  --on-primary: var(--color-off-white);
+  --hit: var(--color-petrol);
+  --hit-soft: color-mix(in srgb, var(--color-petrol) 14%, var(--color-off-white));
+  --miss: color-mix(in srgb, var(--color-blush) 62%, var(--color-ebony));
+  --miss-ink: color-mix(in srgb, var(--color-blush) 62%, var(--color-ebony));
+  --miss-soft: color-mix(in srgb, var(--color-blush) 16%, var(--color-off-white));
+  --neutral-soft: color-mix(in srgb, var(--color-khaki) 25%, var(--color-off-white));
+  --key-body: var(--color-ebony);
+  --shadow-raised: 0 6px 18px rgba(27, 29, 33, 0.08);
+
+  color-scheme: light;
+}

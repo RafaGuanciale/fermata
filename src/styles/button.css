@@ -1,0 +1,52 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font: 600 14px/1 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 120ms, background-color 120ms;
+}
+
+.button__icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.button-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.button-primary:hover {
+  filter: brightness(1.06);
+}
+
+.button-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.button-secondary:hover,
+.button-ghost:hover {
+  background: var(--surface-sunk);
+}
+
+.button-ghost {
+  background: transparent;
+  color: var(--text);
+  padding: 0 var(--space-3);
+}
+
+.button-small {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  font-size: 13px;
+}
