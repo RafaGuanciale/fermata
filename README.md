@@ -18,7 +18,9 @@ O nome vem do sinal de fermata, que manda sustentar a nota além do tempo. É a 
 
 - **Barra lateral em todas as páginas**: completa no notebook, só ícones no tablet, barra inferior no celular
 - **Teclado fixo embaixo** com as 88 teclas do piano: acende o que você toca (MIDI, clique ou teclado do computador) e reconhece acordes maiores e menores. Dá para recolher
-- **Treino de leitura** em modo imersivo (tela cheia): notas soltas de Dó a Sol ou Ode à Alegria, com feedback a cada nota e a pauta se ajustando ao tamanho da tela
+- **Treino de leitura** num popup com moldura por cima do app: notas soltas de Dó a Sol ou Ode à Alegria, com feedback a cada nota, a pauta se ajustando ao tamanho da tela e opção de teclado inteiro (88 teclas)
+- **Metrônomo** no rodapé do teclado e dentro do treino e da partitura: BPM de 30 a 240, botões de ±1 e ±5, bater o tempo, 2, 3, 4 ou 6 tempos com acento no primeiro. Continua tocando quando você troca de página
+- **Login com a conta Permana** e sincronização entre aparelhos: repertório, partituras, progresso no Estudo e histórico dos treinos
 - **Repertório** com categorias em cartões com foto (Filmes e séries, Clássico, Jazz, MPB e brasileira, Pop e rock, Jogos, Infantil) e a área **Músicos**, montada a partir dos compositores e artistas cadastrados
 - Cadastro de peças com estado (quero aprender, aprendendo, aprendi, no repertório), nível, categorias e a **partitura em PDF ou foto**
 - **Leitor de partitura** em tela cheia com zoom, igual no notebook, tablet e celular (PDF.js)
@@ -28,16 +30,40 @@ O nome vem do sinal de fermata, que manda sustentar a nota além do tempo. É a 
 
 ### Onde ficam os dados e os PDFs
 
-Por enquanto, tudo fica no navegador do aparelho (IndexedDB): treinos, peças, progresso das lições e os arquivos de partitura. O app pede ao navegador armazenamento persistente para que nada seja apagado quando faltar espaço.
+O app sempre lê e grava no navegador (IndexedDB), então funciona sem internet e sem login.
 
-A consequência é que cada aparelho tem o seu: o PDF subido no notebook não aparece no tablet. A próxima fase resolve isso com login e armazenamento na nuvem. Todas as operações do repertório passam por `src/repertoire/repo.ts`, então a troca acontece num lugar só.
+Com login, as mudanças sobem para a nuvem e descem nos outros aparelhos:
+
+- **Dados** (peças, lições, treinos): banco `fermata` no mesmo MongoDB Atlas do Permana, separado dos dados do Permana. Vale a alteração mais recente.
+- **Partituras**: loja privada do Vercel Blob. O arquivo vai do navegador direto para o Blob, sem passar pela função. Nos outros aparelhos ele só baixa na primeira vez que você abre.
+
+As telas não sabem que a nuvem existe: hooks do Dexie em `src/sync/engine.ts` marcam cada gravação e põem numa fila, que sobe alguns segundos depois, ao voltar para a aba, ao reconectar e a cada 2 minutos.
+
+### Login com a conta Permana
+
+O Fermata não tem cadastro próprio nem guarda senha. As funções da Vercel em `api/` repassam o login para o servidor do Permana (`POST /auth/login`) e, a cada chamada, confirmam de quem é o token perguntando ao próprio Permana (`GET /users/me`). Nada mudou no backend do Permana.
+
+| Função | O que faz |
+| --- | --- |
+| `api/login.ts` | Repassa email e senha ao Permana e devolve token e perfil |
+| `api/sync.ts` | Recebe as mudanças do aparelho e devolve as dos outros |
+| `api/blob.ts` | Autoriza o envio de partitura e gera link temporário de leitura |
+
+### Configuração na Vercel
+
+1. **Storage → Create → Blob**, acesso **Private**, conectado ao projeto `fermata`. A Vercel adiciona sozinha as variáveis do Blob.
+2. **Settings → Environment Variables**:
+   - `MONGODB_URI`: a mesma string de conexão do Atlas usada no Permana (o Fermata usa o banco `fermata`)
+   - `PERMANA_API_URL`: o endereço do backend do Permana, o mesmo do `VITE_API_URL` do front do Permana
+3. No Atlas, **Network Access** precisa aceitar `0.0.0.0/0`, porque as funções da Vercel não têm IP fixo.
+4. Novo deploy.
 
 ### Próximas fases
 
 | Fase | O quê |
 | --- | --- |
-| próxima | Login e sincronização entre notebook, tablet e celular (dados e PDFs na nuvem) |
-| depois | Treino com metrônomo, clave de fá, mais lições, página de Progresso |
+| próxima | Metodologia de treino: fases com prova, aquecimento por nível, escada de BPM com o metrônomo |
+| depois | Clave de fá, mais lições, página de Progresso |
 
 ## Integração com o piano (Web MIDI)
 
@@ -62,12 +88,15 @@ O código está em `src/input/NoteInputProvider.tsx`. Todas as telas ouvem o mes
 ### Estrutura e boas práticas
 
 ```
+api/           funções da Vercel: login, sincronização e partituras
 src/
   brand/       logotipo (moeda com F, no desenho do Permana)
   music/       notas, acordes, escalas e geração de exercícios
   drill/       estado do treino como função pura (estado, ação) → estado
   input/       entrada de notas: MIDI, tela e teclado do computador
   db/          banco local (Dexie) e métricas de evolução
+  sync/        conta Permana, fila de envio e sincronização com a nuvem
+  metronome/   metrônomo (Web Audio) e contas de andamento
   repertoire/  categorias, busca, músicos e operações do repertório
   study/       módulos, lições e o conteúdo de cada lição
   media/       fotos das categorias e módulos
@@ -92,12 +121,14 @@ npm run build      # checa tipos e gera dist/
 
 ## Segurança e privacidade
 
-- Nenhum dado sai do computador: sessões e tentativas ficam no IndexedDB do navegador. Limpar os dados do site apaga o histórico.
-- Não há login, chaves de API nem variáveis de ambiente.
+- Sem login, nenhum dado sai do aparelho.
+- Com login, a senha vai direto para o servidor do Permana; o Fermata só guarda o token, como o próprio Permana faz.
+- Toda função confere o token com o Permana antes de qualquer leitura ou gravação, e cada usuário só enxerga os próprios registros e a própria pasta no Blob.
+- Partituras ficam numa loja privada: não existe link público, só links assinados que valem 10 minutos.
+- Segredos (`MONGODB_URI`, credenciais do Blob) ficam só nas variáveis de ambiente da Vercel.
 - O acesso MIDI é pedido sem `sysex`, então o site só lê notas e não consegue mandar comandos ao piano.
 - Recursos externos: fontes do Google Fonts e fotos do Unsplash (carregadas do CDN deles).
-- Os PDFs não saem do aparelho e são abertos com PDF.js, sem executar scripts do arquivo.
-- Quando houver login e servidor, entram aqui: autenticação, validação de entrada, limite de requisições e a política de privacidade (LGPD), seguindo o que já foi feito no Permana.
+- Os PDFs são abertos com PDF.js, sem executar scripts do arquivo.
 
 ## Créditos das fotos
 

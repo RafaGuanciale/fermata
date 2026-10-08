@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { LEVEL_LABEL, STATUS_LABEL, STATUS_ORDER, categoryBySlug } from '../repertoire/catalog';
-import { deletePiece, formatBytes, setStatus } from '../repertoire/repo';
+import { deletePiece, fileWhere, formatBytes, setStatus } from '../repertoire/repo';
 import PhotoCard from '../components/PhotoCard';
 import StatusBadge from '../components/StatusBadge';
 import { BackIcon, ExpandIcon, FileIcon, TrashIcon } from '../components/Icons';
@@ -93,7 +93,7 @@ export default function PiecePage() {
             <span className="fileBox fileBox-inline">
               <FileIcon className="fileBox__icon" />
               <span className="fileBox__name">{file.name}</span>
-              <span className="fileBox__size">{formatBytes(file.size)} · salvo neste aparelho</span>
+              <span className="fileBox__size">{formatBytes(file.size)} · {fileWhere(file)}</span>
             </span>
           ) : (
             <span>Nenhuma</span>

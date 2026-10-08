@@ -3,6 +3,7 @@ import Logo from '../brand/Logo';
 import { ProgressIcon, PracticeIcon, RepertoireIcon, StudyIcon, TodayIcon } from './Icons';
 import ThemeToggle from './ThemeToggle';
 import KeyboardDock from './KeyboardDock';
+import AccountChip from './AccountChip';
 
 const LINKS = [
   { to: '/', label: 'Hoje', Icon: TodayIcon, end: true },
@@ -40,10 +41,18 @@ export default function AppLayout() {
           ))}
         </ul>
         <div className="sideNav__foot">
+          <AccountChip />
           <ThemeToggle />
         </div>
       </nav>
       <div className="page__column">
+        <div className="page__topBar">
+          <NavLink to="/" aria-label="Fermata, início"><Logo compact /></NavLink>
+          <div className="page__topBarActions">
+            <AccountChip compact />
+            <ThemeToggle iconOnly />
+          </div>
+        </div>
         <main className="page__main">
           <div className="page__inner">
             <Outlet />

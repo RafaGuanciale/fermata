@@ -1,11 +1,12 @@
 // Sessão de treino imersiva: sem barra lateral, em tela cheia quando o aparelho deixa.
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import PianoKeyboard, { type KeyMark } from '../components/PianoKeyboard';
 import Staff, { type NoteState } from '../components/Staff';
 import DrillFeedback from '../components/DrillFeedback';
 import ThemeToggle from '../components/ThemeToggle';
+import MetronomeButton from '../components/MetronomeButton';
 import { CloseIcon, ExpandIcon, PlugIcon } from '../components/Icons';
 import { createDrill, drillReducer, isFinished, summarize, type DrillAction, type DrillState } from '../drill/drill';
 import { makeExercise, type Exercise, type ExerciseKind } from '../music/exercises';
@@ -17,6 +18,24 @@ import { db } from '../db/db';
 import { formatPercent, formatSeconds } from '../format';
 
 const NAMES_KEY = 'fermata-show-names';
+
+const FULL_KEYS_KEY = 'fermata-session-full-keyboard';
+
+function readFlag(key: string): boolean {
+  try {
+    return localStorage.getItem(key) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function saveFlag(key: string, on: boolean) {
+  try {
+    localStorage.setItem(key, on ? '1' : '0');
+  } catch {
+    // sem localStorage: vale só agora
+  }
+}
 
 function readShowNames(): boolean {
   try {
@@ -37,6 +56,22 @@ export default function PracticeSessionPage({ onClose }: { onClose: () => void }
   const [exercise, setExercise] = useState<Exercise>(() => makeExercise(kind));
   const [drill, setDrill] = useState<DrillState>(() => createDrill(exercise.notes, performance.now()));
   const [showNames, setShowNames] = useState(readShowNames);
+  const [fullKeys, setFullKeys] = useState(() => readFlag(FULL_KEYS_KEY));
+  const keysRef = useRef<HTMLDivElement>(null);
+
+  // Teclado inteiro: começa centralizado no Dó central.
+  useEffect(() => {
+    const box = keysRef.current;
+    const c4 = box?.querySelector<HTMLElement>('[data-midi="60"]');
+    if (!box || !c4 || !fullKeys) return;
+    box.scrollLeft = c4.offsetLeft - box.clientWidth / 2 + c4.offsetWidth * 4;
+  }, [fullKeys]);
+
+  const toggleFullKeys = () =>
+    setFullKeys((on) => {
+      saveFlag(FULL_KEYS_KEY, !on);
+      return !on;
+    });
   const drillRef = useRef(drill);
   const sessionRef = useRef<Promise<number> | null>(null);
 
@@ -137,6 +172,10 @@ export default function PracticeSessionPage({ onClose }: { onClose: () => void }
               Música
             </button>
           </div>
+          <MetronomeButton placement="down" />
+          <button className="pill" type="button" aria-pressed={fullKeys} onClick={toggleFullKeys}>
+            {fullKeys ? 'Teclado curto' : 'Teclado inteiro'}
+          </button>
           <button className="pill" type="button" aria-pressed={showNames} onClick={toggleNames}>
             {showNames ? 'Esconder nomes' : 'Mostrar nomes'}
           </button>
@@ -209,16 +248,16 @@ export default function PracticeSessionPage({ onClose }: { onClose: () => void }
             <dd className="session__statValue">{summary.misses}</dd>
           </div>
         </dl>
-        <div className="session__keyboard">
+        <div className={'session__keyboard' + (fullKeys ? ' session__keyboard-full' : '')} ref={keysRef}>
           <PianoKeyboard
-            low={60}
-            high={72}
+            low={fullKeys ? 21 : 60}
+            high={fullKeys ? 108 : 72}
             marks={marks}
             showNames={showNames}
             showComputerKeys
             onPress={press}
             onRelease={release}
-            label="Teclado de Dó 4 a Dó 5"
+            label={fullKeys ? 'Teclado inteiro, 88 teclas' : 'Teclado de Dó 4 a Dó 5'}
           />
         </div>
         <button className="button button-ghost button-small session__restart" type="button" onClick={() => startExercise(kind)}>

@@ -45,7 +45,7 @@ export default function RepertoirePage() {
 
       {!searching && (
         <section className="page__section" aria-label="Categorias">
-          <div className="photoGrid">
+          <div className="photoGrid photoGrid-categories">
             {CATEGORIES.map((c) => (
               <PhotoCard
                 key={c.slug}

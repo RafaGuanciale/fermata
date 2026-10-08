@@ -79,6 +79,8 @@
 
 .sideNav__foot {
   margin-top: auto;
+  display: grid;
+  gap: var(--space-2);
   padding: 0 var(--space-2);
 }
 
@@ -116,6 +118,18 @@
 
   .sideNav__foot {
     padding: 0;
+    justify-items: center;
+  }
+
+  .sideNav__foot .accountChip {
+    padding: 0;
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+
+  .sideNav__foot .accountChip__name {
+    display: none;
   }
 
   .sideNav__foot .themeToggle__label {

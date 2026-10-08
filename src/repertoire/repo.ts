@@ -1,7 +1,8 @@
-// Operações do repertório. Todas as telas passam por aqui, nunca direto no banco:
-// quando os arquivos forem para a nuvem, só este arquivo muda.
+// Operações do repertório. Todas as telas passam por aqui para gravar.
+// A nuvem entra sozinha pelos hooks de src/sync; aqui só cuidamos de baixar o arquivo quando falta.
 
 import { db, type Piece, type StoredFile } from '../db/db';
+import { downloadFile } from '../sync/engine';
 
 export const ACCEPTED_FILES = 'application/pdf,image/png,image/jpeg,image/webp';
 export const MAX_FILE_BYTES = 40 * 1024 * 1024;
@@ -63,8 +64,20 @@ export async function deletePiece(id: number) {
   });
 }
 
-export async function getFile(id: number): Promise<StoredFile | undefined> {
-  return db.files.get(id);
+/** Devolve a partitura com o arquivo. Se ela veio de outro aparelho, baixa da nuvem na primeira vez. */
+export async function getFile(id: number): Promise<(StoredFile & { blob: Blob }) | undefined> {
+  const file = await db.files.get(id);
+  if (!file) return undefined;
+  if (file.blob) return file as StoredFile & { blob: Blob };
+  const blob = await downloadFile(file);
+  return { ...file, blob };
+}
+
+/** Onde a partitura está, em palavras. */
+export function fileWhere(file: Pick<StoredFile, 'blob' | 'pathname'>): string {
+  if (file.blob && file.pathname) return 'neste aparelho e na nuvem';
+  if (file.blob) return 'salvo neste aparelho';
+  return 'na nuvem, baixa ao abrir';
 }
 
 export function formatBytes(n: number): string {

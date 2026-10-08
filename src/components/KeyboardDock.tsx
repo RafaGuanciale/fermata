@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import { noteInfo, whiteKeysBetween, type Midi } from '../music/notes';
 import { detectTriad } from '../music/theory';
+import MetronomeButton from './MetronomeButton';
 import { useNoteInput } from '../input/useNoteInput';
 import { midiStatusLabel } from '../input/useNoteInput';
 import { ChevronIcon, PlugIcon } from './Icons';
@@ -251,6 +252,7 @@ export default function KeyboardDock() {
             <span className="dock__hint">Toque no piano, clique nas teclas ou use A S D F G H J K</span>
           )}
         </span>
+        <MetronomeButton placement="up" />
         <button className="dock__midi" type="button" onClick={connectMidi} title="Ligue o piano pelo cabo USB. Funciona no Chrome e no Edge.">
           {midi.kind === 'connected' ? <span className="dock__dot" aria-hidden /> : <PlugIcon className="dock__plug" />}
           <span className="dock__midiLabel">{midiStatusLabel(midi)}</span>

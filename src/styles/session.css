@@ -142,6 +142,26 @@
   overflow-x: auto;
 }
 
+/* Teclado inteiro (88 teclas): teclas menores e rolagem lateral */
+.session__keyboard-full {
+  grid-column: 1 / -1;
+  width: 100%;
+  scroll-behavior: smooth;
+}
+
+.session__keyboard-full .pianoKeyboard {
+  --key-w: 30px;
+  --key-h: 140px;
+  --black-w: 19px;
+  --black-h: 88px;
+  max-width: none;
+  margin: 0 auto;
+}
+
+.session__keyboard-full .pianoKeyboard__white {
+  font-size: 10px;
+}
+
 .session__restart {
   justify-self: end;
 }
@@ -251,3 +271,10 @@
   color: var(--text);
 }
 
+
+/* Com o teclado inteiro, os números ficam numa linha só acima dele */
+.session__footer:has(.session__keyboard-full) .session__stats {
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  column-gap: var(--space-8);
+}

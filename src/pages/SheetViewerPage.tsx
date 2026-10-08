@@ -9,6 +9,7 @@ import { db } from '../db/db';
 import { getFile, markOpened } from '../repertoire/repo';
 import { CloseIcon, ExpandIcon, MinusIcon, PlusIcon } from '../components/Icons';
 import ThemeToggle from '../components/ThemeToggle';
+import MetronomeButton from '../components/MetronomeButton';
 import { canFullscreen, enterFullscreen, useElementWidth, useFullscreenState } from '../hooks/useFullscreen';
 
 GlobalWorkerOptions.workerSrc = workerSrc;
@@ -62,7 +63,12 @@ export default function SheetViewerPage({ onClose }: { onClose: () => void }) {
       if (!piece?.fileId) return setError('Esta peça não tem partitura.');
       setTitle(piece.title);
       void markOpened(id);
-      const file = await getFile(piece.fileId);
+      let file: Awaited<ReturnType<typeof getFile>>;
+      try {
+        file = await getFile(piece.fileId);
+      } catch (err) {
+        return setError(err instanceof Error ? err.message : 'Não deu para baixar a partitura.');
+      }
       if (!file) return setError('O arquivo não está neste aparelho.');
       if (file.type.startsWith('image/')) {
         url = URL.createObjectURL(file.blob);
@@ -108,6 +114,7 @@ export default function SheetViewerPage({ onClose }: { onClose: () => void }) {
               <PlusIcon className="pill__icon" />
             </button>
           </div>
+          <MetronomeButton placement="down" />
           {canFullscreen() && !isFull && (
             <button className="pill pill-icon" type="button" onClick={enterFullscreen} aria-label="Tela cheia" title="Tela cheia">
               <ExpandIcon className="pill__icon" />

@@ -110,28 +110,27 @@ export default function PieceFormPage() {
           </div>
         </fieldset>
 
-        <div className="form__row form__row-2">
-          <fieldset className="form__fieldset">
-            <legend className="form__label">Nível</legend>
-            <div className="chips">
-              {(Object.keys(LEVEL_LABEL) as Level[]).map((l) => (
-                <button key={l} type="button" className={'chip' + (level === l ? ' chip-active' : '')} aria-pressed={level === l} onClick={() => setLevel(l)}>
-                  {LEVEL_LABEL[l]}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset className="form__fieldset">
-            <legend className="form__label">Estado</legend>
-            <div className="chips">
-              {STATUS_ORDER.map((s) => (
-                <button key={s} type="button" className={'chip' + (status === s ? ' chip-active' : '')} aria-pressed={status === s} onClick={() => setStatus(s)}>
-                  {STATUS_LABEL[s]}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        </div>
+        <fieldset className="form__fieldset">
+          <legend className="form__label">Nível</legend>
+          <div className="choice choice-3" role="radiogroup" aria-label="Nível">
+            {(Object.keys(LEVEL_LABEL) as Level[]).map((l) => (
+              <button key={l} type="button" role="radio" className={'choice__option' + (level === l ? ' choice__option-active' : '')} aria-checked={level === l} onClick={() => setLevel(l)}>
+                {LEVEL_LABEL[l]}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="form__fieldset">
+          <legend className="form__label">Em que ponto você está</legend>
+          <div className="choice choice-4" role="radiogroup" aria-label="Estado">
+            {STATUS_ORDER.map((s) => (
+              <button key={s} type="button" role="radio" className={'choice__option' + (status === s ? ' choice__option-active' : '')} aria-checked={status === s} onClick={() => setStatus(s)}>
+                {STATUS_LABEL[s]}
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
         <div className="form__fieldset">
           <span className="form__label">Partitura</span>
@@ -156,7 +155,7 @@ export default function PieceFormPage() {
             >
               <UploadIcon className="dropZone__icon" />
               <span className="dropZone__title">Escolha o PDF ou uma foto da partitura</span>
-              <span className="form__help">Ou arraste o arquivo para cá. Fica salvo neste aparelho.</span>
+              <span className="form__help">Ou arraste o arquivo para cá. Fica salvo neste aparelho e, se você entrou com a conta Permana, também na nuvem.</span>
               <input id="peca-arquivo" className="dropZone__input" type="file" accept={ACCEPTED_FILES} onChange={(e) => pickFile(e.target.files?.[0])} />
             </label>
           )}

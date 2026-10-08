@@ -88,6 +88,7 @@ export default function PianoKeyboard({
         return (
           <Tag
             key={m}
+            data-midi={m}
             className={markClass('pianoKeyboard__white', m)}
             {...keyProps(m, `${n.name} ${n.sci}`)}
           >
@@ -103,6 +104,7 @@ export default function PianoKeyboard({
         return (
           <Tag
             key={midi}
+            data-midi={midi}
             className={markClass('pianoKeyboard__black', midi)}
             style={{ '--slot': slot } as React.CSSProperties}
             {...keyProps(midi, `${n.name} ${n.sci}`)}

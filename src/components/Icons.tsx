@@ -200,3 +200,39 @@ export function TrashIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function UserIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="8.5" r="3.5" />
+      <path d="M5 20c.9-3.4 3.7-5.5 7-5.5s6.1 2.1 7 5.5" />
+    </svg>
+  );
+}
+
+export function CloudIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M7.5 18.5h9.5a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 9.6a4.5 4.5 0 0 0 .5 8.9z" />
+    </svg>
+  );
+}
+
+export function SyncIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M19.5 12a7.5 7.5 0 0 1-13.1 5M4.5 12a7.5 7.5 0 0 1 13.1-5" />
+      <path d="M17.8 3.5v3.7h-3.7M6.2 20.5v-3.7h3.7" />
+    </svg>
+  );
+}
+
+export function MetronomeIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M9.2 3.5h5.6L19 20.5H5L9.2 3.5z" />
+      <path d="M12 15.5l5-9" />
+      <path d="M7.2 15.5h9.6" />
+    </svg>
+  );
+}

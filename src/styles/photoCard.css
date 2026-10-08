@@ -151,6 +151,11 @@ a.photoCard:focus-visible .photoCard__img {
   gap: var(--space-4);
 }
 
+/* Oito cartões no repertório (7 temas + Músicos): 4 + 4, ou 2 por linha no celular. */
+.photoGrid-categories {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 @media (max-width: 719px) {
   .photoGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

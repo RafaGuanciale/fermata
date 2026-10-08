@@ -166,6 +166,7 @@
 .form__row {
   display: grid;
   gap: var(--space-6);
+  align-items: start;
 }
 
 .form__row-2 {
@@ -181,6 +182,7 @@
 .form__field,
 .form__fieldset {
   display: grid;
+  align-content: start;
   gap: var(--space-2);
   min-width: 0;
   margin: 0;
@@ -191,6 +193,55 @@
 .form__label {
   font: 600 13px/18px var(--font-body);
   padding: 0;
+  margin-bottom: 2px;
+}
+
+.form .chips {
+  align-items: center;
+}
+
+/* Escolha única (nível, estado): opções do mesmo tamanho, lado a lado */
+.choice {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.choice-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.choice__option {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text);
+  font: 500 14px/1.2 var(--font-body);
+  text-align: center;
+  cursor: pointer;
+}
+
+.choice__option:hover {
+  background: var(--surface-sunk);
+}
+
+.choice__option-active,
+.choice__option-active:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .choice-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .form__input {
@@ -223,7 +274,14 @@
 .form__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.form__actions .button {
+  min-width: 140px;
+  justify-content: center;
 }
 
 .dropZone {

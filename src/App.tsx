@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, matchPath, useLocation, type Location } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { NoteInputProvider } from './input/NoteInputProvider';
+import { MetronomeProvider } from './metronome/MetronomeProvider';
 import AppLayout from './components/AppLayout';
 import ImmersiveFrame, { useCloseImmersive, type ImmersiveState } from './components/ImmersiveFrame';
 import TodayPage from './pages/TodayPage';
@@ -16,6 +17,7 @@ import StudyPage from './pages/StudyPage';
 import ModulePage from './pages/ModulePage';
 import LessonPage from './pages/LessonPage';
 import UpcomingPage from './pages/UpcomingPage';
+import AccountPage from './pages/AccountPage';
 
 // O leitor de PDF é pesado: só carrega quando você abre uma partitura.
 const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
@@ -52,6 +54,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <NoteInputProvider>
+        <MetronomeProvider>
         <Routes location={background}>
           <Route element={<AppLayout />}>
             <Route index element={<TodayPage />} />
@@ -62,6 +65,7 @@ export default function App() {
             <Route path="/repertorio/musicos" element={<MusiciansPage />} />
             <Route path="/repertorio/peca/:id" element={<PiecePage />} />
             <Route path="/repertorio/peca/:id/editar" element={<PieceFormPage />} />
+            <Route path="/conta" element={<AccountPage />} />
             <Route path="/estudo" element={<StudyPage />} />
             <Route path="/estudo/:moduleId" element={<ModulePage />} />
             <Route path="/estudo/:moduleId/:lessonId" element={<LessonPage />} />
@@ -87,6 +91,7 @@ export default function App() {
             <Route path="/partitura/:id" element={<SheetPopup />} />
           </Routes>
         )}
+        </MetronomeProvider>
       </NoteInputProvider>
     </ThemeProvider>
   );

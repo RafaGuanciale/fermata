@@ -1,0 +1,210 @@
+/* Metrônomo: botão com o BPM e painel de ajuste */
+
+.metronome {
+  position: relative;
+  flex: none;
+}
+
+.metronome__trigger {
+  position: relative;
+  gap: 6px;
+  padding: 0 var(--space-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.metronome__trigger-on {
+  border-color: var(--color-petrol);
+  background: color-mix(in srgb, var(--color-petrol) 22%, transparent);
+}
+
+.metronome__triggerBpm {
+  font-weight: 600;
+}
+
+.metronome__pulse {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 2px solid var(--color-petrol);
+  pointer-events: none;
+  animation: metronome-pulse 260ms var(--ease-out) forwards;
+}
+
+.metronome__pulse-strong {
+  border-color: var(--color-blush);
+}
+
+@keyframes metronome-pulse {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+.metronome__panel {
+  position: absolute;
+  right: 0;
+  z-index: 60;
+  display: grid;
+  gap: var(--space-4);
+  width: min(340px, calc(100vw - 24px));
+  padding: 20px;
+  border-radius: var(--radius-l);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+  animation: metronome-in var(--dur-hover) var(--ease-out);
+}
+
+.metronome__panel-up {
+  bottom: calc(100% + 10px);
+}
+
+.metronome__panel-down {
+  top: calc(100% + 10px);
+}
+
+@keyframes metronome-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.metronome__bpmRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.metronome__step {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text);
+  font: 600 13px/1 var(--font-body);
+  cursor: pointer;
+}
+
+.metronome__step:hover {
+  background: var(--surface-sunk);
+}
+
+.metronome__step-round {
+  min-width: 40px;
+  width: 40px;
+}
+
+.metronome__stepIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.metronome__bpm {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.metronome__bpm input {
+  width: 3.4ch;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: 600 40px/1 var(--font-display);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.metronome__bpm input::-webkit-outer-spin-button,
+.metronome__bpm input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.metronome__bpm span {
+  font: 600 10px/1 var(--font-body);
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.metronome__slider {
+  width: 100%;
+  accent-color: var(--color-petrol);
+}
+
+.metronome__slider-small {
+  width: 150px;
+}
+
+.metronome__beats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 16px;
+}
+
+.metronome__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface-sunk);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  transition: background-color 80ms, transform 80ms;
+}
+
+.metronome__dot-accent {
+  box-shadow: inset 0 0 0 1.5px var(--color-blush);
+}
+
+.metronome__dot-on {
+  background: var(--color-petrol);
+  transform: scale(1.25);
+}
+
+.metronome__dot-accent.metronome__dot-on {
+  background: var(--color-blush);
+}
+
+.metronome__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.metronome__label {
+  font: 600 13px/1 var(--font-body);
+}
+
+.metronome__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.metronome__check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-petrol);
+}
+
+.metronome__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
