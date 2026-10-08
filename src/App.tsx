@@ -24,6 +24,19 @@ import { CalibratePage, ExamPage, ReadingPage, WarmupPage } from './pages/Traini
 
 // O leitor de PDF é pesado: só carrega quando você abre uma partitura.
 const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
+// A partitura interativa (OpenSheetMusicDisplay) também só carrega quando você estuda uma peça.
+const ScorePracticePage = lazy(() => import('./pages/ScorePracticePage'));
+
+function ScorePopup() {
+  const close = useCloseImmersive('/repertorio');
+  return (
+    <ImmersiveFrame onClose={close} label="Estudar a peça">
+      <Suspense fallback={<div className="session" />}>
+        <ScorePracticePage onClose={close} />
+      </Suspense>
+    </ImmersiveFrame>
+  );
+}
 
 function SessionPopup() {
   const close = useCloseImmersive('/treino');
@@ -54,14 +67,14 @@ function TreinoPopup({ label, render }: { label: string; render: (close: () => v
   );
 }
 
-const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/t/:id', '/treino/aquecimento', '/treino/leitura', '/treino/prova/:n', '/treino/calibrar'];
+const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/t/:id', '/treino/aquecimento', '/treino/leitura', '/treino/prova/:n', '/treino/calibrar', '/peca/:id/estudar'];
 
 export default function App() {
   const location = useLocation();
   const immersive = IMMERSIVE.some((p) => matchPath(p, location.pathname));
   // O popup abre por cima da página de onde você veio. Aberto direto pelo link, mostra Treino ou Repertório atrás.
   const background: Location = (location.state as ImmersiveState | null)?.background ??
-    (immersive ? { ...location, pathname: location.pathname.startsWith('/partitura') ? '/repertorio' : '/treino', search: '', state: null } : location);
+    (immersive ? { ...location, pathname: location.pathname.startsWith('/partitura') || location.pathname.startsWith('/peca') ? '/repertorio' : '/treino', search: '', state: null } : location);
 
   return (
     <ThemeProvider>
@@ -106,6 +119,7 @@ export default function App() {
             <Route path="/treino/prova/:n" element={<TreinoPopup label="Prova" render={(c) => <ExamPage onClose={c} />} />} />
             <Route path="/treino/calibrar" element={<TreinoPopup label="Ajustar atraso" render={(c) => <CalibratePage onClose={c} />} />} />
             <Route path="/partitura/:id" element={<SheetPopup />} />
+            <Route path="/peca/:id/estudar" element={<ScorePopup />} />
           </Routes>
         )}
         </MetronomeProvider>

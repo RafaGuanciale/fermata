@@ -7,7 +7,7 @@ import { downloadFile } from '../sync/engine';
 export const ACCEPTED_FILES = 'application/pdf,image/png,image/jpeg,image/webp';
 export const MAX_FILE_BYTES = 40 * 1024 * 1024;
 
-export type PieceInput = Omit<Piece, 'id' | 'createdAt' | 'updatedAt' | 'openedAt' | 'fileId'>;
+export type PieceInput = Omit<Piece, 'id' | 'createdAt' | 'updatedAt' | 'openedAt' | 'fileId' | 'fileUid' | 'scoreFileId' | 'scoreFileUid' | 'uid' | 'mt'>;
 
 /** Pede ao navegador para não apagar os dados quando faltar espaço. */
 async function askPersistentStorage() {
@@ -18,33 +18,62 @@ async function askPersistentStorage() {
   }
 }
 
+export const ACCEPTED_SCORE = '.mxl,.musicxml,.xml';
+const MAX_SCORE_BYTES = 5 * 1024 * 1024;
+
+/** Tipo do MusicXML pela extensão (o navegador costuma não saber). null = não é MusicXML. */
+export function scoreType(name: string): string | null {
+  const ext = name.toLowerCase().split('.').pop();
+  if (ext === 'mxl') return 'application/vnd.recordare.musicxml';
+  if (ext === 'musicxml' || ext === 'xml') return 'application/vnd.recordare.musicxml+xml';
+  return null;
+}
+
+export function validateScoreFile(file: File): string | null {
+  if (!scoreType(file.name)) return 'Envie o arquivo exportado do MuseScore em MusicXML (.mxl ou .musicxml).';
+  if (file.size > MAX_SCORE_BYTES) return 'O MusicXML passa de 5 MB. Exporte em .mxl, que é compactado.';
+  return null;
+}
+
 export function validateFile(file: File): string | null {
   if (!ACCEPTED_FILES.split(',').includes(file.type)) return 'Envie um PDF ou uma foto (PNG, JPG ou WEBP).';
   if (file.size > MAX_FILE_BYTES) return 'O arquivo passa de 40 MB. Tente uma versão menor do PDF.';
   return null;
 }
 
-/** Cria ou atualiza uma peça. `file`: novo arquivo; `null`: remover o atual; `undefined`: manter. */
-export async function savePiece(input: PieceInput, file?: File | null, id?: number): Promise<number> {
+export interface PieceFiles {
+  /** Partitura para ler (PDF ou foto). Novo arquivo, `null` para remover, ausente para manter. */
+  sheet?: File | null;
+  /** MusicXML para tocar junto. Mesmas regras. */
+  score?: File | null;
+}
+
+/** Cria ou atualiza uma peça e seus arquivos. */
+export async function savePiece(input: PieceInput, files: PieceFiles = {}, id?: number): Promise<number> {
   const now = Date.now();
+  const store = async (file: File, type: string) =>
+    db.files.add({ name: file.name, type, size: file.size, blob: new Blob([file], { type }), createdAt: now } satisfies StoredFile);
   return db.transaction('rw', db.pieces, db.files, async () => {
     const existing = id ? await db.pieces.get(id) : undefined;
     let fileId = existing?.fileId ?? null;
-    if (file !== undefined && fileId) {
+    let scoreFileId = existing?.scoreFileId ?? null;
+    if (files.sheet !== undefined && fileId) {
       await db.files.delete(fileId);
       fileId = null;
     }
-    if (file) {
-      const stored: StoredFile = { name: file.name, type: file.type, size: file.size, blob: file, createdAt: now };
-      fileId = await db.files.add(stored);
+    if (files.sheet) fileId = await store(files.sheet, files.sheet.type);
+    if (files.score !== undefined && scoreFileId) {
+      await db.files.delete(scoreFileId);
+      scoreFileId = null;
     }
+    if (files.score) scoreFileId = await store(files.score, scoreType(files.score.name) ?? 'application/vnd.recordare.musicxml+xml');
     if (existing?.id) {
-      await db.pieces.update(existing.id, { ...input, fileId, updatedAt: now });
+      await db.pieces.update(existing.id, { ...input, fileId, scoreFileId, updatedAt: now });
       return existing.id;
     }
-    return db.pieces.add({ ...input, fileId, createdAt: now, updatedAt: now, openedAt: null });
+    return db.pieces.add({ ...input, fileId, scoreFileId, createdAt: now, updatedAt: now, openedAt: null });
   }).finally(() => {
-    if (file) void askPersistentStorage();
+    if (files.sheet || files.score) void askPersistentStorage();
   });
 }
 
@@ -60,6 +89,7 @@ export async function deletePiece(id: number) {
   await db.transaction('rw', db.pieces, db.files, async () => {
     const p = await db.pieces.get(id);
     if (p?.fileId) await db.files.delete(p.fileId);
+    if (p?.scoreFileId) await db.files.delete(p.scoreFileId);
     await db.pieces.delete(id);
   });
 }

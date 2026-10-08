@@ -16,6 +16,7 @@
     "dexie": "^4.4.6",
     "dexie-react-hooks": "^1.1.7",
     "mongodb": "^7.7.0",
+    "opensheetmusicdisplay": "^2.2.0",
     "pdfjs-dist": "^4.10.38",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

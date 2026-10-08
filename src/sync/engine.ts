@@ -178,7 +178,12 @@ async function buildChange(entry: OutboxEntry, acc: Account): Promise<Change> {
   if (name === 'pieces') {
     const fileId = row.fileId as number | null;
     const f = fileId ? await db.files.get(fileId) : undefined;
-    refs = { fileUid: f?.uid ?? (row.fileUid as string | null | undefined) ?? null };
+    const scoreId = row.scoreFileId as number | null | undefined;
+    const sf = scoreId ? await db.files.get(scoreId) : undefined;
+    refs = {
+      fileUid: f?.uid ?? (row.fileUid as string | null | undefined) ?? null,
+      scoreFileUid: sf?.uid ?? (row.scoreFileUid as string | null | undefined) ?? null,
+    };
   } else if (name === 'attempts') {
     const s = await db.sessions.get(row.sessionId as number);
     refs = { sessionUid: s?.uid ?? (row.sessionUid as string | undefined) ?? null };
@@ -203,7 +208,11 @@ async function applyRemote(changes: Change[]) {
       let refs = {};
       if (c.table === 'pieces') {
         const fileUid = c.data?.fileUid as string | null | undefined;
-        refs = { fileId: fileUid ? ((await db.files.where('uid').equals(fileUid).first())?.id ?? null) : null };
+        const scoreUid = c.data?.scoreFileUid as string | null | undefined;
+        refs = {
+          fileId: fileUid ? ((await db.files.where('uid').equals(fileUid).first())?.id ?? null) : null,
+          scoreFileId: scoreUid ? ((await db.files.where('uid').equals(scoreUid).first())?.id ?? null) : null,
+        };
       } else if (c.table === 'attempts') {
         const sessionUid = c.data?.sessionUid as string | null | undefined;
         refs = { sessionId: sessionUid ? ((await db.sessions.where('uid').equals(sessionUid).first())?.id ?? 0) : 0 };
@@ -216,10 +225,14 @@ async function applyRemote(changes: Change[]) {
 /** Referências que chegaram antes do registro referenciado (páginas diferentes). */
 async function fixRefs() {
   await remoteWrite(async () => {
-    const pieces = await db.pieces.filter((p) => !p.fileId && !!p.fileUid).toArray();
+    const pieces = await db.pieces.filter((p) => (!p.fileId && !!p.fileUid) || (!p.scoreFileId && !!p.scoreFileUid)).toArray();
     for (const p of pieces) {
-      const f = await db.files.where('uid').equals(p.fileUid!).first();
-      if (f?.id) await db.pieces.update(p.id!, { fileId: f.id });
+      const f = !p.fileId && p.fileUid ? await db.files.where('uid').equals(p.fileUid).first() : undefined;
+      const sf = !p.scoreFileId && p.scoreFileUid ? await db.files.where('uid').equals(p.scoreFileUid).first() : undefined;
+      const patch: { fileId?: number; scoreFileId?: number } = {};
+      if (f?.id) patch.fileId = f.id;
+      if (sf?.id) patch.scoreFileId = sf.id;
+      if (Object.keys(patch).length) await db.pieces.update(p.id!, patch);
     }
     const attempts = await db.attempts.where('sessionId').equals(0).toArray();
     for (const a of attempts) {

@@ -12,7 +12,7 @@ import { isOwnPathname } from './_lib/protocol.js';
 
 export const config = { maxDuration: 60 };
 
-const ALLOWED_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'];
+const ALLOWED_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'application/vnd.recordare.musicxml', 'application/vnd.recordare.musicxml+xml'];
 const MAX_BYTES = 40 * 1024 * 1024;
 const MINUTES = 60 * 1000;
 

@@ -54,6 +54,9 @@ export interface Piece extends Synced {
   fileId: number | null;
   /** Preenchido quando a peça veio de outro aparelho. */
   fileUid?: string | null;
+  /** MusicXML exportado do MuseScore: as notas que o app sabe tocar junto. */
+  scoreFileId?: number | null;
+  scoreFileUid?: string | null;
   createdAt: number;
   updatedAt: number;
   openedAt: number | null;

@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { db, type LearnStatus, type Level } from '../db/db';
 import { CATEGORIES, LEVEL_LABEL, STATUS_LABEL, STATUS_ORDER, parsePeople } from '../repertoire/catalog';
-import { ACCEPTED_FILES, formatBytes, savePiece, validateFile } from '../repertoire/repo';
+import { ACCEPTED_FILES, ACCEPTED_SCORE, formatBytes, savePiece, validateFile, validateScoreFile } from '../repertoire/repo';
 import { BackIcon, FileIcon, UploadIcon } from '../components/Icons';
 
 export default function PieceFormPage() {
@@ -19,6 +19,8 @@ export default function PieceFormPage() {
   const [status, setStatus] = useState<LearnStatus>('wish');
   const [file, setFile] = useState<File | null | undefined>(undefined);
   const [currentFile, setCurrentFile] = useState<{ name: string; size: number } | null>(null);
+  const [score, setScore] = useState<File | null | undefined>(undefined);
+  const [currentScore, setCurrentScore] = useState<{ name: string; size: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -37,6 +39,10 @@ export default function PieceFormPage() {
         const f = await db.files.get(p.fileId);
         if (f) setCurrentFile({ name: f.name, size: f.size });
       }
+      if (p.scoreFileId) {
+        const sf = await db.files.get(p.scoreFileId);
+        if (sf) setCurrentScore({ name: sf.name, size: sf.size });
+      }
     })();
   }, [editingId, navigate]);
 
@@ -50,6 +56,13 @@ export default function PieceFormPage() {
     if (!problem) setFile(f);
   };
 
+  const pickScore = (f: File | undefined) => {
+    if (!f) return;
+    const problem = validateScoreFile(f);
+    setError(problem);
+    if (!problem) setScore(f);
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return setError('Dê um nome para a peça.');
@@ -57,7 +70,7 @@ export default function PieceFormPage() {
     try {
       const savedId = await savePiece(
         { title: title.trim(), people: parsePeople(people), arrangement: arrangement.trim(), categories, level, status },
-        file,
+        { sheet: file, score },
         editingId,
       );
       navigate(`/repertorio/peca/${savedId}`, { replace: true });
@@ -69,6 +82,7 @@ export default function PieceFormPage() {
   };
 
   const shownFile = file ? { name: file.name, size: file.size } : file === null ? null : currentFile;
+  const shownScore = score ? { name: score.name, size: score.size } : score === null ? null : currentScore;
 
   return (
     <>
@@ -157,6 +171,35 @@ export default function PieceFormPage() {
               <span className="dropZone__title">Escolha o PDF ou uma foto da partitura</span>
               <span className="form__help">Ou arraste o arquivo para cá. Fica salvo neste aparelho e, se você entrou com a conta Permana, também na nuvem.</span>
               <input id="peca-arquivo" className="dropZone__input" type="file" accept={ACCEPTED_FILES} onChange={(e) => pickFile(e.target.files?.[0])} />
+            </label>
+          )}
+        </div>
+
+        <div className="form__fieldset">
+          <span className="form__label">Notas para tocar (opcional)</span>
+          {shownScore ? (
+            <div className="fileBox">
+              <FileIcon className="fileBox__icon" />
+              <span className="fileBox__name">{shownScore.name}</span>
+              <span className="fileBox__size">{formatBytes(shownScore.size)}</span>
+              <button type="button" className="button button-ghost button-small" onClick={() => setScore(null)}>
+                Remover
+              </button>
+            </div>
+          ) : (
+            <label
+              className="dropZone dropZone-small"
+              htmlFor="peca-musicxml"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                pickScore(e.dataTransfer.files[0]);
+              }}
+            >
+              <UploadIcon className="dropZone__icon" />
+              <span className="dropZone__title">MusicXML exportado do MuseScore</span>
+              <span className="form__help">Com ele, o app sabe as notas e você pode estudar a peça tocando junto. No MuseScore: Arquivo → Exportar → MusicXML.</span>
+              <input id="peca-musicxml" className="dropZone__input" type="file" accept={ACCEPTED_SCORE} onChange={(e) => pickScore(e.target.files?.[0])} />
             </label>
           )}
         </div>

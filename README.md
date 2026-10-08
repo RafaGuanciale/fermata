@@ -24,6 +24,7 @@ O nome vem do sinal de fermata, que manda sustentar a nota além do tempo. É a 
 - **Login com a conta Permana** e sincronização entre aparelhos: repertório, partituras, progresso no Estudo e histórico dos treinos
 - **Repertório** com categorias em cartões com foto (Filmes e séries, Clássico, Jazz, MPB e brasileira, Pop e rock, Jogos, Infantil) e a área **Músicos**, montada a partir dos compositores e artistas cadastrados
 - Cadastro de peças com estado (quero aprender, aprendendo, aprendi, no repertório), nível, categorias e a **partitura em PDF ou foto**
+- **Estudar as suas peças**: anexe o MusicXML exportado do MuseScore e toque junto com a partitura (OpenSheetMusicDisplay). Modo estudar (o cursor espera cada nota ou acorde), modo no tempo com contagem e resultado por compasso, mão direita, esquerda ou as duas, e repetição de um trecho de compassos
 - **Leitor de partitura** em tela cheia com zoom, igual no notebook, tablet e celular (PDF.js)
 - **Estudo em seis módulos** (Teclado, Leitura, Ritmo, Acordes, Escalas, Harmonia), com lições marcáveis como aprendidas. Lições prontas: teclas e oitavas, clave de sol, tríades com inversões e escala maior, todas interativas com o piano
 - **Hoje:** treino sugerido, peças que você está aprendendo e evolução (minutos, tempo para achar a nota, acertos de primeira, nota que mais erra)
@@ -63,7 +64,7 @@ O Fermata não tem cadastro próprio nem guarda senha. As funções da Vercel em
 
 | Fase | O quê |
 | --- | --- |
-| próxima | Tocar e estudar as suas peças (MusicXML exportado do MuseScore), fases 2 a 5 do treino |
+| próxima | Fases 2 a 5 do treino, sessão do dia encadeada |
 | depois | Mais lições no Estudo, página de Progresso |
 
 ## Integração com o piano (Web MIDI)
@@ -81,7 +82,7 @@ O código está em `src/input/NoteInputProvider.tsx`. Todas as telas ouvem o mes
 - React 19 + TypeScript + Vite
 - React Router v6
 - Dexie (IndexedDB) e `dexie-react-hooks` para a tela atualizar sozinha quando um treino é salvo
-- PDF.js para mostrar as partituras
+- PDF.js para mostrar as partituras e OpenSheetMusicDisplay para desenhar o MusicXML
 - Vitest para os testes da lógica
 - CSS puro com BEM e tokens em variáveis CSS; cores derivadas com `color-mix()`
 - Fontes: Cinzel (logotipo), Playfair Display (títulos), Montserrat (texto), Noto Music (clave)
@@ -98,6 +99,7 @@ src/
   db/          banco local (Dexie) e métricas de evolução
   sync/        conta Permana, fila de envio e sincronização com a nuvem
   metronome/   metrônomo (Web Audio) e contas de andamento
+  score/       estudar uma peça pelo MusicXML: passos, modo espera, trecho e julgamento no tempo
   training/    programa de treino (fases, aquecimento, leitura), julgamento no tempo, escada de BPM e regras de progresso
   repertoire/  categorias, busca, músicos e operações do repertório
   study/       módulos, lições e o conteúdo de cada lição

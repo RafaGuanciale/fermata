@@ -6,7 +6,7 @@ import { LEVEL_LABEL, STATUS_LABEL, STATUS_ORDER, categoryBySlug } from '../repe
 import { deletePiece, fileWhere, formatBytes, setStatus } from '../repertoire/repo';
 import PhotoCard from '../components/PhotoCard';
 import StatusBadge from '../components/StatusBadge';
-import { BackIcon, ExpandIcon, FileIcon, TrashIcon } from '../components/Icons';
+import { BackIcon, ExpandIcon, FileIcon, PlayIcon, TrashIcon } from '../components/Icons';
 
 export default function PiecePage() {
   const location = useLocation();
@@ -14,6 +14,7 @@ export default function PiecePage() {
   const navigate = useNavigate();
   const piece = useLiveQuery(() => db.pieces.get(id), [id]);
   const file = useLiveQuery(async () => (piece?.fileId ? db.files.get(piece.fileId) : null), [piece?.fileId]);
+  const scoreFile = useLiveQuery(async () => (piece?.scoreFileId ? db.files.get(piece.scoreFileId) : null), [piece?.scoreFileId]);
   const [confirming, setConfirming] = useState(false);
 
   if (piece === undefined) return null;
@@ -37,7 +38,7 @@ export default function PiecePage() {
       >
         <span className="photoCard__actions">
           {piece.fileId ? (
-            <Link className="button button-primary" to={`/partitura/${piece.id}`} state={{ background: location }}>
+            <Link className={'button ' + (piece.scoreFileId ? 'button-secondary' : 'button-primary')} to={`/partitura/${piece.id}`} state={{ background: location }}>
               <ExpandIcon className="button__icon" />
               Abrir partitura
             </Link>
@@ -46,6 +47,12 @@ export default function PiecePage() {
               Adicionar partitura
             </Link>
           )}
+          {piece.scoreFileId ? (
+            <Link className="button button-primary" to={`/peca/${piece.id}/estudar`} state={{ background: location }}>
+              <PlayIcon className="button__icon" />
+              Estudar esta peça
+            </Link>
+          ) : null}
           <Link className="button button-secondary" to={`/repertorio/peca/${piece.id}/editar`}>
             Editar
           </Link>
@@ -97,6 +104,20 @@ export default function PiecePage() {
             </span>
           ) : (
             <span>Nenhuma</span>
+          )}
+        </div>
+        <div className="detailList__row">
+          <span className="page__eyebrow">Notas para tocar</span>
+          {scoreFile ? (
+            <span className="fileBox fileBox-inline">
+              <FileIcon className="fileBox__icon" />
+              <span className="fileBox__name">{scoreFile.name}</span>
+              <span className="fileBox__size">{formatBytes(scoreFile.size)} · {fileWhere(scoreFile)}</span>
+            </span>
+          ) : (
+            <span>
+              Nenhuma. <Link to={`/repertorio/peca/${piece.id}/editar`}>Adicionar o MusicXML do MuseScore</Link>
+            </span>
           )}
         </div>
       </section>

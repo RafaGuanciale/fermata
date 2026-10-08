@@ -23,7 +23,8 @@
   color: var(--text);
 }
 
-.segmented__option-active {
+.segmented__option-active,
+.segmented__option-active:hover {
   background: var(--primary);
   color: var(--on-primary);
 }

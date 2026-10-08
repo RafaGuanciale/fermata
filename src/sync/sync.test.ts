@@ -11,7 +11,7 @@ const tick = () => new Promise((r) => setTimeout(r, 30));
 describe('serialização', () => {
   it('tira campos locais e troca ids por uid', () => {
     const data = toRemoteData('pieces', { id: 3, uid: 'p1', mt: 5, title: 'Asa Branca', fileId: 9 }, { fileUid: 'f1' });
-    expect(data).toEqual({ title: 'Asa Branca', fileUid: 'f1' });
+    expect(data).toEqual({ title: 'Asa Branca', fileUid: 'f1', scoreFileUid: null });
     const file = toRemoteData('files', { id: 1, uid: 'f1', blob: new Blob(['x']), name: 'a.pdf', pathname: 'fermata/u/f1.pdf' });
     expect(file).toEqual({ name: 'a.pdf', pathname: 'fermata/u/f1.pdf' });
   });

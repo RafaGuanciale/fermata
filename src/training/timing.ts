@@ -62,20 +62,23 @@ export interface TakeResult {
   clean: boolean;
 }
 
+/** Uma nota esperada num momento (ms desde o primeiro tempo). Acordes = várias com o mesmo `t`. */
+export interface ExpectedNote {
+  midi: Midi | null;
+  t: number | null;
+}
+
 /**
  * Julga uma passada. Cada nota esperada pega o evento da mesma tecla mais perto do seu tempo,
- * dentro de meio tempo (ou da janela "fora do tempo", se for maior). Eventos sem par são extras.
+ * dentro de `reach` ms. Eventos sem par são extras.
  * `until`: até onde a passada já andou; notas cujo prazo não venceu ficam sem julgamento (null).
  */
-export function judgeTake(notes: TimedNote[], bpm: number, events: PlayedEvent[], w: Windows, until = Infinity): TakeResult {
-  const times = onsets(notes, bpm);
-  const reach = Math.max(w.off, 60000 / bpm / 2);
+export function judgeExpected(expected: ExpectedNote[], events: PlayedEvent[], w: Windows, reach: number, until = Infinity): TakeResult {
   const used = new Set<number>();
-  const out: (NoteJudgement | null)[] = notes.map(() => null);
+  const out: (NoteJudgement | null)[] = expected.map(() => null);
 
-  times.forEach((at, i) => {
-    if (at === null) return;
-    const midi = notes[i].midi;
+  expected.forEach(({ midi, t: at }, i) => {
+    if (at === null || midi === null) return;
     let best = -1;
     let bestDist = Infinity;
     events.forEach((e, j) => {
@@ -97,7 +100,7 @@ export function judgeTake(notes: TimedNote[], bpm: number, events: PlayedEvent[]
   });
 
   const judged = out.filter((j): j is NoteJudgement => j !== null);
-  const counted = times.filter((t) => t !== null).length;
+  const counted = expected.filter((e) => e.t !== null && e.midi !== null).length;
   const sum = judged.reduce((s, j) => s + GRADE_WEIGHT[j.grade], 0);
   const goods = judged.filter((j) => j.grade === 'perfect' || j.grade === 'good').length;
   const extras = events.length - used.size;
@@ -106,6 +109,13 @@ export function judgeTake(notes: TimedNote[], bpm: number, events: PlayedEvent[]
   const allPlayed = judged.length === counted && judged.every((j) => j.delta !== null);
   const noneOutside = judged.every((j) => j.grade !== 'miss');
   return { notes: out, extras, accuracy, goodShare, clean: allPlayed && noneOutside && goodShare >= 0.9 };
+}
+
+/** Passada de uma melodia (uma nota por vez). */
+export function judgeTake(notes: TimedNote[], bpm: number, events: PlayedEvent[], w: Windows, until = Infinity): TakeResult {
+  const times = onsets(notes, bpm);
+  const expected = notes.map((n, i) => ({ midi: n.midi, t: times[i] }));
+  return judgeExpected(expected, events, w, Math.max(w.off, 60000 / bpm / 2), until);
 }
 
 // ---------- escada de BPM ----------

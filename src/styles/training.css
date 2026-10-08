@@ -443,3 +443,69 @@ a.path__treino:hover {
 a.chip {
   text-decoration: none;
 }
+
+/* Estudar uma peça (MusicXML) */
+.scorePractice__bar {
+  width: 100%;
+  max-width: 1180px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+}
+
+.scorePractice__range,
+.scorePractice__bpm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 14px;
+}
+
+.scorePractice__range input {
+  width: 64px;
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-sunk);
+  color: var(--text);
+  font: 500 14px/1 var(--font-body);
+  text-align: center;
+}
+
+.scorePractice__bpm strong {
+  min-width: 76px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.scorePractice__paper {
+  width: 100%;
+  max-width: 1180px;
+  max-height: min(56vh, 620px);
+  overflow-y: auto;
+  border-radius: var(--radius-l);
+  background: var(--color-off-white);
+  color: var(--color-ebony);
+  padding: var(--space-4) var(--space-2);
+  box-shadow: var(--shadow-raised);
+}
+
+.scorePractice__paper .viewer__msg {
+  color: var(--color-ebony);
+  text-align: center;
+  padding: var(--space-8);
+}
+
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}

@@ -17,7 +17,7 @@ type Row = Record<string, unknown>;
 /** Campos que nunca saem do aparelho. */
 const LOCAL_ONLY: Record<SyncTable, string[]> = {
   files: ['id', 'blob'],
-  pieces: ['id', 'fileId'],
+  pieces: ['id', 'fileId', 'scoreFileId'],
   lessons: [],
   sessions: ['id'],
   attempts: ['id', 'sessionId'],
@@ -26,11 +26,13 @@ const LOCAL_ONLY: Record<SyncTable, string[]> = {
 
 export interface Refs {
   fileUid?: string | null;
+  scoreFileUid?: string | null;
   sessionUid?: string | null;
 }
 
 export interface LocalRefs {
   fileId?: number | null;
+  scoreFileId?: number | null;
   sessionId?: number;
 }
 
@@ -56,7 +58,10 @@ export function toRemoteData(table: SyncTable, row: Row, refs: Refs = {}): Row {
     if (k === 'uid' || k === 'mt' || LOCAL_ONLY[table].includes(k) || v === undefined) continue;
     out[k] = v;
   }
-  if (table === 'pieces') out.fileUid = refs.fileUid ?? null;
+  if (table === 'pieces') {
+    out.fileUid = refs.fileUid ?? null;
+    out.scoreFileUid = refs.scoreFileUid ?? null;
+  }
   if (table === 'attempts') out.sessionUid = refs.sessionUid ?? null;
   return out;
 }
@@ -67,7 +72,10 @@ export function fromRemoteData(table: SyncTable, change: Pick<Change, 'uid' | 'm
   if (local?.id !== undefined && table !== 'lessons') row.id = local.id;
   if (table === 'lessons') row.id = change.uid;
   if (table === 'files') row.blob = local?.blob ?? null;
-  if (table === 'pieces') row.fileId = refs.fileId ?? null;
+  if (table === 'pieces') {
+    row.fileId = refs.fileId ?? null;
+    row.scoreFileId = refs.scoreFileId ?? null;
+  }
   if (table === 'attempts') row.sessionId = refs.sessionId ?? 0;
   return row;
 }
@@ -88,6 +96,8 @@ export const EXT_BY_TYPE: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
+  'application/vnd.recordare.musicxml': 'mxl',
+  'application/vnd.recordare.musicxml+xml': 'musicxml',
 };
 
 export function blobPathname(userId: string, fileUid: string, type: string): string {
