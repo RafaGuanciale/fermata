@@ -58,6 +58,11 @@
   --radius-l: 20px;
   --radius-pill: 999px;
 
+  /* Movimento: hover e mudanças de estado sempre suaves */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-hover: 280ms;
+  --dur-slow: 600ms;
+
   color-scheme: dark;
 }
 

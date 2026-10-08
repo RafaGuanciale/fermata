@@ -10,7 +10,6 @@
   font: 600 14px/1 var(--font-body);
   text-decoration: none;
   cursor: pointer;
-  transition: filter 120ms, background-color 120ms;
 }
 
 .button__icon {
@@ -25,7 +24,13 @@
 }
 
 .button-primary:hover {
-  filter: brightness(1.06);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+.button:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .button-secondary {

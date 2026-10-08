@@ -1,8 +1,7 @@
 /* Sessão de treino imersiva: tela inteira, pauta no centro, teclado embaixo. */
 
 .session {
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
   grid-template-columns: minmax(0, 1fr);

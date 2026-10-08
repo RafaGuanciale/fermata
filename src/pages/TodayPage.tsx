@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Attempt, type Session } from '../db/db';
 import { DAY, avgFindMs, dailyAvgFindMs, firstTryRate, practiceMinutes, startOfWeek, weakestNote } from '../db/stats';
@@ -8,9 +8,9 @@ import PhotoCard from '../components/PhotoCard';
 import PieceList from '../components/PieceList';
 import StatTile from '../components/StatTile';
 import { PlayIcon } from '../components/Icons';
-import { enterFullscreen } from '../hooks/useFullscreen';
 
 export default function TodayPage() {
+  const location = useLocation();
   const now = Date.now();
   const since = now - 28 * DAY;
   const data = useLiveQuery(async () => {
@@ -32,11 +32,11 @@ export default function TodayPage() {
       <PhotoCard photo="todayHero" size="hero" eyebrow="Treino sugerido · cerca de 3 min" title="Leitura de Dó a Sol na clave de sol" sizes="100vw">
         <span className="photoCard__body">As cinco notas da posição de Dó, as mesmas da Ode à Alegria. O foco é achar a tecla certa.</span>
         <span className="photoCard__actions">
-          <Link className="button button-primary" to="/treino/sessao?modo=notas" onClick={enterFullscreen}>
+          <Link className="button button-primary" to="/treino/sessao?modo=notas" state={{ background: location }}>
             <PlayIcon className="button__icon" />
             Começar treino
           </Link>
-          <Link className="button button-secondary" to="/treino/sessao?modo=musica" onClick={enterFullscreen}>
+          <Link className="button button-secondary" to="/treino/sessao?modo=musica" state={{ background: location }}>
             Tocar Ode à Alegria
           </Link>
         </span>

@@ -34,6 +34,21 @@ a {
   color: inherit;
 }
 
+/* Toda interação muda de forma suave (as teclas do piano ficam de fora: precisam responder na hora) */
+a,
+button,
+.chip,
+.pill,
+.field,
+.photoCard,
+.pieceList__item,
+.musician,
+.lessonList__item {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: var(--dur-hover);
+  transition-timing-function: var(--ease-out);
+}
+
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
@@ -62,6 +77,7 @@ a {
   min-width: 0;
   min-height: 100vh;
   min-height: 100dvh;
+  padding-bottom: var(--dock-h, 0px);
 }
 
 .page__main {
@@ -95,7 +111,7 @@ a {
   }
 
   .page__column {
-    padding-bottom: var(--bottom-nav-h);
+    padding-bottom: calc(var(--bottom-nav-h) + var(--dock-h, 0px));
   }
 }
 

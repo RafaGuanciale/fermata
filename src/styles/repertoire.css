@@ -19,11 +19,13 @@
   border: 1px solid var(--line);
   text-decoration: none;
   color: var(--text);
-  transition: border-color 120ms, transform 120ms;
 }
 
 .pieceList__item:hover {
   border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 70%, var(--surface-raised));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
 .pieceList__main {
@@ -95,6 +97,7 @@
 
 .musician:hover {
   border-color: var(--line-strong);
+  transform: translateY(-2px);
 }
 
 .musician-active {

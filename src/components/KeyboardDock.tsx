@@ -92,10 +92,44 @@ export function FullKeyboard({ low, high, held, onPress, onRelease, labelCs = tr
   );
 }
 
+const HEIGHT_KEY = 'fermata-dock-height';
+const MIN_H = 64;
+const DEFAULT_H = 104;
+
+function maxHeight() {
+  return typeof window === 'undefined' ? 360 : Math.max(MIN_H + 40, Math.min(420, Math.round(window.innerHeight * 0.5)));
+}
+
+function readHeight(): number {
+  try {
+    const v = Number(localStorage.getItem(HEIGHT_KEY));
+    if (v >= MIN_H) return Math.min(v, maxHeight());
+  } catch {
+    // padrão abaixo
+  }
+  return DEFAULT_H;
+}
+
 export default function KeyboardDock() {
   const { held, midi, connectMidi, press, release } = useNoteInput();
   const [open, setOpen] = useState(readOpen);
+  const [height, setHeight] = useState(readHeight);
+  const [dragging, setDragging] = useState(false);
+  const dockRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // O dock fica fixo embaixo; a página reserva o espaço dele pela variável --dock-h.
+  useEffect(() => {
+    const el = dockRef.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const ro = new ResizeObserver(() => root.style.setProperty('--dock-h', `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty('--dock-h');
+    };
+  }, []);
 
   // Em telas estreitas o teclado rola de lado; começa centralizado no Dó central.
   useEffect(() => {
@@ -116,23 +150,93 @@ export default function KeyboardDock() {
     if (left < el.scrollLeft || left > el.scrollLeft + el.clientWidth - 40) el.scrollTo({ left: left - el.clientWidth / 2, behavior: 'smooth' });
   }, [held]);
 
-  const toggle = () =>
-    setOpen((v) => {
-      try {
-        localStorage.setItem(OPEN_KEY, v ? '0' : '1');
-      } catch {
-        // preferência vale só nesta visita
+  const saveHeight = (h: number) => {
+    try {
+      localStorage.setItem(HEIGHT_KEY, String(Math.round(h)));
+    } catch {
+      // vale só nesta visita
+    }
+  };
+
+  const setOpenSaved = (v: boolean) => {
+    setOpen(v);
+    try {
+      localStorage.setItem(OPEN_KEY, v ? '1' : '0');
+    } catch {
+      // vale só nesta visita
+    }
+  };
+
+  // Arrastar a alça para cima aumenta as teclas; para baixo diminui. Abaixo do mínimo, recolhe.
+  const startDrag = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startH = open ? height : MIN_H - 30;
+    let moved = false;
+    let last = startH;
+    setDragging(true);
+    const onMove = (ev: PointerEvent) => {
+      const dy = startY - ev.clientY;
+      if (Math.abs(dy) > 3) moved = true;
+      last = Math.max(MIN_H - 40, Math.min(maxHeight(), startH + dy));
+      if (last >= MIN_H) {
+        if (!open) setOpenSaved(true);
+        setHeight(last);
       }
-      return !v;
-    });
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      setDragging(false);
+      if (!moved) {
+        setOpenSaved(!open);
+        return;
+      }
+      if (last < MIN_H) setOpenSaved(false);
+      else saveHeight(last);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  const onHandleKey = (e: React.KeyboardEvent) => {
+    const step = e.shiftKey ? 48 : 16;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const next = Math.max(MIN_H, Math.min(maxHeight(), height + (e.key === 'ArrowUp' ? step : -step)));
+      if (!open) setOpenSaved(true);
+      setHeight(next);
+      saveHeight(next);
+    }
+  };
 
   const notes = [...held].sort((a, b) => a - b);
   const chord = detectTriad(held);
 
   return (
-    <section className={'dock' + (open ? ' dock-open' : '')} aria-label="Seu teclado">
+    <section
+      ref={dockRef}
+      className={'dock' + (open ? ' dock-open' : '') + (dragging ? ' dock-dragging' : '')}
+      aria-label="Seu teclado"
+      style={{ '--kb-h': `${height}px` } as React.CSSProperties}
+    >
+      <button
+        className="dock__handle"
+        type="button"
+        role="separator"
+        aria-orientation="horizontal"
+        aria-label="Altura do teclado. Arraste ou use as setas para cima e para baixo."
+        aria-valuemin={MIN_H}
+        aria-valuemax={maxHeight()}
+        aria-valuenow={open ? Math.round(height) : 0}
+        onPointerDown={startDrag}
+        onKeyDown={onHandleKey}
+        title="Arraste para aumentar ou diminuir o teclado"
+      >
+        <span className="dock__grip" aria-hidden />
+      </button>
       <div className="dock__bar">
-        <button className="dock__toggle" type="button" onClick={toggle} aria-expanded={open}>
+        <button className="dock__toggle" type="button" onClick={() => setOpenSaved(!open)} aria-expanded={open}>
           <ChevronIcon className={'dock__chevron' + (open ? ' dock__chevron-open' : '')} />
           Teclado
         </button>

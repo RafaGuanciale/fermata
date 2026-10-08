@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { LEVEL_LABEL, STATUS_LABEL, STATUS_ORDER, categoryBySlug } from '../repertoire/catalog';
@@ -7,9 +7,9 @@ import { deletePiece, formatBytes, setStatus } from '../repertoire/repo';
 import PhotoCard from '../components/PhotoCard';
 import StatusBadge from '../components/StatusBadge';
 import { BackIcon, ExpandIcon, FileIcon, TrashIcon } from '../components/Icons';
-import { enterFullscreen } from '../hooks/useFullscreen';
 
 export default function PiecePage() {
+  const location = useLocation();
   const id = Number(useParams().id);
   const navigate = useNavigate();
   const piece = useLiveQuery(() => db.pieces.get(id), [id]);
@@ -37,7 +37,7 @@ export default function PiecePage() {
       >
         <span className="photoCard__actions">
           {piece.fileId ? (
-            <Link className="button button-primary" to={`/partitura/${piece.id}`} onClick={enterFullscreen}>
+            <Link className="button button-primary" to={`/partitura/${piece.id}`} state={{ background: location }}>
               <ExpandIcon className="button__icon" />
               Abrir partitura
             </Link>

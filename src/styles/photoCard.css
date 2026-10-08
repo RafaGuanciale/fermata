@@ -42,12 +42,21 @@ div.photoCard {
   height: 100%;
   object-fit: cover;
   z-index: -2;
-  transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
-.photoCard:hover .photoCard__img,
-.photoCard:focus-visible .photoCard__img {
-  transform: scale(1.05);
+a.photoCard:hover,
+button.photoCard:hover,
+a.photoCard:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--line-strong);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+}
+
+a.photoCard:hover .photoCard__img,
+button.photoCard:hover .photoCard__img,
+a.photoCard:focus-visible .photoCard__img {
+  transform: scale(1.06);
 }
 
 /* Escurece a parte de baixo para o título ler bem sobre qualquer foto */

@@ -2,14 +2,14 @@
 // tablet e celular, inclusive no Android, onde o navegador não mostra PDF sozinho).
 
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { getDocument, GlobalWorkerOptions, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { db } from '../db/db';
 import { getFile, markOpened } from '../repertoire/repo';
 import { CloseIcon, ExpandIcon, MinusIcon, PlusIcon } from '../components/Icons';
 import ThemeToggle from '../components/ThemeToggle';
-import { canFullscreen, enterFullscreen, exitFullscreen, useElementWidth, useFullscreenState } from '../hooks/useFullscreen';
+import { canFullscreen, enterFullscreen, useElementWidth, useFullscreenState } from '../hooks/useFullscreen';
 
 GlobalWorkerOptions.workerSrc = workerSrc;
 
@@ -44,9 +44,8 @@ function PdfPage({ pdf, pageNumber, width }: { pdf: PDFDocumentProxy; pageNumber
   return <canvas className="viewer__page" ref={canvasRef} aria-label={`Página ${pageNumber}`} />;
 }
 
-export default function SheetViewerPage() {
+export default function SheetViewerPage({ onClose }: { onClose: () => void }) {
   const id = Number(useParams().id);
-  const navigate = useNavigate();
   const isFull = useFullscreenState();
   const [areaRef, areaWidth] = useElementWidth<HTMLDivElement>();
   const [title, setTitle] = useState('');
@@ -83,10 +82,7 @@ export default function SheetViewerPage() {
     };
   }, [id]);
 
-  const leave = () => {
-    exitFullscreen();
-    navigate(`/repertorio/peca/${id}`);
-  };
+  const leave = onClose;
 
   // Largura da página: cabe na tela no zoom 100%; tablets em pé ficam com a página inteira na largura.
   const fitWidth = Math.min(areaWidth - 16, 1100);

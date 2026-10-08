@@ -1,7 +1,7 @@
 // Sessão de treino imersiva: sem barra lateral, em tela cheia quando o aparelho deixa.
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import PianoKeyboard, { type KeyMark } from '../components/PianoKeyboard';
 import Staff, { type NoteState } from '../components/Staff';
 import DrillFeedback from '../components/DrillFeedback';
@@ -12,7 +12,7 @@ import { makeExercise, type Exercise, type ExerciseKind } from '../music/exercis
 import type { Midi } from '../music/notes';
 import { useNoteInput, useNoteOn } from '../input/useNoteInput';
 import { midiStatusLabel } from '../input/useNoteInput';
-import { canFullscreen, enterFullscreen, exitFullscreen, useElementWidth, useFullscreenState } from '../hooks/useFullscreen';
+import { canFullscreen, enterFullscreen, useElementWidth, useFullscreenState } from '../hooks/useFullscreen';
 import { db } from '../db/db';
 import { formatPercent, formatSeconds } from '../format';
 
@@ -26,9 +26,9 @@ function readShowNames(): boolean {
   }
 }
 
-export default function PracticeSessionPage() {
+export default function PracticeSessionPage({ onClose }: { onClose: () => void }) {
   const [params, setParams] = useSearchParams();
-  const navigate = useNavigate();
+  const location = useLocation();
   const kind: ExerciseKind = params.get('modo') === 'musica' ? 'song' : 'locate';
   const isFull = useFullscreenState();
   const [staffRef, staffWidth] = useElementWidth<HTMLDivElement>();
@@ -99,10 +99,7 @@ export default function PracticeSessionPage() {
       return !v;
     });
 
-  const leave = () => {
-    exitFullscreen();
-    navigate('/treino');
-  };
+  const leave = onClose;
 
   const states: NoteState[] = useMemo(
     () =>
@@ -133,10 +130,10 @@ export default function PracticeSessionPage() {
         </div>
         <div className="session__controls">
           <div className="segmented" role="group" aria-label="Tipo de treino">
-            <button type="button" className={'segmented__option' + (kind === 'locate' ? ' segmented__option-active' : '')} aria-pressed={kind === 'locate'} onClick={() => setParams({ modo: 'notas' }, { replace: true })}>
+            <button type="button" className={'segmented__option' + (kind === 'locate' ? ' segmented__option-active' : '')} aria-pressed={kind === 'locate'} onClick={() => setParams({ modo: 'notas' }, { replace: true, state: location.state })}>
               Notas soltas
             </button>
-            <button type="button" className={'segmented__option' + (kind === 'song' ? ' segmented__option-active' : '')} aria-pressed={kind === 'song'} onClick={() => setParams({ modo: 'musica' }, { replace: true })}>
+            <button type="button" className={'segmented__option' + (kind === 'song' ? ' segmented__option-active' : '')} aria-pressed={kind === 'song'} onClick={() => setParams({ modo: 'musica' }, { replace: true, state: location.state })}>
               Música
             </button>
           </div>

@@ -49,8 +49,8 @@ export default function AppLayout() {
             <Outlet />
           </div>
         </main>
-        <KeyboardDock />
       </div>
+      <KeyboardDock />
     </div>
   );
 }
