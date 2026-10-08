@@ -14,6 +14,8 @@ export function audioContext(): AudioContext | null {
 export interface ScheduledTrack {
   /** performance.now() do primeiro tempo depois da contagem */
   firstBeat: number;
+  /** O mesmo momento no relógio do Web Audio, para agendar sons junto. */
+  firstBeatCtx: number;
   beatMs: number;
   cancel: () => void;
 }
@@ -53,6 +55,7 @@ export function scheduleTrack(opts: { bpm: number; countIn: number; beats: numbe
   const firstBeat = performance.now() + (firstBeatCtx - ctx.currentTime) * 1000;
   return {
     firstBeat,
+    firstBeatCtx,
     beatMs: beatSec * 1000,
     cancel: () => oscs.forEach((o) => {
       try {

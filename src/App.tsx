@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, matchPath, useLocation, type Location } from '
 import { ThemeProvider } from './theme/ThemeProvider';
 import { NoteInputProvider } from './input/NoteInputProvider';
 import { MetronomeProvider } from './metronome/MetronomeProvider';
+import PracticeClock from './progress/PracticeClock';
 import AppLayout from './components/AppLayout';
 import ImmersiveFrame, { useCloseImmersive, type ImmersiveState } from './components/ImmersiveFrame';
 import TodayPage from './pages/TodayPage';
@@ -17,7 +18,7 @@ import PiecePage from './pages/PiecePage';
 import StudyPage from './pages/StudyPage';
 import ModulePage from './pages/ModulePage';
 import LessonPage from './pages/LessonPage';
-import UpcomingPage from './pages/UpcomingPage';
+import ProgressPage from './pages/ProgressPage';
 import AccountPage from './pages/AccountPage';
 import TrainingSessionPage from './pages/TrainingSessionPage';
 import { CalibratePage, ExamPage, ReadingPage, WarmupPage } from './pages/TrainingExtrasPages';
@@ -30,7 +31,7 @@ const ScorePracticePage = lazy(() => import('./pages/ScorePracticePage'));
 function ScorePopup() {
   const close = useCloseImmersive('/repertorio');
   return (
-    <ImmersiveFrame onClose={close} label="Estudar a peça">
+    <ImmersiveFrame onClose={close} label="Tocar a música">
       <Suspense fallback={<div className="session" />}>
         <ScorePracticePage onClose={close} />
       </Suspense>
@@ -80,6 +81,7 @@ export default function App() {
     <ThemeProvider>
       <NoteInputProvider>
         <MetronomeProvider>
+          <PracticeClock />
         <Routes location={background}>
           <Route element={<AppLayout />}>
             <Route index element={<TodayPage />} />
@@ -94,17 +96,7 @@ export default function App() {
             <Route path="/estudo" element={<StudyPage />} />
             <Route path="/estudo/:moduleId" element={<ModulePage />} />
             <Route path="/estudo/:moduleId/:lessonId" element={<LessonPage />} />
-            <Route
-              path="/progresso"
-              element={
-                <UpcomingPage
-                  eyebrow="Sua evolução"
-                  title="Progresso"
-                  phase="Próxima fase"
-                  items={['Histórico de sessões de treino', 'Tempo para achar cada nota ao longo das semanas', 'Mapa do que você já aprendeu no Estudo e no Repertório']}
-                />
-              }
-            />
+            <Route path="/progresso" element={<ProgressPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

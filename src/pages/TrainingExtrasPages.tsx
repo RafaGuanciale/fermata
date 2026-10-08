@@ -242,7 +242,7 @@ export function ReadingPage({ onClose }: { onClose: () => void }) {
           <button className="button button-primary" type="button" onClick={another}>
             Outro trecho
           </button>
-          <span className="timed__hint">Leitura não repete o mesmo trecho: repetir vira estudo de peça.</span>
+          <span className="timed__hint">Leitura não repete o mesmo trecho: repetir vira estudo de música.</span>
         </div>
       )}
     </Shell>

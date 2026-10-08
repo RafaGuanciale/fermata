@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createWait, expectedFor, measureAccuracy, playableSteps, timedPlan, waitPress, weakestRange, type ScoreStep } from './practice';
+import { playNotes, createWait, expectedFor, measureAccuracy, playableSteps, timedPlan, waitPress, weakestRange, type ScoreStep } from './practice';
 
 // Dois compassos 4/4: mão direita E E F G | G(2) com ligadura; mão esquerda C+G no tempo 1 de cada compasso.
 const steps: ScoreStep[] = [
@@ -43,5 +43,19 @@ describe('passos da peça', () => {
     const acc = measureAccuracy(timedPlan(steps, 'direita', 2, { from: 1, to: 2 }, 60), ['perfect', 'good', 'miss', 'miss', 'perfect']);
     expect(acc).toEqual([{ measure: 1, accuracy: 0.5 }, { measure: 2, accuracy: 1 }]);
     expect(weakestRange(acc)).toEqual({ from: 1, to: 1 });
+  });
+});
+
+describe('cascata', () => {
+  it('lista as notas das duas mãos com momento e duração', () => {
+    const withLen: ScoreStep[] = [
+      { measure: 1, beat: 0, notes: [{ midi: 64, staff: 0, tied: false, beats: 1 }, { midi: 48, staff: 1, tied: false, beats: 4 }] },
+      { measure: 1, beat: 1, notes: [{ midi: 62, staff: 0, tied: false, beats: 2 }, { midi: 48, staff: 1, tied: true, beats: 1 }] },
+    ];
+    expect(playNotes(withLen, 2, { from: 1, to: 1 }, 60)).toEqual([
+      { midi: 64, t: 0, dur: 1000, hand: 'direita', step: 0 },
+      { midi: 48, t: 0, dur: 4000, hand: 'esquerda', step: 0 },
+      { midi: 62, t: 1000, dur: 2000, hand: 'direita', step: 1 },
+    ]);
   });
 });

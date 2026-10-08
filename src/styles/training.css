@@ -509,3 +509,204 @@ a.chip {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* ---------- Tocar a música (MusicXML) ---------- */
+
+/* O popup cabe inteiro na moldura: partitura rola por dentro, teclado sempre visível */
+.immersive__frame > .session-fit {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.session-fit {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scoreStage {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) clamp(var(--space-3), 3vw, var(--space-8)) var(--space-3);
+}
+
+.scoreStage__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+}
+
+.scoreStage__range,
+.scoreStage__bpm,
+.scoreStage__toggles {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  font-size: 14px;
+}
+
+.scoreStage__range input {
+  width: 60px;
+  min-height: 34px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-sunk);
+  color: var(--text);
+  font: 500 14px/1 var(--font-body);
+  text-align: center;
+}
+
+.scoreStage__bpmValue {
+  display: grid;
+  justify-items: center;
+  min-width: 96px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.scoreStage__bpmValue small,
+.scoreStage__bpmValue .linkButton {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.scorePaper {
+  flex: 1 1 0;
+  min-height: 140px;
+  overflow-y: auto;
+  border-radius: var(--radius-l);
+  background: var(--color-off-white);
+  color: var(--color-ebony);
+  padding: var(--space-2);
+}
+
+.scorePaper__msg {
+  padding: var(--space-8);
+  text-align: center;
+}
+
+/* Notas pintadas direto no SVG da partitura */
+.scorePaper g.sn-current path,
+.scorePaper g.sn-current ellipse {
+  fill: var(--color-petrol) !important;
+  stroke: var(--color-petrol) !important;
+}
+
+.scorePaper g.sn-current {
+  filter: drop-shadow(0 0 2px var(--color-petrol)) drop-shadow(0 0 7px color-mix(in srgb, var(--color-petrol) 80%, transparent));
+}
+
+.scorePaper g.sn-current path {
+  stroke-width: 1.4px;
+}
+
+.scorePaper g.sn-ok path {
+  fill: color-mix(in srgb, var(--color-petrol) 75%, var(--color-off-white)) !important;
+  stroke: color-mix(in srgb, var(--color-petrol) 75%, var(--color-off-white)) !important;
+}
+
+.scorePaper g.sn-done path {
+  fill: color-mix(in srgb, var(--color-ebony) 40%, var(--color-off-white)) !important;
+  stroke: color-mix(in srgb, var(--color-ebony) 40%, var(--color-off-white)) !important;
+}
+
+.scorePaper g.sn-late path {
+  fill: color-mix(in srgb, var(--color-khaki) 85%, var(--color-ebony)) !important;
+  stroke: color-mix(in srgb, var(--color-khaki) 85%, var(--color-ebony)) !important;
+}
+
+.scorePaper g.sn-miss path {
+  fill: var(--color-blush) !important;
+  stroke: var(--color-blush) !important;
+}
+
+.scorePaper g.sn-muted {
+  opacity: 0.28;
+}
+
+.scoreStage__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: 48px;
+}
+
+.scoreStage__keys {
+  position: relative;
+  flex: none;
+}
+
+.fullKeyboard-score {
+  height: clamp(84px, 14vh, 130px);
+  min-width: 0;
+}
+
+/* Marcas no teclado: mão direita petróleo, esquerda cáqui, acerto e erro */
+.fullKeyboard__key-right {
+  background: var(--color-petrol);
+}
+
+.fullKeyboard__key-left {
+  background: color-mix(in srgb, var(--color-khaki) 80%, var(--color-ebony));
+}
+
+.fullKeyboard__key-ok {
+  background: color-mix(in srgb, var(--color-petrol) 45%, var(--key-white));
+}
+
+.fullKeyboard__key-miss {
+  background: var(--color-blush);
+}
+
+.fullKeyboard__key-right .fullKeyboard__label,
+.fullKeyboard__key-left .fullKeyboard__label {
+  color: var(--color-off-white);
+}
+
+/* Cascata: notas caindo até a tecla */
+.cascade {
+  position: relative;
+  height: clamp(70px, 14vh, 140px);
+  overflow: hidden;
+  border-radius: var(--radius-s) var(--radius-s) 0 0;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-petrol) 8%, transparent));
+}
+
+.cascade__note {
+  position: absolute;
+  border-radius: 4px;
+  background: var(--color-petrol);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-off-white) 25%, transparent);
+}
+
+.cascade__note-black {
+  background: color-mix(in srgb, var(--color-petrol) 75%, var(--color-ebony));
+}
+
+.cascade__note-left {
+  background: color-mix(in srgb, var(--color-khaki) 85%, var(--color-ebony));
+}
+
+.cascade__note-other {
+  opacity: 0.35;
+}
+
+@media (max-width: 719px) {
+  .scoreStage__bar {
+    gap: var(--space-2);
+  }
+
+  .scoreStage__toggles {
+    flex-wrap: wrap;
+  }
+}

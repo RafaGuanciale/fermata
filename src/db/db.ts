@@ -57,6 +57,8 @@ export interface Piece extends Synced {
   /** MusicXML exportado do MuseScore: as notas que o app sabe tocar junto. */
   scoreFileId?: number | null;
   scoreFileUid?: string | null;
+  /** Andamento ideal (BPM). Sem ele, vale o da partitura. */
+  bpm?: number | null;
   createdAt: number;
   updatedAt: number;
   openedAt: number | null;
@@ -102,8 +104,20 @@ export interface TrainingRun extends Synced {
   firstTry?: number;
   avgMs?: number;
   passed?: boolean;
+  /** Música: trecho com mais erro na passada */
+  weakFrom?: number;
+  weakTo?: number;
   /** Mudança de nível (kind 'level') ou nível em que foi feito */
   level?: number;
+}
+
+/** Minutos tocando por dia, um registro por aparelho (somados na tela de Progresso). */
+export interface PracticeDay extends Synced {
+  /** `${dia}:${aparelho}` */
+  id: string;
+  day: string;
+  minutes: number;
+  device: string;
 }
 
 /** Fila do que mudou neste aparelho e ainda não subiu. */
@@ -120,6 +134,7 @@ export interface OutboxEntry {
 class FermataDB extends Dexie {
   outbox!: Table<OutboxEntry, string>;
   runs!: Table<TrainingRun, number>;
+  practice!: Table<PracticeDay, string>;
   sessions!: Table<Session, number>;
   attempts!: Table<Attempt, number>;
   pieces!: Table<Piece, number>;
@@ -160,6 +175,9 @@ class FermataDB extends Dexie {
       });
     this.version(4).stores({
       runs: '++id, treinoId, day, at, &uid',
+    });
+    this.version(5).stores({
+      practice: 'id, day',
     });
   }
 }

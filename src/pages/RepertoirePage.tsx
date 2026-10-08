@@ -27,7 +27,7 @@ export default function RepertoirePage() {
         </div>
         <Link className="button button-primary" to="/repertorio/nova">
           <PlusIcon className="button__icon" />
-          Adicionar peça
+          Adicionar música
         </Link>
       </header>
 
@@ -67,9 +67,9 @@ export default function RepertoirePage() {
         </section>
       )}
 
-      <section className="page__section" aria-label="Suas peças">
+      <section className="page__section" aria-label="Suas músicas">
         <div className="page__sectionHead">
-          <h2 className="page__sectionTitle">{searching ? `Resultados para “${query.trim()}”` : 'Suas peças'}</h2>
+          <h2 className="page__sectionTitle">{searching ? `Resultados para “${query.trim()}”` : 'Suas músicas'}</h2>
           {all.length > 0 && (
             <div className="chips" role="group" aria-label="Filtrar por estado">
               {(['all', ...STATUS_ORDER] as const).map((s) => (
@@ -82,15 +82,15 @@ export default function RepertoirePage() {
         </div>
         {pieces === undefined ? null : all.length === 0 ? (
           <div className="emptyState">
-            <h3 className="emptyState__title">Comece pela peça que você está estudando</h3>
+            <h3 className="emptyState__title">Comece pela música que você está estudando</h3>
             <p className="emptyState__body">Cadastre o título, quem compôs, as categorias e, se tiver, o PDF da partitura. Ela aparece aqui e na categoria certa.</p>
             <Link className="button button-primary" to="/repertorio/nova">
               <PlusIcon className="button__icon" />
-              Adicionar peça
+              Adicionar música
             </Link>
           </div>
         ) : shown.length === 0 ? (
-          <p className="emptyState__body">Nenhuma peça com esse filtro.</p>
+          <p className="emptyState__body">Nenhuma música com esse filtro.</p>
         ) : (
           <PieceList pieces={shown} />
         )}

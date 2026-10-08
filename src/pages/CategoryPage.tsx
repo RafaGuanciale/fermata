@@ -19,18 +19,18 @@ export default function CategoryPage() {
         Repertório
       </Link>
       <PhotoCard photo={category.photo} size="hero" eyebrow={category.eyebrow} title={category.title} sizes="100vw">
-        <span className="photoCard__body">{pieces ? countLabel(pieces.length, 'peça no seu repertório', 'peças no seu repertório') : ' '}</span>
+        <span className="photoCard__body">{pieces ? countLabel(pieces.length, 'música no seu repertório', 'músicas no seu repertório') : ' '}</span>
         <span className="photoCard__actions">
           <Link className="button button-primary" to={`/repertorio/nova?categoria=${slug}`}>
             <PlusIcon className="button__icon" />
-            Adicionar peça aqui
+            Adicionar música aqui
           </Link>
         </span>
       </PhotoCard>
       {pieces && pieces.length > 0 ? (
         <PieceList pieces={pieces.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'))} />
       ) : pieces ? (
-        <p className="emptyState__body">Nenhuma peça em {category.title} ainda.</p>
+        <p className="emptyState__body">Nenhuma música em {category.title} ainda.</p>
       ) : null}
     </>
   );

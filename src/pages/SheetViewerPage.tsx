@@ -60,7 +60,7 @@ export default function SheetViewerPage({ onClose }: { onClose: () => void }) {
     let doc: PDFDocumentProxy | null = null;
     void (async () => {
       const piece = await db.pieces.get(id);
-      if (!piece?.fileId) return setError('Esta peça não tem partitura.');
+      if (!piece?.fileId) return setError('Esta música não tem partitura.');
       setTitle(piece.title);
       void markOpened(id);
       let file: Awaited<ReturnType<typeof getFile>>;

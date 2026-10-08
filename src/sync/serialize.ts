@@ -1,7 +1,10 @@
 // Conversão entre o registro local (Dexie) e o que vai para a nuvem. Funções puras.
 // Ids numéricos são só deste aparelho; entre aparelhos as referências usam `uid`.
 
-export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs'] as const;
+export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice'] as const;
+
+/** Tabelas cuja chave já é global (texto): o uid é a própria chave. */
+export const STRING_KEY_TABLES: readonly string[] = ['lessons', 'practice'];
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 export interface Change {
@@ -22,6 +25,7 @@ const LOCAL_ONLY: Record<SyncTable, string[]> = {
   sessions: ['id'],
   attempts: ['id', 'sessionId'],
   runs: ['id'],
+  practice: [],
 };
 
 export interface Refs {
@@ -46,9 +50,9 @@ export function byTableOrder<T extends { table: string }>(a: T, b: T): number {
   return tableRank(a.table) - tableRank(b.table);
 }
 
-/** Na tabela de lições a chave já é global ("modulo/licao"). */
+/** Em lições e prática a chave já é global ("modulo/licao", "dia:aparelho"). */
 export function uidOf(table: string, row: Row): string | undefined {
-  const v = table === 'lessons' ? row.id : row.uid;
+  const v = STRING_KEY_TABLES.includes(table) ? row.id : row.uid;
   return typeof v === 'string' ? v : undefined;
 }
 
@@ -69,8 +73,8 @@ export function toRemoteData(table: SyncTable, row: Row, refs: Refs = {}): Row {
 export function fromRemoteData(table: SyncTable, change: Pick<Change, 'uid' | 'mt' | 'data'>, local: Row | undefined, refs: LocalRefs = {}): Row {
   const row: Row = { ...(change.data ?? {}), uid: change.uid, mt: change.mt };
   for (const k of LOCAL_ONLY[table]) delete row[k];
-  if (local?.id !== undefined && table !== 'lessons') row.id = local.id;
-  if (table === 'lessons') row.id = change.uid;
+  if (local?.id !== undefined && !STRING_KEY_TABLES.includes(table)) row.id = local.id;
+  if (STRING_KEY_TABLES.includes(table)) row.id = change.uid;
   if (table === 'files') row.blob = local?.blob ?? null;
   if (table === 'pieces') {
     row.fileId = refs.fileId ?? null;

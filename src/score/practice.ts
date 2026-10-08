@@ -13,6 +13,8 @@ export interface StepNote {
   staff: number;
   /** Continuação de ligadura: já está soando, não se toca de novo. */
   tied: boolean;
+  /** Duração em tempos de semínima (para a cascata e o acompanhamento). */
+  beats?: number;
 }
 
 export interface ScoreStep {
@@ -139,4 +141,31 @@ export function weakestRange(acc: { measure: number; accuracy: number }[], thres
   const weak = acc.filter((a) => a.accuracy < threshold).map((a) => a.measure);
   if (!weak.length) return null;
   return { from: Math.min(...weak), to: Math.max(...weak) };
+}
+
+// ---------- cascata e acompanhamento ----------
+
+export interface PlayNote {
+  midi: Midi;
+  /** ms desde o primeiro tempo do trecho */
+  t: number;
+  dur: number;
+  hand: Hand;
+  step: number;
+}
+
+/** Todas as notas do trecho com momento e duração, das duas mãos. Ligaduras somam na nota que começa. */
+export function playNotes(steps: ScoreStep[], staffCount: number, range: Range, bpm: number): PlayNote[] {
+  const beatMs = 60000 / bpm;
+  const first = steps.find((s) => s.measure >= range.from && s.measure <= range.to);
+  if (!first) return [];
+  const out: PlayNote[] = [];
+  steps.forEach((s, i) => {
+    if (s.measure < range.from || s.measure > range.to) return;
+    for (const n of s.notes) {
+      if (n.tied) continue;
+      out.push({ midi: n.midi, t: (s.beat - first.beat) * beatMs, dur: (n.beats ?? 1) * beatMs, hand: handOfStaff(n.staff, staffCount), step: i });
+    }
+  });
+  return out;
 }

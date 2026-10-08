@@ -1,0 +1,333 @@
+/* Página de Progresso: blocos de números e gráficos SVG de uma cor só (petróleo). */
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  /* Rampa sequencial do calendário: do fundo afundado até o azul de acerto. */
+  --heat-0: var(--surface-sunk);
+  --heat-1: color-mix(in srgb, var(--hit) 22%, var(--surface-sunk));
+  --heat-2: color-mix(in srgb, var(--hit) 45%, var(--surface-sunk));
+  --heat-3: color-mix(in srgb, var(--hit) 70%, var(--surface-sunk));
+  --heat-4: var(--hit);
+}
+
+:root[data-theme="light"] .progress {
+  --heat-0: color-mix(in srgb, var(--color-khaki) 22%, var(--color-off-white));
+  --heat-1: color-mix(in srgb, var(--color-petrol) 22%, var(--color-off-white));
+  --heat-2: color-mix(in srgb, var(--color-petrol) 45%, var(--color-off-white));
+  --heat-3: color-mix(in srgb, var(--color-petrol) 70%, var(--color-off-white));
+  --heat-4: var(--color-petrol);
+}
+
+.progress__empty {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  max-width: 60ch;
+  padding: var(--space-6);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+}
+
+.progress__tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.progress__charts,
+.progress__stuck {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.progress__figure,
+.progress__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.progress__caption,
+.progress__cardTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: 600 14px/20px var(--font-body);
+}
+
+.progress__hint,
+.progress__muted {
+  font: 400 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+/* Gráficos */
+.heat,
+.bars,
+.line {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.heat {
+  max-width: 560px;
+}
+
+.heat__label,
+.chart__tick {
+  font: 500 10px var(--font-body);
+  fill: var(--text-muted);
+}
+
+.chart__value {
+  font: 600 11px var(--font-body);
+  fill: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart__axis {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.heat__cell {
+  transition: opacity 120ms ease;
+}
+
+.heat__cell:hover {
+  opacity: 0.75;
+}
+
+.heat__cell-0 { fill: var(--heat-0); }
+.heat__cell-1 { fill: var(--heat-1); }
+.heat__cell-2 { fill: var(--heat-2); }
+.heat__cell-3 { fill: var(--heat-3); }
+.heat__cell-4 { fill: var(--heat-4); }
+
+.bars__hit {
+  fill: transparent;
+}
+
+.bars__hit:hover {
+  fill: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.bars__bar {
+  fill: var(--hit-soft);
+}
+
+.bars__bar-current {
+  fill: var(--hit);
+}
+
+.line__path {
+  fill: none;
+  stroke: var(--hit);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.line__dot {
+  fill: var(--hit);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+/* Andamento por treino */
+.progress__meters {
+  display: grid;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.progress__meter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px var(--space-3);
+}
+
+.progress__meterName {
+  font: 500 14px/20px var(--font-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress__meterStatus {
+  font: 500 12px/20px var(--font-body);
+  color: var(--text-muted);
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.progress__meterValue {
+  grid-column: 1 / -1;
+  font: 400 13px/18px var(--font-body);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  overflow: hidden;
+}
+
+.progress__barFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--hit);
+}
+
+/* Onde trava */
+.progress__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.progress__chip {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--miss-soft);
+  color: var(--text);
+  font: 400 13px/18px var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 18px;
+}
+
+.progress__list a {
+  color: var(--text);
+}
+
+/* Fases e marcos */
+.progress__phases,
+.progress__marks {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.progress__phase {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  opacity: 0.6;
+}
+
+.progress__phase-current,
+.progress__phase-done {
+  opacity: 1;
+}
+
+.progress__phaseN {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  font: 600 13px var(--font-body);
+}
+
+.progress__phase-current .progress__phaseN {
+  border-color: var(--hit);
+  color: var(--hit);
+}
+
+.progress__phase-done .progress__phaseN {
+  background: var(--hit);
+  border-color: var(--hit);
+  color: var(--on-key-lit);
+}
+
+.progress__phaseText {
+  display: flex;
+  flex-direction: column;
+}
+
+.progress__phaseTitle {
+  font: 500 14px/20px var(--font-body);
+}
+
+.progress__mark {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.progress__mark-done {
+  color: var(--text);
+}
+
+.progress__markDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+}
+
+.progress__mark-done .progress__markDot {
+  background: var(--hit);
+  border-color: var(--hit);
+}
+
+.progress__markTitle {
+  font: 400 14px/20px var(--font-body);
+}
+
+/* Até três cartões lado a lado, sem buraco na grade */
+.progress__stuck-auto {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+@media (max-width: 900px) {
+  .progress__charts,
+  .progress__stuck,
+  .progress__stuck-auto {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .progress__tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+:root[data-theme="light"] .bars__bar {
+  fill: color-mix(in srgb, var(--color-petrol) 28%, var(--color-off-white));
+}

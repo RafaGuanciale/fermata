@@ -18,6 +18,8 @@ App web pessoal de estudo de piano do Rafael. Marca endossada: "Fermata, um proj
 - Notas são números MIDI (Dó central = 60). Nomes em português ("Fá♯") e notação científica ("F♯4").
 - Toda entrada de nota passa pelo `NoteInputProvider` (MIDI, clique, teclado do computador). Telas usam `useNoteInput()` (notas seguradas) ou `useNoteOn()`; nunca sabem a origem.
 - Layout: barra lateral em todas as páginas (completa ≥1100px, ícones no tablet, barra inferior <720px) e o teclado fixo (`KeyboardDock`) embaixo. Treino e leitor de partitura abrem num popup com moldura (`ImmersiveFrame`) por cima da página de origem: o link passa `state={{ background: location }}` e o `App` desenha a página de fundo mais o popup. Tela cheia de verdade só pelo botão dentro do popup.
+- Progresso: `src/progress/PracticeClock.tsx` grava os minutos tocados na tabela `practice` (um registro por dia e aparelho); `src/progress/stats.ts` calcula tudo o que a página mostra.
+- Na interface, a palavra é "música", não "peça" (o código ainda usa `Piece`).
 - Repertório: telas nunca mexem no banco direto, passam por `src/repertoire/repo.ts` (é onde a nuvem vai entrar).
 - Fotos: Unsplash, ids em `src/media/photos.ts`, sempre via `PhotoCard` (tem fallback se a foto não carregar).
 - Responsivo de verdade: notebook, tablet (Rafael vai comprar um) e celular. Testar 1440, 820 e 390 px.

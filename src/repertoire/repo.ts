@@ -81,6 +81,10 @@ export async function setStatus(id: number, status: Piece['status']) {
   await db.pieces.update(id, { status, updatedAt: Date.now() });
 }
 
+export async function setPieceBpm(id: number, bpm: number | null) {
+  await db.pieces.update(id, { bpm, updatedAt: Date.now() });
+}
+
 export async function markOpened(id: number) {
   await db.pieces.update(id, { openedAt: Date.now() });
 }

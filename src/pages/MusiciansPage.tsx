@@ -21,10 +21,10 @@ export default function MusiciansPage() {
         Repertório
       </Link>
       <PhotoCard photo="musicos" size="hero" eyebrow="Compositores · Artistas" title="Músicos" sizes="100vw">
-        <span className="photoCard__body">Todo nome que você cadastra numa peça vira um músico aqui.</span>
+        <span className="photoCard__body">Todo nome que você cadastra numa música vira um músico aqui.</span>
       </PhotoCard>
 
-      {pieces && musicians.length === 0 && <p className="emptyState__body">Os músicos aparecem quando você cadastrar peças com compositor ou artista.</p>}
+      {pieces && musicians.length === 0 && <p className="emptyState__body">Os músicos aparecem quando você cadastrar músicas com compositor ou artista.</p>}
 
       <div className="musicianGrid">
         {musicians.map((m) => {
@@ -39,7 +39,7 @@ export default function MusiciansPage() {
             >
               <span className="musician__avatar" aria-hidden>{initials(m.name)}</span>
               <span className="musician__name">{m.name}</span>
-              <span className="musician__count">{countLabel(m.count, 'peça', 'peças')}</span>
+              <span className="musician__count">{countLabel(m.count, 'música', 'músicas')}</span>
             </button>
           );
         })}
@@ -47,7 +47,7 @@ export default function MusiciansPage() {
 
       {selected && ofSelected.length > 0 && (
         <section className="page__section">
-          <h2 className="page__sectionTitle">Peças de {selected}</h2>
+          <h2 className="page__sectionTitle">Músicas de {selected}</h2>
           <PieceList pieces={ofSelected} />
         </section>
       )}

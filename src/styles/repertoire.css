@@ -388,3 +388,7 @@
 .dropZone-small {
   padding: var(--space-6) var(--space-4);
 }
+
+.form__field-narrow {
+  max-width: 320px;
+}

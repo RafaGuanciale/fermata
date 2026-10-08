@@ -1,24 +1,30 @@
-// Estudar uma peça do repertório a partir do MusicXML: a partitura desenhada pelo OpenSheetMusicDisplay,
-// um cursor que espera a nota (modo estudar) ou anda no tempo do metrônomo (modo no tempo),
-// escolha de mão e repetição de compassos. A lógica fica em src/score/practice.ts.
+// Tocar uma música do repertório a partir do MusicXML.
+// Estudar: a partitura espera cada nota ou acorde. Tocar junto: as notas andam no tempo do metrônomo,
+// com teclas-guia, cascata de notas opcional e a outra mão tocada pelo app.
+// A partitura é desenhada pelo OpenSheetMusicDisplay; as notas da vez são pintadas direto no SVG.
+// A lógica fica em src/score/practice.ts.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { OpenSheetMusicDisplay, type Note } from 'opensheetmusicdisplay';
 import { db, type Piece } from '../db/db';
-import { getFile } from '../repertoire/repo';
+import { getFile, setPieceBpm } from '../repertoire/repo';
 import { useNoteInput, useNoteOn, midiStatusLabel } from '../input/useNoteInput';
 import { useMetronome } from '../metronome/MetronomeProvider';
+import { whiteKeysBetween, type Midi } from '../music/notes';
 import {
   createWait,
   expectedFor,
+  handOfStaff,
   measureAccuracy,
   measureCount,
+  playNotes,
   playableSteps,
   timedPlan,
   waitPress,
   weakestRange,
   type Hand,
+  type PlayNote,
   type Range,
   type ScoreStep,
   type TimedPlan,
@@ -26,190 +32,262 @@ import {
 } from '../score/practice';
 import { judgeExpected, windowsFor, type PlayedEvent, type TakeResult } from '../training/timing';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../training/clickTrack';
+import { playNotes as synth } from '../audio/synth';
 import { saveRun } from '../training/runs';
 import { canFullscreen, enterFullscreen, useFullscreenState } from '../hooks/useFullscreen';
-import PianoKeyboard, { type KeyMark } from '../components/PianoKeyboard';
+import { FullKeyboard, type FitMark } from '../components/KeyboardDock';
 import ThemeToggle from '../components/ThemeToggle';
 import { TakeSummary } from '../components/TimedRunner';
 import { CloseIcon, ExpandIcon, MinusIcon, PlayIcon, PlugIcon, PlusIcon } from '../components/Icons';
+
+interface NoteEl {
+  midi: Midi;
+  staff: number;
+  el: SVGGElement | null;
+}
 
 interface Loaded {
   piece: Piece;
   steps: ScoreStep[];
   staffCount: number;
   beatsPerBar: number;
-  low: number;
-  high: number;
+  low: Midi;
+  high: Midi;
+  scoreTempo: number | null;
 }
 
-function cssVar(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
+type Mode = 'estudar' | 'junto';
+type Take = 'idle' | 'countin' | 'playing' | 'done';
 
-/** Percorre a partitura com o cursor e anota o que soa em cada momento. */
-function readSteps(osmd: OpenSheetMusicDisplay): { steps: ScoreStep[]; staffCount: number } {
+const NOTE_CLASSES = ['sn-current', 'sn-ok', 'sn-late', 'sn-miss', 'sn-done'];
+const LOOK_MS = 2600;
+
+/** Percorre a partitura com o cursor: o que soa em cada momento e o elemento SVG de cada nota. */
+function readScore(osmd: OpenSheetMusicDisplay): { steps: ScoreStep[]; els: NoteEl[][]; staffCount: number } {
   const staves = osmd.Sheet.Staves;
   const cursor = osmd.cursor;
   cursor.reset();
   const steps: ScoreStep[] = [];
+  const els: NoteEl[][] = [];
   let beat = 0;
   let lastTs: number | null = null;
   let lastLen = 1;
   let guard = 0;
+  const keep = (n: Note) => !n.isRest() && !n.IsGraceNote && n.PrintObject !== false;
   while (!cursor.Iterator.EndReached && guard++ < 20000) {
     const ts = cursor.Iterator.currentTimeStamp.RealValue * 4;
     if (lastTs !== null) {
       const d = ts - lastTs;
       beat += d > 0 ? d : lastLen;
     }
-    const notes = cursor.NotesUnderCursor().filter((n: Note) => !n.isRest() && !n.IsGraceNote && n.PrintObject !== false);
+    const notes = cursor.NotesUnderCursor().filter(keep);
     lastLen = notes.length ? Math.min(...notes.map((n) => n.Length.RealValue * 4)) : 1;
+    const staffOf = (n: Note) => Math.max(0, staves.indexOf(n.ParentStaffEntry.ParentStaff));
     steps.push({
       measure: cursor.Iterator.CurrentMeasureIndex + 1,
       beat,
-      notes: notes.map((n) => ({
-        midi: n.halfTone + 12,
-        staff: Math.max(0, staves.indexOf(n.ParentStaffEntry.ParentStaff)),
-        tied: Boolean(n.NoteTie && n.NoteTie.StartNote !== n),
-      })),
+      notes: notes.map((n) => ({ midi: n.halfTone + 12, staff: staffOf(n), tied: Boolean(n.NoteTie && n.NoteTie.StartNote !== n), beats: n.Length.RealValue * 4 })),
     });
+    els.push(
+      cursor
+        .GNotesUnderCursor()
+        .filter((g) => keep(g.sourceNote))
+        .map((g) => ({
+          midi: g.sourceNote.halfTone + 12,
+          staff: staffOf(g.sourceNote),
+          el: (g as unknown as { getSVGGElement?: () => SVGGElement }).getSVGGElement?.() ?? null,
+        })),
+    );
     lastTs = ts;
     cursor.next();
   }
   cursor.reset();
-  return { steps, staffCount: Math.max(1, staves.length) };
+  return { steps, els, staffCount: Math.max(1, staves.length) };
+}
+
+/** Teclas da cascata: posição e largura em %, na mesma geometria do teclado. */
+function keyGeometry(low: Midi, high: Midi) {
+  const whites = whiteKeysBetween(low, high);
+  const W = whites.length;
+  const map = new Map<Midi, { left: number; width: number; black: boolean }>();
+  whites.forEach((m, i) => {
+    map.set(m, { left: (i / W) * 100, width: (1 / W) * 100, black: false });
+    if (m + 1 <= high && !whites.includes(m + 1)) map.set(m + 1, { left: ((i + 1 - 0.31) / W) * 100, width: (0.62 / W) * 100, black: true });
+  });
+  return map;
 }
 
 export default function ScorePracticePage({ onClose }: { onClose: () => void }) {
   const id = Number(useParams().id);
-  const { midi, connectMidi, press, release } = useNoteInput();
+  // A página de Progresso pode abrir direto num trecho difícil.
+  const startAt = useLocation().state as { from?: number; to?: number } | null;
+  const startFrom = startAt?.from;
+  const startTo = startAt?.to;
+  const { midi, held, connectMidi, press, release } = useNoteInput();
   const metronome = useMetronome();
   const isFull = useFullscreenState();
   const paperRef = useRef<HTMLDivElement>(null);
-  const keysRef = useRef<HTMLDivElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
   const osmdRef = useRef<OpenSheetMusicDisplay | null>(null);
-  const cursorAt = useRef(0);
+  const elsRef = useRef<NoteEl[][]>([]);
+  const paintedRef = useRef<SVGGElement[]>([]);
+  const [renderTick, setRenderTick] = useState(0);
 
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'estudar' | 'tempo'>('estudar');
+  const [mode, setMode] = useState<Mode>('estudar');
   const [hand, setHand] = useState<Hand>('direita');
   const [range, setRange] = useState<Range>({ from: 1, to: 1 });
-  const [bpm, setBpm] = useState(60);
-  const [lightKeys, setLightKeys] = useState(true);
+  const [bpm, setBpm] = useState(80);
+  const [guideKeys, setGuideKeys] = useState(true);
+  const [cascade, setCascade] = useState(true);
+  const [otherHand, setOtherHand] = useState(true);
 
   // ---------- carregar ----------
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       const piece = await db.pieces.get(id);
-      if (!piece?.scoreFileId) return setError('Esta peça ainda não tem o MusicXML. Adicione em Editar.');
+      if (!piece?.scoreFileId) return setError('Esta música ainda não tem o MusicXML. Adicione em Editar.');
       let file;
       try {
         file = await getFile(piece.scoreFileId);
       } catch (err) {
         return setError(err instanceof Error ? err.message : 'Não deu para baixar o arquivo.');
       }
-      if (!file || !paperRef.current || cancelled) return;
-      const osmd = new OpenSheetMusicDisplay(paperRef.current, {
-        autoResize: true,
+      if (!file || !hostRef.current || cancelled) return;
+      const osmd = new OpenSheetMusicDisplay(hostRef.current, {
+        autoResize: false,
         backend: 'svg',
         drawTitle: true,
         drawPartNames: false,
-        followCursor: true,
-        cursorsOptions: [{ type: 0, color: cssVar('--color-petrol') || 'teal', alpha: 0.45, follow: true }],
+        followCursor: false,
       });
       try {
         await osmd.load(file.blob, piece.title);
         if (cancelled) return;
         osmd.render();
-        osmd.cursor.show();
       } catch (err) {
         console.error(err);
         return setError('Não deu para ler este MusicXML. Exporte de novo no MuseScore e tente outra vez.');
       }
       osmdRef.current = osmd;
-      const { steps, staffCount } = readSteps(osmd);
+      const { steps, els, staffCount } = readScore(osmd);
+      elsRef.current = els;
       const all = steps.flatMap((s) => s.notes.map((n) => n.midi));
-      const low = Math.max(21, Math.min(...all, 60) - 2);
-      const high = Math.min(108, Math.max(...all, 72) + 2);
+      const minNote = Math.min(...all, 60);
+      const maxNote = Math.max(...all, 72);
+      // Teclado do trecho da música, de Dó a Dó, com pelo menos duas oitavas.
+      let low = Math.max(21, minNote - (((minNote % 12) + 12) % 12));
+      let high = Math.min(108, maxNote + ((12 - (((maxNote % 12) + 12) % 12)) % 12));
+      if (high - low < 24) high = Math.min(108, low + 24);
+      if (high - low < 24) low = Math.max(21, high - 24);
       const ts = osmd.Sheet.SourceMeasures[0]?.ActiveTimeSignature;
       const beatsPerBar = ts ? Math.round((ts.Numerator * 4) / ts.Denominator) || 4 : 4;
-      cursorAt.current = 0;
-      setRange({ from: 1, to: measureCount(steps) });
-      // Começa em 60% do andamento da partitura, como na escada de BPM do treino.
       const tempo = osmd.Sheet.DefaultStartTempoInBpm;
-      if (tempo > 0) setBpm(Math.max(40, Math.round((tempo * 0.6) / 2) * 2));
-      setLoaded({ piece, steps, staffCount, beatsPerBar, low, high });
+      const scoreTempo = tempo > 0 ? Math.round(tempo) : null;
+      const total = measureCount(steps);
+      if (startFrom && startTo && startFrom <= startTo && startTo <= total) setRange({ from: startFrom, to: startTo });
+      else setRange({ from: 1, to: total });
+      setBpm(piece.bpm ?? scoreTempo ?? 80);
+      setHand('direita');
+      setLoaded({ piece, steps, staffCount, beatsPerBar, low, high, scoreTempo });
     })();
     return () => {
       cancelled = true;
       osmdRef.current?.clear();
       osmdRef.current = null;
     };
-  }, [id]);
+  }, [id, startFrom, startTo]);
 
-  /** Leva o cursor da partitura até um passo. */
-  const moveCursor = useCallback((step: number) => {
-    const osmd = osmdRef.current;
-    if (!osmd) return;
-    const c = osmd.cursor;
-    if (step < cursorAt.current) {
-      c.reset();
-      cursorAt.current = 0;
-    }
-    while (cursorAt.current < step && !c.Iterator.EndReached) {
-      c.next();
-      cursorAt.current++;
-    }
-  }, []);
+  // Redesenha a partitura quando a largura muda (os elementos SVG mudam, então relê).
+  useEffect(() => {
+    const paper = paperRef.current;
+    if (!paper || !loaded) return;
+    let last = paper.clientWidth;
+    let timer = 0;
+    const ro = new ResizeObserver(() => {
+      if (Math.abs(paper.clientWidth - last) < 24) return;
+      last = paper.clientWidth;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const osmd = osmdRef.current;
+        if (!osmd) return;
+        osmd.render();
+        elsRef.current = readScore(osmd).els;
+        paintedRef.current = [];
+        setRenderTick((t) => t + 1);
+      }, 250);
+    });
+    ro.observe(paper);
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(timer);
+    };
+  }, [loaded]);
 
   const order = useMemo(() => (loaded ? playableSteps(loaded.steps, hand, loaded.staffCount, range) : []), [loaded, hand, range]);
+  const allNotes = useMemo(() => (loaded ? playNotes(loaded.steps, loaded.staffCount, range, bpm) : []), [loaded, range, bpm]);
 
-  // ---------- modo estudar ----------
+  // ---------- estudar ----------
   const [wait, setWait] = useState<WaitState>(() => createWait([]));
+  const [wrongKey, setWrongKey] = useState<number | null>(null);
   useEffect(() => {
     setWait(createWait(order));
-    if (order.length) moveCursor(order[0]);
-  }, [order, moveCursor, mode]);
+    setWrongKey(null);
+  }, [order, mode]);
 
   const currentStep = loaded && wait.order.length ? loaded.steps[wait.order[wait.pos]] : null;
   const expected = currentStep && loaded ? expectedFor(currentStep, hand, loaded.staffCount) : [];
 
-  // ---------- modo no tempo ----------
-  const [take, setTake] = useState<'idle' | 'countin' | 'playing' | 'done'>('idle');
+  // ---------- tocar junto ----------
+  const [take, setTake] = useState<Take>('idle');
+  const [listening, setListening] = useState(false);
   const [now, setNow] = useState(0);
-  const [result, setResult] = useState<{ r: TakeResult; weak: Range | null } | null>(null);
+  const [result, setResult] = useState<{ r: TakeResult; weak: Range | null; plan: TimedPlan } | null>(null);
   const trackRef = useRef<ScheduledTrack | null>(null);
   const planRef = useRef<TimedPlan | null>(null);
   const eventsRef = useRef<PlayedEvent[]>([]);
-  const takeRef = useRef(take);
+  const stopSoundRef = useRef<(() => void) | null>(null);
+  const takeRef = useRef<Take>(take);
   takeRef.current = take;
 
-  const stopTake = () => {
+  const stopTake = useCallback(() => {
     trackRef.current?.cancel();
     trackRef.current = null;
+    stopSoundRef.current?.();
+    stopSoundRef.current = null;
+    setListening(false);
     setTake('idle');
-  };
+  }, []);
 
-  useEffect(() => () => trackRef.current?.cancel(), []);
+  useEffect(() => () => {
+    trackRef.current?.cancel();
+    stopSoundRef.current?.();
+  }, []);
+
   useEffect(() => {
-    if (mode === 'estudar') stopTake();
+    stopTake();
     setResult(null);
-  }, [mode, hand, range]);
+  }, [mode, hand, range, stopTake]);
 
-  const startTake = () => {
+  const start = (listenOnly: boolean) => {
     if (!loaded) return;
     if (metronome.running) metronome.stop();
     const plan = timedPlan(loaded.steps, hand, loaded.staffCount, range, bpm);
-    if (!plan.expected.length) return;
-    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar });
+    if (!plan.stepTimes.length) return;
+    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar, volume: listenOnly ? 0.35 : 0.6 });
     if (!track) return;
+    // O app toca: tudo (ouvir) ou só a outra mão (acompanhamento).
+    const sounding = allNotes.filter((n) => listenOnly || (otherHand && hand !== 'duas' && n.hand !== hand));
+    stopSoundRef.current = sounding.length
+      ? synth(sounding.map((n) => ({ midi: n.midi, at: track.firstBeatCtx + n.t / 1000, dur: n.dur / 1000 })), listenOnly ? 0.4 : 0.3)
+      : null;
     planRef.current = plan;
     trackRef.current = track;
     eventsRef.current = [];
     setResult(null);
-    moveCursor(plan.stepTimes[0].step);
+    setListening(listenOnly);
     setTake('countin');
   };
 
@@ -224,71 +302,160 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
       setNow(t);
       const elapsed = t - track.firstBeat;
       if (elapsed >= 0 && takeRef.current === 'countin') setTake('playing');
-      // O cursor chega um pouquinho antes da nota, para dar tempo de ler.
-      let target = plan.stepTimes[0].step;
-      for (const st of plan.stepTimes) if (st.t <= elapsed + 90) target = st.step;
-      moveCursor(target);
       const reach = Math.max(150, track.beatMs / 2);
       if (elapsed > plan.lengthMs + reach) {
+        trackRef.current = null;
+        stopSoundRef.current = null;
+        if (listening) {
+          setListening(false);
+          setTake('idle');
+          return;
+        }
         const r = judgeExpected(plan.expected, eventsRef.current, windowsFor(1), reach);
         const weak = weakestRange(measureAccuracy(plan, r.notes.map((n) => n?.grade)));
-        trackRef.current = null;
-        setResult({ r, weak });
+        setResult({ r, weak, plan });
         setTake('done');
-        void saveRun({ treinoId: `peca-${loaded.piece.uid ?? loaded.piece.id}`, kind: 'timed', bpm, accuracy: r.accuracy, clean: r.clean });
+        void saveRun({ treinoId: `peca-${loaded.piece.uid ?? loaded.piece.id}`, kind: 'timed', bpm, accuracy: r.accuracy, clean: r.clean, weakFrom: weak?.from, weakTo: weak?.to });
         return;
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [take, loaded, bpm, moveCursor]);
+  }, [take, loaded, bpm, listening]);
 
   // ---------- entrada de notas ----------
-  const [wrongKey, setWrongKey] = useState<number | null>(null);
   useNoteOn((m, at) => {
     if (!loaded) return;
     if (mode === 'estudar') {
       if (!currentStep) return;
       const next = waitPress(wait, m, expected);
       setWrongKey(next.wrong);
-      if (next.pos !== wait.pos || next.laps !== wait.laps) moveCursor(next.order[next.pos]);
       setWait(next);
       return;
     }
     const track = trackRef.current;
-    if (!track || (takeRef.current !== 'countin' && takeRef.current !== 'playing')) return;
+    if (!track || listening || (takeRef.current !== 'countin' && takeRef.current !== 'playing')) return;
     const t = at - track.firstBeat - (getLatency() ?? 0);
     if (t < -track.beatMs) return;
     eventsRef.current = [...eventsRef.current, { midi: m, t }];
   });
 
-  // Teclado começa no trecho da peça.
-  useEffect(() => {
-    const box = keysRef.current;
-    if (!box || !loaded) return;
-    const anchor = box.querySelector<HTMLElement>(`[data-midi="${loaded.low + 2}"]`);
-    if (anchor) box.scrollLeft = Math.max(0, anchor.offsetLeft - 40);
-  }, [loaded]);
+  // ---------- o que está acontecendo agora ----------
+  const track = trackRef.current;
+  const elapsed = track && (take === 'countin' || take === 'playing') ? now - track.firstBeat : null;
+  const plan = planRef.current;
+  let playStep: number | null = null;
+  if (mode === 'junto' && plan && elapsed !== null && elapsed >= -60) {
+    for (const st of plan.stepTimes) if (st.t <= elapsed + 60) playStep = st.step;
+  }
+  const liveJudge = mode === 'junto' && take === 'playing' && plan && elapsed !== null && !listening ? judgeExpected(plan.expected, eventsRef.current, windowsFor(1), Math.max(150, (track?.beatMs ?? 1000) / 2), elapsed) : null;
 
-  const marks: Partial<Record<number, KeyMark>> = {};
-  if (mode === 'estudar' && lightKeys) for (const m of expected) if (!wait.pressed.includes(m)) marks[m] = 'lit';
-  if (mode === 'estudar' && wrongKey !== null) marks[wrongKey] = 'miss';
+  // ---------- pintar a partitura ----------
+  // A mão que não está sendo estudada fica apagada.
+  useEffect(() => {
+    if (!loaded) return;
+    elsRef.current.forEach((step) =>
+      step.forEach((n) => n.el?.classList.toggle('sn-muted', hand !== 'duas' && handOfStaff(n.staff, loaded.staffCount) !== hand)),
+    );
+  }, [hand, loaded, renderTick]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    for (const el of paintedRef.current) el.classList.remove(...NOTE_CLASSES);
+    const painted: SVGGElement[] = [];
+    const paint = (step: number, cls: string, onlyMidi?: Midi) => {
+      for (const n of elsRef.current[step] ?? []) {
+        if (!n.el) continue;
+        if (hand !== 'duas' && handOfStaff(n.staff, loaded.staffCount) !== hand) continue;
+        if (onlyMidi !== undefined && n.midi !== onlyMidi) continue;
+        n.el.classList.add(cls);
+        painted.push(n.el);
+      }
+    };
+
+    let focus: number | null = null;
+    if (mode === 'estudar') {
+      wait.order.forEach((step, i) => {
+        if (i < wait.pos) paint(step, wait.missedSteps.includes(step) ? 'sn-late' : 'sn-done');
+      });
+      if (currentStep) {
+        const step = wait.order[wait.pos];
+        paint(step, 'sn-current');
+        for (const m of wait.pressed) paint(step, 'sn-ok', m);
+        focus = step;
+      }
+    } else {
+      const judged = liveJudge ?? (take === 'done' ? result?.r : null);
+      const p = take === 'done' ? result?.plan : plan;
+      if (judged && p) {
+        p.expected.forEach((e, i) => {
+          const g = judged.notes[i]?.grade;
+          if (!g) return;
+          paint(e.step, g === 'perfect' || g === 'good' ? 'sn-ok' : g === 'off' ? 'sn-late' : 'sn-miss', e.midi ?? undefined);
+        });
+      }
+      if (playStep !== null) {
+        paint(playStep, 'sn-current');
+        focus = playStep;
+      } else if (take === 'idle' && order.length) focus = order[0];
+    }
+    paintedRef.current = painted;
+
+    // Mantém a nota da vez visível dentro do papel.
+    const paper = paperRef.current;
+    const el = focus !== null ? elsRef.current[focus]?.find((n) => n.el)?.el : null;
+    if (paper && el) {
+      const pr = paper.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      if (er.top < pr.top + 40 || er.bottom > pr.bottom - 40) {
+        paper.scrollTo({ top: paper.scrollTop + (er.top - pr.top) - pr.height / 3, behavior: 'smooth' });
+      }
+    }
+  });
+
+  // ---------- teclado e cascata ----------
+  const marks: Partial<Record<Midi, FitMark>> = {};
+  if (mode === 'estudar') {
+    if (guideKeys && currentStep) {
+      const handFor = (m: Midi): FitMark => {
+        const n = currentStep.notes.find((x) => x.midi === m);
+        return n && loaded && handOfStaff(n.staff, loaded.staffCount) === 'esquerda' ? 'left' : 'right';
+      };
+      for (const m of expected) marks[m] = wait.pressed.includes(m) ? 'ok' : handFor(m);
+    }
+    if (wrongKey !== null) marks[wrongKey] = 'miss';
+  } else if (elapsed !== null && guideKeys) {
+    for (const n of allNotes) {
+      if (n.t <= elapsed + 40 && n.t + n.dur > elapsed + 40 && (hand === 'duas' || n.hand === hand || otherHand || listening)) marks[n.midi] = n.hand === 'esquerda' ? 'left' : 'right';
+    }
+  }
+
+  const geometry = useMemo(() => (loaded ? keyGeometry(loaded.low, loaded.high) : null), [loaded]);
+  const showCascade = mode === 'junto' && cascade && geometry;
+  const cascadeTime = elapsed ?? (take === 'idle' && loaded ? -loaded.beatsPerBar * (60000 / bpm) : null);
 
   const total = loaded ? measureCount(loaded.steps) : 1;
-  const track = trackRef.current;
   const countdown = take === 'countin' && track ? Math.max(1, Math.ceil(-(now - track.firstBeat) / track.beatMs)) : null;
   const setFrom = (v: number) => setRange((r) => ({ from: Math.min(Math.max(1, v), r.to), to: r.to }));
   const setTo = (v: number) => setRange((r) => ({ from: r.from, to: Math.max(Math.min(total, v), r.from) }));
+  const ideal = loaded?.piece.bpm ?? loaded?.scoreTempo ?? null;
+  const busy = take === 'countin' || take === 'playing';
+
+  const saveIdeal = async () => {
+    if (!loaded) return;
+    await setPieceBpm(loaded.piece.id!, bpm);
+    setLoaded({ ...loaded, piece: { ...loaded.piece, bpm } });
+  };
 
   return (
-    <div className="session">
+    <div className="session session-fit">
       <header className="session__bar">
         <button className="session__icon" type="button" onClick={onClose} aria-label="Fechar" title="Fechar">
           <CloseIcon className="session__iconSvg" />
         </button>
         <div className="session__title">
-          <p className="page__eyebrow">Estudar a peça</p>
+          <p className="page__eyebrow">Tocar a música</p>
           <h1 className="session__name">{loaded?.piece.title ?? ''}</h1>
         </div>
         <div className="session__controls">
@@ -296,8 +463,8 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
             <button type="button" className={'segmented__option' + (mode === 'estudar' ? ' segmented__option-active' : '')} aria-pressed={mode === 'estudar'} onClick={() => setMode('estudar')}>
               Estudar
             </button>
-            <button type="button" className={'segmented__option' + (mode === 'tempo' ? ' segmented__option-active' : '')} aria-pressed={mode === 'tempo'} onClick={() => setMode('tempo')}>
-              No tempo
+            <button type="button" className={'segmented__option' + (mode === 'junto' ? ' segmented__option-active' : '')} aria-pressed={mode === 'junto'} onClick={() => setMode('junto')}>
+              Tocar junto
             </button>
           </div>
           <button className="pill session__midi" type="button" onClick={connectMidi}>
@@ -313,74 +480,100 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
         </div>
       </header>
 
-      <main className="session__stage training__stage scorePractice">
+      <main className="scoreStage">
         {error ? (
           <p className="training__how">{error}</p>
         ) : (
           <>
-            {loaded && (
-              <div className="scorePractice__bar">
-                {loaded.staffCount > 1 && (
-                  <div className="segmented" role="group" aria-label="Mão">
-                    {(['direita', 'esquerda', 'duas'] as Hand[]).map((h) => (
-                      <button key={h} type="button" className={'segmented__option' + (hand === h ? ' segmented__option-active' : '')} aria-pressed={hand === h} onClick={() => setHand(h)}>
-                        {h === 'direita' ? 'Mão direita' : h === 'esquerda' ? 'Mão esquerda' : 'Duas mãos'}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div className="scorePractice__range">
-                  <span>Compassos</span>
-                  <input type="number" min={1} max={total} value={range.from} onChange={(e) => setFrom(Number(e.target.value))} aria-label="Do compasso" />
-                  <span>a</span>
-                  <input type="number" min={1} max={total} value={range.to} onChange={(e) => setTo(Number(e.target.value))} aria-label="Até o compasso" />
-                  {(range.from !== 1 || range.to !== total) && (
-                    <button className="button button-ghost button-small" type="button" onClick={() => setRange({ from: 1, to: total })}>
-                      Peça inteira
+            <div className="scoreStage__bar">
+              {loaded && loaded.staffCount > 1 && (
+                <div className="segmented" role="group" aria-label="Mão">
+                  {(['direita', 'esquerda', 'duas'] as Hand[]).map((h) => (
+                    <button key={h} type="button" className={'segmented__option' + (hand === h ? ' segmented__option-active' : '')} aria-pressed={hand === h} onClick={() => setHand(h)}>
+                      {h === 'direita' ? 'Mão direita' : h === 'esquerda' ? 'Mão esquerda' : 'Duas mãos'}
                     </button>
-                  )}
+                  ))}
                 </div>
-                {mode === 'tempo' ? (
-                  <div className="scorePractice__bpm">
-                    <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => Math.max(30, b - 4))} aria-label="Mais devagar">
-                      <MinusIcon className="metronome__stepIcon" />
-                    </button>
+              )}
+              <div className="scoreStage__range">
+                <span>Compassos</span>
+                <input type="number" min={1} max={total} value={range.from} onChange={(e) => setFrom(Number(e.target.value))} aria-label="Do compasso" />
+                <span>a</span>
+                <input type="number" min={1} max={total} value={range.to} onChange={(e) => setTo(Number(e.target.value))} aria-label="Até o compasso" />
+                {(range.from !== 1 || range.to !== total) && (
+                  <button className="linkButton" type="button" onClick={() => setRange({ from: 1, to: total })}>
+                    Música inteira
+                  </button>
+                )}
+              </div>
+              {mode === 'junto' && (
+                <div className="scoreStage__bpm">
+                  <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => Math.max(30, b - 4))} aria-label="Mais devagar" disabled={busy}>
+                    <MinusIcon className="metronome__stepIcon" />
+                  </button>
+                  <span className="scoreStage__bpmValue">
                     <strong>{bpm} BPM</strong>
-                    <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => Math.min(200, b + 4))} aria-label="Mais rápido">
-                      <PlusIcon className="metronome__stepIcon" />
-                    </button>
-                  </div>
-                ) : (
+                    {ideal !== null && (
+                      bpm === ideal ? <small>ideal da música</small> : (
+                        <button className="linkButton" type="button" onClick={() => void saveIdeal()}>
+                          usar como ideal
+                        </button>
+                      )
+                    )}
+                  </span>
+                  <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => Math.min(220, b + 4))} aria-label="Mais rápido" disabled={busy}>
+                    <PlusIcon className="metronome__stepIcon" />
+                  </button>
+                </div>
+              )}
+              <div className="scoreStage__toggles">
+                <label className="metronome__check">
+                  <input type="checkbox" checked={guideKeys} onChange={(e) => setGuideKeys(e.target.checked)} />
+                  Teclas-guia
+                </label>
+                {mode === 'junto' && (
                   <label className="metronome__check">
-                    <input type="checkbox" checked={lightKeys} onChange={(e) => setLightKeys(e.target.checked)} />
-                    Acender a próxima tecla
+                    <input type="checkbox" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
+                    Cascata
+                  </label>
+                )}
+                {mode === 'junto' && hand !== 'duas' && loaded && loaded.staffCount > 1 && (
+                  <label className="metronome__check">
+                    <input type="checkbox" checked={otherHand} onChange={(e) => setOtherHand(e.target.checked)} />
+                    App toca a outra mão
                   </label>
                 )}
               </div>
-            )}
+            </div>
 
-            <div className="scorePractice__paper">
-              {!loaded && <p className="emptyState__body viewer__msg">Abrindo a peça…</p>}
-              <div ref={paperRef} />
+            <div className="scorePaper" ref={paperRef}>
+              {!loaded && <p className="scorePaper__msg">Abrindo a música…</p>}
+              <div ref={hostRef} />
             </div>
 
             {loaded && (
-              <div className="timed__controls">
+              <div className="scoreStage__status">
                 {mode === 'estudar' ? (
                   <span className="timed__hint">
-                    {wait.laps > 0 ? `Volta ${wait.laps + 1} no trecho. ` : ''}
-                    {wrongKey !== null ? 'Essa não. Procure de novo, a partitura espera.' : 'A partitura espera você tocar cada nota ou acorde.'}
+                    {wait.laps > 0 ? `Volta ${wait.laps + 1} no trecho · ` : ''}
+                    {wrongKey !== null ? 'Essa não. A partitura espera a nota certa.' : 'Toque a nota ou o acorde pintado. A partitura espera você.'}
                     {wait.missedSteps.length > 0 && ` · ${wait.missedSteps.length} ${wait.missedSteps.length === 1 ? 'ponto pediu' : 'pontos pediram'} segunda tentativa`}
                   </span>
                 ) : take === 'countin' ? (
                   <p className="timed__count" aria-live="assertive">{countdown}</p>
                 ) : take === 'playing' ? (
-                  <button className="button button-secondary" type="button" onClick={stopTake}>Parar</button>
+                  <>
+                    <button className="button button-secondary button-small" type="button" onClick={stopTake}>Parar</button>
+                    <span className="timed__hint">{listening ? 'Ouvindo o trecho' : `${bpm} BPM`}</span>
+                  </>
                 ) : (
                   <>
-                    <button className="button button-primary timed__start" type="button" onClick={startTake}>
+                    <button className="button button-primary timed__start" type="button" onClick={() => start(false)}>
                       <PlayIcon className="button__icon" />
-                      {take === 'done' ? 'De novo' : 'Tocar'}
+                      {take === 'done' ? 'De novo' : 'Tocar junto'}
+                    </button>
+                    <button className="button button-secondary" type="button" onClick={() => start(true)}>
+                      Ouvir o trecho
                     </button>
                     {result ? (
                       <span className="timed__hint">
@@ -395,7 +588,7 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
                         )}
                       </span>
                     ) : (
-                      <span className="timed__hint">{loaded.beatsPerBar} tempos de contagem, depois o cursor anda no tempo.</span>
+                      <span className="timed__hint">Contagem de {loaded.beatsPerBar} tempos e as notas andam no tempo.</span>
                     )}
                   </>
                 )}
@@ -403,13 +596,39 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
             )}
 
             {loaded && (
-              <div className="session__keyboard session__keyboard-full timed__keyboard" ref={keysRef}>
-                <PianoKeyboard low={21} high={108} marks={marks} onPress={press} onRelease={release} label="Teclado inteiro" />
+              <div className="scoreStage__keys">
+                {showCascade && cascadeTime !== null && (
+                  <Cascade notes={allNotes} geometry={geometry!} elapsed={cascadeTime} hand={hand} otherHand={otherHand || listening} />
+                )}
+                <FullKeyboard low={loaded.low} high={loaded.high} held={held} marks={marks} onPress={press} onRelease={release} className="fullKeyboard-score" />
               </div>
             )}
           </>
         )}
       </main>
+    </div>
+  );
+}
+
+/** Notas caindo até o teclado, cada uma na coluna da sua tecla. Chegam na tecla na hora de tocar. */
+function Cascade({ notes, geometry, elapsed, hand, otherHand }: { notes: PlayNote[]; geometry: Map<Midi, { left: number; width: number; black: boolean }>; elapsed: number; hand: Hand; otherHand: boolean }) {
+  const visible = notes.filter((n) => n.t + n.dur > elapsed && n.t < elapsed + LOOK_MS && (hand === 'duas' || n.hand === hand || otherHand));
+  return (
+    <div className="cascade" aria-hidden>
+      {visible.map((n, i) => {
+        const g = geometry.get(n.midi);
+        if (!g) return null;
+        const bottom = ((n.t - elapsed) / LOOK_MS) * 100;
+        const height = (n.dur / LOOK_MS) * 100;
+        const active = hand === 'duas' || n.hand === hand;
+        return (
+          <span
+            key={`${n.step}-${n.midi}-${i}`}
+            className={'cascade__note' + (n.hand === 'esquerda' ? ' cascade__note-left' : '') + (g.black ? ' cascade__note-black' : '') + (active ? '' : ' cascade__note-other')}
+            style={{ left: `${g.left}%`, width: `${g.width}%`, bottom: `${bottom}%`, height: `${Math.max(2, height)}%` }}
+          />
+        );
+      })}
     </div>
   );
 }

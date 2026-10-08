@@ -17,6 +17,7 @@ export default function PieceFormPage() {
   const [categories, setCategories] = useState<string[]>(() => (params.get('categoria') ? [params.get('categoria')!] : []));
   const [level, setLevel] = useState<Level>('facil');
   const [status, setStatus] = useState<LearnStatus>('wish');
+  const [bpm, setBpm] = useState('');
   const [file, setFile] = useState<File | null | undefined>(undefined);
   const [currentFile, setCurrentFile] = useState<{ name: string; size: number } | null>(null);
   const [score, setScore] = useState<File | null | undefined>(undefined);
@@ -35,6 +36,7 @@ export default function PieceFormPage() {
       setCategories(p.categories);
       setLevel(p.level);
       setStatus(p.status);
+      setBpm(p.bpm ? String(p.bpm) : '');
       if (p.fileId) {
         const f = await db.files.get(p.fileId);
         if (f) setCurrentFile({ name: f.name, size: f.size });
@@ -65,17 +67,17 @@ export default function PieceFormPage() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return setError('Dê um nome para a peça.');
+    if (!title.trim()) return setError('Dê um nome para a música.');
     setSaving(true);
     try {
       const savedId = await savePiece(
-        { title: title.trim(), people: parsePeople(people), arrangement: arrangement.trim(), categories, level, status },
+        { title: title.trim(), people: parsePeople(people), arrangement: arrangement.trim(), categories, level, status, bpm: Number(bpm) >= 30 && Number(bpm) <= 240 ? Math.round(Number(bpm)) : null },
         { sheet: file, score },
         editingId,
       );
       navigate(`/repertorio/peca/${savedId}`, { replace: true });
     } catch (err) {
-      console.error('[Fermata] Erro ao salvar peça', err);
+      console.error('[Fermata] Erro ao salvar música', err);
       setError('Não deu para salvar. O navegador pode estar sem espaço; tente um PDF menor.');
       setSaving(false);
     }
@@ -88,10 +90,10 @@ export default function PieceFormPage() {
     <>
       <Link className="page__back" to={editingId ? `/repertorio/peca/${editingId}` : '/repertorio'}>
         <BackIcon className="page__backIcon" />
-        {editingId ? 'Voltar para a peça' : 'Repertório'}
+        {editingId ? 'Voltar para a música' : 'Repertório'}
       </Link>
       <header className="page__header">
-        <h1 className="page__title">{editingId ? 'Editar peça' : 'Nova peça'}</h1>
+        <h1 className="page__title">{editingId ? 'Editar música' : 'Nova música'}</h1>
       </header>
 
       <form className="form" onSubmit={submit} noValidate>
@@ -198,17 +200,23 @@ export default function PieceFormPage() {
             >
               <UploadIcon className="dropZone__icon" />
               <span className="dropZone__title">MusicXML exportado do MuseScore</span>
-              <span className="form__help">Com ele, o app sabe as notas e você pode estudar a peça tocando junto. No MuseScore: Arquivo → Exportar → MusicXML.</span>
+              <span className="form__help">Com ele, o app sabe as notas e você pode tocar junto com a partitura. No MuseScore: Arquivo → Exportar → MusicXML.</span>
               <input id="peca-musicxml" className="dropZone__input" type="file" accept={ACCEPTED_SCORE} onChange={(e) => pickScore(e.target.files?.[0])} />
             </label>
           )}
         </div>
 
+        <label className="form__field form__field-narrow" htmlFor="peca-bpm">
+          <span className="form__label">Andamento ideal (BPM)</span>
+          <input id="peca-bpm" className="form__input" type="number" inputMode="numeric" min={30} max={240} value={bpm} onChange={(e) => setBpm(e.target.value)} placeholder="Da partitura" />
+          <span className="form__help">É o tempo que a música tem quando você toca junto. Vazio: usa o que estiver escrito no MusicXML.</span>
+        </label>
+
         {error && <p className="form__error" role="alert">{error}</p>}
 
         <div className="form__actions">
           <button className="button button-primary" type="submit" disabled={saving}>
-            {saving ? 'Salvando…' : editingId ? 'Salvar alterações' : 'Adicionar peça'}
+            {saving ? 'Salvando…' : editingId ? 'Salvar alterações' : 'Adicionar música'}
           </button>
           <Link className="button button-secondary" to={editingId ? `/repertorio/peca/${editingId}` : '/repertorio'}>
             Cancelar

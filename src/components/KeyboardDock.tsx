@@ -24,10 +24,14 @@ function readOpen(): boolean {
   return typeof window !== 'undefined' ? window.innerWidth >= 720 : true;
 }
 
-export function FullKeyboard({ low, high, held, onPress, onRelease, labelCs = true, className = '' }: {
+export type FitMark = 'right' | 'left' | 'ok' | 'miss';
+
+export function FullKeyboard({ low, high, held, onPress, onRelease, labelCs = true, className = '', marks }: {
   low: Midi;
   high: Midi;
   held: ReadonlySet<Midi>;
+  /** Teclas para destacar: próxima nota de cada mão, acerto ou erro. */
+  marks?: Partial<Record<Midi, FitMark>>;
   onPress?: (m: Midi) => void;
   onRelease?: (m: Midi) => void;
   labelCs?: boolean;
@@ -70,7 +74,7 @@ export function FullKeyboard({ low, high, held, onPress, onRelease, labelCs = tr
             role={onPress ? 'button' : undefined}
             tabIndex={onPress ? -1 : undefined}
             aria-label={onPress ? `${info.name} ${info.sci}` : undefined}
-            className={'fullKeyboard__white' + (held.has(m) ? ' fullKeyboard__white-on' : '')}
+            className={'fullKeyboard__white' + (held.has(m) ? ' fullKeyboard__white-on' : '') + (marks?.[m] ? ` fullKeyboard__key-${marks[m]}` : '')}
             {...handlers(m)}
           >
             {labelCs && info.letter === 0 && <span className="fullKeyboard__label">{info.sci}</span>}
@@ -84,7 +88,7 @@ export function FullKeyboard({ low, high, held, onPress, onRelease, labelCs = tr
           role={onPress ? 'button' : undefined}
           tabIndex={onPress ? -1 : undefined}
           aria-label={onPress ? `${noteInfo(midi).name} ${noteInfo(midi).sci}` : undefined}
-          className={'fullKeyboard__black' + (held.has(midi) ? ' fullKeyboard__black-on' : '')}
+          className={'fullKeyboard__black' + (held.has(midi) ? ' fullKeyboard__black-on' : '') + (marks?.[midi] ? ` fullKeyboard__key-${marks[midi]}` : '')}
           style={{ '--slot': slot } as React.CSSProperties}
           {...handlers(midi)}
         />

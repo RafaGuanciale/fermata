@@ -12,6 +12,7 @@ import { authHeaders, getAccount, logout, readMessage, subscribeAccount, type Ac
 import { setSyncStatus } from './status';
 import {
   SYNC_TABLES,
+  STRING_KEY_TABLES,
   blobPathname,
   byTableOrder,
   fromRemoteData,
@@ -69,7 +70,7 @@ export function installSyncHooks() {
   for (const name of SYNC_TABLES) {
     const t = table(name);
     t.hook('creating', function (_pk, obj, tx) {
-      obj.uid ??= name === 'lessons' ? obj.id : crypto.randomUUID();
+      obj.uid ??= STRING_KEY_TABLES.includes(name) ? obj.id : crypto.randomUUID();
       if (remoteTx.has(tx)) return;
       obj.mt = Date.now();
       enqueue(tx, name, uidOf(name, obj), false);
@@ -98,7 +99,7 @@ async function remoteWrite<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 async function getByUid(name: SyncTable, uid: string): Promise<Row | undefined> {
-  if (name === 'lessons') return table(name).get(uid);
+  if (STRING_KEY_TABLES.includes(name)) return table(name).get(uid);
   return table(name).where('uid').equals(uid).first();
 }
 

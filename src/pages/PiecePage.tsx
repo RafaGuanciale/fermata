@@ -18,7 +18,7 @@ export default function PiecePage() {
   const [confirming, setConfirming] = useState(false);
 
   if (piece === undefined) return null;
-  if (!piece) return <p className="emptyState__body">Essa peça não existe mais. <Link to="/repertorio">Voltar ao repertório</Link></p>;
+  if (!piece) return <p className="emptyState__body">Essa música não existe mais. <Link to="/repertorio">Voltar ao repertório</Link></p>;
 
   const mainCategory = piece.categories.map((c) => categoryBySlug(c)).find(Boolean);
 
@@ -32,7 +32,7 @@ export default function PiecePage() {
       <PhotoCard
         photo={mainCategory?.photo ?? 'repertoireHero'}
         size="hero"
-        eyebrow={[piece.people.join(', '), piece.arrangement].filter(Boolean).join(' · ') || 'Peça'}
+        eyebrow={[piece.people.join(', '), piece.arrangement].filter(Boolean).join(' · ') || 'Música'}
         title={piece.title}
         sizes="100vw"
       >
@@ -50,7 +50,7 @@ export default function PiecePage() {
           {piece.scoreFileId ? (
             <Link className="button button-primary" to={`/peca/${piece.id}/estudar`} state={{ background: location }}>
               <PlayIcon className="button__icon" />
-              Estudar esta peça
+              Tocar esta música
             </Link>
           ) : null}
           <Link className="button button-secondary" to={`/repertorio/peca/${piece.id}/editar`}>
@@ -64,7 +64,7 @@ export default function PiecePage() {
           <h2 className="page__sectionTitle">Em que ponto você está</h2>
           <StatusBadge status={piece.status} />
         </div>
-        <div className="chips" role="group" aria-label="Estado da peça">
+        <div className="chips" role="group" aria-label="Estado da música">
           {STATUS_ORDER.map((s) => (
             <button key={s} type="button" className={'chip chip-large' + (piece.status === s ? ' chip-active' : '')} aria-pressed={piece.status === s} onClick={() => setStatus(piece.id!, s)}>
               {STATUS_LABEL[s]}
@@ -136,7 +136,7 @@ export default function PiecePage() {
         ) : (
           <button className="button button-ghost button-small" type="button" onClick={() => setConfirming(true)}>
             <TrashIcon className="button__icon" />
-            Apagar peça
+            Apagar música
           </button>
         )}
       </div>

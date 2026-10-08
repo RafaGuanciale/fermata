@@ -1,6 +1,6 @@
 // Formato da troca entre aparelho e servidor. Funções puras, testadas em protocol.test.ts.
 
-export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs'] as const;
+export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice'] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 export interface Change {

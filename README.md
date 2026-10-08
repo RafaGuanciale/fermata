@@ -23,11 +23,12 @@ O nome vem do sinal de fermata, que manda sustentar a nota além do tempo. É a 
 - **Metrônomo** no rodapé do teclado e dentro do treino e da partitura: BPM de 30 a 240, botões de ±1 e ±5, bater o tempo, 2, 3, 4 ou 6 tempos com acento no primeiro. Continua tocando quando você troca de página
 - **Login com a conta Permana** e sincronização entre aparelhos: repertório, partituras, progresso no Estudo e histórico dos treinos
 - **Repertório** com categorias em cartões com foto (Filmes e séries, Clássico, Jazz, MPB e brasileira, Pop e rock, Jogos, Infantil) e a área **Músicos**, montada a partir dos compositores e artistas cadastrados
-- Cadastro de peças com estado (quero aprender, aprendendo, aprendi, no repertório), nível, categorias e a **partitura em PDF ou foto**
-- **Estudar as suas peças**: anexe o MusicXML exportado do MuseScore e toque junto com a partitura (OpenSheetMusicDisplay). Modo estudar (o cursor espera cada nota ou acorde), modo no tempo com contagem e resultado por compasso, mão direita, esquerda ou as duas, e repetição de um trecho de compassos
+- Cadastro de músicas com estado (quero aprender, aprendendo, aprendi, no repertório), nível, categorias e a **partitura em PDF ou foto**
+- **Tocar as suas músicas**: anexe o MusicXML exportado do MuseScore e toque com a partitura (OpenSheetMusicDisplay). Dois modos: Estudar (o app espera cada nota ou acorde) e Tocar junto (no tempo, com contagem e resultado por compasso). As notas são pintadas na partitura, o teclado mostra as teclas da vez (direita e esquerda com cores diferentes), cascata opcional, o app pode tocar a outra mão, "Ouvir o trecho", BPM ideal salvo por música e repetição de um trecho de compassos
 - **Leitor de partitura** em tela cheia com zoom, igual no notebook, tablet e celular (PDF.js)
 - **Estudo em seis módulos** (Teclado, Leitura, Ritmo, Acordes, Escalas, Harmonia), com lições marcáveis como aprendidas. Lições prontas: teclas e oitavas, clave de sol, tríades com inversões e escala maior, todas interativas com o piano
-- **Hoje:** treino sugerido, peças que você está aprendendo e evolução (minutos, tempo para achar a nota, acertos de primeira, nota que mais erra)
+- **Hoje:** treino sugerido, músicas que você está aprendendo e evolução (minutos, tempo para achar a nota, acertos de primeira, nota que mais erra)
+- **Progresso:** constância (minutos por semana, dias seguidos, calendário de 16 semanas), evolução (tempo de leitura por semana, melhor andamento limpo por treino e por música), onde você trava (notas que mais erra, treinos parados, trechos difíceis das músicas) e conquistas (fases e marcos). Os minutos vêm do relógio de prática: um minuto conta quando houve alguma nota tocada
 - Tema escuro por padrão, com tema claro
 
 ### Onde ficam os dados e os PDFs
@@ -36,7 +37,7 @@ O app sempre lê e grava no navegador (IndexedDB), então funciona sem internet 
 
 Com login, as mudanças sobem para a nuvem e descem nos outros aparelhos:
 
-- **Dados** (peças, lições, treinos): banco `fermata` no mesmo MongoDB Atlas do Permana, separado dos dados do Permana. Vale a alteração mais recente.
+- **Dados** (músicas, lições, treinos, minutos de prática): banco `fermata` no mesmo MongoDB Atlas do Permana, separado dos dados do Permana. Vale a alteração mais recente.
 - **Partituras**: loja privada do Vercel Blob. O arquivo vai do navegador direto para o Blob, sem passar pela função. Nos outros aparelhos ele só baixa na primeira vez que você abre.
 
 As telas não sabem que a nuvem existe: hooks do Dexie em `src/sync/engine.ts` marcam cada gravação e põem numa fila, que sobe alguns segundos depois, ao voltar para a aba, ao reconectar e a cada 2 minutos.
@@ -65,7 +66,7 @@ O Fermata não tem cadastro próprio nem guarda senha. As funções da Vercel em
 | Fase | O quê |
 | --- | --- |
 | próxima | Fases 2 a 5 do treino, sessão do dia encadeada |
-| depois | Mais lições no Estudo, página de Progresso |
+| depois | Curso completo no Estudo (lições com teoria e prática no teclado, música final por unidade), fases 2 a 5 do treino |
 
 ## Integração com o piano (Web MIDI)
 
@@ -99,7 +100,8 @@ src/
   db/          banco local (Dexie) e métricas de evolução
   sync/        conta Permana, fila de envio e sincronização com a nuvem
   metronome/   metrônomo (Web Audio) e contas de andamento
-  score/       estudar uma peça pelo MusicXML: passos, modo espera, trecho e julgamento no tempo
+  score/       tocar uma música pelo MusicXML: passos, modo espera, trecho e julgamento no tempo
+  progress/    relógio de prática (minutos por dia) e números da página de Progresso
   training/    programa de treino (fases, aquecimento, leitura), julgamento no tempo, escada de BPM e regras de progresso
   repertoire/  categorias, busca, músicos e operações do repertório
   study/       módulos, lições e o conteúdo de cada lição
