@@ -6,6 +6,7 @@ import PianoKeyboard, { type KeyMark } from '../components/PianoKeyboard';
 import Staff, { type NoteState } from '../components/Staff';
 import DrillFeedback from '../components/DrillFeedback';
 import ThemeToggle from '../components/ThemeToggle';
+import { saveRun } from '../training/runs';
 import MetronomeButton from '../components/MetronomeButton';
 import { CloseIcon, ExpandIcon, PlugIcon } from '../components/Icons';
 import { createDrill, drillReducer, isFinished, summarize, type DrillAction, type DrillState } from '../drill/drill';
@@ -152,6 +153,16 @@ export default function PracticeSessionPage({ onClose }: { onClose: () => void }
 
   const summary = summarize(drill);
   const finished = isFinished(drill);
+  const treinoId = params.get('treino');
+  const savedRef = useRef<DrillState | null>(null);
+
+  // Treino do programa (Fase 1): o resultado conta para vencer o treino.
+  useEffect(() => {
+    if (!treinoId || !finished || savedRef.current === drill || !summary.total) return;
+    savedRef.current = drill;
+    const firstTry = summary.firstTry / summary.total;
+    void saveRun({ treinoId, kind: 'locate', accuracy: firstTry, firstTry, avgMs: summary.avgMs ?? undefined, passed: firstTry >= 0.9 && (summary.avgMs ?? Infinity) < 2000 });
+  }, [treinoId, finished, drill, summary]);
 
   return (
     <div className="session">
@@ -214,6 +225,13 @@ export default function PracticeSessionPage({ onClose }: { onClose: () => void }
                 </span>
                 {summary.avgMs !== null && <span className="drillFeedback__detail">{formatSeconds(summary.avgMs)} por nota</span>}
               </div>
+              {treinoId && (
+                <p className="timed__hint">
+                  {summary.firstTry / summary.total >= 0.9 && (summary.avgMs ?? Infinity) < 2000
+                    ? 'Este conta para vencer o treino. Repita em outro dia para fechar.'
+                    : 'Para contar: 90% de primeira e menos de 2 s por nota, em 2 dias diferentes.'}
+                </p>
+              )}
               <div className="session__doneActions">
                 <button className="button button-primary" type="button" onClick={() => startExercise(kind)}>
                   Treinar de novo

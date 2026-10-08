@@ -1,7 +1,7 @@
 // Conversão entre o registro local (Dexie) e o que vai para a nuvem. Funções puras.
 // Ids numéricos são só deste aparelho; entre aparelhos as referências usam `uid`.
 
-export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts'] as const;
+export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs'] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 export interface Change {
@@ -21,6 +21,7 @@ const LOCAL_ONLY: Record<SyncTable, string[]> = {
   lessons: [],
   sessions: ['id'],
   attempts: ['id', 'sessionId'],
+  runs: ['id'],
 };
 
 export interface Refs {

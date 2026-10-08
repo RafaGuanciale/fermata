@@ -19,6 +19,7 @@ O nome vem do sinal de fermata, que manda sustentar a nota além do tempo. É a 
 - **Barra lateral em todas as páginas**: completa no notebook, só ícones no tablet, barra inferior no celular
 - **Teclado fixo embaixo** com as 88 teclas do piano: acende o que você toca (MIDI, clique ou teclado do computador) e reconhece acordes maiores e menores. Dá para recolher
 - **Treino de leitura** num popup com moldura por cima do app: notas soltas de Dó a Sol ou Ode à Alegria, com feedback a cada nota, a pauta se ajustando ao tamanho da tela e opção de teclado inteiro (88 teclas)
+- **Treino com metodologia**: caminho em 5 fases com treinos e prova (Fase 1 pronta), aquecimento diário por nível que sobe quando fica fácil, leitura à primeira vista por nível, treino no tempo com contagem, notas pintadas por precisão (no tempo, fora do tempo, erro), escada de BPM automática e ajuste do atraso do piano
 - **Metrônomo** no rodapé do teclado e dentro do treino e da partitura: BPM de 30 a 240, botões de ±1 e ±5, bater o tempo, 2, 3, 4 ou 6 tempos com acento no primeiro. Continua tocando quando você troca de página
 - **Login com a conta Permana** e sincronização entre aparelhos: repertório, partituras, progresso no Estudo e histórico dos treinos
 - **Repertório** com categorias em cartões com foto (Filmes e séries, Clássico, Jazz, MPB e brasileira, Pop e rock, Jogos, Infantil) e a área **Músicos**, montada a partir dos compositores e artistas cadastrados
@@ -62,8 +63,8 @@ O Fermata não tem cadastro próprio nem guarda senha. As funções da Vercel em
 
 | Fase | O quê |
 | --- | --- |
-| próxima | Metodologia de treino: fases com prova, aquecimento por nível, escada de BPM com o metrônomo |
-| depois | Clave de fá, mais lições, página de Progresso |
+| próxima | Tocar e estudar as suas peças (MusicXML exportado do MuseScore), fases 2 a 5 do treino |
+| depois | Mais lições no Estudo, página de Progresso |
 
 ## Integração com o piano (Web MIDI)
 
@@ -97,6 +98,7 @@ src/
   db/          banco local (Dexie) e métricas de evolução
   sync/        conta Permana, fila de envio e sincronização com a nuvem
   metronome/   metrônomo (Web Audio) e contas de andamento
+  training/    programa de treino (fases, aquecimento, leitura), julgamento no tempo, escada de BPM e regras de progresso
   repertoire/  categorias, busca, músicos e operações do repertório
   study/       módulos, lições e o conteúdo de cada lição
   media/       fotos das categorias e módulos

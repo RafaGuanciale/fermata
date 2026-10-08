@@ -79,6 +79,30 @@ export interface LessonProgress extends Synced {
   updatedAt: number;
 }
 
+/** Resultado de um treino do programa (fases, aquecimento, leitura, prova) ou mudança de nível. */
+export interface TrainingRun extends Synced {
+  id?: number;
+  /** id do treino ("f1-escada-md"), "aquecimento", "leitura" ou "prova-1" */
+  treinoId: string;
+  kind: 'timed' | 'locate' | 'names' | 'warmup' | 'reading' | 'exam' | 'level';
+  at: number;
+  /** Dia local "2026-10-08": as regras contam dias diferentes. */
+  day: string;
+  bpm?: number;
+  /** 0 a 1 */
+  accuracy?: number;
+  clean?: boolean;
+  reps?: number;
+  cleanReps?: number;
+  /** Passadas limpas seguidas no tempo-alvo */
+  atTarget?: number;
+  firstTry?: number;
+  avgMs?: number;
+  passed?: boolean;
+  /** Mudança de nível (kind 'level') ou nível em que foi feito */
+  level?: number;
+}
+
 /** Fila do que mudou neste aparelho e ainda não subiu. */
 export interface OutboxEntry {
   /** `${table}:${uid}` */
@@ -92,6 +116,7 @@ export interface OutboxEntry {
 
 class FermataDB extends Dexie {
   outbox!: Table<OutboxEntry, string>;
+  runs!: Table<TrainingRun, number>;
   sessions!: Table<Session, number>;
   attempts!: Table<Attempt, number>;
   pieces!: Table<Piece, number>;
@@ -130,6 +155,9 @@ class FermataDB extends Dexie {
           r.mt ??= r.updatedAt;
         });
       });
+    this.version(4).stores({
+      runs: '++id, treinoId, day, at, &uid',
+    });
   }
 }
 

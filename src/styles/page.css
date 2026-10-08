@@ -43,7 +43,8 @@ button,
 .photoCard,
 .pieceList__item,
 .musician,
-.lessonList__item {
+.lessonList__item,
+.path__treino {
   transition-property: background-color, border-color, color, box-shadow, transform, opacity, filter;
   transition-duration: var(--dur-hover);
   transition-timing-function: var(--ease-out);

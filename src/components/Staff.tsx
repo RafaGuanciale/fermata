@@ -1,10 +1,11 @@
-import { ledgerSteps, noteInfo, trebleStep, type Midi } from '../music/notes';
+import { ledgerSteps, noteInfo, staffStep, type Clef, type Midi } from '../music/notes';
 import { END_PAD, FIRST_X, GAP, staffLayout, windowStart } from './staffLayout';
 
-export type NoteState = 'hit' | 'miss' | 'current' | 'upcoming' | 'plain';
+export type NoteState = 'hit' | 'late' | 'miss' | 'current' | 'upcoming' | 'plain';
 
 interface StaffProps {
-  notes: Midi[];
+  /** null = pausa */
+  notes: (Midi | null)[];
   states: NoteState[];
   /** Nota ativa: a janela visível acompanha ela. */
   current: number;
@@ -14,6 +15,11 @@ interface StaffProps {
   /** Largura disponível em px. A pauta escolhe quantas notas cabem e escala no celular. */
   width: number;
   label: string;
+  clef?: Clef;
+  /** Duração de cada nota em tempos (semínima = 1). Sem isso, tudo é semínima. */
+  durations?: number[];
+  /** Com `durations`, desenha barra de compasso a cada N tempos. */
+  beatsPerBar?: number;
 }
 
 // Medidas em "staff-space" (S): distância entre duas linhas da pauta. Tamanho natural: S = 20px.
@@ -27,7 +33,7 @@ const HEIGHT = BOTTOM + 3 * S + 10;
 
 const y = (step: number) => BOTTOM - (step * S) / 2;
 
-export default function Staff({ notes, states, current, showNames, barEvery, width, label }: StaffProps) {
+export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar }: StaffProps) {
   if (width <= 0) return <div className="staff" style={{ height: HEIGHT * 0.62 }} />;
   const { scale, visible } = staffLayout(width, notes.length);
   const start = windowStart(current, visible, notes.length);
@@ -39,7 +45,13 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
   const nameY = BOTTOM + 2.6 * S;
 
   const bars: number[] = [];
-  if (barEvery) slice.forEach((_, i) => { if (i > 0 && (start + i) % barEvery === 0) bars.push(xOf(i) - GAP / 2); });
+  if (durations && beatsPerBar) {
+    let acc = durations.slice(0, start).reduce((a, b) => a + b, 0);
+    slice.forEach((_, i) => {
+      if (i > 0 && acc > 0 && Math.abs(acc % beatsPerBar) < 1e-6) bars.push(xOf(i) - GAP / 2);
+      acc += durations[start + i] ?? 1;
+    });
+  } else if (barEvery) slice.forEach((_, i) => { if (i > 0 && (start + i) % barEvery === 0) bars.push(xOf(i) - GAP / 2); });
 
   return (
     <div className="staff">
@@ -58,35 +70,63 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
         {bars.map((x) => (
           <line key={x} className="staff__line" x1={x} x2={x} y1={TOP} y2={BOTTOM} />
         ))}
-        <text className="staff__clef" x={6} y={BOTTOM + 0.95 * S} fontSize={6.4 * S} aria-hidden>
-          𝄞
-        </text>
+        {clef === 'bass' ? (
+          <text className="staff__clef" x={10} y={TOP + 2.95 * S} fontSize={4 * S} aria-hidden>
+            𝄢
+          </text>
+        ) : (
+          <text className="staff__clef" x={6} y={BOTTOM + 0.95 * S} fontSize={6.4 * S} aria-hidden>
+            𝄞
+          </text>
+        )}
 
         {slice.map((midi, i) => {
-          const step = trebleStep(midi);
           const x = xOf(i);
-          const cy = y(step);
           const state = sliceStates[i];
-          const stemUp = step < 4;
           const mod = state === 'current' || state === 'plain' ? '' : `-${state}`;
+          const beats = durations?.[start + i] ?? 1;
+          if (midi === null) {
+            return (
+              <g key={start + i}>
+                {state === 'current' && <circle className="staff__halo" cx={x} cy={TOP + 2 * S} r={25} />}
+                <text className={`staff__rest${mod ? ` staff__rest${mod}` : ''}`} x={x} y={TOP + 2.9 * S} fontSize={3.4 * S} aria-hidden>
+                  {beats >= 4 ? '𝄻' : beats >= 2 ? '𝄼' : beats >= 1 ? '𝄽' : '𝄾'}
+                </text>
+              </g>
+            );
+          }
+          const step = staffStep(midi, clef);
+          const cy = y(step);
+          const stemUp = step < 4;
           const name = noteInfo(midi).name;
-          const mark = state === 'hit' ? ' ✓' : state === 'miss' ? ' ✕' : '';
+          const mark = state === 'hit' ? ' ✓' : state === 'miss' ? ' ✕' : state === 'late' ? ' ~' : '';
           const stemX = stemUp ? x + HEAD_RX - 1.5 : x - HEAD_RX + 1.5;
+          const stemEnd = stemUp ? cy - STEM : cy + STEM;
+          const hollow = beats >= 2;
+          const dotted = beats === 3 || beats === 1.5;
+          const eighth = beats === 0.5;
           return (
             <g key={start + i}>
               {ledgerSteps(step).map((ls) => (
                 <line key={ls} className="staff__ledger" x1={x - 22} x2={x + 22} y1={y(ls)} y2={y(ls)} />
               ))}
               {state === 'current' && <circle className="staff__halo" cx={x} cy={cy} r={25} />}
-              <line className={`staff__stem${mod ? ` staff__stem${mod}` : ''}`} x1={stemX} x2={stemX} y1={cy} y2={stemUp ? cy - STEM : cy + STEM} />
+              {beats < 4 && <line className={`staff__stem${mod ? ` staff__stem${mod}` : ''}`} x1={stemX} x2={stemX} y1={cy} y2={stemEnd} />}
+              {eighth && (
+                <path
+                  className={`staff__flag${mod ? ` staff__stem${mod}` : ''}`}
+                  d={stemUp ? `M${stemX} ${stemEnd} c 4 10, 18 14, 12 32` : `M${stemX} ${stemEnd} c 4 -10, 18 -14, 12 -32`}
+                />
+              )}
               <ellipse
-                className={`staff__head${mod ? ` staff__head${mod}` : ''}`}
+                className={`staff__head${mod ? ` staff__head${mod}` : ''}${hollow ? ' staff__head-hollow' : ''}`}
                 cx={x}
                 cy={cy}
                 rx={HEAD_RX}
                 ry={HEAD_RY}
                 transform={`rotate(-20 ${x} ${cy})`}
               />
+              {dotted && <circle className={`staff__dot${mod ? ` staff__head${mod}` : ''}`} cx={x + HEAD_RX + 8} cy={step % 2 === 0 ? cy - S / 2 : cy} r={3.2} />}
               {(showNames || mark) && (
                 <text className={'staff__name' + (state === 'current' ? ' staff__name-current' : '')} x={x} y={nameY}>
                   {showNames ? name + mark : mark.trim()}

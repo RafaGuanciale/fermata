@@ -76,3 +76,52 @@
   fill: var(--text);
   font-weight: 600;
 }
+
+/* Duração das notas e pausas */
+.staff__head-hollow {
+  fill: transparent;
+  stroke: var(--text);
+  stroke-width: 2.4;
+}
+
+.staff__head-hollow.staff__head-hit {
+  stroke: var(--hit);
+}
+
+.staff__head-hollow.staff__head-miss {
+  stroke: var(--miss);
+}
+
+.staff__head-hollow.staff__head-late {
+  stroke: var(--color-khaki);
+}
+
+.staff__flag {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.staff__dot {
+  fill: var(--text);
+}
+
+.staff__rest {
+  fill: var(--text);
+  font-family: var(--font-music);
+  text-anchor: middle;
+}
+
+.staff__rest-upcoming {
+  opacity: 0.5;
+}
+
+/* Fora do tempo: tocou a nota certa, mas adiantado ou atrasado */
+.staff__head-late {
+  fill: var(--color-khaki);
+}
+
+.staff__stem-late {
+  stroke: var(--color-khaki);
+}

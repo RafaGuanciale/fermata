@@ -8,6 +8,8 @@ import PhotoCard from '../components/PhotoCard';
 import PieceList from '../components/PieceList';
 import StatTile from '../components/StatTile';
 import { PlayIcon } from '../components/Icons';
+import { useRuns } from '../training/runs';
+import { currentPhase, currentWarmupLevel, nextTreino } from '../training/progress';
 
 export default function TodayPage() {
   const location = useLocation();
@@ -22,6 +24,21 @@ export default function TodayPage() {
     return { sessions, attempts, learning };
   }, []);
 
+  const runs = useRuns();
+  const plan = runs
+    ? (() => {
+        const cur = currentPhase(runs);
+        const next = nextTreino(cur);
+        return {
+          phase: cur.phase.n,
+          warmLevel: currentWarmupLevel(runs).n,
+          title: next?.title ?? (cur.examUnlocked ? `Prova da fase ${cur.phase.n}` : cur.phase.title),
+          how: next ? next.how.charAt(0).toLowerCase() + next.how.slice(1) : 'a prova da fase, sem ajudas.',
+          treinoId: next?.id ?? null,
+        };
+      })()
+    : null;
+
   return (
     <>
       <header className="page__header">
@@ -29,16 +46,22 @@ export default function TodayPage() {
         <h1 className="page__title">Seu estudo de hoje</h1>
       </header>
 
-      <PhotoCard photo="todayHero" size="hero" eyebrow="Treino sugerido · cerca de 3 min" title="Leitura de Dó a Sol na clave de sol" sizes="100vw">
-        <span className="photoCard__body">As cinco notas da posição de Dó, as mesmas da Ode à Alegria. O foco é achar a tecla certa.</span>
+      <PhotoCard photo="todayHero" size="hero" eyebrow={plan ? `Treino de hoje · fase ${plan.phase} · cerca de 15 min` : 'Treino de hoje'} title={plan?.title ?? 'Seu treino'} sizes="100vw">
+        <span className="photoCard__body">{plan ? `Aquecimento no nível ${plan.warmLevel}, depois: ${plan.how}` : 'Aquecimento, o próximo treino da fase e um trecho de leitura.'}</span>
         <span className="photoCard__actions">
-          <Link className="button button-primary" to="/treino/sessao?modo=notas" state={{ background: location }}>
+          <Link className="button button-primary" to="/treino/aquecimento" state={{ background: location }}>
             <PlayIcon className="button__icon" />
-            Começar treino
+            Aquecer
           </Link>
-          <Link className="button button-secondary" to="/treino/sessao?modo=musica" state={{ background: location }}>
-            Tocar Ode à Alegria
-          </Link>
+          {plan?.treinoId ? (
+            <Link className="button button-secondary" to={`/treino/t/${plan.treinoId}`} state={{ background: location }}>
+              Ir para o treino
+            </Link>
+          ) : (
+            <Link className="button button-secondary" to="/treino">
+              Ver o caminho
+            </Link>
+          )}
         </span>
       </PhotoCard>
 

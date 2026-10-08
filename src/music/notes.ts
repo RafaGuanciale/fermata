@@ -62,6 +62,21 @@ export function trebleStep(midi: Midi): number {
   return (n.octave - 4) * 7 + n.letter - 2;
 }
 
+/**
+ * Posição na pauta em clave de fá. 0 = linha inferior (Sol2), 8 = linha superior (Lá3).
+ * Dó3 fica no segundo espaço (3); Dó4 na linha suplementar acima (10).
+ */
+export function bassStep(midi: Midi): number {
+  const n = noteInfo(midi);
+  return (n.octave - 2) * 7 + n.letter - 4;
+}
+
+export type Clef = 'treble' | 'bass';
+
+export function staffStep(midi: Midi, clef: Clef): number {
+  return clef === 'bass' ? bassStep(midi) : trebleStep(midi);
+}
+
 /** Linhas suplementares necessárias para uma nota (passos pares fora da pauta). */
 export function ledgerSteps(step: number): number[] {
   const out: number[] = [];

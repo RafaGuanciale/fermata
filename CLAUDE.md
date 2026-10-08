@@ -8,6 +8,7 @@ App web pessoal de estudo de piano do Rafael. Marca endossada: "Fermata, um proj
 - Backend: funções da Vercel em `api/` (TypeScript, imports relativos com `.js`, arquivos em `api/_lib` não viram rota). Login repassado ao Permana; dados no banco `fermata` do Atlas; partituras no Vercel Blob privado.
 - Sincronização: `src/sync/engine.ts` instala hooks no Dexie (preenchem `uid` e `mt` e põem na fila `outbox`). Tabela nova que precise sincronizar entra em `SYNC_TABLES` (cliente e `api/_lib/protocol.ts`) e no mapa de campos locais de `src/sync/serialize.ts`.
 - Metrônomo: um só, no `MetronomeProvider`; use `useMetronome()` para ler BPM e tempo atual.
+- Treino: `src/training/program.ts` é o programa (dados), `timing.ts` julga passadas e faz a escada de BPM, `progress.ts` decide status e níveis a partir da tabela `runs`. Tudo puro e testado. A metodologia aprovada está no doc "Fermata — Metodologia de treino".
 - CSS: um arquivo por bloco em `src/styles/`, todos importados em `src/index.css`. Nunca importar CSS dentro de componente.
 - BEM: `bloco__elemento`, modificador com um hífen (`button-primary`, `sideNav__link-active`).
 - Cores: só as seis bases em `tokens.css` (`--color-champagne`, `--color-khaki`, `--color-off-white`, `--color-petrol`, `--color-ebony`, `--color-blush`). Todo o resto é token derivado com `color-mix()`. Nunca hex solto em componente.
