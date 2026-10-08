@@ -1,6 +1,8 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import Logo from '../brand/Logo';
 import { ProgressIcon, PracticeIcon, RepertoireIcon, StudyIcon, TodayIcon } from './Icons';
 import ThemeToggle from './ThemeToggle';
+import KeyboardDock from './KeyboardDock';
 
 const LINKS = [
   { to: '/', label: 'Hoje', Icon: TodayIcon, end: true },
@@ -10,12 +12,17 @@ const LINKS = [
   { to: '/progresso', label: 'Progresso', Icon: ProgressIcon, end: false },
 ];
 
+/**
+ * Notebook: barra lateral completa. Tablet: barra de ícones. Celular: barra inferior.
+ * O teclado fixo fica sempre embaixo do conteúdo.
+ */
 export default function AppLayout() {
   return (
     <div className="page">
       <nav className="sideNav" aria-label="Principal">
-        <NavLink to="/" className="sideNav__brand">
-          <span className="sideNav__wordmark">FERMATA</span>
+        <NavLink to="/" className="sideNav__brand" aria-label="Fermata, início">
+          <span className="sideNav__logoFull"><Logo /></span>
+          <span className="sideNav__logoMark"><Logo compact /></span>
           <span className="sideNav__endorse">um projeto Permana</span>
         </NavLink>
         <ul className="sideNav__list">
@@ -27,21 +34,23 @@ export default function AppLayout() {
                 className={({ isActive }) => 'sideNav__link' + (isActive ? ' sideNav__link-active' : '')}
               >
                 <Icon className="sideNav__icon" />
-                {label}
+                <span className="sideNav__label">{label}</span>
               </NavLink>
             </li>
           ))}
         </ul>
         <div className="sideNav__foot">
           <ThemeToggle />
-          <span>Fermata · um projeto Permana</span>
         </div>
       </nav>
-      <main className="page__main">
-        <div className="page__inner">
-          <Outlet />
-        </div>
-      </main>
+      <div className="page__column">
+        <main className="page__main">
+          <div className="page__inner">
+            <Outlet />
+          </div>
+        </main>
+        <KeyboardDock />
+      </div>
     </div>
   );
 }

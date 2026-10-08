@@ -1,0 +1,162 @@
+/* Cartão com foto e título, no espírito das categorias do Permana */
+
+.photoCard {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, var(--color-petrol), var(--color-ebony));
+  color: var(--color-champagne);
+  text-decoration: none;
+  text-align: left;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.photoCard-tall {
+  aspect-ratio: 3 / 4;
+}
+
+.photoCard-wide {
+  aspect-ratio: 16 / 10;
+}
+
+.photoCard-hero {
+  min-height: 320px;
+}
+
+div.photoCard {
+  cursor: default;
+}
+
+.photoCard__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.photoCard:hover .photoCard__img,
+.photoCard:focus-visible .photoCard__img {
+  transform: scale(1.05);
+}
+
+/* Escurece a parte de baixo para o título ler bem sobre qualquer foto */
+.photoCard__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(17, 18, 22, 0.05) 30%, rgba(17, 18, 22, 0.55) 62%, rgba(17, 18, 22, 0.88) 100%);
+}
+
+.photoCard__badge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-champagne) 92%, transparent);
+  color: var(--color-ebony);
+  font: 500 11px/16px var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.photoCard__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-petrol);
+}
+
+.photoCard__text {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-4) var(--space-4) var(--space-4);
+}
+
+.photoCard__eyebrow {
+  font: 500 10px/14px var(--font-body);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-champagne) 85%, transparent);
+}
+
+.photoCard__title {
+  font: 500 clamp(20px, 2.2vw, 26px) / 1.15 var(--font-display);
+  text-wrap: balance;
+}
+
+.photoCard-hero .photoCard__text {
+  padding: var(--space-8);
+  gap: var(--space-3);
+  max-width: 640px;
+}
+
+.photoCard-hero .photoCard__title {
+  font-size: clamp(28px, 3.6vw, 40px);
+}
+
+.photoCard__body {
+  font: 400 14px/21px var(--font-body);
+  color: color-mix(in srgb, var(--color-champagne) 88%, transparent);
+  max-width: 52ch;
+}
+
+.photoCard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* Os botões sobre foto usam as cores fixas da marca, nos dois temas */
+.photoCard .button-primary {
+  background: var(--color-champagne);
+  color: var(--color-ebony);
+}
+
+.photoCard .button-secondary {
+  color: var(--color-champagne);
+  border-color: color-mix(in srgb, var(--color-champagne) 60%, transparent);
+}
+
+.photoCard .button-secondary:hover {
+  background: rgba(241, 224, 197, 0.12);
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 719px) {
+  .photoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .photoCard__text {
+    padding: var(--space-3);
+  }
+
+  .photoCard-hero {
+    min-height: 380px;
+  }
+
+  .photoCard-hero .photoCard__text {
+    padding: var(--space-6) var(--space-4);
+  }
+}

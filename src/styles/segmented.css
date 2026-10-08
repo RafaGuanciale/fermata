@@ -63,3 +63,9 @@
 .pill__dot-on {
   background: var(--hit);
 }
+
+.pill-icon {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}

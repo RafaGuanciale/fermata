@@ -10,9 +10,12 @@ interface PianoKeyboardProps {
   /** Teclas destacadas: acesas (petróleo) ou erro (blush). */
   marks?: Partial<Record<Midi, KeyMark>>;
   showNames?: boolean;
+  /** Texto sobre teclas específicas (grau do acorde, número da escala). Tem prioridade sobre o nome. */
+  labels?: Partial<Record<Midi, string>>;
   /** Mostra a tecla do computador correspondente (A, S, D…). */
   showComputerKeys?: boolean;
   onPress?: (midi: Midi) => void;
+  onRelease?: (midi: Midi) => void;
   size?: 'regular' | 'small';
   label: string;
 }
@@ -26,8 +29,10 @@ export default function PianoKeyboard({
   high,
   marks = {},
   showNames = false,
+  labels = {},
   showComputerKeys = false,
   onPress,
+  onRelease,
   size = 'regular',
   label,
 }: PianoKeyboardProps) {
@@ -48,6 +53,28 @@ export default function PianoKeyboard({
 
   const Tag = interactive ? 'button' : 'span';
 
+  // Aperta no toque/clique e solta ao levantar, para o teclado se comportar como um piano.
+  const keyProps = (m: Midi, label: string) =>
+    interactive
+      ? {
+          type: 'button' as const,
+          'aria-label': label,
+          onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+            e.currentTarget.releasePointerCapture?.(e.pointerId);
+            onPress?.(m);
+          },
+          onPointerUp: () => onRelease?.(m),
+          onPointerLeave: (e: React.PointerEvent<HTMLElement>) => { if (e.buttons) onRelease?.(m); },
+          onKeyDown: (e: React.KeyboardEvent) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            e.stopPropagation();
+            onPress?.(m);
+            window.setTimeout(() => onRelease?.(m), 180);
+          },
+        }
+      : {};
+
   return (
     <div
       className={
@@ -62,10 +89,10 @@ export default function PianoKeyboard({
           <Tag
             key={m}
             className={markClass('pianoKeyboard__white', m)}
-            {...(interactive ? { type: 'button' as const, onClick: () => onPress?.(m), 'aria-label': `${n.name} ${n.sci}` } : {})}
+            {...keyProps(m, `${n.name} ${n.sci}`)}
           >
             <span style={{ display: 'grid', justifyItems: 'center' }}>
-              {showNames ? n.name : ''}
+              {labels[m] ?? (showNames ? n.name : '')}
               {showComputerKeys && KEY_FOR_NOTE[m] ? <span className="pianoKeyboard__hint">{KEY_FOR_NOTE[m]}</span> : null}
             </span>
           </Tag>
@@ -78,9 +105,9 @@ export default function PianoKeyboard({
             key={midi}
             className={markClass('pianoKeyboard__black', midi)}
             style={{ '--slot': slot } as React.CSSProperties}
-            {...(interactive ? { type: 'button' as const, onClick: () => onPress?.(midi), 'aria-label': `${n.name} ${n.sci}` } : {})}
+            {...keyProps(midi, `${n.name} ${n.sci}`)}
           >
-            {showComputerKeys && KEY_FOR_NOTE[midi] ? <span className="pianoKeyboard__hint">{KEY_FOR_NOTE[midi]}</span> : null}
+            {labels[midi] ?? (showComputerKeys && KEY_FOR_NOTE[midi] ? <span className="pianoKeyboard__hint">{KEY_FOR_NOTE[midi]}</span> : null)}
           </Tag>
         );
       })}

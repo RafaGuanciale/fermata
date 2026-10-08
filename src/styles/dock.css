@@ -1,0 +1,182 @@
+/* Teclado fixo na parte de baixo das páginas */
+
+.dock {
+  position: sticky;
+  bottom: var(--bottom-nav-h, 0px);
+  z-index: 15;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.dock__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 0 clamp(var(--space-3), 3vw, var(--space-8));
+}
+
+.dock__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font: 600 12px/1 var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.dock__toggle:hover {
+  background: var(--surface-sunk);
+}
+
+.dock__chevron {
+  width: 16px;
+  height: 16px;
+  transition: transform 160ms;
+}
+
+.dock__chevron-open {
+  transform: rotate(180deg);
+}
+
+.dock__now {
+  flex: 1;
+  min-width: 0;
+  font: 500 13px/18px var(--font-body);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dock__now strong {
+  font: 500 16px/18px var(--font-display);
+  color: var(--hit);
+}
+
+.dock__hint {
+  color: var(--text-muted);
+}
+
+.dock__midi {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font: 500 12px/1 var(--font-body);
+  cursor: pointer;
+  max-width: 220px;
+}
+
+.dock__midiLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dock__plug {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.dock__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hit);
+  flex: none;
+}
+
+.dock__keys {
+  overflow-x: auto;
+  padding: 0 clamp(var(--space-3), 3vw, var(--space-8)) var(--space-3);
+  scrollbar-width: thin;
+}
+
+@media (max-width: 719px) {
+  .dock__hint {
+    display: none;
+  }
+
+  .dock__midi {
+    max-width: 150px;
+  }
+}
+
+/* Teclado de largura total (88 teclas no dock, ou um trecho em outras telas) */
+.fullKeyboard {
+  --white-w: calc(100% / var(--whites));
+  position: relative;
+  display: flex;
+  min-width: calc(var(--whites) * 18px);
+  height: 96px;
+  padding: 4px 0 0;
+  border-radius: var(--radius-s);
+  background: var(--key-body);
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.fullKeyboard__white {
+  position: relative;
+  flex: 1 1 0;
+  margin: 0 0.5px;
+  border-radius: 0 0 3px 3px;
+  background: var(--key-white);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 60ms;
+}
+
+.fullKeyboard__black {
+  position: absolute;
+  top: 4px;
+  left: calc(var(--slot) * var(--white-w) - var(--white-w) * 0.31);
+  width: calc(var(--white-w) * 0.62);
+  height: 60%;
+  border-radius: 0 0 3px 3px;
+  background: var(--key-black);
+  box-shadow: 0 0 0 1px var(--key-body);
+  z-index: 1;
+  cursor: pointer;
+  transition: background-color 60ms;
+}
+
+.fullKeyboard__white-on,
+.fullKeyboard__black-on {
+  background: var(--key-lit);
+}
+
+.fullKeyboard__label {
+  font: 600 9px/1 var(--font-body);
+  color: color-mix(in srgb, var(--color-ebony) 55%, transparent);
+  margin-bottom: 4px;
+  pointer-events: none;
+}
+
+.fullKeyboard__white-on .fullKeyboard__label {
+  color: var(--on-key-lit);
+}
+
+@media (max-width: 719px) {
+  .fullKeyboard-dock {
+    height: 80px;
+    min-width: calc(var(--whites) * 22px);
+  }
+}

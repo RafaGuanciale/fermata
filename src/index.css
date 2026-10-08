@@ -4,12 +4,18 @@
 
 /* Componentes */
 @import url("./styles/sideNav.css");
+@import url("./styles/dock.css");
 @import url("./styles/button.css");
 @import url("./styles/segmented.css");
+@import url("./styles/components.css");
+@import url("./styles/photoCard.css");
 @import url("./styles/staff.css");
 @import url("./styles/pianoKeyboard.css");
 
 /* Páginas */
 @import url("./styles/today.css");
-@import url("./styles/drill.css");
+@import url("./styles/session.css");
+@import url("./styles/repertoire.css");
+@import url("./styles/study.css");
+@import url("./styles/viewer.css");
 @import url("./styles/upcoming.css");

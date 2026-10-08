@@ -1,52 +1,11 @@
-.today__hero {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-8);
-  padding: var(--space-8);
-  border-radius: var(--radius-l);
-  background: var(--surface-raised);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-raised);
-}
-
-.today__heroText {
-  flex: 1 1 360px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.today__heroTitle {
-  font: 500 30px/36px var(--font-display);
-  text-wrap: balance;
-}
-
-.today__heroBody {
-  color: var(--text-muted);
-  max-width: 52ch;
-}
-
-.today__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-2);
-}
-
 .today__stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--space-4);
 }
 
-.today__empty {
-  padding: var(--space-6);
-  border-radius: var(--radius-m);
-  border: 1px dashed var(--line-strong);
-  color: var(--text-muted);
+.today__weak {
+  color: var(--text);
 }
 
 /* Cartão de métrica */

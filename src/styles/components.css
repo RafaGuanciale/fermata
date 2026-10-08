@@ -1,0 +1,198 @@
+/* Peças pequenas reaproveitadas: chips, tags, estados, campo de busca, estado vazio. */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text);
+  font: 500 13px/1 var(--font-body);
+  cursor: pointer;
+  transition: background-color 120ms, color 120ms, border-color 120ms;
+}
+
+span.chip {
+  cursor: default;
+}
+
+.chip:hover {
+  background: var(--surface-sunk);
+}
+
+.chip-active,
+.chip-active:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.chip-large {
+  min-height: 44px;
+  padding: 0 var(--space-6);
+  font-size: 14px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  color: var(--text);
+  font: 500 12px/18px var(--font-body);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.tag-link:hover {
+  background: var(--line);
+}
+
+/* Estado de aprendizado: o glifo enche conforme avança */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font: 600 11px/14px var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex: none;
+}
+
+.statusBadge__glyph {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  flex: none;
+}
+
+.statusBadge-wish {
+  color: var(--text-muted);
+  border-color: var(--line-strong);
+}
+
+.statusBadge-learning {
+  color: var(--text);
+  background: var(--neutral-soft);
+}
+
+.statusBadge-learning .statusBadge__glyph {
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+
+.statusBadge-learned {
+  color: var(--hit);
+  background: var(--hit-soft);
+}
+
+.statusBadge-learned .statusBadge__glyph {
+  background: currentColor;
+}
+
+.statusBadge-repertoire {
+  color: var(--on-primary);
+  background: var(--primary);
+}
+
+.statusBadge-repertoire .statusBadge__glyph {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  font: 14px/10px var(--font-music);
+}
+
+/* Campo de busca */
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  border: 1px solid var(--line-strong);
+  color: var(--text-muted);
+}
+
+.field:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.field__icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: 400 16px/1 var(--font-body);
+  outline: none;
+}
+
+.field input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Estado vazio */
+.emptyState {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  border-radius: var(--radius-l);
+  border: 1px dashed var(--line-strong);
+}
+
+.emptyState__title {
+  font: 500 22px/28px var(--font-display);
+}
+
+.emptyState__body {
+  color: var(--text-muted);
+  max-width: 60ch;
+}
+
+/* Barra de progresso */
+.progressTrack {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  overflow: hidden;
+}
+
+.progressTrack__fill {
+  height: 100%;
+  background: var(--key-lit);
+  transition: width 300ms;
+}
+
+.button-danger {
+  background: var(--miss);
+  color: var(--color-ebony);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

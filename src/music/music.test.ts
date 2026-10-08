@@ -109,3 +109,21 @@ describe('stats', () => {
     expect(weakestNote(attempts, 1)).toEqual({ midi: 65, missRate: 0.5 });
   });
 });
+
+import { staffLayout, windowStart } from '../components/staffLayout';
+
+describe('janela da pauta', () => {
+  it('mostra tudo no notebook e menos notas, em escala, no celular', () => {
+    expect(staffLayout(1100, 15)).toEqual({ scale: 1, visible: 15 });
+    const phone = staffLayout(340, 15);
+    expect(phone.scale).toBeCloseTo(0.62);
+    expect(phone.visible).toBeGreaterThanOrEqual(5);
+    expect(phone.visible).toBeLessThan(15);
+  });
+
+  it('acompanha a nota ativa sem passar do fim', () => {
+    expect(windowStart(0, 6, 15)).toBe(0);
+    expect(windowStart(5, 6, 15)).toBe(4);
+    expect(windowStart(14, 6, 15)).toBe(9);
+  });
+});

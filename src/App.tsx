@@ -1,66 +1,68 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeProvider';
+import { NoteInputProvider } from './input/NoteInputProvider';
 import AppLayout from './components/AppLayout';
 import TodayPage from './pages/TodayPage';
-import PracticePage from './pages/PracticePage';
+import PracticeHubPage from './pages/PracticeHubPage';
+import PracticeSessionPage from './pages/PracticeSessionPage';
+import RepertoirePage from './pages/RepertoirePage';
+import CategoryPage from './pages/CategoryPage';
+import MusiciansPage from './pages/MusiciansPage';
+import PieceFormPage from './pages/PieceFormPage';
+import PiecePage from './pages/PiecePage';
+import StudyPage from './pages/StudyPage';
+import ModulePage from './pages/ModulePage';
+import LessonPage from './pages/LessonPage';
 import UpcomingPage from './pages/UpcomingPage';
+
+// O leitor de PDF é pesado: só carrega quando você abre uma partitura.
+const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
 
 export default function App() {
   return (
     <ThemeProvider>
-      <Routes>
-        {/* O treino ocupa a tela toda, sem a barra lateral. */}
-        <Route path="/treino" element={<PracticePage />} />
-        <Route element={<AppLayout />}>
-          <Route index element={<TodayPage />} />
+      <NoteInputProvider>
+        <Routes>
+          {/* Modo imersivo: tela cheia, sem barra lateral */}
+          <Route path="/treino/sessao" element={<PracticeSessionPage />} />
           <Route
-            path="/repertorio"
+            path="/partitura/:id"
             element={
-              <UpcomingPage
-                eyebrow="O que você aprendeu e quer aprender"
-                title="Repertório"
-                phase="Fase 4"
-                items={[
-                  'Cadastrar peças com o PDF da partitura',
-                  'Filtros em botões que abrem painéis: tema, gênero, músicos, nível e estado',
-                  'Estado de cada peça: quero aprender, aprendendo, aprendi, no repertório',
-                ]}
-              />
+              <Suspense fallback={<div className="viewer" />}>
+                <SheetViewerPage />
+              </Suspense>
             }
           />
-          <Route
-            path="/estudo"
-            element={
-              <UpcomingPage
-                eyebrow="Teoria para consultar"
-                title="Estudo"
-                phase="Fase 5"
-                items={[
-                  'Acordes desenhados no teclado, em qualquer tom e inversão',
-                  'Escalas, intervalos e campo harmônico',
-                  'Trilhas com o que você já aprendeu',
-                ]}
-              />
-            }
-          />
-          <Route
-            path="/progresso"
-            element={
-              <UpcomingPage
-                eyebrow="Sua evolução"
-                title="Progresso"
-                phase="Fase 5"
-                items={[
-                  'Histórico de sessões de treino',
-                  'Tempo para achar cada nota ao longo das semanas',
-                  'As notas que você mais erra',
-                ]}
-              />
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
+
+          {/* Páginas com a barra lateral e o teclado fixo */}
+          <Route element={<AppLayout />}>
+            <Route index element={<TodayPage />} />
+            <Route path="/treino" element={<PracticeHubPage />} />
+            <Route path="/repertorio" element={<RepertoirePage />} />
+            <Route path="/repertorio/nova" element={<PieceFormPage />} />
+            <Route path="/repertorio/categoria/:slug" element={<CategoryPage />} />
+            <Route path="/repertorio/musicos" element={<MusiciansPage />} />
+            <Route path="/repertorio/peca/:id" element={<PiecePage />} />
+            <Route path="/repertorio/peca/:id/editar" element={<PieceFormPage />} />
+            <Route path="/estudo" element={<StudyPage />} />
+            <Route path="/estudo/:moduleId" element={<ModulePage />} />
+            <Route path="/estudo/:moduleId/:lessonId" element={<LessonPage />} />
+            <Route
+              path="/progresso"
+              element={
+                <UpcomingPage
+                  eyebrow="Sua evolução"
+                  title="Progresso"
+                  phase="Próxima fase"
+                  items={['Histórico de sessões de treino', 'Tempo para achar cada nota ao longo das semanas', 'Mapa do que você já aprendeu no Estudo e no Repertório']}
+                />
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </NoteInputProvider>
     </ThemeProvider>
   );
 }

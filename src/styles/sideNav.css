@@ -1,32 +1,40 @@
+/*
+  Barra lateral em todas as páginas.
+  ≥ 1100px: completa · 720–1099px: só ícones (tablet) · < 720px: barra inferior (celular).
+*/
+
 .sideNav {
-  flex: 1 1 220px;
-  max-width: 260px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  padding: var(--space-8) var(--space-6);
-  border-right: 1px solid var(--line);
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-4);
+  border-right: 1px solid var(--line);
+  background: var(--bg);
+  z-index: 20;
 }
 
 .sideNav__brand {
   display: grid;
-  gap: 2px;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
   text-decoration: none;
+  color: var(--text);
 }
 
-.sideNav__wordmark {
-  font: 600 20px/24px var(--font-wordmark);
-  letter-spacing: 0.14em;
+.sideNav__logoMark {
+  display: none;
 }
 
 .sideNav__endorse {
-  font: 500 11px/14px var(--font-body);
-  letter-spacing: 0.1em;
+  font: 500 10px/14px var(--font-body);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
+  padding-left: 2px;
 }
 
 .sideNav__list {
@@ -42,12 +50,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 44px;
+  min-height: 46px;
   padding: 0 var(--space-4);
   border-radius: var(--radius-pill);
   text-decoration: none;
   font: 500 14px/1 var(--font-body);
   color: var(--text-muted);
+  transition: background-color 120ms, color 120ms;
 }
 
 .sideNav__link:hover {
@@ -69,25 +78,70 @@
 
 .sideNav__foot {
   margin-top: auto;
-  display: grid;
-  gap: var(--space-3);
-  font: 400 12px/16px var(--font-body);
-  color: var(--text-muted);
+  padding: 0 var(--space-2);
 }
 
-/* No celular a navegação vira uma barra inferior com as mesmas áreas. */
-@media (max-width: 720px) {
+/* Tablet: barra de ícones com o nome pequeno embaixo */
+@media (max-width: 1099px) {
+  .sideNav {
+    padding: var(--space-6) var(--space-2);
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .sideNav__logoFull,
+  .sideNav__endorse {
+    display: none;
+  }
+
+  .sideNav__logoMark {
+    display: block;
+  }
+
+  .sideNav__brand {
+    padding: 0;
+  }
+
+  .sideNav__link {
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    width: 72px;
+    min-height: 64px;
+    padding: var(--space-2) 0;
+    border-radius: var(--radius-m);
+    font-size: 11px;
+  }
+
+  .sideNav__foot {
+    padding: 0;
+  }
+
+  .sideNav__foot .themeToggle__label {
+    display: none;
+  }
+
+  .sideNav__foot .themeToggle {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* Celular: barra inferior */
+@media (max-width: 719px) {
   .sideNav {
     position: fixed;
     inset: auto 0 0 0;
-    max-width: none;
-    height: auto;
+    top: auto;
+    height: var(--bottom-nav-h);
     flex-direction: row;
-    padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+    gap: 0;
+    padding: 0 var(--space-1) env(safe-area-inset-bottom, 0px);
     border-right: 0;
     border-top: 1px solid var(--line);
-    background: var(--bg);
-    z-index: 10;
   }
 
   .sideNav__brand,
@@ -99,14 +153,71 @@
     flex: 1;
     flex-direction: row;
     justify-content: space-around;
+    align-items: center;
   }
 
   .sideNav__link {
-    flex-direction: column;
-    gap: var(--space-1);
+    width: auto;
+    min-width: 60px;
     min-height: 52px;
-    padding: var(--space-2);
-    font-size: 11px;
-    border-radius: var(--radius-s);
+    padding: var(--space-1) var(--space-2);
+    box-shadow: none;
   }
+
+  .sideNav__link-active {
+    background: transparent;
+    color: var(--text);
+  }
+
+  .sideNav__link-active .sideNav__icon {
+    color: var(--on-primary);
+    background: var(--primary);
+    border-radius: var(--radius-pill);
+    width: 44px;
+    padding: 2px 12px;
+    box-sizing: content-box;
+  }
+}
+
+/* Logotipo */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text);
+}
+
+.logo__mark {
+  width: 38px;
+  height: 38px;
+  flex: none;
+}
+
+.logo-compact .logo__mark {
+  width: 44px;
+  height: 44px;
+}
+
+.logo__coin {
+  fill: var(--color-champagne);
+}
+
+.logo__ring {
+  stroke: var(--color-petrol);
+  stroke-opacity: 0.45;
+  stroke-width: 1.6;
+}
+
+.logo__letter {
+  fill: var(--color-petrol);
+}
+
+.logo__word {
+  font: 600 21px/1 var(--font-wordmark);
+  letter-spacing: 0.2em;
+}
+
+:root[data-theme="light"] .logo__coin {
+  stroke: var(--line-strong);
+  stroke-width: 1;
 }

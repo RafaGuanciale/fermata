@@ -14,7 +14,7 @@ export default function UpcomingPage({ eyebrow, title, phase, items }: UpcomingP
       </header>
       <section className="upcoming">
         <span className="upcoming__badge">{phase}</span>
-        <h2 className="upcoming__title">Esta parte vem depois do treino</h2>
+        <h2 className="upcoming__title">Em construção</h2>
         <ul className="upcoming__list">
           {items.map((item) => (
             <li key={item}>{item}</li>
