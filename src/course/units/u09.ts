@@ -2,7 +2,8 @@
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { chordSequence, choice, mix, nonChordTones, type ChoiceQuestion, type StrangeKind } from '../gens';
-import { melodyTask, twoHandTask } from '../tasks';
+import { pick } from '../music';
+import { melodyTask, sightReadingTwoHands, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
@@ -328,14 +329,369 @@ const minuet: SongSpec = {
   pass: { accuracy: 0.9 },
 };
 
+const SIGHT_KEYS = [
+  { tonic: 60, fifths: 0 }, { tonic: 67, fifths: 1 }, { tonic: 62, fifths: 2 }, { tonic: 69, fifths: 3 },
+  { tonic: 65, fifths: -1 }, { tonic: 70, fifths: -2 }, { tonic: 63, fifths: -3 },
+];
+const sight2 = (bpm: number) => (rng: Rng) => {
+  const k = pick(rng, SIGHT_KEYS);
+  return sightReadingTwoHands(rng, { tonic: k.tonic, bars: 8, bpm, fifths: k.fifths });
+};
+
+const SIGHT_Q: ChoiceQuestion[] = [
+  { q: 'Nos 30 segundos antes de ler, o que olhar primeiro?', options: ['Armadura, compasso e a primeira nota de cada mão', 'Só a primeira nota da direita', 'O título'], answer: 0, why: 'É o que os examinadores da ABRSM sugerem: o mapa antes da viagem.' },
+  { q: 'Errou uma nota na primeira vista. O que fazer?', options: ['Seguir em frente no tempo', 'Voltar e corrigir', 'Parar e recomeçar'], answer: 0, why: 'Na leitura, o pulso vale mais que a nota. Quem para perde o lugar.' },
+  { q: 'Para não parar, os olhos devem estar…', options: ['Um pouco à frente do que as mãos tocam', 'Nas mãos', 'Exatamente na nota tocada'], answer: 0, why: 'Ler adiante dá tempo de preparar a próxima posição.' },
+  { q: 'Num trecho com armadura de 3 bemóis, as notas alteradas são…', options: ['Si♭, Mi♭ e Lá♭', 'Fá♯, Dó♯ e Sol♯', 'Si♭, Mi♭ e Ré♭'], answer: 0, why: 'A ordem dos bemóis: Si, Mi, Lá...' },
+];
+
+const l69: Lesson = {
+  n: 69,
+  id: 'l69',
+  title: 'Primeira vista com as duas mãos',
+  minutes: 60,
+  objectives: [
+    'Consigo preparar uma leitura em 30 segundos: armadura, compasso, posição das mãos e ritmo.',
+    'Consigo ler à primeira vista 8 compassos com as duas mãos, armaduras até 3 acidentes, sem parar, com 80% das notas no tempo.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Os 30 segundos',
+      body: `Nos exames de piano (ABRSM, por exemplo), o aluno recebe o trecho de primeira vista e tem **30 segundos** para olhar antes de tocar. Bem usados, esses segundos valem mais que a leitura em si. Uma ordem que funciona:
+
+1. **Armadura e tom**: quantos acidentes, que tonalidade? Diga em voz alta as notas alteradas ("Fá♯ e Dó♯").
+2. **Compasso** e **andamento**: conte um compasso mentalmente no andamento em que vai tocar (mais devagar do que acha que consegue).
+3. **Posição das mãos**: a primeira nota de cada mão e o desenho geral (posição de cinco dedos? desce? sobe?).
+4. **Ritmo**: os pontos difíceis (pontuadas, pausas). Bata o ritmo de um compasso difícil na perna.
+5. **Fim**: onde a música termina? Saber o destino ajuda a não se perder.`,
+    },
+    {
+      kind: 'text',
+      title: 'Não parar',
+      body: `A regra de ouro da primeira vista é **não parar**. Errou uma nota? Siga. Perdeu um tempo? Entre de novo no próximo. Um ouvinte perdoa uma nota errada; não perdoa o pulso quebrado.
+
+Duas técnicas ajudam:
+
+- **Olhe adiante**: os olhos ficam meio compasso ou um compasso à frente das mãos. Assim, quando a mão chega, ela já sabe para onde ir.
+- **Simplifique**: se as duas mãos ficarem pesadas, mantenha a **direita** inteira e toque na esquerda só a **primeira nota** de cada compasso. É o que pianistas fazem em ensaios: o essencial primeiro.
+
+Nesta lição, a esquerda toca notas longas (tônica e dominante) e a direita uma melodia nova em posição de cinco dedos. A melodia é gerada na hora: cada passada é uma leitura nova.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'olhar para as mãos',
+      body: 'Cada vez que os olhos descem para o teclado, eles perdem o lugar na pauta. Na posição de cinco dedos, confie no tato: os dedos sabem onde estão. Olhe para baixo só nas mudanças de posição, e rápido.',
+    },
+    { kind: 'exercise', id: 'l69-quiz', exercise: quiz('Antes de ler', 'Quatro perguntas rápidas.', SIGHT_Q, 0.75) },
+    { kind: 'exercise', id: 'l69-leitura', exercise: quickTimed('Primeira vista, mãos juntas', '8 compassos novos a cada passada, armaduras até 3 acidentes, a 52 BPM. Olhe 30 s antes. Três passadas boas.', sight2(52), { reps: 3, pass: { accuracy: 0.8 } }) },
+    { kind: 'exercise', id: 'l69-mais', exercise: quickTimed('Um pouco mais rápido', 'O mesmo, a 60 BPM.', sight2(60), { reps: 2, pass: { accuracy: 0.8 } }) },
+  ],
+  review: [choice(SIGHT_Q, 'primeira-vista'), strangeName],
+  checkpoint: [
+    quickTimed('Primeira vista a 56 BPM', '8 compassos novos, duas mãos, sem dicas. Meta: 85% das notas no tempo.', sight2(56)),
+  ],
+  exit: [choice(SIGHT_Q, 'primeira-vista')],
+};
+
+const ORN_Q: ChoiceQuestion[] = [
+  { q: 'O trinado é…', options: ['Alternar rápido a nota escrita com a vizinha de cima', 'Uma nota longa', 'Um arpejo'], answer: 0, why: 'No barroco, costuma começar pela nota de cima.' },
+  { q: 'O mordente superior é…', options: ['Nota, vizinha de cima, nota, bem rápido', 'Nota, vizinha de baixo, nota', 'Duas notas juntas'], answer: 0, why: 'Um "trinado curto" de três notas.' },
+  { q: 'O grupeto (turn) em Dó é…', options: ['Ré–Dó–Si–Dó', 'Dó–Ré–Dó', 'Dó–Mi–Sol'], answer: 0, why: 'Vizinha de cima, nota, vizinha de baixo, nota.' },
+  { q: 'Acciaccatura é…', options: ['Nota bem curta "esmagada" antes da principal', 'Nota longa que ocupa metade do tempo da principal', 'Um trinado longo'], answer: 0, why: 'Escrita como notinha com um risco na haste.' },
+  { q: 'A apojatura (ornamento) dura…', options: ['Uma boa parte do valor da nota principal, no tempo', 'Quase nada', 'O dobro da nota'], answer: 0, why: 'Ao contrário da acciaccatura, ela "pesa" no tempo forte.' },
+];
+
+const TRILL = 'D5:0.25 C5:0.25 D5:0.25 C5:0.25 D5:0.25 C5:0.25 D5:0.25 C5:0.25 B4:0.25 C5:0.25 D5:0.5 C5:1 | C5:4';
+const MORDENT = 'C5:0.25 D5:0.25 C5:1.5 G4:2 | E5:0.25 F5:0.25 E5:1.5 C5:2 | D5:0.25 C5:0.25 B4:0.25 C5:0.25 D5:1 G4:2 | C5:4';
+
+const l70: Lesson = {
+  n: 70,
+  id: 'l70',
+  title: 'Ornamentos',
+  minutes: 60,
+  objectives: [
+    'Consigo ler e tocar mordente, trinado, grupeto, apojatura e acciaccatura.',
+    'Consigo tocar um trinado de pelo menos 6 notas com variação abaixo de 30 ms.',
+    'Consigo tocar a primeira parte do Minueto em Sol com 90% das notas.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Os enfeites da música antiga',
+      body: `Na música barroca e clássica, os compositores escreviam pequenos sinais sobre as notas para pedir **ornamentos**: enfeites rápidos que o intérprete toca a partir da nota escrita. Os cinco mais comuns:
+
+- **Trinado** (tr): alternar rápido a nota com a **vizinha de cima**. No barroco (Bach), começa pela nota de cima; no clássico e depois, em geral, pela própria nota.
+- **Mordente** (um zigue-zague curto): nota, **vizinha de cima**, nota, bem rápido, no tempo. É um "trinado de três notas". Com um risco vertical, é o mordente **inferior** (vizinha de baixo).
+- **Grupeto** (um S deitado, ∽): vizinha de cima, nota, vizinha de baixo, nota. Em Dó: Ré–Dó–Si–Dó.
+- **Apojatura** (notinha sem risco): uma nota "de apoio" que **ocupa uma parte do tempo** da principal, no tempo forte, e resolve nela (como a apojatura da lição 66).
+- **Acciaccatura** (notinha com risco na haste): uma nota **esmagada**, curtíssima, quase junto com a principal.
+
+O app mede o resultado escrito por extenso: as notas rápidas aparecem como semicolcheias na pauta.`,
+    },
+    {
+      kind: 'example',
+      title: 'Os ornamentos sobre Dó',
+      steps: [
+        { say: 'Mordente: Dó–Ré–Dó, rápido, no tempo.', play: { bpm: 72, steps: [{ midis: [72], beats: 0.2 }, { midis: [74], beats: 0.2 }, { midis: [72], beats: 1.6 }] } },
+        { say: 'Trinado barroco: começa no Ré e termina com um pequeno giro.', play: { bpm: 72, steps: [74, 72, 74, 72, 74, 72, 74, 72, 71, 72].map((m) => ({ midis: [m], beats: 0.2 })).concat([{ midis: [72], beats: 1 }]) } },
+        { say: 'Grupeto: Ré–Dó–Si–Dó.', play: { bpm: 72, steps: [74, 72, 71].map((m) => ({ midis: [m], beats: 0.25 })).concat([{ midis: [72], beats: 1.25 }]) } },
+        { say: 'Apojatura (Ré pesando no tempo, resolvendo em Dó) e acciaccatura (Ré esmagado).', play: { bpm: 72, steps: [{ midis: [74], beats: 1 }, { midis: [72], beats: 1 }, { midis: [74], beats: 0.08 }, { midis: [72], beats: 1.92 }] } },
+      ],
+    },
+    {
+      kind: 'text',
+      title: 'Trinado igual',
+      body: `O trinado bom é **igual**: as notas do mesmo tamanho, como um zumbido regular. O desigual soa como um tropeço repetido.
+
+Use dois dedos **não vizinhos de força parecida**: **2–3** ou **1–3** na direita costumam funcionar melhor que 3–4. Movimento pequeno, dedos perto da tecla, e a rotação do antebraço ajudando (um leve balanço de um lado para o outro, como girar uma maçaneta).
+
+Comece devagar, em semicolcheias medidas, e só acelere quando ficar igual. O exercício mede a variação entre as notas: a meta é ficar abaixo de **30 ms**, com pelo menos 6 notas seguidas.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'saude',
+      title: 'trinado sem aperto',
+      body: 'Trinado tenso cansa o antebraço em segundos. Se a mão travar, pare, sacuda o braço e recomece mais devagar. Velocidade no trinado vem de relaxamento, não de força.',
+    },
+    { kind: 'exercise', id: 'l70-trinado', exercise: quickTimed('Trinado medido', 'Ré–Dó em semicolcheias com giro final, de 48 a 66 BPM. Variação até 30 ms.', () => melodyTask(TRILL, { bpm: 48 }), { ladder: { from: 48, to: 66, step: 6 }, evenness: 30, window: 70 }) },
+    { kind: 'exercise', id: 'l70-mordentes', exercise: quickTimed('Mordentes e grupeto', 'Escritos por extenso, a 60 BPM. Os enfeites rápidos e leves, a nota principal cantando.', () => melodyTask(MORDENT, { bpm: 60 }), { reps: 2, window: 80 }) },
+    {
+      kind: 'text',
+      title: 'O Minueto em Sol',
+      body: `O **Minueto em Sol** é provavelmente a peça mais tocada por estudantes de piano no mundo. Ele está no **Caderno de Anna Magdalena Bach** (1725), uma coleção doméstica da família Bach, e por muito tempo foi atribuído a Johann Sebastian. Hoje se sabe que é de **Christian Petzold**, organista de Dresden.
+
+O minueto é uma **dança em 3/4**, elegante, com o primeiro tempo apoiado. A forma é de período: o compasso 8 termina no **V** (Ré, meia cadência) e o 16 no **I** (Sol, cadência perfeita). Repare nas notas estranhas da lição 66: passagens em quase todo compasso, e as bordaduras do compasso 6.
+
+O arranjo do curso tem só a primeira parte, com a esquerda em notas longas. No original, a peça pede alguns ornamentos (como um trinado no compasso 15): acrescente-os quando a peça estiver segura.`,
+    },
+    { kind: 'exercise', id: 'l70-minueto-md', exercise: quickTimed('Minueto, mão direita', 'Os 16 compassos da direita, de 72 a 96 BPM.', () => melodyTask(MINUET_R, { bpm: 72, beatsPerBar: 3, fifths: 1 }), { ladder: { from: 72, to: 96, step: 8 }, pass: { accuracy: 0.9 } }) },
+    { kind: 'song', songId: 'u09-minueto', why: 'O projeto final da unidade: o minueto com as duas mãos.' },
+    { kind: 'exercise', id: 'l70-quiz', exercise: quiz('Ornamentos', 'Cinco perguntas rápidas.', ORN_Q) },
+  ],
+  review: [choice(ORN_Q, 'ornamentos')],
+  checkpoint: [
+    quickTimed('Trinado a 66 BPM', 'Sem dicas. Variação até 30 ms.', () => melodyTask(TRILL, { bpm: 66 }), { evenness: 30, window: 70 }),
+    quickTimed('Minueto a 96 BPM', 'Mão direita, 16 compassos. Meta: 90%.', () => melodyTask(MINUET_R, { bpm: 96, beatsPerBar: 3, fifths: 1 }), { pass: { accuracy: 0.9 } }),
+  ],
+  exit: [choice(ORN_Q, 'ornamentos')],
+};
+
+// Frère Jacques (canção folclórica francesa) em cânone entre as mãos: a esquerda entra 2 compassos depois, uma oitava abaixo.
+const FJ = ['C4 D4 E4 C4', 'C4 D4 E4 C4', 'E4 F4 G4:2', 'E4 F4 G4:2', 'G4:0.5 A4:0.5 G4:0.5 F4:0.5 E4 C4', 'G4:0.5 A4:0.5 G4:0.5 F4:0.5 E4 C4', 'C4 G3 C4:2', 'C4 G3 C4:2'];
+const down = (bar: string) => bar.replace(/([A-G]#?b?)(\d)/g, (_, l: string, o: string) => `${l}${Number(o) - 1}`);
+const CANON_R = [...FJ, 'C4:4', 'C4:4'].join(' | ');
+const CANON_L = ['r:4', 'r:4', ...FJ.map(down)].join(' | ');
+
+const POLY_Q: ChoiceQuestion[] = [
+  { q: 'Num cânone, a segunda voz…', options: ['Repete a primeira, entrando depois', 'Toca outra melodia', 'Toca só acordes'], answer: 0, why: 'Como numa ronda cantada: "Frère Jacques" é um cânone.' },
+  { q: 'Imitação é…', options: ['Uma voz repetir o motivo da outra, às vezes em outra altura', 'Tocar igual ao professor', 'Duas vozes juntas em oitava'], answer: 0, why: 'É a base do contraponto de Bach.' },
+  { q: '2 contra 3 cabe numa grade de…', options: ['6 partes por tempo', '5 partes', '4 partes'], answer: 0, why: 'O menor múltiplo comum de 2 e 3.' },
+  { q: 'Na grade de 6, as 3 notas caem em…', options: ['1, 3 e 5', '1, 4', '1, 2 e 3'], answer: 0, why: 'E as 2 notas em 1 e 4. Juntas: 1 (as duas), 3, 4, 5.' },
+  { q: 'Para acertar um salto grande no tempo, o mais importante é…', options: ['Olhar e mover o braço antes, com a mão já em forma', 'Esticar o dedo', 'Tocar mais forte'], answer: 0, why: 'Os olhos chegam primeiro, o braço leva a mão pronta.' },
+];
+
+const l71: Lesson = {
+  n: 71,
+  id: 'l71',
+  title: 'Duas vozes independentes',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar duas melodias independentes, uma em cada mão, com ritmos diferentes.',
+    'Consigo tocar um cânone entre as mãos com 85% das notas certas em cada mão.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Contraponto: duas melodias ao mesmo tempo',
+      body: `Até aqui, quase sempre uma mão cantava e a outra acompanhava. No **contraponto**, as duas mãos tocam **melodias**, cada uma com seu próprio ritmo e desenho, e a harmonia nasce do encontro entre elas. É a escrita de Bach, das Invenções, das fugas, e de muita música antiga.
+
+O jeito mais simples de começar é a **imitação**: uma voz apresenta um motivo, e a outra repete o mesmo motivo, depois, às vezes em outra altura. Quando a imitação é inteira e contínua, chama-se **cânone**: a mesma melodia em duas vozes defasadas, como uma ronda cantada.
+
+**Frère Jacques** é um cânone perfeito: qualquer compasso dela soa bem junto com qualquer outro, porque tudo cabe no acorde de Dó.`,
+    },
+    {
+      kind: 'text',
+      title: 'Como estudar duas vozes',
+      body: `A dificuldade do contraponto não é a velocidade: é a **independência**. Uma mão quer copiar o ritmo da outra. O método clássico:
+
+1. Cada mão sozinha, até ficar automática e **cantável**: cante a melodia enquanto toca.
+2. Juntas, **muito devagar**, compasso a compasso, ouvindo as duas linhas.
+3. Toque uma mão e **cante** a outra. Depois troque.
+4. Junte de novo, prestando atenção nos pontos em que as duas mãos atacam **juntas**: eles são o "esqueleto" que segura a coordenação.
+
+No cânone desta lição, a esquerda entra **2 compassos depois**, uma oitava abaixo. Nos compassos 5 e 6, a direita está nas colcheias enquanto a esquerda está nas mínimas: é o trecho mais difícil.`,
+    },
+    {
+      kind: 'example',
+      title: 'O cânone',
+      steps: [
+        { say: 'Primeiro a direita sozinha, depois a esquerda entrando no compasso 3, uma oitava abaixo.', play: { bpm: 100, steps: [[60], [62], [64], [60], [60], [62], [64], [60], [64, 48], [65, 50], [67, 52], [], [64, 48], [65, 50], [67, 52], []].map((midis) => ({ midis, beats: 1 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l71-me', exercise: quickTimed('A esquerda sozinha', 'A melodia uma oitava abaixo, de 72 a 88 BPM.', () => melodyTask(FJ.map(down).join(' | '), { bpm: 72, clef: 'bass' }), { ladder: { from: 72, to: 88, step: 8 } }) },
+    { kind: 'exercise', id: 'l71-canone', exercise: quickTimed('O cânone, duas mãos', '10 compassos, de 66 a 84 BPM. Ouça as duas melodias.', () => twoHandTask(CANON_R, CANON_L, { bpm: 66, caption: 'A pauta mostra a direita. A esquerda entra no compasso 3 com a mesma melodia, uma oitava abaixo.' }), { ladder: { from: 66, to: 84, step: 6 }, window: 80 }) },
+    { kind: 'song', songId: 'u09-canone', why: 'O cânone na pauta dupla: dá para ver a imitação.' },
+    { kind: 'exercise', id: 'l71-quiz', exercise: quiz('Contraponto e polirritmia', 'Cinco perguntas rápidas.', POLY_Q) },
+  ],
+  review: [choice(POLY_Q, 'contraponto')],
+  checkpoint: [
+    quickTimed('Cânone a 84 BPM', 'Duas mãos, sem dicas. Meta: 85%.', () => twoHandTask(CANON_R, CANON_L, { bpm: 84 }), { window: 80 }),
+  ],
+  exit: [choice(POLY_Q, 'contraponto')],
+};
+
+// 2 contra 3: direita em tercinas, esquerda em colcheias, sobre Dó e Sol.
+const POLY_R = 'C5:1/3 E5:1/3 G5:1/3 C5:1/3 E5:1/3 G5:1/3 B4:1/3 D5:1/3 G5:1/3 B4:1/3 D5:1/3 G5:1/3';
+const POLY_L = 'C3:0.5 G3:0.5 C3:0.5 G3:0.5 G2:0.5 D3:0.5 G2:0.5 D3:0.5';
+const polyTask = (cycles: number, bpm: number) => twoHandTask(Array(cycles).fill(POLY_R).join(' | '), Array(cycles).fill(POLY_L).join(' | '), { bpm, caption: '3 na direita (tercinas), 2 na esquerda (colcheias). Conte "1-2-3-4-5-6": direita no 1, 3, 5; esquerda no 1 e 4.' });
+// Saltos: baixo grave no tempo, acorde no meio do teclado no contratempo do tempo.
+const JUMPS = 'C2 C3+E3+G3 G1 B2+D3+G3 | A1 A2+C3+E3 F1 A2+C3+F3 | C2 C3+E3+G3 G1 B2+D3+F3 | C2:2 C3+E3+G3:2';
+
+const l72: Lesson = {
+  n: 72,
+  id: 'l72',
+  title: 'Polirritmia 2 contra 3 e saltos',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar 2 contra 3 (uma mão em tercinas, a outra em colcheias) por 8 tempos, em ±50 ms.',
+    'Consigo tocar saltos de registro na mão esquerda no tempo, com 85% de acerto.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Três numa mão, dois na outra',
+      body: `Na lição 39 você alternou colcheias e tercinas **em sequência**. Agora elas acontecem **ao mesmo tempo**: a direita toca 3 notas por tempo e a esquerda 2. Isso é uma **polirritmia**, o famoso **2 contra 3**, que aparece em Chopin, Debussy, Brahms e em muita música brasileira e africana.
+
+O segredo é a **grade de 6**. Divida o tempo em 6 partes iguais e conte "1-2-3-4-5-6":
+
+- As **3 notas** (tercina) caem em **1, 3 e 5**.
+- As **2 notas** (colcheias) caem em **1 e 4**.
+
+Juntando as duas mãos, o desenho é: **1** (as duas juntas), **3** (direita), **4** (esquerda), **5** (direita). Fale devagar: "**JUN**-ta, di-**REI**-ta, es-**QUER**-da, di-**REI**-ta". Toque com as mãos na tampa do piano até o desenho ficar natural; depois no teclado.`,
+    },
+    {
+      kind: 'example',
+      title: '2 contra 3 devagar',
+      steps: [
+        { say: 'Só a grade de 6, com os acentos: 1 (juntas), 3 (direita), 4 (esquerda), 5 (direita).', play: { bpm: 40, steps: [{ midis: [48, 72], beats: 1 / 3 }, { midis: [76], beats: 1 / 6 }, { midis: [55], beats: 1 / 6 }, { midis: [79], beats: 1 / 3 }, { midis: [48, 72], beats: 1 / 3 }, { midis: [76], beats: 1 / 6 }, { midis: [55], beats: 1 / 6 }, { midis: [79], beats: 1 / 3 }] } },
+        { say: 'No andamento: o 3 contra 2 vira um balanço contínuo.', play: { bpm: 72, steps: Array.from({ length: 4 }, () => [{ midis: [48, 72], beats: 1 / 3 }, { midis: [76], beats: 1 / 6 }, { midis: [55], beats: 1 / 6 }, { midis: [79], beats: 1 / 3 }]).flat() } },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'pense na mão de três',
+      body: 'Pianistas costumam pensar na mão das tercinas como a "melodia" e deixar a de colcheias cair sozinha entre a 2ª e a 3ª nota da tercina. Se tentar contar as duas mãos ao mesmo tempo, o cérebro trava; deixe uma conduzir.',
+    },
+    { kind: 'exercise', id: 'l72-poli', exercise: quickTimed('2 contra 3', 'Tercinas na direita, colcheias na esquerda, 8 tempos, de 40 a 56 BPM. Janela de ±50 ms.', () => polyTask(2, 40), { window: 50, ladder: { from: 40, to: 56, step: 4 } }) },
+    {
+      kind: 'text',
+      title: 'Saltos no tempo',
+      body: `O outro desafio desta lição é o **salto**: a mão esquerda que vai do baixo grave ao meio do teclado e volta, a cada tempo, como no ragtime (lição 65) e no "stride". Errar o salto é quase sempre um problema de **preparação**, não de pontaria:
+
+1. **Os olhos chegam antes**: olhe para o destino um instante antes de a mão sair.
+2. **O braço leva a mão**, já na forma do acorde. A mão não "procura" a tecla no ar: ela chega pronta.
+3. **Saia cedo**: solte a nota grave um pouquinho antes e use o tempo do deslocamento. O pedal pode segurar o som do baixo.
+4. **Movimento curvo**, rente ao teclado, não um arco alto.
+
+Comece devagar, a ponto de não errar nenhum salto; a velocidade vem da segurança.`,
+    },
+    { kind: 'exercise', id: 'l72-saltos', exercise: quickTimed('Saltos na esquerda', 'Baixo grave no tempo, acorde no meio do teclado no tempo seguinte. De 56 a 76 BPM.', () => melodyTask(JUMPS, { bpm: 56, clef: 'bass' }), { ladder: { from: 56, to: 76, step: 5 }, window: 80 }) },
+  ],
+  review: [choice(POLY_Q, 'contraponto')],
+  checkpoint: [
+    quickTimed('8 ciclos de 2 contra 3', 'A 56 BPM, sem dicas, ±50 ms.', () => polyTask(2, 56), { window: 50 }),
+    quickTimed('Saltos a 76 BPM', 'Sem dicas. Meta: 85%.', () => melodyTask(JUMPS, { bpm: 76, clef: 'bass' }), { window: 80 }),
+  ],
+  exit: [choice(POLY_Q, 'contraponto')],
+};
+
+const l73: Lesson = {
+  n: 73,
+  id: 'l73',
+  title: 'Checkpoint da unidade 9 e projeto: peça clássica com análise',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 9, sem dicas.',
+    'Consigo tocar o Minueto em Sol com 95% das notas no andamento escolhido e escrever sua análise de forma e harmonia.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Tocar e entender',
+      body: `Esta unidade foi sobre ler e tocar como um pianista clássico: as notas estranhas que dão vida à melodia, o equilíbrio entre melodia e acompanhamento, a condução a quatro vozes, a primeira vista com as duas mãos, os ornamentos, o contraponto e as polirritmias.
+
+O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma peça é responder:
+
+- **Forma**: quantas frases? Onde estão as cadências e de que tipo são? Há repetição?
+- **Harmonia**: que acorde está embaixo de cada compasso (em graus)?
+- **Melodia**: quais notas são estranhas à harmonia, e de que tipo?
+- **Expressão**: onde a música cresce, onde respira?`,
+    },
+    {
+      kind: 'text',
+      title: 'Um roteiro para a análise do minueto',
+      body: `Uma pista para começar (confira tudo no teclado):
+
+- **Compassos 1 a 4**: I (Sol) – I – IV (Dó) – I. A melodia desce e sobe por graus, com passagens.
+- **Compassos 5 a 8**: ii (Lá menor) – I – V (Ré) – V. Termina em **meia cadência**: a pergunta.
+- **Compassos 9 a 12**: repetem os compassos 1 a 4.
+- **Compassos 13 a 16**: IV – I – V – I. Termina em **cadência perfeita**: a resposta.
+
+É um **período** (lição 56) de 16 compassos, com antecedente e consequente de 8. Escreva os graus embaixo de cada compasso, circule as notas de passagem e as bordaduras, e marque as duas cadências. Na parte técnica, mantenha o trilho de escalas: a meta da unidade é **92 BPM** em colcheias, mãos juntas.`,
+    },
+    { kind: 'song', songId: 'u09-minueto', why: 'O projeto final: toque com as duas mãos até 95% das notas no andamento que escolher (a referência é 96 BPM).' },
+  ],
+  review: [strangePlay, fourVoices, choice([...STRANGE_Q, ...ORN_Q, ...POLY_Q])],
+  checkpoint: [
+    items('Checkpoint da unidade 9', '20 perguntas: notas estranhas, quatro vozes, ornamentos, contraponto e primeira vista. Meta: 85%.', mix([strangePlay, strangeName, fourVoices, choice([...STRANGE_Q, ...ALBERTI_Q, ...FOUR_Q, ...SIGHT_Q, ...ORN_Q, ...POLY_Q])]), 20, 36, 84, 0.85, 'off'),
+    quickTimed('Primeira vista', '8 compassos novos a 56 BPM, duas mãos.', sight2(56)),
+  ],
+  project: {
+    title: 'Peça clássica com análise',
+    brief: `Toque o **Minueto em Sol** inteiro (16 compassos, duas mãos) com 95% das notas, no andamento que você escolher (a referência é 96 BPM). Grave, e escreva a análise: forma, graus, cadências e notas estranhas.`,
+    steps: [
+      'Estude mãos separadas no modo Estudar até não errar.',
+      'Junte as mãos devagar (72 BPM) e suba até o seu andamento.',
+      'Acrescente a expressão: primeiro tempo apoiado, frases que respiram nos compassos 4, 8, 12 e 16.',
+      'Grave e passe o exercício abaixo.',
+      'Escreva a análise: graus de cada compasso, as duas cadências, três notas estranhas com o nome.',
+    ],
+    rubric: [
+      '95% das notas no andamento escolhido.',
+      'Dinâmica: frases com começo, meio e fim; a melodia acima da esquerda.',
+      'Articulação: colcheias ligadas, semínimas levemente destacadas, como numa dança.',
+      'A análise de forma e de harmonia está correta.',
+    ],
+    exercise: { kind: 'timed', title: 'Minueto, duas mãos', how: 'Os 16 compassos a 84 BPM.', gen: () => twoHandTask(MINUET_R, MINUET_L, { bpm: 84, beatsPerBar: 3, fifths: 1 }), reps: 1, window: 90, pass: { accuracy: 0.95 } },
+  },
+  exit: [strangeName, choice([...STRANGE_Q, ...ORN_Q])],
+};
+
+const canon: SongSpec = {
+  id: 'u09-canone',
+  title: 'Cânone de Frère Jacques',
+  composer: 'canção folclórica francesa',
+  arrangement: 'arranjo do Fermata: cânone entre as mãos, a esquerda entra 2 compassos depois, uma oitava abaixo',
+  bpm: 84,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: CANON_R,
+  left: CANON_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
 const unit: Unit = {
   n: 9,
   id: 'u09',
   title: 'Leitura clássica e textura',
   goal: 'Reconhecer notas estranhas, equilibrar melodia e acompanhamento, conduzir quatro vozes, ler à primeira vista com as duas mãos, tocar ornamentos, duas vozes independentes e 2 contra 3.',
   technique: 'Escalas maiores em 2 oitavas, mãos juntas, de 60 rumo a 92 BPM em colcheias; trinados medidos (6 notas ou mais, variação abaixo de 30 ms) (referência: RCM Level 3). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l66, l67, l68],
-  songs: [minuet, sonatina],
+  lessons: [l66, l67, l68, l69, l70, l71, l72, l73],
+  songs: [minuet, sonatina, canon],
   final: {
     songId: 'u09-minueto',
     brief: 'O Minueto em Sol do Caderno de Anna Magdalena Bach (hoje atribuído a Christian Petzold): dança em 3/4, melodia com notas de passagem e bordaduras, frases de 4 compassos, cadência no V no compasso 8 e no I no 16. Toque leve, com o primeiro tempo de cada compasso um pouco mais apoiado, como numa dança.',
