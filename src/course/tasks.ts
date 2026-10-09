@@ -72,3 +72,20 @@ export function twoHandTask(right: string, left: string, opts: { bpm: number; be
     caption: opts.caption,
   };
 }
+
+/**
+ * Melodia com ligaduras de prolongamento: "~" no fim de uma nota liga ela à próxima (a mesma tecla).
+ * A pauta mostra as duas figuras; o que se toca é uma nota só, com a duração somada.
+ */
+export function tiedMelodyTask(text: string, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string }): TimedTask {
+  const bpb = opts.beatsPerBar ?? 4;
+  const tied = text.split('|').flatMap((b) => b.trim().split(/\s+/)).filter(Boolean).map((t) => t.endsWith('~'));
+  const base = melodyTask(text.replace(/~/g, ''), { ...opts, beatsPerBar: bpb });
+  const events: TimedTask['events'] = [];
+  base.events.forEach((e, i) => {
+    const prev = events[events.length - 1];
+    if (i > 0 && tied[i - 1] && prev && prev.midi === e.midi) prev.beats += e.beats;
+    else events.push({ ...e });
+  });
+  return { ...base, events };
+}
