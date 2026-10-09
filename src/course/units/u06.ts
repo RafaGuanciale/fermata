@@ -666,6 +666,178 @@ O exercício a seguir é a canção do projeto desta unidade: 16 compassos com i
   exit: [choice(PATTERNS, 'padroes'), colorChords],
 };
 
+const BASS_CHROMA: ChoiceQuestion[] = [
+  { q: 'Em C – G/B – Am – Am/G, o baixo faz…', options: ['Dó, Si, Lá, Sol: desce por grau conjunto', 'Dó, Sol, Lá, Lá', 'Sobe de Dó a Sol'], answer: 0, why: 'As inversões põem a nota certa no baixo para ele andar em escada.' },
+  { q: 'A escala cromática tem…', options: ['Todas as 12 notas, de semitom em semitom', '7 notas', 'Só as pretas'], answer: 0, why: 'Dó, Dó♯, Ré, Ré♯… cada tecla, branca ou preta.' },
+  { q: 'Por convenção, a cromática se escreve…', options: ['Com sustenidos subindo e bemóis descendo', 'Só com bemóis', 'Só com sustenidos'], answer: 0, why: 'O acidente aponta a direção: ♯ puxa para cima, ♭ para baixo.' },
+  { q: 'Dedilhado da cromática na direita:', options: ['3 nas pretas, 1 nas brancas, 2 na segunda branca de um par (Mi–Fá, Si–Dó)', '1 2 3 4 5 em sequência', 'Só 2 e 3'], answer: 0, why: 'A mão quase não se move: o 3 fica sobre as pretas e o polegar nas brancas.' },
+  { q: 'D/F♯ é…', options: ['Ré maior com Fá♯ no baixo', 'Ré e Fá♯ juntos', 'Fá♯ menor'], answer: 0, why: 'Muito usado entre G e Em: Sol, Fá♯, Mi no baixo.' },
+];
+
+const DESC_R = 'C4+E4+G4:2 B3+D4+G4:2 | C4+E4+A4:2 C4+E4+A4:2 | C4+F4+A4:2 C4+E4+G4:2 | D4+F4+A4:2 B3+D4+G4:2 | C4+E4+G4:4';
+const DESC_L = 'C3:2 B2:2 | A2:2 G2:2 | F2:2 E2:2 | D2:2 G2:2 | C2:4';
+const DESC_G_R = 'B3+D4+G4:2 A3+D4+F#4:2 | B3+E4+G4:2 B3+E4+G4:2 | C4+E4+G4:2 B3+D4+G4:2 | C4+E4+A4:2 A3+D4+F#4:2 | B3+D4+G4:4';
+const DESC_G_L = 'G2:2 F#2:2 | E2:2 D2:2 | C2:2 B1:2 | A1:2 D2:2 | G1:4';
+const descending = chordSequence({
+  sequences: [
+    { name: 'Baixo descendo em Dó.', symbols: ['C', 'G/B', 'Am', 'Am/G'] },
+    { name: 'Continuação em Dó.', symbols: ['F', 'C/E', 'Dm', 'G'] },
+    { name: 'Baixo descendo em Sol.', symbols: ['G', 'D/F#', 'Em', 'Em/D'] },
+    { name: 'Continuação em Sol.', symbols: ['C', 'G/B', 'Am', 'D'] },
+  ],
+});
+
+/** Escala cromática de uma oitava, subindo e descendo em colcheias (3 compassos) e a tônica em semibreve. */
+function chromaticLine(from: Midi): string {
+  const sciC = (m: Midi) => `${['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][m % 12]}${Math.floor(m / 12) - 1}`;
+  const up = Array.from({ length: 13 }, (_, i) => from + i);
+  const down = Array.from({ length: 11 }, (_, i) => from + 11 - i);
+  const all = [...up, ...down].map((m) => `${sciC(m)}:0.5`);
+  return `${all.slice(0, 8).join(' ')} | ${all.slice(8, 16).join(' ')} | ${all.slice(16).join(' ')} | ${sciC(from)}:4`;
+}
+
+const l48: Lesson = {
+  n: 48,
+  id: 'l48',
+  title: 'Baixo em movimento e escala cromática',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar progressões com baixo descendente (C – G/B – Am – Am/G – F – C/E – Dm – G), com o baixo certo em cada acorde.',
+    'Consigo tocar a escala cromática de uma oitava, mãos separadas, em colcheias a 69 BPM, com variação abaixo de 35 ms.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O baixo que anda',
+      body: `Até aqui o baixo tocou quase sempre a **fundamental** de cada acorde, e por isso pulava: Dó, Sol, Lá, Fá. Com as inversões da lição 43, o baixo pode **andar por grau conjunto**, como uma melodia própria, enquanto a direita continua conduzida.
+
+A progressão mais conhecida desse tipo é o **baixo descendente**:
+
+**C – G/B – Am – Am/G – F – C/E – Dm – G**
+
+O baixo desce a escala de Dó: **Dó, Si, Lá, Sol, Fá, Mi, Ré**, e o Sol final prepara a volta. As cifras com barra são só o jeito de escrever isso: G/B é o acorde de Sol com o Si no baixo, Am/G é Lá menor com o Sol no baixo (uma nota que nem é do acorde, mas está de passagem).
+
+Essa linha aparece em muita música, do barroco ao pop. Em Sol maior: **G – D/F♯ – Em – Em/D – C – G/B – Am – D**.`,
+    },
+    {
+      kind: 'example',
+      title: 'Baixo descendente em Dó',
+      steps: [
+        { say: 'O baixo sozinho: uma escala descendo.', play: { bpm: 80, steps: [48, 47, 45, 43, 41, 40, 38, 43].map((m) => ({ midis: [m], beats: 1 })) } },
+        { say: 'Com os acordes conduzidos na direita: a mão direita quase não sai do lugar.', play: { bpm: 72, steps: [[48, 60, 64, 67], [47, 59, 62, 67], [45, 60, 64, 69], [43, 60, 64, 69], [41, 60, 65, 69], [40, 60, 64, 67], [38, 62, 65, 69], [43, 59, 62, 67], [36, 60, 64, 67]].map((midis, i) => ({ midis, beats: i === 8 ? 4 : 2 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l48-cifras', exercise: items('Cifras com baixo andando', 'Toque cada acorde com a nota da barra no baixo (a esquerda pode tocar o baixo).', descending, 8, 36, 72, 0.85) },
+    { kind: 'exercise', id: 'l48-tempo', exercise: quickTimed('Baixo descendente no tempo', 'Mínimas, a direita conduzida e a esquerda descendo, de 60 a 72 BPM. Dó ou Sol maior, sorteado.', (rng) => (rng() < 0.5 ? twoHandTask(DESC_R, DESC_L, { bpm: 60, caption: 'C G/B | Am Am/G | F C/E | Dm G | C' }) : twoHandTask(DESC_G_R, DESC_G_L, { bpm: 60, fifths: 1, caption: 'G D/F♯ | Em Em/D | C G/B | Am D | G' })), { window: 80, ladder: { from: 60, to: 72, step: 6 } }) },
+    {
+      kind: 'text',
+      title: 'A escala cromática',
+      body: `A **escala cromática** usa **todas as 12 notas**, de semitom em semitom: Dó, Dó♯, Ré, Ré♯, Mi, Fá, Fá♯... Ela não tem tônica nem modo: é a "régua" de onde saem todas as outras escalas, e aparece em passagens rápidas, floreios e linhas de baixo.
+
+Na escrita, a convenção é **sustenido subindo e bemol descendo**: Dó, Dó♯, Ré, Ré♯... e na volta Si, Si♭, Lá, Lá♭... O acidente aponta para onde a nota vai. (A pauta do exercício do app escreve tudo com sustenido; na partitura impressa você vai ver os bemóis na descida.)
+
+O **dedilhado** é o que torna a cromática fácil:
+
+- **3 em todas as pretas**, **1 em todas as brancas**...
+- ...menos onde há **duas brancas vizinhas** (Mi–Fá e Si–Dó): a segunda delas, na direção em que você vai, leva o **2**.
+
+Na direita, subindo de Dó: 1 3 1 3 1 **2** 3 1 3 1 3 1 **2**. Descendo, a mesma regra: Dó 1, **Si 2**, Si♭ 3, Lá 1... A mão desliza quase sem se abrir; o polegar passa a cada duas notas, então o antebraço precisa acompanhar de lado, bem solto. A esquerda usa a mesma regra, espelhada.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'saude',
+      title: 'polegar solto',
+      body: 'Na cromática o polegar trabalha em quase toda nota branca. Se ele começar a apertar ou o punho subir, pare. A meta é igualdade (variação abaixo de 35 ms), não velocidade: suba o andamento só com as notas iguais.',
+    },
+    { kind: 'exercise', id: 'l48-cromatica-md', exercise: quickTimed('Cromática, mão direita', 'De Dó4 a Dó5 e de volta, em colcheias, de 50 a 69 BPM. Variação até 35 ms.', () => melodyTask(chromaticLine(60), { bpm: 50 }), { ladder: { from: 50, to: 69, step: 5 }, evenness: 35 }) },
+    { kind: 'exercise', id: 'l48-cromatica-me', exercise: quickTimed('Cromática, mão esquerda', 'De Dó3 a Dó4 e de volta, de 50 a 69 BPM.', () => melodyTask(chromaticLine(48), { bpm: 50, clef: 'bass' }), { ladder: { from: 50, to: 69, step: 5 }, evenness: 35 }) },
+    { kind: 'exercise', id: 'l48-quiz', exercise: quiz('Baixo e cromática', 'Cinco perguntas rápidas.', BASS_CHROMA) },
+  ],
+  review: [descending, slashChords, choice(BASS_CHROMA, 'cromatica')],
+  checkpoint: [
+    items('Baixo andando', '6 sequências com barra, sem dicas. Meta: 85%.', descending, 6, 36, 72, 0.85, 'off'),
+    quickTimed('Cromática a 69 BPM', 'Mão direita, colcheias, sem dicas. Variação até 35 ms.', () => melodyTask(chromaticLine(60), { bpm: 69 }), { evenness: 35 }),
+  ],
+  exit: [descending, choice(BASS_CHROMA, 'cromatica')],
+};
+
+const l49: Lesson = {
+  n: 49,
+  id: 'l49',
+  title: 'Checkpoint da unidade 6 e projeto: pop pela cifra',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 6, sem dicas.',
+    'Consigo tocar uma canção em I–V–vi–IV a partir do lead sheet, com dois padrões de mão esquerda, introdução e final.',
+    'Consigo conduzir as vozes da progressão com no máximo 2 semitons a mais que o caminho mais curto.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que a unidade juntou',
+      body: `Nesta unidade os acordes deixaram de ser blocos isolados. Você aprendeu os quatro tipos de tríade e a soletrá-los, as inversões e a cifra com barra, a conduzir as vozes (notas comuns ficam, as outras andam pouco), as cores sus e add9, o compasso composto, quatro padrões de mão esquerda, o baixo que anda e a escala cromática.
+
+Com isso dá para fazer o que todo pianista de pop faz: pegar um **lead sheet** (melodia + cifra) e transformar num arranjo próprio.`,
+    },
+    {
+      kind: 'text',
+      title: 'Como montar um arranjo pela cifra',
+      body: `O projeto é a **Canção em quatro acordes** (melodia original do curso, C – G – Am – F). O lead sheet tem a melodia e a cifra; o arranjo é seu. Um roteiro que funciona para qualquer canção:
+
+1. **Introdução** (2 a 4 compassos): só a esquerda, ou acordes na direita, com a progressão. Ela apresenta o tom e o andamento.
+2. **Parte A**: melodia na direita, um padrão **mais simples** na esquerda (meio-arpejo, por exemplo).
+3. **Parte B**: o mesmo, com um padrão **mais rico** (balada 1-5-8-10 ou arpejo contínuo). Mudar o padrão é o jeito mais simples de fazer a música crescer.
+4. **Final**: desacelere um pouco e termine no **I**, com um acorde cheio e deixado soar.
+
+Dois toques que fazem diferença: troque o pedal a cada acorde (pedal legato) e deixe a melodia mais forte que a esquerda.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'a condução vale para a direita também',
+      body: 'Na introdução e no final, quando a direita toca acordes, use as posições conduzidas da lição 44 (Dó–Mi–Sol, Si–Ré–Sol, Dó–Mi–Lá, Dó–Fá–Lá). O exercício abaixo mede isso.',
+    },
+    { kind: 'exercise', id: 'l49-conducao', exercise: items('Condução em 4 tons', 'I–V–vi–IV conduzido em tom sorteado. Meta: 7 de 8.', leadAny, 8, 48, 84, 0.875, 'off') },
+    { kind: 'song', songId: 'u06-cancao', why: 'O projeto final: a canção com o arranjo escrito. Depois de passar, toque pelo lead sheet com o seu próprio arranjo.' },
+  ],
+  review: [chordsAll, inv1, leadAny, colorChords, descending],
+  checkpoint: [
+    {
+      kind: 'items',
+      title: 'Checkpoint da unidade 6',
+      how: '24 perguntas misturadas: tríades, grafia, inversões, barras, cores, ouvido e teoria. Meta: 85%.',
+      gen: mix([chordsAll, spellAll, inv1, invNamed, slashChords, colorChords, resolveSus, earFour, descending, choice([...TRIADS, ...INVERSIONS, ...VOICE, ...COLORS, ...COMPOUND, ...PATTERNS, ...BASS_CHROMA])]),
+      count: 24,
+      low: 36,
+      high: 84,
+      labels: 'off',
+      pass: { accuracy: 0.85 },
+    },
+    items('Dois ciclos conduzidos', 'I–V–vi–IV duas vezes, tom sorteado, sem dicas.', leadTwo, 3, 48, 84, 0.85, 'off'),
+    quickTimed('6/8', 'Quatro compassos sorteados a 60 BPM (semínima pontuada).', compoundRhythm([...R68, ...R68_REST], 4, 60), { window: 60 }),
+  ],
+  project: {
+    title: 'Pop pela cifra',
+    brief: `Toque a **Canção em quatro acordes** do começo ao fim a 72 BPM: introdução, parte A com um padrão de mão esquerda, parte B com outro padrão e final em Dó. Primeiro como está escrita (exercício abaixo); depois, pelo lead sheet, com o seu arranjo.`,
+    steps: [
+      'Passe a canção escrita no "Tocar a música" a 72 BPM.',
+      'Escreva o lead sheet num papel: a melodia (ou só o ritmo das frases) e a cifra de cada compasso.',
+      'Escolha seus dois padrões de esquerda (um para A, outro para B) e uma introdução de 2 ou 4 compassos.',
+      'Toque o seu arranjo inteiro, com pedal legato, e grave.',
+      'Ouça e confira a rubrica.',
+    ],
+    rubric: [
+      'A canção escrita passou com 90% das notas a 72 BPM.',
+      'No seu arranjo, todos os acordes saíram certos (pelo menos 95%).',
+      'A direita conduziu as vozes na introdução e no final (sem pular de posição fundamental em posição fundamental).',
+      'Dá para ouvir a parte B crescer em relação à parte A.',
+      'A melodia ficou mais forte que a esquerda, e o pedal limpo.',
+    ],
+    exercise: { kind: 'timed', title: 'A canção, a 72 BPM', how: 'Os 16 compassos com as duas mãos.', gen: () => twoHandTask(SONG_R, SONG_L, { bpm: 72 }), reps: 1, window: 80, pass: { accuracy: 0.9 } },
+  },
+  exit: [leadAny, spellAll, choice([...TRIADS, ...INVERSIONS, ...VOICE, ...COLORS])],
+};
+
 // Greensleeves (melodia inglesa, século 16), simplificada em 6/8: colcheias no lugar das pontuadas.
 const greensleeves: SongSpec = {
   id: 'u06-greensleeves',
@@ -687,8 +859,8 @@ const unit: Unit = {
   id: 'u06',
   title: 'Tríades, inversões e condução',
   goal: 'Montar e soletrar os quatro tipos de tríade, usar inversões e cifra com barra, encadear acordes conduzindo as vozes e acompanhar uma canção pela cifra.',
-  technique: 'Tríades quebradas pelas inversões em tercinas, mãos separadas, de 40 rumo a 60 BPM; I–V–vi–IV conduzido em Dó, Sol, Fá e Ré (referência: RCM Level 1–2). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l42, l43, l44, l45, l46, l47],
+  technique: 'Tríades quebradas pelas inversões em tercinas (de 40 rumo a 60 BPM) e escala cromática de uma oitava em colcheias (de 50 rumo a 69 BPM, variação abaixo de 35 ms), mãos separadas; I–V–vi–IV conduzido em Dó, Sol, Fá e Ré (referência: RCM Level 1–2). Use a escada de andamento do treino nos dias sem lição nova.',
+  lessons: [l42, l43, l44, l45, l46, l47, l48, l49],
   songs: [popSong, greensleeves],
   final: {
     songId: 'u06-cancao',
@@ -699,4 +871,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [chords12, chordsDimAug, chordsAll, spellAll, earFour, inv1, invNamed, slashChords, lead1, leadAny, leadTwo, colorChords, resolveSus, colorsAndTriads];
+export const _gens: ItemGen[] = [chords12, chordsDimAug, chordsAll, spellAll, earFour, inv1, invNamed, slashChords, lead1, leadAny, leadTwo, colorChords, resolveSus, colorsAndTriads, descending];
