@@ -3,7 +3,7 @@
 
 import { choice, intervalAbove, intervalByEar, mix, readInterval, readNote, toneOrSemitone, type ChoiceQuestion } from '../gens';
 import { pick } from '../music';
-import { melodyTask, rhythmTask, tiedMelodyTask, twoHandTask } from '../tasks';
+import { melodyTask, rhythmTask, tiedMelodyTask, transposedTask, twoHandTask } from '../tasks';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
 // ---------- notas e peças reaproveitadas ----------
@@ -664,6 +664,187 @@ Na posição de Dó da mão esquerda isso não exige movimento nenhum: o Dó3 é
   exit: [readBoth, choice([...METER_3, ...ACCIDENTALS])],
 };
 
+const PHRASE: ChoiceQuestion[] = [
+  { q: 'Uma ligadura de expressão sobre várias notas diferentes marca…', options: ['Uma frase, tocada em legato', 'Uma nota segurada', 'Uma pausa'], answer: 0, why: 'É a "respiração" da música: legato por dentro, respiro no fim.' },
+  { q: 'No fim de uma frase, a última nota costuma ser…', options: ['Mais leve, e a mão sobe', 'A mais forte', 'Reatacada'], answer: 0, why: 'Frase termina como uma fala: baixando a voz.' },
+  { q: 'Na queda e rolagem de punho, num par de notas ligadas…', options: ['A 1ª cai com peso; a 2ª sai mais leve e curta', 'As duas iguais', 'A 2ª mais forte'], answer: 0, why: 'O punho cai na 1ª e rola para cima na 2ª, soltando a mão.' },
+  { q: 'Crescendo é…', options: ['Aumentar o volume aos poucos', 'Acelerar', 'Tocar ligado'], answer: 0, why: 'Volume, não andamento. Acelerar sem querer é o erro típico no crescendo.' },
+  { q: 'O sinal > (que fecha) pede…', options: ['Diminuendo', 'Crescendo', 'Staccato'], answer: 0, why: 'O sinal fecha como o volume: diminuendo.' },
+];
+
+/** Pares de notas vizinhas, ligados: a 2ª sai mais leve. */
+const PAIRS = ['E4 D4 r:2', 'G4 F4 r:2', 'D4 C4 r:2', 'F4 E4 r:2', 'C4 D4 r:2', 'A4 G4 r:2'];
+
+const l15: Lesson = {
+  n: 15,
+  id: 'l15',
+  title: 'Frase, crescendo e diminuendo',
+  minutes: 60,
+  objectives: [
+    'Consigo fazer um crescendo e um diminuendo regulares em 5 notas.',
+    'Consigo tocar pares ligados com a 2ª nota mais leve, pela queda e rolagem do punho.',
+    'Consigo terminar uma frase leve, respirando antes da próxima.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'A frase musical',
+      body: `Na lição 4 você tocou frases de pergunta e resposta. Agora elas ganham forma na partitura: a **ligadura de expressão**, a curva longa sobre várias notas diferentes, marca uma **frase**. Dentro dela, toque em **legato**; no fim dela, **respire**: solte a mão e deixe um pequeno silêncio antes da próxima frase.
+
+Uma frase bem tocada tem direção, como uma frase falada. Ela costuma crescer em direção a um ponto alto (muitas vezes a nota mais aguda ou mais longa) e se acomodar no final. Ninguém fala "**BOM** **DIA** **TU**-**DO** **BEM**" com todas as sílabas iguais: a música também não.
+
+O final da frase pede cuidado especial: a última nota sai **mais leve**, e a mão sobe com ela. Terminar uma frase batendo a última nota é como falar o ponto final gritando.`,
+    },
+    {
+      kind: 'text',
+      title: 'Crescendo e diminuendo regulares',
+      body: `Você já conhece os sinais: **crescendo** (<, abrindo) e **diminuendo** (>, fechando). O desafio agora é a regularidade: cada nota um pouco mais forte (ou mais leve) que a anterior, **sem degraus** e sem saltos de volume.
+
+Pense numa rampa, não numa escada. Em 5 notas, saia de **p** e chegue em **f** distribuindo o aumento: cada nota recebe um pouquinho mais de peso do braço. O erro mais comum é ficar no mesmo volume e dar um salto só na última nota.
+
+O outro erro comum: **acelerar** no crescendo e **atrasar** no diminuendo. Volume e andamento são independentes. Deixe o pulso firme enquanto o volume muda.`,
+    },
+    {
+      kind: 'example',
+      title: 'Uma frase com direção',
+      steps: [
+        { say: 'Sem direção: todas as notas no mesmo volume.', play: { bpm: 72, steps: [60, 62, 64, 65, 67, 65, 64, 62, 60].map((m, i) => ({ midis: [m], beats: i === 8 ? 2 : 1, velocity: 0.6 })) } },
+        { say: 'Com direção: cresce até o Sol e se acomoda no Dó, que sai leve.', play: { bpm: 72, steps: [60, 62, 64, 65, 67, 65, 64, 62, 60].map((m, i) => ({ midis: [m], beats: i === 8 ? 2 : 1, velocity: [0.3, 0.42, 0.54, 0.66, 0.85, 0.68, 0.52, 0.4, 0.28][i] })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l15-cresc', exercise: quickTimed('Crescendo em 5 notas', 'Suba o pentacorde de p até f, cada nota um pouco mais forte, a 66 BPM. Precisa do piano conectado e calibrado. Quatro passadas boas seguidas.', (rng) => melodyTask(pick(rng, ['C4 D4 E4 F4 | G4:4', 'G4 A4 B4 C5 | D5:4']), { bpm: 66 }), { reps: 4, dynamics: 'crescendo' }) },
+    { kind: 'exercise', id: 'l15-dim', exercise: quickTimed('Diminuendo em 5 notas', 'Desça de f até p, sem atrasar. Quatro passadas boas seguidas.', (rng) => melodyTask(pick(rng, ['G4 F4 E4 D4 | C4:4', 'D5 C5 B4 A4 | G4:4']), { bpm: 66 }), { reps: 4, dynamics: 'diminuendo' }) },
+    {
+      kind: 'text',
+      title: 'Queda e rolagem de punho',
+      body: `A frase mais curta que existe tem **duas notas** ligadas, e ela aparece o tempo todo: suspiros, finais de frase, pares de notas vizinhas. O gesto para tocá-la é a **queda e rolagem** do punho:
+
+- **Queda**: o punho, levemente baixo, deixa o peso do braço cair no primeiro dedo. A 1ª nota sai cheia.
+- **Rolagem**: o punho rola para cima e para a frente enquanto o segundo dedo toca. A 2ª nota sai **mais leve** e **mais curta**, e a mão sai da tecla no movimento.
+
+É um gesto só, como um "ufa": pesa e solta. Ele ensina a mão a fazer o fim de frase sem bater e evita tensão, porque o punho nunca fica travado.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'saude',
+      title: 'o punho se move',
+      body: 'Punho travado é o caminho mais curto para a dor. Se o punho fica duro durante os pares, exagere a rolagem por alguns minutos, bem devagar, e só depois volte ao tamanho normal do gesto.',
+    },
+    {
+      kind: 'example',
+      title: 'Pares ligados',
+      steps: [
+        { say: 'Mi cai com peso, Ré sai leve e curto.', keys: [64, 62], play: { bpm: 72, steps: [{ midis: [64], beats: 1, velocity: 0.8 }, { midis: [62], beats: 0.6, velocity: 0.4 }, { midis: [], beats: 1.4 }] } },
+        { say: 'Três pares seguidos: pesa, solta; pesa, solta.', play: { bpm: 72, steps: [[67, 65], [65, 64], [64, 62]].flatMap(([a, b]) => [{ midis: [a], beats: 1, velocity: 0.8 }, { midis: [b], beats: 0.6, velocity: 0.4 }, { midis: [], beats: 0.4 }]) } },
+      ],
+    },
+    {
+      kind: 'exercise',
+      id: 'l15-pares',
+      exercise: quickTimed('Pares ligados', 'Duas notas ligadas: a 2ª mais leve que a 1ª, sem buraco entre elas. Quatro passadas boas seguidas, cada uma com um par novo. O app mede a ligação e o volume; a 2ª nota curta fica por sua conta.', (rng) => melodyTask(pick(rng, PAIRS), { bpm: 66 }), { reps: 4, articulation: 'legato', dynamics: 'diminuendo' }),
+    },
+    { kind: 'exercise', id: 'l15-quiz', exercise: quiz('Frase e dinâmica', 'Cinco perguntas rápidas.', PHRASE) },
+  ],
+  review: [choice(PHRASE, 'frase'), toneSemi],
+  checkpoint: [
+    quickTimed('Crescendo', 'Pentacorde subindo de p até f, a 66 BPM.', (rng) => melodyTask(pick(rng, ['C4 D4 E4 F4 | G4:4', 'G4 A4 B4 C5 | D5:4']), { bpm: 66 }), { dynamics: 'crescendo' }),
+    quickTimed('Diminuendo', 'Pentacorde descendo de f até p, a 66 BPM.', (rng) => melodyTask(pick(rng, ['G4 F4 E4 D4 | C4:4', 'D5 C5 B4 A4 | G4:4']), { bpm: 66 }), { dynamics: 'diminuendo' }),
+    quickTimed('Par ligado', 'Um par novo: ligado, 2ª mais leve.', (rng) => melodyTask(pick(rng, PAIRS), { bpm: 66 }), { articulation: 'legato', dynamics: 'diminuendo' }),
+  ],
+  exit: [choice(PHRASE, 'frase'), readBoth],
+};
+
+const TRANSPOSE: ChoiceQuestion[] = [
+  { q: 'Transpor uma melodia é…', options: ['Tocá-la começando em outra nota, com os mesmos intervalos', 'Tocá-la de trás para frente', 'Tocá-la mais rápido'], answer: 0, why: 'O desenho (subidas, descidas e tamanhos de passo) fica igual; muda só o ponto de partida.' },
+  { q: 'Da posição de Dó para a de Sol, cada nota sobe…', options: ['Uma 5ª', 'Uma 3ª', 'Uma oitava'], answer: 0, why: 'Dó → Sol é uma 5ª: Dó vira Sol, Ré vira Lá, Mi vira Si…' },
+  { q: 'Na posição de Sol, o Mi da posição de Dó vira…', options: ['Si', 'Lá', 'Dó'], answer: 0, why: 'Mesmo dedo (3): Mi em Dó, Si em Sol.' },
+  { q: 'Ao transpor de posição para posição, o dedilhado…', options: ['Fica o mesmo', 'Muda inteiro', 'Inverte'], answer: 0, why: 'Mesma forma, mesmos dedos: é por isso que transpor na posição fixa é fácil.' },
+];
+
+const ODE_4 = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4 D4 D4:2';
+
+const l16: Lesson = {
+  n: 16,
+  id: 'l16',
+  title: 'Checkpoint da unidade e projeto "Leia e transponha"',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 2, sem dicas.',
+    'Consigo transpor uma melodia da posição de Dó para a de Sol, lendo a original.',
+    'Consigo tocar a Ode à Alegria com as duas mãos na pauta dupla.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que você já sabe',
+      body: `Nesta unidade você passou a ler: a clave de Sol com as âncoras Dó4, Sol4, Dó5 e Sol5; a clave de Fá com Sol2, Dó3, Fá3 e o Dó central; os intervalos de 2ª a 5ª como formas na pauta e na mão; o 3/4, a mínima pontuada e as ligaduras; tom, semitom e os acidentes; a posição de Sol com o Fá♯; as mãos juntas com bordão; e a frase com direção.
+
+O checkpoint de hoje mistura tudo, com perguntas novas e sem dicas. Ele também puxa coisas da Unidade 1, porque o que não é revisado se apaga.`,
+    },
+    {
+      kind: 'text',
+      title: 'Transpor: a mesma forma em outro lugar',
+      body: `**Transpor** é tocar a mesma melodia começando em outra nota. O que se mantém é o **desenho**: cada subida, cada descida e o tamanho de cada passo. Por isso uma melodia transposta é imediatamente reconhecível, só fica mais aguda ou mais grave.
+
+Na posição fixa de cinco dedos, transpor fica simples: a melodia que você tocava na posição de Dó, com polegar no Dó4, é tocada **com os mesmos dedos** na posição de Sol, com polegar no Sol4. Cada nota sobe uma **5ª**: Dó vira Sol, Ré vira Lá, Mi vira Si, Fá vira Dó, Sol vira Ré.
+
+O segredo é **não traduzir nota por nota**. Leia a pauta original pelo desenho, como na lição 9, e deixe os dedos fazerem o mesmo caminho no lugar novo. Ler "Mi... então é Si" a cada nota é lento demais; ler "começa no dedo 3, repete, sobe um, sobe um" funciona em qualquer posição.
+
+Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de Sol: as cinco notas Sol, Lá, Si, Dó, Ré são todas brancas.`,
+    },
+    {
+      kind: 'example',
+      title: 'Ode à Alegria em Dó e em Sol',
+      steps: [
+        { say: 'Em Dó: polegar no Dó4. Começa no dedo 3 (Mi).', keys: [60, 64], play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62].map((m, i) => ({ midis: [m], beats: i === 14 ? 2 : 1 })) } },
+        { say: 'Em Sol: polegar no Sol4, mesmos dedos. Começa no dedo 3 (Si).', keys: [67, 71], play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62].map((m, i) => ({ midis: [m + 7], beats: i === 14 ? 2 : 1 })) } },
+      ],
+    },
+    {
+      kind: 'exercise',
+      id: 'l16-transpor',
+      exercise: quickTimed('Transponha para Sol', 'A pauta mostra uma melodia na posição de Dó. Toque-a na posição de Sol, polegar no Sol4, com os mesmos dedos. 60 BPM, duas passadas boas.', (rng) => transposedTask(pick(rng, READ_R), 7, { bpm: 60, caption: 'Escrito em Dó. Toque em Sol: cada nota uma 5ª acima.' }), { reps: 2 }),
+    },
+    { kind: 'exercise', id: 'l16-quiz', exercise: quiz('Transposição', 'Quatro perguntas rápidas.', TRANSPOSE, 0.75) },
+    { kind: 'song', songId: 'u02-ode-me', why: 'O projeto final da unidade: a Ode à Alegria inteira na pauta dupla, com as duas mãos.' },
+  ],
+  review: [readBoth, intervalUp, toneSemi, intervalEar25, choice([...PAUTA, ...CLAVE_FA, ...INTERVALS, ...METER_3, ...ACCIDENTALS, ...PHRASE, ...TRANSPOSE])],
+  checkpoint: [
+    {
+      kind: 'items',
+      title: 'Leitura, intervalos e ouvido',
+      how: '20 perguntas misturadas das lições 9 a 15, com algumas da Unidade 1. Meta: 85%.',
+      gen: mix([readTreble, readBass, intervalUp, intervalStaff, toneSemi, intervalEar25, readSharps, choice([...PAUTA, ...CLAVE_FA, ...INTERVALS, ...METER_3, ...ACCIDENTALS, ...TRANSPOSE])]),
+      count: 20,
+      low: 36,
+      high: 84,
+      labels: 'off',
+      pass: { accuracy: 0.85 },
+    },
+    quickTimed('Ritmo em 3/4', '4 compassos sorteados a 76 BPM.', rhythm3(4, 76)),
+    quickTimed('Transposição', 'Ode à Alegria, primeira frase, escrita em Dó. Toque em Sol, a 72 BPM. Meta: 90%.', () => transposedTask(ODE_4, 7, { bpm: 72 }), { pass: { accuracy: 0.9 } }),
+  ],
+  project: {
+    title: 'Leia e transponha',
+    brief: `Duas entregas. Primeiro, toque a **Ode à Alegria inteira com as duas mãos** (16 compassos, a 80 BPM) no "Tocar a música", lendo a pauta dupla. Depois, **transponha a melodia para Sol**: mão direita na posição de Sol, lendo a partitura em Dó. Se quiser ir além, transponha também o bordão: Sol2 e Ré3 na mão esquerda.`,
+    steps: [
+      'Toque a Ode à Alegria com as duas mãos no modo Estudar até não errar notas.',
+      'Passe para o "Tocar junto" a 70 BPM e suba para 80 BPM.',
+      'Na posição de Sol, toque só a mão direita da primeira frase, olhando a partitura em Dó.',
+      'Faça a transposição dos 8 compassos no exercício abaixo.',
+      'Opcional: some o bordão transposto (Sol2 no lugar de Dó3, Ré3 no lugar de Sol3).',
+    ],
+    rubric: [
+      'A Ode à Alegria passou a 80 BPM com 85% ou mais das notas.',
+      'A transposição saiu no tempo, sem parar para traduzir nota por nota.',
+      'As mãos desceram juntas no 1 de cada compasso.',
+      'As frases terminaram leves, com respiração entre elas.',
+    ],
+    exercise: { kind: 'timed', title: 'Transposição, 8 compassos', how: 'Ode à Alegria escrita em Dó; toque em Sol, a 72 BPM.', gen: () => transposedTask(ODE_8_R, 7, { bpm: 72, caption: 'Escrito em Dó. Toque em Sol, com os mesmos dedos.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
+  },
+  exit: [readBoth, intervalUp, choice(TRANSPOSE, 'transposicao')],
+};
+
 // ---------- músicas ----------
 
 const odeLeft: SongSpec = {
@@ -715,7 +896,7 @@ const unit: Unit = {
   title: 'Pauta dupla e intervalos',
   goal: 'Ler nas claves de Sol e de Fá, tocar intervalos de 2ª a 5ª e tocar com as duas mãos juntas.',
   technique: 'Pentacordes de Dó e de Sol, mãos separadas e depois juntas, legato, subindo de 60 rumo a 100 BPM em semínimas (referência: RCM Preparatory A). Nos dias sem lição nova, 5 minutos de leitura de notas no treino.',
-  lessons: [l09, l10, l11, l12, l13, l14],
+  lessons: [l09, l10, l11, l12, l13, l14, l15, l16],
   songs: [odeLeft, ode8, valsa],
   final: {
     songId: 'u02-ode-me',

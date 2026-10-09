@@ -89,3 +89,11 @@ export function tiedMelodyTask(text: string, opts: { bpm: number; beatsPerBar?: 
   });
   return { ...base, events };
 }
+
+/** Transposição: a pauta mostra a melodia escrita em `text`; o que conta é tocá-la `semitones` acima (ou abaixo). */
+export function transposedTask(text: string, semitones: number, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string }): TimedTask {
+  const base = melodyTask(text, opts);
+  const events = base.events.map((e) => ({ ...e, midi: e.midi === null ? null : e.midi + semitones }));
+  const [low, high] = rangeOf(events.flatMap((e) => (e.midi === null ? [] : [e.midi])), [base.low, base.high]);
+  return { ...base, events, low, high, transpose: semitones };
+}

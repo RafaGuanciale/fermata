@@ -82,6 +82,8 @@ export interface TimedTask {
   high: Midi;
   /** Texto curto acima da pauta. */
   caption?: string;
+  /** Transposição: a pauta mostra a melodia original e o que se toca fica `transpose` semitons acima (ou abaixo, se negativo). */
+  transpose?: number;
 }
 
 // ---------- exercícios ----------

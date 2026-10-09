@@ -188,13 +188,14 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
       return at;
     });
   }, [task.display]);
+  const shift = task.transpose ?? 0;
   let current = 0;
   displayStarts.forEach((b, i) => {
     if (phase === 'playing' && b * beatMs - 120 <= elapsed) current = i;
   });
   const states: NoteState[] = task.display.map((d, i) => {
     if (d.midi === null && !anyKey) return 'plain';
-    const ei = task.events.findIndex((e) => Math.abs(e.beat - displayStarts[i]) < 1e-6 && (e.midi === null || e.midi === d.midi));
+    const ei = task.events.findIndex((e) => Math.abs(e.beat - displayStarts[i]) < 1e-6 && (e.midi === null || (d.midi !== null && e.midi === d.midi + shift)));
     const j = ei >= 0 ? live?.notes[ei] : null;
     if (j) return j.grade === 'perfect' || j.grade === 'good' ? 'hit' : j.grade === 'off' ? 'late' : 'miss';
     if (phase === 'done') return 'plain';
@@ -204,7 +205,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
 
   const marks: Partial<Record<number, KeyMark>> = {};
   const next = task.display[current]?.midi;
-  if (hints && !anyKey && next !== null && next !== undefined && phase !== 'done') marks[next] = 'lit';
+  if (hints && !anyKey && next !== null && next !== undefined && phase !== 'done') marks[next + shift] = 'lit';
 
   const countdown = phase === 'countin' && track ? Math.max(1, Math.ceil(-elapsed / track.beatMs)) : null;
 

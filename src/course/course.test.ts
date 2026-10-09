@@ -8,7 +8,7 @@ import {
 import { n, parseLine, ptName, seeded } from './music';
 import { afterCheckpoint, canMaster, lessonKey, lessonState, nextLesson, rowsById, songPassed, unitComplete, warmupItems } from './progress';
 import { checkSong, songXml } from './song';
-import { melodyTask, rhythmTask, tiedMelodyTask } from './tasks';
+import { melodyTask, rhythmTask, tiedMelodyTask, transposedTask } from './tasks';
 import type { Exercise, Item, ItemGen, Unit } from './types';
 
 const DAY = 86400000;
@@ -44,6 +44,11 @@ describe('escrita de melodias', () => {
     const tie = tiedMelodyTask('C4 E4:2~ | E4 D4 C4', { bpm: 60, beatsPerBar: 3 });
     expect(tie.display.map((d) => [d.midi, d.beats])).toEqual([[60, 1], [64, 2], [64, 1], [62, 1], [60, 1]]);
     expect(tie.events.map((e) => [e.midi, e.beat, e.beats])).toEqual([[60, 0, 1], [64, 1, 3], [62, 4, 1], [60, 5, 1]]);
+    const tr = transposedTask('C4 D4 E4:2', 7, { bpm: 60 });
+    expect(tr.display.map((d) => d.midi)).toEqual([60, 62, 64]);
+    expect(tr.events.map((e) => e.midi)).toEqual([67, 69, 71]);
+    expect(tr.transpose).toBe(7);
+    expect(tr.low <= 67 && tr.high >= 71).toBe(true);
   });
 });
 
