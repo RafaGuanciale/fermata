@@ -12,7 +12,7 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
 import { swingBeat } from '../tasks';
-import { articulationScore, dynamicsScore, ioiSd, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
+import { articulationScore, balanceScore, dynamicsScore, ioiSd, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
 
@@ -25,6 +25,8 @@ export interface TimedOutcome {
 
 interface TakeScore {
   r: TakeResult;
+  /** Equilíbrio entre as mãos (fração dos compassos com a melodia acima), null se não medido. */
+  bal: number | null;
   artic: number | null;
   dyn: number | null;
   /** A passada foi sem força medida (teclado da tela ou do computador). */
@@ -141,9 +143,10 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     const dyn = ex.dynamics && cal && vels.length ? dynamicsScore(vels, ex.dynamics, cal) : null;
     const ped = ex.pedal ? pedalScore(task, bpm, pedalRef.current, ex.pedal) : null;
     const even = ex.evenness ? ioiSd(task, bpm, events) : null;
+    const bal = ex.balance !== undefined ? balanceScore(task, bpm, events, ex.balance) : null;
     const need = ex.pass.accuracy;
-    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0) && (ped === null || ped.score >= 0.85) && (even === null || even <= ex.evenness!);
-    const s = { r, artic, dyn, noVelocity, ped, even, ok };
+    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0) && (ped === null || ped.score >= 0.85) && (even === null || even <= ex.evenness!) && (bal === null || bal >= 0.8);
+    const s = { r, artic, dyn, noVelocity, ped, even, bal, ok };
     setScore(s);
     setPhase('done');
     takeRef.current(s);
@@ -277,6 +280,13 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           {score.even !== null && ex.evenness && (
             <p className="runner__note">
               Uniformidade: variação de {Math.round(score.even)} ms entre as notas (meta: até {ex.evenness} ms){score.even > ex.evenness ? '. Pense em notas iguais, como gotas: nem correr na passagem do polegar, nem frear depois.' : '.'}
+            </p>
+          )}
+          {ex.balance !== undefined && (
+            <p className="runner__note">
+              {score.bal === null
+                ? 'O equilíbrio entre as mãos só é medido com o piano conectado. Esta passada contou só as notas.'
+                : `Equilíbrio: a melodia ficou acima do acompanhamento em ${pct(score.bal)} dos compassos (meta: 80%)${score.bal < 0.8 ? '. Deixe a esquerda mais leve e a direita cantando.' : '.'}`}
             </p>
           )}
           {ex.noExtras && score.r.extras > 0 && (

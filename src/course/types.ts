@@ -26,7 +26,7 @@ export type Accept =
       bass?: Pc;
       /** Classes que podem faltar (a 5ª de uma tétrade em posição próxima). */
       optional?: Pc[];
-      /** Condução de vozes: o movimento desde o acorde anterior (soma dos semitons) pode passar do ótimo só por esta folga. Exige uma nota por classe. */
+      /** Condução de vozes: o movimento desde o acorde anterior (soma dos semitons) pode passar do ótimo só por esta folga. Exige uma nota por classe (mais o baixo, se `bass` vier: ele fica fora da conta). */
       lead?: number;
     }
   /** Apertar todas estas teclas, em qualquer ordem (por exemplo, todos os Fá do teclado). */
@@ -77,6 +77,8 @@ export interface TimedEvent {
   beat: number;
   /** Duração em tempos (para a pauta e para medir legato/staccato). */
   beats: number;
+  /** Mão que toca (tarefas de duas mãos), para medir o equilíbrio entre elas. */
+  hand?: 'r' | 'l';
 }
 
 export interface TimedTask {
@@ -140,6 +142,8 @@ export type Exercise =
       evenness?: number;
       /** Nota a mais derruba a passada (por exemplo, reatacar uma nota ligada). */
       noExtras?: boolean;
+      /** Equilíbrio: a mão direita (melodia) precisa soar pelo menos esta diferença de velocity acima da esquerda, em 80% dos compassos. */
+      balance?: number;
       /** Sobe o BPM a cada passada boa até o alvo (escada). */
       ladder?: { from: number; to: number; step: number };
     })

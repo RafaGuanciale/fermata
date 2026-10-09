@@ -93,9 +93,15 @@ export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[])
     if (chordMatches(accept, held)) {
       const chord = [...held].sort((a, b) => a - b);
       if (accept.lead !== undefined && p.lastChord?.length) {
-        if (chord.length !== accept.pcs.length) return { ...p, misses: p.misses + 1, lastWrong: null, why: `Use ${accept.pcs.length} notas, uma de cada, sem dobrar.` };
-        const moved = voiceMove(p.lastChord, chord);
-        const best = optimalMove(p.lastChord, accept.pcs);
+        // Com baixo pedido, a nota mais grave (o baixo, na esquerda) fica fora da medida: conduzem-se as vozes de cima.
+        const withBass = accept.bass !== undefined && chord.length === accept.pcs.length + 1;
+        const upper = withBass ? chord.slice(1) : chord;
+        const prevUpper = withBass && p.lastChord.length === accept.pcs.length + 1 ? p.lastChord.slice(1) : p.lastChord;
+        if (upper.length !== accept.pcs.length || prevUpper.length !== upper.length) {
+          return { ...p, misses: p.misses + 1, lastWrong: null, why: `Use ${accept.pcs.length} notas em cima, uma de cada${accept.bass !== undefined ? ', e o baixo embaixo' : ', sem dobrar'}.` };
+        }
+        const moved = voiceMove(prevUpper, upper);
+        const best = optimalMove(prevUpper, accept.pcs);
         if (moved > best + accept.lead) {
           return { ...p, misses: p.misses + 1, lastWrong: null, why: `Acorde certo, mas a mão andou ${moved} semitons (o mais curto é ${best}). Segure as notas comuns e ande por grau conjunto.` };
         }
@@ -371,6 +377,27 @@ export function calibrate(soft: number[], loud: number[]): VelocityCalibration |
 /** Força das notas casadas com o esperado, na ordem (para julgar dinâmica). */
 export function matchedVelocities(task: TimedTask, bpm: number, events: CourseEvent[]): number[] {
   return matchEvents(task, bpm, events).flatMap((e) => (e && e.velocity !== undefined ? [e.velocity] : []));
+}
+
+/**
+ * Equilíbrio entre as mãos: por compasso, média de velocity da direita menos a da esquerda (notas casadas).
+ * Devolve a fração dos compassos (com as duas mãos) em que a diferença chega a `minDiff`, ou null sem velocity.
+ */
+export function balanceScore(task: TimedTask, bpm: number, events: CourseEvent[], minDiff: number): number | null {
+  const matched = matchEvents(task, bpm, events);
+  const bars = new Map<number, { r: number[]; l: number[] }>();
+  task.events.forEach((e, i) => {
+    const m = matched[i];
+    if (!m || m.velocity === undefined || !e.hand) return;
+    const b = Math.floor(e.beat / task.beatsPerBar + 1e-9);
+    const slot = bars.get(b) ?? { r: [], l: [] };
+    slot[e.hand].push(m.velocity);
+    bars.set(b, slot);
+  });
+  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+  const both = [...bars.values()].filter((x) => x.r.length && x.l.length);
+  if (!both.length) return null;
+  return both.filter((x) => avg(x.r) - avg(x.l) >= minDiff).length / both.length;
 }
 
 /** Fração das notas na faixa pedida, ou subindo/descendo de nota em nota (crescendo/diminuendo). */

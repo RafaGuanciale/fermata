@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
-import { chordSpelling, echoTransposed, shellChord } from './gens';
+import { chordSpelling, echoTransposed, nonChordTones, shellChord } from './gens';
+import { sightReadingTwoHands, twoHandTask } from './tasks';
+import { balanceScore } from './judge';
 import { swingTask } from './tasks';
 import { chordTargets } from './judge';
 import { cadenceChoice, diatonicSymbol, fieldSequence, harmonizeAny, playCadence } from './gens';
@@ -250,6 +252,48 @@ describe('tétrades, swing e notas-alvo', () => {
     const events = [ev(64, 0), ev(69, 4 * beat - 50), ev(62, 8 * beat + 30), ev(65, 12 * beat)];
     const r = chordTargets(events, backing, 120, 4, 4);
     expect(r).toEqual({ arrivals: 3, hits: 2, ratio: 2 / 3 });
+  });
+});
+
+describe('equilíbrio, quatro vozes e primeira vista com as duas mãos', () => {
+  it('equilíbrio entre as mãos por compasso', () => {
+    const task = twoHandTask('E4 E4 E4 E4 | E4 E4 E4 E4', 'C3:4 | C3:4', { bpm: 60 });
+    const ev = (midi: number, t: number, velocity: number) => ({ midi, t, off: t + 500, velocity });
+    const loud = [0, 1000, 2000, 3000].map((t) => ev(64, t, 90));
+    const soft = [4000, 5000, 6000, 7000].map((t) => ev(64, t, 60));
+    const events = [...loud, ...soft, ev(48, 0, 60), ev(48, 4000, 70)];
+    expect(balanceScore(task, 60, events, 10)).toBe(0.5);
+    expect(balanceScore(task, 60, events.map((e) => ({ ...e, velocity: undefined })), 10)).toBeNull();
+  });
+
+  it('condução com o baixo na esquerda: o baixo fica fora da conta', () => {
+    const item = chordSequence({ sequences: [{ symbols: ['C/C', 'G/B'] }], lead: 2 })(seeded(1));
+    const play = (p: ReturnType<typeof startItem>, keys: number[]) => keys.reduce((q, m, i) => pressItem(q, item, m, keys.slice(0, i + 1)), p);
+    let p = play(startItem(), [48, 60, 64, 67]);
+    p = play(p, [47, 59, 62, 67]);
+    expect(p.done).toBe(true);
+    expect(p.misses).toBe(0);
+  });
+
+  it('notas estranhas', () => {
+    const ex = [{ chord: 'C', notes: [64, 65, 67], strange: [65], kind: 'passagem' as const }];
+    expect(nonChordTones({ examples: ex, ask: 'play' })(seeded(1)).steps).toEqual([{ kind: 'exact', midis: [65] }]);
+    for (let seed = 1; seed < 10; seed++) {
+      const c = nonChordTones({ examples: ex, ask: 'name' })(seeded(seed));
+      expect(c.choices![c.answer!]).toBe('passagem');
+    }
+    const four = chordSequence({ sequences: [{ symbols: ['C', 'F'] }], lead: 2, bass: true })(seeded(1));
+    expect(four.steps[1]).toMatchObject({ kind: 'chord', bass: 5, lead: 2 });
+  });
+
+  it('primeira vista com as duas mãos', () => {
+    for (let seed = 1; seed < 15; seed++) {
+      const t = sightReadingTwoHands(seeded(seed), { tonic: 62, bars: 8, bpm: 60, fifths: 2 });
+      expect(t.events.filter((e) => e.hand === 'l')).toHaveLength(8);
+      expect(t.events.filter((e) => e.hand === 'r').length).toBeGreaterThan(8);
+      const last = t.events.filter((e) => e.beat === 28);
+      expect(last.every((e) => (e.midi! - 62) % 12 === 0)).toBe(true);
+    }
   });
 });
 

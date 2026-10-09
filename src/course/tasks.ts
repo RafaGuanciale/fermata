@@ -69,7 +69,10 @@ export function twoHandTask(right: string, left: string, opts: { bpm: number; be
   return {
     display: r.map((x) => ({ midi: x.midis[0] ?? null, beats: x.beats })),
     clef: 'treble',
-    events: [...r, ...l].flatMap((x) => x.midis.map((m) => ({ midi: m, beat: x.beat, beats: x.beats }))).sort((a, b) => a.beat - b.beat),
+    events: [
+      ...r.flatMap((x) => x.midis.map((m) => ({ midi: m, beat: x.beat, beats: x.beats, hand: 'r' as const }))),
+      ...l.flatMap((x) => x.midis.map((m) => ({ midi: m, beat: x.beat, beats: x.beats, hand: 'l' as const }))),
+    ].sort((a, b) => a.beat - b.beat),
     beatsPerBar: bpb,
     bpm: opts.bpm,
     low: opts.low ?? low,
@@ -173,4 +176,37 @@ export function swingTask(text: string, opts: { bpm: number; beatsPerBar?: numbe
 export function swingTwoHands(right: string, left: string, opts: { bpm: number; beatsPerBar?: number; caption?: string; fifths?: number }): TimedTask {
   const base = twoHandTask(right, left, opts);
   return { ...base, events: base.events.map((e) => ({ ...e, beat: swingBeat(e.beat) })), swing: true };
+}
+
+/**
+ * Primeira vista com as duas mãos: melodia nova na direita (posição de cinco dedos) e, na esquerda, a tônica ou a dominante
+ * em semibreves, escolhida pela nota do tempo forte. Termina com as duas mãos na tônica.
+ */
+export function sightReadingTwoHands(rng: Rng, opts: { tonic: Midi; bars: number; bpm: number; fifths?: number; caption?: string }): TimedTask {
+  const right = sightReadingTask(rng, { tonic: opts.tonic, bars: opts.bars, bpm: opts.bpm, fifths: opts.fifths });
+  const bassT = opts.tonic - 24 + (opts.tonic - 24 < 36 ? 12 : 0);
+  const left: string[] = [];
+  for (let b = 0; b < opts.bars; b++) {
+    const first = right.events.find((e) => Math.abs(e.beat - b * 4) < 1e-6);
+    const deg = first && first.midi !== null ? (((first.midi - opts.tonic) % 12) + 12) % 12 : 0;
+    // Graus 2 e 7 (e o 5 no meio da frase) pedem a dominante; o resto, a tônica.
+    const useV = b < opts.bars - 1 && (deg === 2 || deg === 11 || (deg === 7 && b % 2 === 1));
+    left.push(`${sci(useV ? bassT + 7 - 12 : bassT)}:4`);
+  }
+  const rightText = right.display.map((d) => (d.midi === null ? `r:${d.beats}` : `${sci(d.midi)}:${d.beats}`));
+  // Reconstrói a linha da direita com barras a cada 4 tempos.
+  const bars: string[] = [];
+  let acc = 0;
+  let cur: string[] = [];
+  right.display.forEach((d, i) => {
+    cur.push(rightText[i]);
+    acc += d.beats;
+    if (Math.abs(acc - 4) < 1e-6) {
+      bars.push(cur.join(' '));
+      cur = [];
+      acc = 0;
+    }
+  });
+  const t = twoHandTask(bars.join(' | '), left.join(' | '), { bpm: opts.bpm, fifths: opts.fifths, caption: opts.caption ?? 'Primeira vista, mãos juntas: olhe 30 segundos antes (armadura, primeira nota de cada mão, ritmo) e toque sem parar.' });
+  return t;
 }

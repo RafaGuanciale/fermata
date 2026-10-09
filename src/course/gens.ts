@@ -997,7 +997,7 @@ export function nearestVoicing(from: Midi[], pcs: Pc[]): Midi[] {
 }
 
 /** Progressão em sequência (cifras dadas): com `lead`, cada troca precisa andar no máximo o caminho mais curto + `lead` semitons. */
-export function chordSequence(opts: { sequences: { name?: string; symbols: string[] }[]; lead?: number; center?: Midi; voicing?: 'full' | 'guide'; skill?: string }): ItemGen {
+export function chordSequence(opts: { sequences: { name?: string; symbols: string[] }[]; lead?: number; center?: Midi; voicing?: 'full' | 'guide'; /** Exige a fundamental no baixo (quatro vozes: baixo na esquerda, três na direita). */ bass?: boolean; skill?: string }): ItemGen {
   if (opts.voicing === 'guide') return guideSequence(opts);
   return (rng) => {
     const seq = pick(rng, opts.sequences);
@@ -1018,7 +1018,7 @@ export function chordSequence(opts: { sequences: { name?: string; symbols: strin
       hint: chain.map((v, i) => `${chordLabel(seq.symbols[i])} (${v.map((m) => PC_NAMES[pcOf(m)]).join('–')})`).join(' → '),
       steps: seq.symbols.map((s) => {
         const c = parseChord(s);
-        const a: Accept = { kind: 'chord', pcs: c.pcs, bass: c.bass };
+        const a: Accept = { kind: 'chord', pcs: c.pcs, bass: c.bass ?? (opts.bass ? c.root : undefined) };
         if (opts.lead !== undefined) a.lead = opts.lead;
         return a;
       }),
@@ -1267,6 +1267,40 @@ export function shellChord(opts: { symbols: string[]; skill?: string }): ItemGen
       hint: `${ptName(`${sp[0]}4`)} embaixo, ${ptName(`${sp[1]}4`)} e ${ptName(`${sp[3]}4`)} em cima.`,
       steps: [{ kind: 'chord', pcs: [c.root, third, seventh], bass: c.root }],
       skill: opts.skill ?? 'shell',
+    };
+  };
+}
+
+export type StrangeKind = 'passagem' | 'bordadura' | 'apojatura' | 'retardo' | 'antecipação' | 'escapada';
+
+/** Notas estranhas: a pauta mostra uma melodia sobre um acorde; você toca só as notas fora do acorde, ou diz o tipo. */
+export function nonChordTones(opts: { examples: { chord: string; notes: Midi[]; strange: Midi[]; kind: StrangeKind }[]; ask: 'play' | 'name'; skill?: string }): ItemGen {
+  const kinds: StrangeKind[] = ['passagem', 'bordadura', 'apojatura', 'retardo', 'antecipação', 'escapada'];
+  return (rng) => {
+    const ex = pick(rng, opts.examples);
+    const chord = voiced(ex.chord, 60).slice(0, 1).concat(voiced(ex.chord, 48).slice(1));
+    const listen: Listen = { bpm: 72, steps: ex.notes.map((m, i) => ({ midis: i === 0 ? [...chord, m] : [m], beats: 1 })) };
+    const base = { staff: { notes: ex.notes, clef: 'treble' as const }, listen, symbol: chordLabel(ex.chord), skill: opts.skill ?? 'notas-estranhas' };
+    if (opts.ask === 'play') {
+      return {
+        ...base,
+        prompt: 'Toque só as notas estranhas ao acorde, em ordem',
+        detail: `O acorde é ${chordLabel(ex.chord)} (${spelledHint(ex.chord) ?? ''}). Quais notas da melodia ficam fora dele?`,
+        hintKeys: ex.strange,
+        hint: `${ex.strange.map((m) => nameOf(m)).join(', ')}: ${ex.kind}.`,
+        steps: ex.strange.map((m) => ({ kind: 'exact', midis: [m] }) as Accept),
+      };
+    }
+    const options = shuffle(rng, kinds).slice(0, 3);
+    if (!options.includes(ex.kind)) options[Math.floor(rng() * 3)] = ex.kind;
+    return {
+      ...base,
+      prompt: 'Que tipo de nota estranha aparece aqui?',
+      detail: `Acorde ${chordLabel(ex.chord)}.`,
+      choices: options,
+      answer: options.indexOf(ex.kind),
+      hint: `${ex.strange.map((m) => nameOf(m)).join(', ')}: ${ex.kind}.`,
+      steps: [],
     };
   };
 }
