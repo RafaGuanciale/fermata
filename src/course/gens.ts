@@ -197,7 +197,16 @@ export function parseChord(symbol: string): { root: Pc; pcs: Pc[]; bass?: Pc } {
 }
 
 /** Grafia da cifra para a tela: "Bb7M" → "B♭7M". */
-export const chordLabel = (symbol: string) => symbol.replace(/#/g, '♯').replace(/b(?=\d|$|\/|m|7|\()/g, '♭');
+export const chordLabel = (symbol: string) => symbol.replace(/#/g, '♯').replace(/([A-G])b/g, '$1♭').replace(/\(b/g, '(♭');
+
+/** Notas de uma tríade com a grafia certa ("Mi♭, Sol♭, Si♭"), ou null se a cifra não é uma tríade simples. */
+function spelledHint(symbol: string): string | null {
+  try {
+    return triadSpelling(symbol.split('/')[0]).map((x) => ptName(`${x}4`)).join(', ');
+  } catch {
+    return null;
+  }
+}
 
 /** "Toque o acorde de Fá maior" a partir de cifras. Com `bass`, a inversão é exigida. */
 export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requireBass?: boolean; omitFifth?: boolean; skill?: string }): ItemGen {
@@ -214,7 +223,7 @@ export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requ
       prompt: 'Toque o acorde',
       symbol: chordLabel(symbol),
       hintKeys,
-      hint: c.pcs.map((p) => PC_NAMES[p]).join(', '),
+      hint: spelledHint(symbol) ?? c.pcs.map((p) => PC_NAMES[p]).join(', '),
       steps: [accept],
       skill: opts.skill ?? 'acorde',
     };
@@ -832,6 +841,9 @@ export function qualityByEar(opts: { from: string[]; intervals: string[]; harmon
   };
 }
 
+/** "a, b ou c". */
+const orList = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ou ${xs[xs.length - 1]}`);
+
 const TRIAD_PT: Record<string, string> = { '': 'maior', m: 'menor', dim: 'diminuta', aug: 'aumentada' };
 
 /** O app toca uma tríade; você toca uma tríade da mesma qualidade sobre outra fundamental (no estado fundamental). */
@@ -845,12 +857,152 @@ export function chordQualityByEar(opts: { qualities: ('' | 'm' | 'dim' | 'aug')[
     const triad = ivs.map((x) => root + x);
     return {
       prompt: `Ouça o acorde e toque um da mesma qualidade com fundamental em ${PC_NAMES[pcOf(ans)]}`,
-      detail: `Pode ser ${opts.qualities.map((x) => TRIAD_PT[x]).join(' ou ')}. A fundamental embaixo.`,
+      detail: `Pode ser ${orList(opts.qualities.map((x) => TRIAD_PT[x]))}. A fundamental embaixo.`,
       listen: { bpm: 72, steps: [{ midis: triad, beats: 2 }, ...triad.map((m) => ({ midis: [m], beats: 0.5 })), { midis: triad, beats: 2 }] },
       hintKeys: ivs.map((x) => ans + x),
-      hint: `Tríade ${TRIAD_PT[q]}: ${ivs.map((x) => PC_NAMES[pcOf(ans + x)]).join(', ')}.`,
+      hint: `Tríade ${TRIAD_PT[q]}: ${spelledHint(SHARP_NAMES[pcOf(ans)] + q) ?? ivs.map((x) => PC_NAMES[pcOf(ans + x)]).join(', ')}.`,
       steps: [{ kind: 'chord', pcs: ivs.map((x) => pcOf(ans + x)), bass: pcOf(ans) }],
       skill: opts.skill ?? 'qualidade-ouvido',
+    };
+  };
+}
+
+// ---------- tríades soletradas, inversões e condução (Unidade 6) ----------
+
+const TRIAD_IVS: Record<string, [string, string]> = { '': ['3M', '5J'], m: ['3m', '5J'], dim: ['3m', '5d'], '°': ['3m', '5d'], aug: ['3M', '5A'], '+': ['3M', '5A'] };
+const CHORD_PT: Record<string, string> = { '': 'maior', m: 'menor', dim: 'diminuto', '°': 'diminuto', aug: 'aumentado', '+': 'aumentado' };
+
+/** Tríade soletrada: "F#m" → ["F#", "A", "C#"]; "Bdim" → ["B", "D", "F"]. */
+export function triadSpelling(symbol: string): string[] {
+  const m = /^([A-G](?:#|b)?)(m|dim|°|aug|\+)?$/.exec(symbol);
+  if (!m) throw new Error(`Tríade inválida: ${symbol}`);
+  const [third, fifth] = TRIAD_IVS[m[2] ?? ''];
+  const root = `${m[1]}4`;
+  return [root, spellInterval(root, third), spellInterval(root, fifth)].map((x) => x.replace(/-?\d+$/, ''));
+}
+
+/** "F#m" → "Fá♯ menor". */
+export function triadName(symbol: string): string {
+  const m = /^([A-G](?:#|b)?)(.*)$/.exec(symbol)!;
+  return `${ptName(m[1] + '4')} ${CHORD_PT[m[2]] ?? m[2]}`;
+}
+
+/** Soletre: "Quais são as notas de F♯m?" A grafia certa, a de outra qualidade e uma com a letra trocada. */
+export function spellTriadChoice(opts: { chords: string[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const symbol = pick(rng, opts.chords);
+    const m = /^([A-G](?:#|b)?)(.*)$/.exec(symbol)!;
+    const q = m[2];
+    const right = triadSpelling(symbol);
+    const otherQ = q === '' ? 'm' : q === 'm' ? '' : q === 'dim' ? 'm' : '';
+    const other = triadSpelling(m[1] + otherQ);
+    // Letra trocada: a mesma tecla da 3ª escrita com a letra vizinha (Fá♯–Si♭–Dó♯ no lugar de Fá♯–Lá♯–Dó♯).
+    const third = n(`${right[1]}4`);
+    const letters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    const li = letters.indexOf(right[1][0]);
+    let wrong: string[] | null = null;
+    for (const k of [1, -1]) {
+      const L = letters[(li + k + 7) % 7];
+      const base = LETTER_PC[L];
+      const d = ((pcOf(third) - base + 18) % 12) - 6;
+      if (Math.abs(d) <= 1) {
+        wrong = [right[0], L + (d > 0 ? '#' : d < 0 ? 'b' : ''), right[2]];
+        break;
+      }
+    }
+    if (!wrong) {
+      // Sem enarmônica simples para a 3ª: a terceira opção muda a 5ª (vira diminuta ou aumentada).
+      const fifth = n(`${right[2]}4`);
+      const alt = spellWith(fifth + (q === 'dim' || q === '°' ? 1 : -1), right[2][0], 4);
+      if (alt) wrong = [right[0], right[1], alt.replace(/-?\d+$/, '')];
+    }
+    const fmt = (xs: string[]) => xs.map((x) => ptName(`${x}4`)).join(', ');
+    const options = [fmt(right), fmt(other), ...(wrong ? [fmt(wrong)] : [])].filter((x, i, a) => a.indexOf(x) === i);
+    const shuffled = shuffle(rng, options);
+    return {
+      prompt: `Quais são as notas de ${chordLabel(symbol)}?`,
+      detail: triadName(symbol),
+      choices: shuffled,
+      answer: shuffled.indexOf(fmt(right)),
+      hint: `${fmt(right)}: uma letra sim, outra não (${right.map((x) => ptName(`${x[0]}4`)).join('–')}), e as terças dão a qualidade.`,
+      steps: [],
+      skill: opts.skill ?? 'soletrar-triade',
+    };
+  };
+}
+
+const INV_PT = ['posição fundamental', '1ª inversão', '2ª inversão'];
+
+/** "Toque Ré menor na 1ª inversão": a cifra com barra (Dm/F) aparece junto; o baixo é exigido. */
+export function inversionChord(opts: { chords: string[]; inversions: (0 | 1 | 2)[]; showSlash?: boolean; skill?: string }): ItemGen {
+  return (rng) => {
+    const symbol = pick(rng, opts.chords);
+    const inv = pick(rng, opts.inversions);
+    const sp = triadSpelling(symbol);
+    const c = parseChord(symbol);
+    const slash = inv === 0 ? symbol : `${symbol}/${sp[inv]}`;
+    const order = [...sp.slice(inv), ...sp.slice(0, inv)];
+    return {
+      prompt: `Toque ${triadName(symbol)} na ${INV_PT[inv]}`,
+      symbol: opts.showSlash === false ? undefined : chordLabel(slash),
+      detail: inv === 0 ? 'Fundamental no baixo.' : `${inv === 1 ? 'A 3ª' : 'A 5ª'} no baixo.`,
+      hint: `De baixo para cima: ${order.map((x) => ptName(`${x}4`)).join(', ')}.`,
+      steps: [{ kind: 'chord', pcs: c.pcs, bass: c.pcs[inv] }],
+      skill: opts.skill ?? 'inversao',
+    };
+  };
+}
+
+/** Voicing mais perto de `from` com estas classes (uma nota por classe). */
+export function nearestVoicing(from: Midi[], pcs: Pc[]): Midi[] {
+  const voices = [...from].sort((a, b) => a - b);
+  let best: Midi[] = [];
+  let bestCost = Infinity;
+  const go = (rest: Pc[], i: number, acc: number, used: Midi[]) => {
+    if (acc >= bestCost) return;
+    if (i === voices.length) {
+      if (new Set(used).size === used.length) {
+        bestCost = acc;
+        best = [...used].sort((a, b) => a - b);
+      }
+      return;
+    }
+    rest.forEach((pc, k) => {
+      const v = voices[i];
+      const up = v + ((pc - pcOf(v) + 12) % 12);
+      for (const t of [up, up - 12]) go([...rest.slice(0, k), ...rest.slice(k + 1)], i + 1, acc + Math.abs(t - v), [...used, t]);
+    });
+  };
+  go(pcs, 0, 0, []);
+  return best;
+}
+
+/** Progressão em sequência (cifras dadas): com `lead`, cada troca precisa andar no máximo o caminho mais curto + `lead` semitons. */
+export function chordSequence(opts: { sequences: { name?: string; symbols: string[] }[]; lead?: number; center?: Midi; skill?: string }): ItemGen {
+  return (rng) => {
+    const seq = pick(rng, opts.sequences);
+    const first = parseChord(seq.symbols[0]);
+    const center = opts.center ?? 60;
+    const root = center - 5 + ((first.root - pcOf(center - 5) + 12) % 12);
+    let cur = first.pcs.map((p) => root + ((p - first.root + 12) % 12)).sort((a, b) => a - b);
+    const chain = [cur];
+    for (const s of seq.symbols.slice(1)) {
+      cur = nearestVoicing(cur, parseChord(s).pcs);
+      chain.push(cur);
+    }
+    return {
+      prompt: opts.lead !== undefined ? 'Toque a progressão conduzindo as vozes' : 'Toque os acordes, em ordem',
+      symbol: seq.symbols.map(chordLabel).join(' – '),
+      detail: [seq.name, opts.lead !== undefined ? 'Três notas por acorde. Notas comuns ficam; as outras andam o mínimo.' : 'Qualquer posição; o baixo é exigido nas cifras com barra.'].filter(Boolean).join(' '),
+      hintKeys: chain[0],
+      hint: chain.map((v, i) => `${chordLabel(seq.symbols[i])} (${v.map((m) => PC_NAMES[pcOf(m)]).join('–')})`).join(' → '),
+      steps: seq.symbols.map((s) => {
+        const c = parseChord(s);
+        const a: Accept = { kind: 'chord', pcs: c.pcs, bass: c.bass };
+        if (opts.lead !== undefined) a.lead = opts.lead;
+        return a;
+      }),
+      skill: opts.skill ?? (opts.lead !== undefined ? 'conducao' : 'sequencia-acordes'),
     };
   };
 }

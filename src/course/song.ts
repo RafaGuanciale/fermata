@@ -100,9 +100,11 @@ export function songXml(song: SongSpec): string {
     const r = ri.map((i) => right[i]);
     let xml = `<measure number="${b}">`;
     if (b === 1) {
-      xml += `<attributes><divisions>${DIV}</divisions><key><fifths>${song.fifths}</fifths></key><time><beats>${song.beatsPerBar}</beats><beat-type>4</beat-type></time>`;
+      const time = song.time ?? { beats: song.beatsPerBar, beatType: 4 };
+      const compound = time.beatType === 8 && time.beats % 3 === 0;
+      xml += `<attributes><divisions>${DIV}</divisions><key><fifths>${song.fifths}</fifths></key><time><beats>${time.beats}</beats><beat-type>${time.beatType}</beat-type></time>`;
       xml += staves === 2 ? '<staves>2</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef>' : '<clef><sign>G</sign><line>2</line></clef>';
-      xml += `</attributes><direction placement="above"><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>${song.bpm}</per-minute></metronome></direction-type><sound tempo="${song.bpm}"/></direction>`;
+      xml += `</attributes><direction placement="above"><direction-type><metronome>${compound ? `<beat-unit>quarter</beat-unit><beat-unit-dot/><per-minute>${Math.round(song.bpm / 1.5)}</per-minute>` : `<beat-unit>quarter</beat-unit><per-minute>${song.bpm}</per-minute>`}</metronome></direction-type><sound tempo="${song.bpm}"/></direction>`;
     }
     xml += r.map((p, k) => noteXml(p, 1, 1, r.length === 1 && p.beats === song.beatsPerBar, rMarks[ri[k]])).join('');
     if (left) {

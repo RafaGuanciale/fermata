@@ -236,6 +236,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           clef={task.clef}
           durations={task.display.map((d) => d.beats)}
           beatsPerBar={task.beatsPerBar}
+          beatScale={task.compound ? 1.5 : 1}
           fifths={task.fifths}
           label="Pauta do exercício"
         />

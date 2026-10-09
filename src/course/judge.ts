@@ -17,9 +17,41 @@ export interface ItemProgress {
   misses: number;
   done: boolean;
   lastWrong: Midi | null;
+  /** Último acorde aceito (para medir a condução de vozes do próximo). */
+  lastChord?: Midi[];
+  /** Explicação do último erro, quando não é só uma tecla errada (condução de vozes). */
+  why?: string;
 }
 
 export const startItem = (): ItemProgress => ({ step: 0, found: [], misses: 0, done: false, lastWrong: null });
+
+/** Movimento real entre dois acordes com o mesmo número de notas: pareia de baixo para cima e soma os semitons. */
+export function voiceMove(from: Midi[], to: Midi[]): number {
+  const a = [...from].sort((x, y) => x - y);
+  const b = [...to].sort((x, y) => x - y);
+  return a.reduce((s, m, i) => s + Math.abs(m - b[i]), 0);
+}
+
+/** Menor movimento possível de `from` até um acorde com estas classes (uma nota por classe, cada voz vai para a oitava mais perto). */
+export function optimalMove(from: Midi[], pcs: Pc[]): number {
+  const voices = [...from].sort((x, y) => x - y);
+  let best = Infinity;
+  const perm = (rest: Pc[], i: number, acc: number, used: Midi[]) => {
+    if (acc >= best) return;
+    if (i === voices.length) {
+      if (new Set(used).size === used.length) best = acc;
+      return;
+    }
+    rest.forEach((pc, k) => {
+      const v = voices[i];
+      const up = v + ((pc - pcOf(v) + 12) % 12);
+      const cand = [up, up - 12];
+      for (const t of cand) perm([...rest.slice(0, k), ...rest.slice(k + 1)], i + 1, acc + Math.abs(t - v), [...used, t]);
+    });
+  };
+  perm(pcs, 0, 0, []);
+  return best;
+}
 
 function fits(accept: Accept, midi: Midi): boolean {
   switch (accept.kind) {
@@ -42,9 +74,9 @@ export function chordMatches(accept: Extract<Accept, { kind: 'chord' }>, held: M
   return true;
 }
 
-function advance(p: ItemProgress, item: Item): ItemProgress {
+function advance(p: ItemProgress, item: Item, chord?: Midi[]): ItemProgress {
   const step = p.step + 1;
-  return { ...p, step, found: [], lastWrong: null, done: step >= item.steps.length };
+  return { ...p, step, found: [], lastWrong: null, why: undefined, lastChord: chord ?? p.lastChord, done: step >= item.steps.length };
 }
 
 /**
@@ -54,13 +86,24 @@ function advance(p: ItemProgress, item: Item): ItemProgress {
 export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[]): ItemProgress {
   if (p.done || !item.steps.length) return p;
   const accept = item.steps[p.step];
-  if (!fits(accept, midi)) return { ...p, misses: p.misses + 1, lastWrong: midi };
+  if (!fits(accept, midi)) return { ...p, misses: p.misses + 1, lastWrong: midi, why: undefined };
   if (accept.kind === 'chord') {
-    if (chordMatches(accept, held)) return advance(p, item);
+    if (chordMatches(accept, held)) {
+      const chord = [...held].sort((a, b) => a - b);
+      if (accept.lead !== undefined && p.lastChord?.length) {
+        if (chord.length !== accept.pcs.length) return { ...p, misses: p.misses + 1, lastWrong: null, why: `Use ${accept.pcs.length} notas, uma de cada, sem dobrar.` };
+        const moved = voiceMove(p.lastChord, chord);
+        const best = optimalMove(p.lastChord, accept.pcs);
+        if (moved > best + accept.lead) {
+          return { ...p, misses: p.misses + 1, lastWrong: null, why: `Acorde certo, mas a mão andou ${moved} semitons (o mais curto é ${best}). Segure as notas comuns e ande por grau conjunto.` };
+        }
+      }
+      return advance(p, item, chord);
+    }
     // Todas as classes, mas baixo errado: é inversão errada.
     const pcs = new Set(held.map(pcOf));
     if (accept.bass !== undefined && accept.pcs.filter((x) => !accept.optional?.includes(x)).every((x) => pcs.has(x))) return { ...p, misses: p.misses + 1, lastWrong: Math.min(...held) };
-    return { ...p, lastWrong: null };
+    return { ...p, lastWrong: null, why: undefined };
   }
   if (accept.kind === 'all') {
     const found = p.found.includes(midi) ? p.found : [...p.found, midi];

@@ -126,3 +126,27 @@ export function sightReadingTask(rng: Rng, opts: { tonic: Midi; bars: number; bp
   bars.push(`${sci(pos[0])}:4`);
   return melodyTask(bars.join(' | '), { bpm: opts.bpm, fifths: opts.fifths, clef: opts.clef, caption: opts.caption ?? 'Primeira vista: olhe o trecho por alguns segundos e toque sem parar.' });
 }
+
+/**
+ * Compasso composto (6/8): o texto vem em semínimas como na partitura (colcheia = 0.5, semínima pontuada = 1.5, compasso = 3),
+ * e a tarefa conta em semínimas pontuadas: 2 tempos por compasso, `bpm` = semínimas pontuadas por minuto.
+ */
+export function compoundTask(text: string, opts: { bpm: number; clef?: Clef; caption?: string; fifths?: number; low?: Midi; high?: Midi }): TimedTask {
+  const base = melodyTask(text, { ...opts, beatsPerBar: 3 });
+  const k = 2 / 3;
+  return {
+    ...base,
+    display: base.display.map((d) => ({ ...d, beats: d.beats * k })),
+    events: base.events.map((e) => ({ ...e, beat: e.beat * k, beats: e.beats * k })),
+    beatsPerBar: 2,
+    compound: true,
+  };
+}
+
+/** Ritmo em 6/8 sorteado (texto em semínimas, "x" nota e "r" pausa). */
+export function compoundRhythm(pool: string[], bars: number, bpm: number, caption?: string) {
+  return (rng: Rng): TimedTask => {
+    const t = compoundTask(Array.from({ length: bars }, () => pick(rng, pool)).join(' | ').replace(/\bx\b/g, 'C4'), { bpm, caption: caption ?? 'Ritmo em 6/8: toque qualquer tecla no tempo de cada figura. Conte em 2: cada tempo é uma semínima pontuada.' });
+    return { ...t, events: t.events.map((e) => ({ ...e, midi: null })), low: 55, high: 72 };
+  };
+}

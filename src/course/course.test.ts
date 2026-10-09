@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
+import { chordSequence, inversionChord, nearestVoicing, spellTriadChoice, triadSpelling } from './gens';
+import { compoundRhythm, compoundTask } from './tasks';
+import { optimalMove, voiceMove } from './judge';
 import { buildMinorScale, chordQualityByEar, minorChord, minorDegreeSymbol, minorSteps, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellInterval, spellIntervalChoice, spellScale } from './gens';
 import { buildScale, degreeByEar, degreeSymbol, keyFromSignature, scaleDegreeNote, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
 import {
@@ -120,6 +123,60 @@ describe('modo menor e intervalos com qualidade', () => {
     expect(xml.match(/tuplet type="start"/g)).toHaveLength(1);
     expect(xml.match(/tuplet type="stop"/g)).toHaveLength(1);
     expect(xml).toContain('<divisions>12</divisions>');
+  });
+});
+
+describe('tríades, inversões, condução e 6/8', () => {
+  it('soletra tríades e inversões', () => {
+    expect(triadSpelling('F#')).toEqual(['F#', 'A#', 'C#']);
+    expect(triadSpelling('Bdim')).toEqual(['B', 'D', 'F']);
+    expect(triadSpelling('Caug')).toEqual(['C', 'E', 'G#']);
+    expect(triadSpelling('Ebm')).toEqual(['Eb', 'Gb', 'Bb']);
+    const inv = inversionChord({ chords: ['Dm'], inversions: [1] })(seeded(1));
+    expect(inv.symbol).toBe('Dm/F');
+    expect(inv.steps[0]).toEqual({ kind: 'chord', pcs: [2, 5, 9], bass: 5 });
+    for (let seed = 1; seed < 30; seed++) {
+      const c = spellTriadChoice({ chords: ['F#', 'Bb', 'Ebm', 'Bdim', 'Caug', 'A', 'Dm'] })(seeded(seed));
+      expect(c.choices!.length).toBeGreaterThanOrEqual(2);
+      expect(new Set(c.choices).size).toBe(c.choices!.length);
+      expect(c.answer).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it('condução de vozes: movimento real, ótimo e julgamento', () => {
+    expect(voiceMove([60, 64, 67], [59, 62, 67])).toBe(3);
+    expect(optimalMove([60, 64, 67], [7, 11, 2])).toBe(3); // C → G: Si–Ré–Sol
+    expect(optimalMove([59, 62, 67], [9, 0, 4])).toBe(5); // G → Am
+    expect(nearestVoicing([60, 64, 67], [9, 0, 4])).toEqual([60, 64, 69]);
+    const item = chordSequence({ sequences: [{ symbols: ['C', 'G'] }], lead: 2 })(seeded(1));
+    let p = pressItem(startItem(), item, 60, [60]);
+    p = pressItem(p, item, 64, [60, 64]);
+    p = pressItem(p, item, 67, [60, 64, 67]);
+    expect(p.step).toBe(1);
+    // G em posição fundamental lá em cima: anda demais.
+    let far = pressItem(p, item, 67, [67]);
+    far = pressItem(far, item, 71, [67, 71]);
+    far = pressItem(far, item, 74, [67, 71, 74]);
+    expect(far.misses).toBe(1);
+    expect(far.why).toMatch(/andou/);
+    // Si–Ré–Sol: caminho curto.
+    let near = pressItem(p, item, 59, [59]);
+    near = pressItem(near, item, 62, [59, 62]);
+    near = pressItem(near, item, 67, [59, 62, 67]);
+    expect(near.done).toBe(true);
+    expect(near.misses).toBe(0);
+  });
+
+  it('6/8: tempo em semínima pontuada', () => {
+    const t = compoundTask('C4:1 D4:0.5 E4:1.5 | F4:3', { bpm: 60 });
+    expect(t.beatsPerBar).toBe(2);
+    expect(t.compound).toBe(true);
+    expect(t.events.map((e) => e.beat)).toEqual([0, 2 / 3, 1, 2]);
+    const r = compoundRhythm(['x x:0.5 x:1.5'], 2, 50)(seeded(1));
+    expect(r.events.every((e) => e.midi === null)).toBe(true);
+    const xml = songXml({ id: 't', title: 't', composer: 'x', bpm: 90, beatsPerBar: 3, time: { beats: 6, beatType: 8 }, fifths: 0, right: 'C4:1 D4:0.5 E4:1.5', hands: 'direita', pass: { accuracy: 0.85 } });
+    expect(xml).toContain('<beats>6</beats><beat-type>8</beat-type>');
+    expect(xml).toContain('<beat-unit-dot/><per-minute>60</per-minute>');
   });
 });
 

@@ -22,6 +22,8 @@ interface StaffProps {
   beatsPerBar?: number;
   /** Armadura: sustenidos (positivo) ou bemóis (negativo). Com bemóis, as pretas são escritas como bemol. */
   fifths?: number;
+  /** Quantas semínimas vale um tempo de `durations` (1,5 no compasso composto, em que o tempo é a semínima pontuada). */
+  beatScale?: number;
 }
 
 // Medidas em "staff-space" (S): distância entre duas linhas da pauta. Tamanho natural: S = 20px.
@@ -38,7 +40,7 @@ const y = (step: number) => BOTTOM - (step * S) / 2;
 const KEY_X = 72;
 const KEY_GAP = 13;
 
-export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0 }: StaffProps) {
+export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1 }: StaffProps) {
   if (width <= 0) return <div className="staff" style={{ height: HEIGHT * 0.62 }} />;
   const keyW = fifths ? Math.abs(fifths) * KEY_GAP + 6 : 0;
   const { scale, visible } = staffLayout(width, notes.length, keyW);
@@ -53,7 +55,8 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
     step: (fifths > 0 ? SHARP_STEPS[i] : FLAT_STEPS[i]) - (clef === 'bass' ? 2 : 0),
   }));
   const nameY = BOTTOM + 2.6 * S;
-  const tuplets = tupletMiddles(durations);
+  const figures = durations?.map((d) => d * beatScale);
+  const tuplets = tupletMiddles(figures);
 
   const bars: number[] = [];
   if (durations && beatsPerBar) {
@@ -100,7 +103,7 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           const x = xOf(i);
           const state = sliceStates[i];
           const mod = state === 'current' || state === 'plain' ? '' : `-${state}`;
-          const beats = durations?.[start + i] ?? 1;
+          const beats = figures?.[start + i] ?? 1;
           if (midi === null) {
             return (
               <g key={start + i}>
@@ -117,10 +120,11 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           const mark = state === 'hit' ? ' ✓' : state === 'miss' ? ' ✕' : state === 'late' ? ' ~' : '';
           const stemX = stemUp ? x + HEAD_RX - 1.5 : x - HEAD_RX + 1.5;
           const stemEnd = stemUp ? cy - STEM : cy + STEM;
-          const hollow = beats >= 2;
-          const dotted = beats === 3 || beats === 1.5;
+          const hollow = beats >= 2 - 1e-6;
+          const near = (x: number) => Math.abs(beats - x) < 1e-6;
+          const dotted = near(3) || near(1.5) || near(0.75);
           const triplet = isTriplet(beats);
-          const eighth = beats === 0.5 || triplet;
+          const eighth = near(0.5) || near(0.75) || triplet;
           return (
             <g key={start + i}>
               {ledgerSteps(step).map((ls) => (

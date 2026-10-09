@@ -20,7 +20,15 @@ export type Accept =
   /** Uma destas teclas exatamente. */
   | { kind: 'exact'; midis: Midi[] }
   /** Acorde: todas as classes seguradas ao mesmo tempo, sem notas a mais. `bass` exige a nota mais grave. */
-  | { kind: 'chord'; pcs: Pc[]; bass?: Pc; /** Classes que podem faltar (a 5ª de uma tétrade em posição próxima). */ optional?: Pc[] }
+  | {
+      kind: 'chord';
+      pcs: Pc[];
+      bass?: Pc;
+      /** Classes que podem faltar (a 5ª de uma tétrade em posição próxima). */
+      optional?: Pc[];
+      /** Condução de vozes: o movimento desde o acorde anterior (soma dos semitons) pode passar do ótimo só por esta folga. Exige uma nota por classe. */
+      lead?: number;
+    }
   /** Apertar todas estas teclas, em qualquer ordem (por exemplo, todos os Fá do teclado). */
   | { kind: 'all'; midis: Midi[] };
 
@@ -86,6 +94,8 @@ export interface TimedTask {
   fifths?: number;
   /** Transposição: a pauta mostra a melodia original e o que se toca fica `transpose` semitons acima (ou abaixo, se negativo). */
   transpose?: number;
+  /** Compasso composto (6/8): o tempo é a semínima pontuada; as durações estão em semínimas pontuadas (colcheia = 1/3). */
+  compound?: boolean;
 }
 
 // ---------- exercícios ----------
@@ -203,7 +213,10 @@ export interface SongSpec {
   arrangement?: string;
   /** Andamento alvo para passar. */
   bpm: number;
+  /** Tempos de semínima por compasso (6/8 = 3). */
   beatsPerBar: number;
+  /** Fórmula de compasso escrita, quando não é x/4: { beats: 6, beatType: 8 }. O texto continua em semínimas (colcheia = 0.5). */
+  time?: { beats: number; beatType: number };
   /** Armadura: número de sustenidos (positivo) ou bemóis (negativo). */
   fifths: number;
   /** Melodia por compasso, separada por "|". Notas "C4", "F#4", "Bb3"; duração após ":"; "r" = pausa; acorde "C3+E3+G3:4". */

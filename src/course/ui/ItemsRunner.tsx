@@ -215,6 +215,8 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
               )
             ) : wrongChoice !== null && item.choices ? (
               <Verdict tone="miss">Não é essa. Tente outra{hints && item.hint ? `: ${item.hint}` : ''}</Verdict>
+            ) : prog.why ? (
+              <Verdict tone="miss">{prog.why}</Verdict>
             ) : prog.lastWrong !== null ? (
               <Verdict tone="miss">Tocou {nameOf(prog.lastWrong)}. Tente de novo{hints && item.hint ? `: ${item.hint}` : ''}</Verdict>
             ) : item.steps.length > 1 ? (
