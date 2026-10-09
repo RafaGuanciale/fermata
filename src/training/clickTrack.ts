@@ -24,7 +24,7 @@ export interface ScheduledTrack {
  * Agenda `countIn` tempos de contagem e mais `beats` tempos de pulso.
  * `mutedAfterCountIn`: só a contagem toca (leitura à primeira vista, prova).
  */
-export function scheduleTrack(opts: { bpm: number; countIn: number; beats: number; beatsPerBar: number; volume?: number; pulse?: boolean }): ScheduledTrack | null {
+export function scheduleTrack(opts: { bpm: number; countIn: number; beats: number; beatsPerBar: number; volume?: number; pulse?: boolean; /** false = contagem muda (só a tela conta) */ countInSound?: boolean }): ScheduledTrack | null {
   const ctx = audioContext();
   if (!ctx) return null;
   void ctx.resume();
@@ -34,6 +34,7 @@ export function scheduleTrack(opts: { bpm: number; countIn: number; beats: numbe
   const oscs: OscillatorNode[] = [];
   const total = opts.countIn + (opts.pulse === false ? 0 : Math.ceil(opts.beats));
   for (let i = 0; i < total; i++) {
+    if (i < opts.countIn && opts.countInSound === false) continue;
     const at = start + i * beatSec;
     const inBar = i < opts.countIn ? i % opts.beatsPerBar : (i - opts.countIn) % opts.beatsPerBar;
     const strong = inBar === 0;

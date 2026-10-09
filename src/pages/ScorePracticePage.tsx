@@ -319,8 +319,8 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
     if (metronome.running) metronome.stop();
     const plan = timedPlan(loaded.steps, hand, loaded.staffCount, range, bpm);
     if (!plan.stepTimes.length) return;
-    // A contagem sempre toca; o clique durante a música é opcional.
-    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar, volume: listenOnly ? 0.35 : 0.6, pulse: click });
+    // Sem clique, nem a contagem soa: a tela mostra 4, 3, 2, 1 e a cascata mostra quando entrar.
+    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar, volume: listenOnly ? 0.35 : 0.6, pulse: click, countInSound: click });
     if (!track) return;
     // O app toca: tudo (ouvir) ou só a outra mão (acompanhamento).
     const sounding = allNotes.filter((n) => listenOnly || (otherHand && hand !== 'duas' && n.hand !== hand));
