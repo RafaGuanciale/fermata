@@ -1,9 +1,9 @@
 // Unidade 3 — Primeiros acordes, cifra e acompanhamento (lições 17 a 24). Projeto final: Amazing Grace com acordes.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
-import { choice, harmonize, mix, playChord, primaryChord, resolveCadence, type ChoiceQuestion } from '../gens';
+import { choice, harmonize, mix, playChord, primaryChord, resolveCadence, transposeProgression, type ChoiceQuestion } from '../gens';
 import { n, pick } from '../music';
-import { melodyTask, twoHandTask } from '../tasks';
+import { melodyTask, randomRhythm, twoHandTask } from '../tasks';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
 // ---------- escrita: acordes da mão esquerda e transposição de linhas ----------
@@ -422,14 +422,306 @@ Uma segunda regra: termine no **I**. E antes dele, o V7 soa melhor do que o IV.`
   exit: [chordsCFG7, choice(FUNCTIONS, 'funcoes')],
 };
 
+const EIGHTHS: ChoiceQuestion[] = [
+  { q: 'Quantas colcheias cabem numa semínima?', options: ['1', '2', '4'], answer: 1, why: 'Colcheia = meio tempo.' },
+  { q: 'Como se conta "1 e 2 e"?', options: ['Números nos tempos, "e" no meio de cada tempo', 'Um número por colcheia', 'Só os tempos fortes'], answer: 0, why: 'Os números caem no tempo; o "e" divide o tempo ao meio.' },
+  { q: 'Duas colcheias seguidas costumam ser escritas…', options: ['Unidas por uma barra (bandeirola)', 'Separadas por pausa', 'Com ponto'], answer: 0, why: 'A barra junta colcheias do mesmo tempo, para ficar fácil ver onde está cada tempo.' },
+  { q: 'O padrão "raiz e 5ª" na mão esquerda em Dó toca…', options: ['Dó e Sol alternados', 'Dó e Mi alternados', 'O acorde inteiro'], answer: 0, why: 'Fundamental e 5ª do acorde: no Dó, Dó e Sol; no Fá, Fá e Dó; no Sol, Sol e Ré.' },
+  { q: 'Num padrão de mão esquerda, a mão direita…', options: ['Toca a melodia por cima', 'Toca o mesmo padrão', 'Fica parada'], answer: 0, why: 'A esquerda dá a harmonia e o ritmo; a direita canta a melodia.' },
+];
+
+const KEY_G: ChoiceQuestion[] = [
+  { q: 'Em Sol maior, o IV é…', options: ['Dó (C)', 'Ré (D)', 'Fá (F)'], answer: 0, why: 'Sol, Lá, Si, Dó: 4º grau.' },
+  { q: 'Em Sol maior, o V7 é…', options: ['D7', 'C7', 'G7'], answer: 0, why: 'Sol, Lá, Si, Dó, Ré: o 5º grau é Ré.' },
+  { q: 'O D7 tem quais notas?', options: ['Ré, Fá♯, Lá, Dó', 'Ré, Fá, Lá, Dó', 'Ré, Fá♯, Lá, Dó♯'], answer: 0, why: 'Ré maior (Ré, Fá♯, Lá) mais a 7ª da dominante, Dó.' },
+  { q: 'Transpor I–IV–V7 de Dó para Sol dá…', options: ['G – C – D7', 'G – F – C7', 'C – F – G7'], answer: 0, why: 'Os graus não mudam; mudam os acordes: o I vira G, o IV vira C, o V7 vira D7.' },
+  { q: 'A sensível de Sol maior (a nota que puxa para o Sol) é…', options: ['Fá♯', 'Fá', 'Lá'], answer: 0, why: 'Meio tom abaixo da tônica: Fá♯. Ela está no D7.' },
+];
+
+const PEDAL: ChoiceQuestion[] = [
+  { q: 'O pedal da direita (sustentação)…', options: ['Deixa as notas soando depois de soltar as teclas', 'Deixa o som mais forte', 'Abafa o som'], answer: 0, why: 'Ele levanta os abafadores: as cordas continuam vibrando.' },
+  { q: 'Onde fica o pé no pedal?', options: ['Calcanhar no chão, parte da frente do pé no pedal', 'Pé inteiro no ar', 'Ponta do pé, calcanhar levantado'], answer: 0, why: 'O calcanhar é o apoio; o movimento vem do tornozelo.' },
+  { q: 'No pedal direto, o pedal desce…', options: ['Junto com o acorde', 'Antes de tocar', 'Só no fim da música'], answer: 0, why: 'Direto (ou rítmico): desce com o acorde e sobe antes do próximo.' },
+  { q: 'Pedal preso durante uma pausa…', options: ['É erro: a pausa vira som', 'É o certo', 'Não muda nada'], answer: 0, why: 'A pausa é silêncio. Com o pedal abaixado, o acorde anterior continua soando.' },
+  { q: '"Lama" no pedal é…', options: ['Dois acordes diferentes soando misturados', 'Pedal muito leve', 'Tocar sem pedal'], answer: 0, why: 'Se o pedal não sobe entre um acorde e outro, as notas dos dois se misturam.' },
+];
+
+const RHY_8 = ['x:0.5 x:0.5 x x x', 'x x:0.5 x:0.5 x:2', 'x:0.5 x:0.5 x:0.5 x:0.5 x:2', 'x:2 x:0.5 x:0.5 x', 'x x x:0.5 x:0.5 x', 'x:0.5 x:0.5 x x:0.5 x:0.5 x', 'x x:2 x:0.5 x:0.5'];
+
+// Padrões da mão esquerda sobre I–IV–V–I em Dó.
+const PAT_BLOCK = `${I}:4 | ${IV}:4 | ${V}:4 | ${I}:4`;
+const PAT_OCTAVE = 'C2+C3:2 C2+C3:2 | F2+F3:2 F2+F3:2 | G2+G3:2 G2+G3:2 | C2+C3:4';
+const PAT_FIFTH = 'C3 G3 C3 G3 | F2 C3 F2 C3 | G2 D3 G2 D3 | C3 G3 C3:2';
+const PATTERNS = [PAT_BLOCK, PAT_OCTAVE, PAT_FIFTH];
+
+// Mão esquerda em Sol maior, posição próxima: I, IV, V7.
+const GI = 'G2+B2+D3';
+const GIV = 'G2+C3+E3';
+const GV7 = 'F#2+C3+D3';
+const gChords = primaryChord({ keys: ['G'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
+const cgChords = primaryChord({ keys: ['C', 'G'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
+const toG = transposeProgression({ from: 'C', to: ['G'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'I'], ['I', 'IV', 'I', 'V7'], ['IV', 'V7', 'I']] });
+
+const TWINKLE_G_R = shift(TWINKLE_R, 7);
+const TWINKLE_G_L = shift(TWINKLE_L, -5);
+
+const twinkleG: SongSpec = {
+  id: 'u03-brilha-g',
+  title: 'Brilha, brilha, estrelinha (em Sol)',
+  composer: 'melodia folclórica francesa',
+  arrangement: 'arranjo do Fermata: a versão em Dó transposta para Sol, com G, C e D7 em posição próxima',
+  bpm: 76,
+  beatsPerBar: 4,
+  fifths: 1,
+  right: TWINKLE_G_R,
+  left: TWINKLE_G_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const l20: Lesson = {
+  n: 20,
+  id: 'l20',
+  title: 'Colcheias e padrões de mão esquerda',
+  minutes: 60,
+  objectives: [
+    'Consigo contar e tocar colcheias a 80 BPM, dentro de ±60 ms.',
+    'Consigo tocar três padrões de mão esquerda sobre I–IV–V–I: bloco, raiz com oitava e raiz com 5ª.',
+    'Consigo manter um padrão na esquerda enquanto a direita toca a melodia.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'A colcheia: meio tempo',
+      body: `Até aqui a menor figura era a semínima, de 1 tempo. A **colcheia** vale **meio tempo**: duas colcheias cabem numa semínima. Ela tem cabeça cheia, haste e uma **bandeirola**; duas ou mais colcheias seguidas são unidas por uma **barra**.
+
+Para contar, divida cada tempo em dois: "**1** e **2** e **3** e **4** e". Os números caem nos tempos (onde o metrônomo bate) e o "e" cai exatamente no meio. Uma semínima ocupa "1 e"; uma colcheia ocupa só o "1" ou só o "e".
+
+Conte em voz alta, de novo. A colcheia é a primeira figura em que o ouvido sozinho engana: sem contar, a tendência é correr no par de colcheias e encurtar a nota seguinte.`,
+    },
+    {
+      kind: 'example',
+      title: 'Ouvir as colcheias com o pulso',
+      steps: [
+        { say: 'Semínimas: uma por tempo.', play: { bpm: 80, steps: [60, 60, 60, 60].map((m) => ({ midis: [m], beats: 1 })) } },
+        { say: 'Colcheias: duas por tempo. "1 e 2 e 3 e 4 e".', play: { bpm: 80, steps: Array.from({ length: 8 }, () => ({ midis: [60], beats: 0.5 })) } },
+        { say: 'Misturando: "1 e", 2, 3, 4.', play: { bpm: 80, steps: [0.5, 0.5, 1, 1, 1].map((b) => ({ midis: [60], beats: b })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l20-colcheias', exercise: quickTimed('Ritmo com colcheias', 'Dois compassos sorteados a 66 BPM, em qualquer tecla. Duas passadas boas.', randomRhythm(RHY_8, 2, 66), { reps: 2, window: 80 }) },
+    { kind: 'exercise', id: 'l20-escada', exercise: quickTimed('Colcheias até 80 BPM', 'Quatro compassos, janela de ±60 ms. Cada passada boa sobe 4 BPM.', randomRhythm(RHY_8, 4, 64), { window: 60, ladder: { from: 64, to: 80, step: 4 } }) },
+    {
+      kind: 'text',
+      title: 'Três padrões de mão esquerda',
+      body: `A cifra diz qual acorde; o **padrão** diz como tocá-lo. Os três primeiros, do mais simples ao mais movimentado:
+
+- **Bloco**: o acorde inteiro, segurado. Em posição próxima, C (Dó–Mi–Sol), F (Dó–Fá–Lá), G (Si–Ré–Sol).
+- **Raiz com oitava**: só a fundamental, dobrada na oitava (Dó2 + Dó3). Soa cheio e grave, como um baixo. A mão salta de raiz em raiz: Dó, Fá, Sol, Dó.
+- **Raiz e 5ª**: a fundamental e a 5ª, alternadas em semínimas. Em Dó: Dó, Sol, Dó, Sol. Em Fá: Fá, Dó. Em Sol: Sol, Ré. É o padrão mais "andado" dos três, base de muita música folclórica.
+
+Toque cada padrão sobre **I–IV–V–I** até ele sair sem olhar. Os três trocam de acorde no tempo 1: prepare a mão no tempo 4 do compasso anterior.`,
+    },
+    {
+      kind: 'example',
+      title: 'Os três padrões',
+      steps: [
+        { say: '**Bloco**: I, IV, V, I.', play: { bpm: 80, steps: [[48, 52, 55], [48, 53, 57], [47, 50, 55], [48, 52, 55]].map((m) => ({ midis: m, beats: 4 })) } },
+        { say: '**Raiz com oitava**: Dó, Fá, Sol, Dó, em mínimas.', play: { bpm: 80, steps: [[36, 48], [41, 53], [43, 55], [36, 48]].flatMap((m) => [{ midis: m, beats: 2 }, { midis: m, beats: 2 }]) } },
+        { say: '**Raiz e 5ª**: Dó–Sol, Fá–Dó, Sol–Ré, Dó–Sol.', play: { bpm: 80, steps: [48, 55, 48, 55, 41, 48, 41, 48, 43, 50, 43, 50, 48, 55, 48].map((m, i) => ({ midis: [m], beats: i === 14 ? 2 : 1 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l20-bloco', exercise: quickTimed('Padrão 1: bloco', 'I–IV–V–I em posição próxima, a 72 BPM. Dois ciclos sem erro.', () => melodyTask(PAT_BLOCK, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
+    { kind: 'exercise', id: 'l20-oitava', exercise: quickTimed('Padrão 2: raiz com oitava', 'Dó, Fá, Sol, Dó, com a oitava, a 72 BPM. Dois ciclos sem erro.', () => melodyTask(PAT_OCTAVE, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
+    { kind: 'exercise', id: 'l20-quinta', exercise: quickTimed('Padrão 3: raiz e 5ª', 'Fundamental e 5ª em semínimas, a 72 BPM. Dois ciclos sem erro.', () => melodyTask(PAT_FIFTH, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'o salto da mão esquerda',
+      body: 'Nos padrões de raiz, a mão salta (Dó → Fá → Sol). Olhe para a próxima raiz um tempo antes e deixe o braço levar a mão, com o pulso solto. O dedo 5 chega primeiro; os outros vêm junto.',
+    },
+    { kind: 'exercise', id: 'l20-junto', exercise: quickTimed('Raiz e 5ª com a melodia', 'Brilha, brilha (4 compassos) na direita; raiz e 5ª na esquerda, a 60 BPM. Duas passadas boas.', () => twoHandTask('C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2', 'C3 G3 C3 G3 | F2 C3 C3 G3 | F2 C3 C3 G3 | G2 D3 C3 G3', { bpm: 60, caption: 'Esquerda: Dó–Sol, Fá–Dó + Dó–Sol, Fá–Dó + Dó–Sol, Sol–Ré + Dó–Sol.' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l20-quiz', exercise: quiz('Colcheias e padrões', 'Cinco perguntas rápidas.', EIGHTHS) },
+  ],
+  review: [choice(EIGHTHS, 'colcheias'), chordsCFG7],
+  checkpoint: [
+    quickTimed('Colcheias a 80 BPM', '4 compassos sorteados, janela de ±60 ms, sem dicas.', randomRhythm(RHY_8, 4, 80), { window: 60 }),
+    quickTimed('Padrão sorteado', 'Um dos três padrões sobre I–IV–V–I, a 76 BPM.', (rng) => melodyTask(pick(rng, PATTERNS), { bpm: 76, clef: 'bass' }), { pass: { accuracy: 0.9 } }),
+  ],
+  exit: [choice(EIGHTHS, 'colcheias'), chordsCFG7],
+};
+
+const l21: Lesson = {
+  n: 21,
+  id: 'l21',
+  title: 'Tonalidade de Sol: G, C e D7',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar I, IV e V7 de Sol maior pelo grau.',
+    'Consigo transpor uma progressão de Dó para Sol pensando nos graus.',
+    'Consigo tocar Brilha, brilha em Sol com acompanhamento.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Os mesmos graus em outra casa',
+      body: `Mude a casa para **Sol**. Contando a partir de Sol: Sol (I), Lá, Si, **Dó (IV)**, **Ré (V)**. Os acordes primários de Sol maior são:
+
+- **I = G** (Sol, Si, Ré): a casa.
+- **IV = C** (Dó, Mi, Sol): o afastamento.
+- **V7 = D7** (Ré, **Fá♯**, Lá, Dó): a tensão.
+
+O D7 traz o **Fá♯**, que você conheceu na posição de Sol. Ele é a **sensível** de Sol: meio tom abaixo da casa, puxando para cima, como o Si em Dó. E o trítono do D7 é **Fá♯–Dó**, que resolve em Sol–Si.
+
+Repare: o acorde de **Dó** era o I em Dó maior e agora é o IV em Sol maior. O acorde é o mesmo; o **papel** mudou porque a casa mudou.`,
+    },
+    {
+      kind: 'text',
+      title: 'Posição próxima em Sol',
+      body: `As mesmas regras de movimento mínimo valem aqui. Na mão esquerda:
+
+- **G**: Sol2, Si2, Ré3 (dedos 5, 3, 1).
+- **C**: Sol2, Dó3, Mi3. O Sol fica; Si e Ré sobem.
+- **D7**: Fá♯2, Dó3, Ré3. O Sol desce meio tom para Fá♯; Si sobe para Dó; Ré fica. A 5ª (Lá) fica de fora.
+
+É exatamente o mesmo desenho de Dó maior, cinco teclas brancas mais grave: o Fá♯ faz em Sol o que o Si fazia em Dó.`,
+    },
+    {
+      kind: 'keys',
+      low: 41,
+      high: 55,
+      lit: [43, 47, 50],
+      labels: { 42: 'Fá♯', 43: 'Sol', 47: 'Si', 48: 'Dó', 50: 'Ré', 52: 'Mi' },
+      caption: 'G em posição próxima: Sol2, Si2, Ré3. Para o C, Si e Ré sobem para Dó e Mi; para o D7, Sol desce para Fá♯ e Si sobe para Dó.',
+    },
+    {
+      kind: 'example',
+      title: 'I – IV – V7 – I em Sol',
+      steps: [
+        { say: 'G – C – D7 – G na mão esquerda.', play: { bpm: 72, steps: [[43, 47, 50], [43, 48, 52], [42, 48, 50], [43, 47, 50]].map((m, i) => ({ midis: m, beats: i === 3 ? 4 : 2 })) } },
+        { say: 'D7 → G: o Fá♯ sobe para Sol, o Dó desce para Si.', keys: [42, 48, 43, 47], play: { bpm: 60, steps: [{ midis: [42, 48, 50], beats: 2 }, { midis: [43, 47, 50], beats: 4 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l21-graus', exercise: { kind: 'items', title: 'Graus em Sol', how: 'O app pede I, IV ou V7 de Sol maior. Toque em qualquer posição.', gen: gChords, count: 15, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
+    { kind: 'exercise', id: 'l21-me', exercise: quickTimed('G – C – D7 – G na esquerda', 'Semibreves a 66 BPM, posição próxima. Duas passadas boas.', () => melodyTask(`${GI}:4 | ${GIV}:4 | ${GV7}:4 | ${GI}:4`, { bpm: 66, clef: 'bass' }), { reps: 2 }) },
+    {
+      kind: 'text',
+      title: 'Transpor uma progressão',
+      body: `Na Unidade 2 você transpôs uma melodia mantendo o desenho. Para acordes é a mesma ideia: **mantenha os graus**, troque a casa.
+
+C – F – G7 – C em Dó é **I – IV – V7 – I**. Em Sol, I – IV – V7 – I vira **G – C – D7 – G**. Para transpor sem errar, nunca traduza letra por letra ("C vira G, F vira…"): traduza para **graus** e depois para o tom novo.
+
+É assim que músicos acompanham cantores: se a música está alta demais para a voz, eles tocam os mesmos graus noutra casa.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'esquecer o Fá♯ do D7',
+      body: 'O D7 com Fá natural é outro acorde (Ré menor com sétima) e soa sem direção. Em Sol maior, todo Fá é Fá♯. Se o acorde de tensão soar triste, confira o Fá.',
+    },
+    { kind: 'exercise', id: 'l21-transpor', exercise: { kind: 'items', title: 'Transponha para Sol', how: 'A cifra vem em Dó. Pense nos graus e toque os acordes de Sol maior, em ordem.', gen: toG, count: 8, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
+    { kind: 'exercise', id: 'l21-brilha', exercise: quickTimed('Brilha, brilha em Sol', '12 compassos, duas mãos: melodia a partir do Sol4, G, C e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_G_R, TWINKLE_G_L, { bpm: 56 }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-brilha-g', why: 'A versão em Sol na pauta dupla. Repare no sustenido da armadura: todo Fá é Fá♯.' },
+    { kind: 'exercise', id: 'l21-quiz', exercise: quiz('Sol maior', 'Cinco perguntas rápidas.', KEY_G) },
+  ],
+  review: [gChords, toG, choice(KEY_G, 'tom-sol')],
+  checkpoint: [
+    { kind: 'items', title: 'Graus em Dó e em Sol', how: 'I, IV ou V7, numa das duas tonalidades, sem dicas. Meta: 85%.', gen: cgChords, count: 16, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
+    { kind: 'items', title: 'Transposição de progressões', how: 'Progressões novas de Dó para Sol. Meta: 85%.', gen: toG, count: 6, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
+  ],
+  exit: [gChords, choice(KEY_G, 'tom-sol')],
+};
+
+/** Acordes em bloco para o pedal direto: com pausas (o pedal sobe na pausa) e sem pausas (sobe antes do próximo). */
+const PEDAL_RESTS = [
+  'C4+E4+G4:2 r:2 | F4+A4+C5:2 r:2 | G4+B4+D5:2 r:2 | C4+E4+G4:2 r:2',
+  'C4+E4+G4:2 r:2 | G4+B4+D5:2 r:2 | F4+A4+C5:2 r:2 | C4+E4+G4:2 r:2',
+  'F4+A4+C5:2 r:2 | C4+E4+G4:2 r:2 | G4+B4+D5:2 r:2 | C4+E4+G4:2 r:2',
+];
+const PEDAL_FLOW = [
+  'C4+E4+G4:2 F4+A4+C5:2 | G4+B4+D5:2 C4+E4+G4:2 | F4+A4+C5:2 G4+B4+D5:2 | C4+E4+G4:4',
+  'C4+E4+G4:2 G4+B4+D5:2 | F4+A4+C5:2 C4+E4+G4:2 | F4+A4+C5:2 G4+B4+D5:2 | C4+E4+G4:4',
+];
+
+const l22: Lesson = {
+  n: 22,
+  id: 'l22',
+  title: 'Pedal direto',
+  minutes: 60,
+  objectives: [
+    'Consigo apoiar o pé no pedal com o calcanhar no chão e mover só o tornozelo.',
+    'Consigo descer o pedal junto com o acorde e subir antes do próximo, sem misturar acordes.',
+    'Consigo deixar as pausas em silêncio, sem pedal preso.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que o pedal faz',
+      body: `O piano tem um **abafador** (um feltro) em cima de cada corda. Quando você solta a tecla, o abafador desce e o som para. O **pedal da direita**, o de **sustentação**, levanta todos os abafadores de uma vez: as notas continuam soando mesmo depois de você soltar as teclas, e as cordas vizinhas vibram junto, deixando o som mais cheio.
+
+No piano digital, o pedal manda essa informação pelo MIDI (o controle 64). O Fermata lê esse sinal e mede quando você desce e sobe o pedal.
+
+O pedal é poderoso e perigoso: com ele abaixado, **tudo** se mistura. Um acorde de Dó seguido de um G7 com o pedal preso vira uma massa de notas, a **lama**. A arte do pedal é trocar na hora certa.`,
+    },
+    {
+      kind: 'text',
+      title: 'O pé no pedal',
+      body: `- **Calcanhar no chão**, sempre. Ele é o apoio e o ponto de giro.
+- A **parte da frente do pé** (onde começam os dedos) fica sobre o pedal, encostada nele, sem pisar.
+- O movimento vem do **tornozelo**: desce e sobe, como quem marca o ritmo com a ponta do pé.
+- Não tire o pé do pedal entre um movimento e outro, e não bata. O pedal desce até o fim e sobe até o fim.
+
+Pratique alguns minutos só o pé, sem tocar nada: desce no 1, sobe no 3, desce no 1… Depois junte com as mãos.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'saude',
+      title: 'perna solta',
+      body: 'O pedal é leve. Se a coxa ou a panturrilha ficam tensas, o banco pode estar longe ou alto demais. Ajuste até o pé alcançar o pedal com o joelho em ângulo confortável.',
+    },
+    {
+      kind: 'text',
+      title: 'Pedal direto: desce com o acorde',
+      body: `A primeira técnica é o **pedal direto** (ou rítmico): o pé **desce junto com o acorde** e **sobe antes do próximo**.
+
+- Nas músicas com **pausas** entre os acordes, o pedal sobe na pausa. A pausa é silêncio: pedal preso numa pausa transforma silêncio em som, e esse é o erro mais comum de quem começa.
+- Quando os acordes vêm **colados**, o pedal sobe no fim de cada acorde, um instante antes do próximo, e desce de novo com ele. Fica um pequeno respiro entre os acordes.
+
+Na Unidade 4 você aprende o **pedal legato** (sincopado), em que o pedal troca um instante **depois** do novo acorde, ligando tudo sem buraco. Ele é mais difícil, e o pedal direto é a base dele.`,
+    },
+    {
+      kind: 'example',
+      title: 'Com pausa e sem pausa',
+      steps: [
+        { say: 'Acorde, pausa, acorde, pausa: o pedal desce com o acorde e sobe na pausa. A pausa fica em silêncio.', play: { bpm: 66, steps: [{ midis: [60, 64, 67], beats: 2 }, { midis: [], beats: 2 }, { midis: [65, 69, 72], beats: 2 }, { midis: [], beats: 2 }] } },
+        { say: 'Assim soa a **lama**: o pedal ficou preso e o Fá se misturou com o Dó.', play: { bpm: 66, steps: [{ midis: [60, 64, 67], beats: 2 }, { midis: [60, 64, 65, 67, 69, 72], beats: 4 }] } },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'sem MIDI, sem pedal medido',
+      body: 'O pedal só é medido com o piano conectado por MIDI (no Safari e no iPad não há MIDI) e o pedal ligado no piano. Sem ele, os exercícios contam só as notas: faça mesmo assim, ouvindo com atenção, e volte com o piano conectado.',
+    },
+    { kind: 'exercise', id: 'l22-pausas', exercise: quickTimed('Pedal com pausas', 'Acordes de mínima e pausas de mínima, mão direita, a 60 BPM. Pedal desce com o acorde e sobe na pausa. Duas passadas boas.', (rng) => melodyTask(pick(rng, PEDAL_RESTS), { bpm: 60 }), { reps: 2, pedal: 'direto' }) },
+    { kind: 'exercise', id: 'l22-colado', exercise: quickTimed('Pedal com acordes colados', 'Agora sem pausas: suba o pedal no fim de cada acorde e desça com o próximo. 60 BPM, duas passadas boas.', (rng) => melodyTask(pick(rng, PEDAL_FLOW), { bpm: 60 }), { reps: 2, pedal: 'direto' }) },
+    { kind: 'exercise', id: 'l22-quiz', exercise: quiz('O pedal', 'Cinco perguntas rápidas.', PEDAL) },
+  ],
+  review: [choice(PEDAL, 'pedal'), cgChords],
+  checkpoint: [
+    quickTimed('Pedal direto', 'Acordes com pausas, ordem nova, a 66 BPM. Meta: 85% das trocas sem lama e nenhuma pausa com pedal preso.', (rng) => melodyTask(pick(rng, PEDAL_RESTS), { bpm: 66 }), { pedal: 'direto' }),
+    quickTimed('Pedal com acordes colados', 'A 66 BPM.', (rng) => melodyTask(pick(rng, PEDAL_FLOW), { bpm: 66 }), { pedal: 'direto' }),
+  ],
+  exit: [choice(PEDAL, 'pedal'), gChords],
+};
+
 const unit: Unit = {
   n: 3,
   id: 'u03',
   title: 'Primeiros acordes e cifra',
   goal: 'Montar acordes maiores, acompanhar melodias com I, IV e V7 lendo cifra, em Dó, Sol e Fá, e usar o pedal.',
   technique: 'Trocas de acorde (C–F–G7) em posição próxima, acordes quebrados e padrões de mão esquerda em semínimas e colcheias, de 60 rumo a 96 BPM (referência: RCM Preparatory B). Nos dias sem lição nova, 5 minutos de chuva de cifras.',
-  lessons: [l17, l18, l19],
-  songs: [mary, twinkleC, amazing],
+  lessons: [l17, l18, l19, l20, l21, l22],
+  songs: [mary, twinkleC, twinkleG, amazing],
   final: {
     songId: 'u03-amazing',
     brief: 'Amazing Grace em Dó, 3/4 com anacruse: a melodia na mão direita, uma oitava acima do Dó central, e um acorde por compasso na esquerda (I, IV, V e V7 em posição próxima). Junta o que a unidade ensinou: acordes primários, cifra, trocas no tempo e a anacruse da Unidade 2. No compasso 8 a mão direita sobe até o Sol5: prepare o salto no compasso anterior.',
@@ -439,5 +731,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, HARM_C, primaryChord({ keys: ['C'], degrees: ['I'], low: 48, high: 72 })];
-export const _shift = shift;
+export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, HARM_C, gChords, cgChords, toG];
