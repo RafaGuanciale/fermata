@@ -178,7 +178,7 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
           </div>
           {item.staff && (
             <div className="runner__staff" ref={staffRef}>
-              <Staff notes={item.staff.notes} states={item.staff.notes.map(() => 'current')} current={0} showNames={false} width={Math.min(staffWidth, 260)} clef={item.staff.clef} label="Nota na pauta" />
+              <Staff notes={item.staff.notes} states={item.staff.notes.map(() => 'current')} current={0} showNames={false} width={Math.min(staffWidth, 260)} clef={item.staff.clef} fifths={item.staff.fifths} label="Nota na pauta" />
             </div>
           )}
           {item.choices && (

@@ -1,5 +1,5 @@
-import { ledgerSteps, noteInfo, staffStep, type Clef, type Midi } from '../music/notes';
-import { END_PAD, FIRST_X, GAP, staffLayout, windowStart } from './staffLayout';
+import { ledgerSteps, type Clef, type Midi } from '../music/notes';
+import { END_PAD, FIRST_X, FLAT_STEPS, GAP, SHARP_STEPS, spellOnStaff, staffLayout, windowStart } from './staffLayout';
 
 export type NoteState = 'hit' | 'late' | 'miss' | 'current' | 'upcoming' | 'plain';
 
@@ -20,6 +20,8 @@ interface StaffProps {
   durations?: number[];
   /** Com `durations`, desenha barra de compasso a cada N tempos. */
   beatsPerBar?: number;
+  /** Armadura: sustenidos (positivo) ou bemóis (negativo). Com bemóis, as pretas são escritas como bemol. */
+  fifths?: number;
 }
 
 // Medidas em "staff-space" (S): distância entre duas linhas da pauta. Tamanho natural: S = 20px.
@@ -33,15 +35,23 @@ const HEIGHT = BOTTOM + 3 * S + 10;
 
 const y = (step: number) => BOTTOM - (step * S) / 2;
 
-export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar }: StaffProps) {
+const KEY_X = 72;
+const KEY_GAP = 13;
+
+export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0 }: StaffProps) {
   if (width <= 0) return <div className="staff" style={{ height: HEIGHT * 0.62 }} />;
-  const { scale, visible } = staffLayout(width, notes.length);
+  const keyW = fifths ? Math.abs(fifths) * KEY_GAP + 6 : 0;
+  const { scale, visible } = staffLayout(width, notes.length, keyW);
   const start = windowStart(current, visible, notes.length);
   const slice = notes.slice(start, start + visible);
   const sliceStates = states.slice(start, start + visible);
 
-  const naturalWidth = FIRST_X + (slice.length - 1) * GAP + END_PAD;
-  const xOf = (i: number) => FIRST_X + i * GAP;
+  const naturalWidth = FIRST_X + keyW + (slice.length - 1) * GAP + END_PAD;
+  const xOf = (i: number) => FIRST_X + keyW + i * GAP;
+  const keySig = Array.from({ length: Math.abs(fifths) }, (_, i) => ({
+    x: KEY_X + i * KEY_GAP,
+    step: (fifths > 0 ? SHARP_STEPS[i] : FLAT_STEPS[i]) - (clef === 'bass' ? 2 : 0),
+  }));
   const nameY = BOTTOM + 2.6 * S;
 
   const bars: number[] = [];
@@ -80,6 +90,11 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           </text>
         )}
 
+        {keySig.map((k) => (
+          <text key={k.x} className="staff__accidental staff__accidental-key" x={k.x} y={y(k.step) + 7} fontSize={1.4 * S} aria-hidden>
+            {fifths > 0 ? '♯' : '♭'}
+          </text>
+        ))}
         {slice.map((midi, i) => {
           const x = xOf(i);
           const state = sliceStates[i];
@@ -95,10 +110,9 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
               </g>
             );
           }
-          const step = staffStep(midi, clef);
+          const { step, accidental, name } = spellOnStaff(midi, clef, fifths);
           const cy = y(step);
           const stemUp = step < 4;
-          const name = noteInfo(midi).name;
           const mark = state === 'hit' ? ' ✓' : state === 'miss' ? ' ✕' : state === 'late' ? ' ~' : '';
           const stemX = stemUp ? x + HEAD_RX - 1.5 : x - HEAD_RX + 1.5;
           const stemEnd = stemUp ? cy - STEM : cy + STEM;
@@ -111,9 +125,9 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
                 <line key={ls} className="staff__ledger" x1={x - 22} x2={x + 22} y1={y(ls)} y2={y(ls)} />
               ))}
               {state === 'current' && <circle className="staff__halo" cx={x} cy={cy} r={25} />}
-              {noteInfo(midi).isBlack && (
+              {accidental && (
                 <text className={`staff__accidental${mod ? ` staff__head${mod}` : ''}`} x={x - HEAD_RX - 6} y={cy + 7} fontSize={1.4 * S} aria-hidden>
-                  ♯
+                  {accidental}
                 </text>
               )}
               {beats < 4 && <line className={`staff__stem${mod ? ` staff__stem${mod}` : ''}`} x1={stemX} x2={stemX} y1={cy} y2={stemEnd} />}

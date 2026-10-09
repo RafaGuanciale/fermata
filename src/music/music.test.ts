@@ -110,7 +110,7 @@ describe('stats', () => {
   });
 });
 
-import { staffLayout, windowStart } from '../components/staffLayout';
+import { spellOnStaff, staffLayout, windowStart } from '../components/staffLayout';
 
 describe('janela da pauta', () => {
   it('mostra tudo no notebook e menos notas, em escala, no celular', () => {
@@ -125,5 +125,19 @@ describe('janela da pauta', () => {
     expect(windowStart(0, 6, 15)).toBe(0);
     expect(windowStart(5, 6, 15)).toBe(4);
     expect(windowStart(14, 6, 15)).toBe(9);
+  });
+});
+
+describe('grafia na armadura', () => {
+  it('sustenido, bemol e bequadro conforme a armadura', () => {
+    expect(spellOnStaff(66, 'treble')).toMatchObject({ accidental: '♯', name: 'Fá♯' });
+    expect(spellOnStaff(66, 'treble', 1)).toMatchObject({ accidental: '', name: 'Fá♯' });
+    expect(spellOnStaff(65, 'treble', 1)).toMatchObject({ accidental: '♮', name: 'Fá' });
+    const bb = spellOnStaff(70, 'treble', -1);
+    expect(bb).toMatchObject({ accidental: '', name: 'Si♭' });
+    expect(bb.step).toBe(spellOnStaff(71, 'treble').step);
+    expect(spellOnStaff(63, 'treble', -1)).toMatchObject({ accidental: '♭', name: 'Mi♭' });
+    expect(spellOnStaff(60, 'treble', 2).accidental).toBe('♮');
+    expect(spellOnStaff(61, 'treble', 2).accidental).toBe('');
   });
 });

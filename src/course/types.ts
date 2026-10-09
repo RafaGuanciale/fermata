@@ -37,7 +37,7 @@ export interface Item {
   /** Linha menor abaixo da pergunta. */
   detail?: string;
   /** O que mostrar junto: nota na pauta, símbolo grande (cifra, grau). */
-  staff?: { notes: Midi[]; clef: Clef };
+  staff?: { notes: Midi[]; clef: Clef; /** Armadura (sustenidos positivos, bemóis negativos). */ fifths?: number };
   symbol?: string;
   /** Teclas acesas como dica (só com dicas ligadas). */
   hintKeys?: Midi[];
@@ -82,6 +82,8 @@ export interface TimedTask {
   high: Midi;
   /** Texto curto acima da pauta. */
   caption?: string;
+  /** Armadura da pauta (sustenidos positivos, bemóis negativos). */
+  fifths?: number;
   /** Transposição: a pauta mostra a melodia original e o que se toca fica `transpose` semitons acima (ou abaixo, se negativo). */
   transpose?: number;
 }
@@ -119,7 +121,9 @@ export type Exercise =
       /** Dinâmica pedida para todas as notas, ou crescendo ao longo da passada. */
       dynamics?: 'p' | 'mf' | 'f' | 'crescendo' | 'diminuendo';
       /** Mede o pedal de sustentação (CC64): direto = desce com o acorde e sobe antes do próximo, nunca preso numa pausa. */
-      pedal?: 'direto';
+      pedal?: 'direto' | 'legato';
+      /** Uniformidade: IOI-SD máximo em ms (escalas). Só conta com pelo menos 3 notas casadas. */
+      evenness?: number;
       /** Nota a mais derruba a passada (por exemplo, reatacar uma nota ligada). */
       noExtras?: boolean;
       /** Sobe o BPM a cada passada boa até o alvo (escada). */

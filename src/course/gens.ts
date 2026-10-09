@@ -46,13 +46,21 @@ export function findExact(opts: { keys: { midi: Midi; label: string }[]; skill?:
   };
 }
 
+/** "2 sustenidos", "1 bemol". */
+export function keySigLabel(fifths: number): string {
+  const k = Math.abs(fifths);
+  if (!k) return 'sem acidentes';
+  return `${k} ${fifths > 0 ? (k > 1 ? 'sustenidos' : 'sustenido') : k > 1 ? 'bemóis' : 'bemol'}`;
+}
+
 /** Nota escrita na pauta: toque a tecla exata. */
-export function readNote(opts: { notes: Midi[]; clef: Clef; skill?: string }): ItemGen {
+export function readNote(opts: { notes: Midi[]; clef: Clef; fifths?: number; skill?: string }): ItemGen {
   return (rng) => {
     const midi = pick(rng, opts.notes);
     return {
       prompt: 'Toque a nota da pauta',
-      staff: { notes: [midi], clef: opts.clef },
+      detail: opts.fifths ? `Atenção à armadura: ${keySigLabel(opts.fifths)}.` : undefined,
+      staff: { notes: [midi], clef: opts.clef, fifths: opts.fifths },
       hintKeys: [midi],
       hint: nameOf(midi),
       steps: [{ kind: 'exact', midis: [midi] }],
@@ -330,6 +338,73 @@ export function transposeProgression(opts: { from: string; to: string[]; progres
       hint: target.map(chordLabel).join(' – '),
       steps: target.map((x) => chordAccept(x)),
       skill: opts.skill ?? 'transpor-progressao',
+    };
+  };
+}
+
+// ---------- escalas e armaduras ----------
+
+const PT_FLAT = ['Dó', 'Ré♭', 'Ré', 'Mi♭', 'Mi', 'Fá', 'Sol♭', 'Sol', 'Lá♭', 'Lá', 'Si♭', 'Si'];
+const MAJOR = [0, 2, 4, 5, 7, 9, 11, 12];
+
+/** Nome em português de uma classe de altura, com bemol nas tonalidades de bemóis. */
+export function ptInKey(pc: Pc, key: string): string {
+  return (FLAT_KEYS.has(rootPc(key)) ? PT_FLAT : PC_NAMES)[((pc % 12) + 12) % 12];
+}
+
+/** Construa a escala maior (8 notas, subindo) ou o tetracorde maior (4 notas) a partir de uma tônica, na oitava 4. */
+export function buildScale(opts: { keys: string[]; notes: 4 | 8; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const tonic = 60 + rootPc(key);
+    const midis = MAJOR.slice(0, opts.notes).map((x) => tonic + x);
+    const names = midis.map((m) => ptInKey(pcOf(m), key));
+    return {
+      prompt: opts.notes === 8 ? `Toque a escala de ${keyName(key)} maior, subindo` : `Toque o tetracorde maior a partir de ${names[0]}`,
+      detail: opts.notes === 8 ? `Comece no ${names[0]}4. Tom, tom, semitom, tom, tom, tom, semitom.` : `Comece no ${names[0]}4. Tom, tom, semitom.`,
+      hintKeys: midis,
+      hint: names.join(', '),
+      steps: midis.map((m) => ({ kind: 'exact', midis: [m] }) as Accept),
+      skill: opts.skill ?? (opts.notes === 8 ? 'construir-escala' : 'tetracorde'),
+    };
+  };
+}
+
+const SIG_KEY: Record<number, string> = { 0: 'C', 1: 'G', 2: 'D', 3: 'A', 4: 'E', [-1]: 'F', [-2]: 'Bb', [-3]: 'Eb' };
+const SHARP_ORDER = ['Fá♯', 'Dó♯', 'Sol♯', 'Ré♯', 'Lá♯'];
+const FLAT_ORDER = ['Si♭', 'Mi♭', 'Lá♭', 'Ré♭', 'Sol♭'];
+
+/** "Que tonalidade maior tem 2 sustenidos (Fá♯, Dó♯)? Toque a tônica." */
+export function keyFromSignature(opts: { fifths: number[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const f = pick(rng, opts.fifths);
+    const key = SIG_KEY[f];
+    const list = f > 0 ? SHARP_ORDER.slice(0, f) : FLAT_ORDER.slice(0, -f);
+    return {
+      prompt: 'Que tonalidade maior tem esta armadura? Toque a tônica',
+      symbol: f === 0 ? 'sem acidentes' : `${keySigLabel(f)}: ${list.join(', ')}`,
+      detail: 'Qualquer oitava.',
+      hint: f > 0 ? `O último sustenido (${list[list.length - 1]}) é a sensível: a tônica fica meio tom acima. ${keyName(key)}.` : f < 0 ? `Com bemóis, a tônica é o penúltimo bemol (com 1 bemol, é Fá). ${keyName(key)}.` : 'Sem acidentes: Dó maior.',
+      steps: [{ kind: 'pc', pcs: [rootPc(key)] }],
+      skill: opts.skill ?? 'armadura',
+    };
+  };
+}
+
+const DEGREE_PT = ['tônica', 'supertônica', 'mediante', 'subdominante', 'dominante', 'superdominante', 'sensível'];
+
+/** "Toque a mediante de Sol maior": nome do grau → nota, em qualquer oitava. */
+export function scaleDegreeNote(opts: { keys: string[]; degrees: number[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const d = pick(rng, opts.degrees);
+    const pc = (rootPc(key) + MAJOR[d - 1]) % 12;
+    return {
+      prompt: `Toque a ${DEGREE_PT[d - 1]} de ${keyName(key)} maior`,
+      detail: 'Qualquer oitava.',
+      hint: `Grau ${d} de ${keyName(key)}: ${ptInKey(pc, key)}.`,
+      steps: [{ kind: 'pc', pcs: [pc] }],
+      skill: opts.skill ?? 'nome-do-grau',
     };
   };
 }

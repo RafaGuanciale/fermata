@@ -112,6 +112,10 @@
   text-anchor: end;
 }
 
+.staff__accidental-key {
+  text-anchor: middle;
+}
+
 .staff__rest {
   fill: var(--text);
   font-family: var(--font-music);

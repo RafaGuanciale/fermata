@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
-import { degreeByEar, degreeSymbol, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
+import { buildScale, degreeByEar, degreeSymbol, keyFromSignature, scaleDegreeNote, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
 import {
-  articulationScore, calibrate, chordMatches, dynamicsScore, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
+  articulationScore, calibrate, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
 } from './judge';
 import { n, parseLine, ptName, seeded } from './music';
 import { afterCheckpoint, canMaster, lessonKey, lessonState, nextLesson, rowsById, songPassed, unitComplete, warmupItems } from './progress';
 import { checkSong, songXml } from './song';
-import { melodyTask, rhythmTask, tiedMelodyTask, transposedTask } from './tasks';
+import { melodyTask, rhythmTask, sightReadingTask, tiedMelodyTask, transposedTask } from './tasks';
 import type { Exercise, Item, ItemGen, Unit } from './types';
 
 const DAY = 86400000;
@@ -33,6 +33,15 @@ describe('escrita de melodias', () => {
     expect(xml).toContain('Teste &amp; cia');
     expect(xml).toContain('<rest measure="yes"/>');
     expect(() => checkSong({ ...song, left: 'C3:4' })).toThrow(/compassos/);
+  });
+
+  it('primeira vista: melodia nova na posição, termina na tônica', () => {
+    for (let seed = 1; seed < 30; seed++) {
+      const t = sightReadingTask(seeded(seed), { tonic: 67, bars: 4, bpm: 60, fifths: 1 });
+      expect(t.events.every((e) => [67, 69, 71, 72, 74].includes(e.midi!))).toBe(true);
+      expect(t.events[t.events.length - 1]).toMatchObject({ midi: 67, beat: 12, beats: 4 });
+      expect(t.fifths).toBe(1);
+    }
   });
 
   it('tarefas no tempo', () => {
@@ -108,13 +117,27 @@ describe('julgamento', () => {
   it('pedal direto: desce com o acorde, sobe antes do próximo, nunca preso na pausa', () => {
     const task = melodyTask('C3+E3+G3:2 r:2 | F3+A3+C4:2 G3+B3+D4:2', { bpm: 60 });
     const good = [{ down: true, t: 150 }, { down: false, t: 1500 }, { down: true, t: 4100 }, { down: false, t: 5900 }, { down: true, t: 6150 }, { down: false, t: 7900 }];
-    expect(pedalScore(task, 60, good)).toEqual({ score: 1, muddy: 0, stuck: 0, missed: 0 });
+    expect(pedalScore(task, 60, good)).toEqual({ score: 1, muddy: 0, stuck: 0, missed: 0, early: 0 });
     const held = [{ down: true, t: 100 }, { down: false, t: 7900 }];
     const s = pedalScore(task, 60, held)!;
     expect(s.stuck).toBe(1);
     expect(s.muddy).toBe(1);
     expect(s.missed).toBe(2);
     expect(pedalScore(task, 60, [])).toBeNull();
+    // Pedal legato: troca logo depois de cada acorde novo.
+    const flow = melodyTask('C4+E4+G4:2 F4+A4+C5:2 | G4+B4+D5:2 C4+E4+G4:2', { bpm: 60 });
+    const legato = [{ down: true, t: 120 }, { down: false, t: 2080 }, { down: true, t: 2200 }, { down: false, t: 4100 }, { down: true, t: 4220 }, { down: false, t: 6090 }, { down: true, t: 6200 }];
+    expect(pedalScore(flow, 60, legato, 'legato')).toEqual({ score: 1, muddy: 0, stuck: 0, missed: 0, early: 0 });
+    const early = [{ down: true, t: 120 }, { down: false, t: 1800 }, { down: true, t: 2050 }];
+    expect(pedalScore(flow, 60, early, 'legato')!.early).toBe(1);
+  });
+
+  it('uniformidade (IOI-SD)', () => {
+    const task = melodyTask('C4:0.5 D4:0.5 E4:0.5 F4:0.5 G4:0.5 A4:0.5 B4:0.5 C5:0.5', { bpm: 60 });
+    const even: CourseEvent[] = [60, 62, 64, 65, 67, 69, 71, 72].map((m, i) => ({ midi: m, t: i * 500, off: null }));
+    expect(ioiSd(task, 60, even)).toBeCloseTo(0);
+    const uneven = even.map((e, i) => ({ ...e, t: e.t + (i % 2 ? 60 : 0) }));
+    expect(ioiSd(task, 60, uneven)!).toBeGreaterThan(50);
   });
 
   it('improviso: notas no conjunto, pausas e nota final', () => {
@@ -170,6 +193,15 @@ describe('geradores', () => {
     expect(bass.steps).toEqual([{ kind: 'pc', pcs: [0] }, { kind: 'pc', pcs: [5] }, { kind: 'pc', pcs: [7] }, { kind: 'pc', pcs: [0] }]);
     for (const step of bass.listen!.steps) expect(Math.min(...step.midis)).toBeLessThan(60);
     expect(tonicByEar({ keys: ['D'] })(rng).steps).toEqual([{ kind: 'pc', pcs: [2] }]);
+    const sc = buildScale({ keys: ['Bb'], notes: 8 })(rng);
+    expect(sc.steps.map((x) => (x.kind === 'exact' ? x.midis[0] : 0))).toEqual([70, 72, 74, 75, 77, 79, 81, 82]);
+    expect(sc.hint).toBe('Si♭, Dó, Ré, Mi♭, Fá, Sol, Lá, Si♭');
+    expect(buildScale({ keys: ['D'], notes: 4 })(rng).hint).toBe('Ré, Mi, Fá♯, Sol');
+    expect(keyFromSignature({ fifths: [2] })(rng).steps).toEqual([{ kind: 'pc', pcs: [2] }]);
+    expect(keyFromSignature({ fifths: [-2] })(rng).symbol).toBe('2 bemóis: Si♭, Mi♭');
+    const deg = scaleDegreeNote({ keys: ['G'], degrees: [7] })(rng);
+    expect(deg.prompt).toBe('Toque a sensível de Sol maior');
+    expect(deg.steps).toEqual([{ kind: 'pc', pcs: [6] }]);
     const tp = transposeProgression({ from: 'C', to: ['G'], progressions: [['I', 'IV', 'V7', 'I']] })(rng);
     expect(tp.symbol).toBe('C – F – G7 – C');
     expect(tp.steps.map((x) => (x.kind === 'chord' ? x.pcs : []))).toEqual([[7, 11, 2], [0, 4, 7], [2, 6, 9, 0], [7, 11, 2]]);

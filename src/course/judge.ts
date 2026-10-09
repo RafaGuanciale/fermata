@@ -146,6 +146,25 @@ function matchEvents(task: TimedTask, bpm: number, events: CourseEvent[]): (Cour
 }
 
 /**
+ * Uniformidade (IOI-SD): desvio-padrão, em ms, da diferença entre o intervalo tocado e o escrito
+ * entre notas vizinhas casadas. Para escalas em figuras iguais, é o IOI-SD clássico. Null com menos de 3 notas casadas.
+ */
+export function ioiSd(task: TimedTask, bpm: number, events: CourseEvent[]): number | null {
+  const beatMs = 60000 / bpm;
+  const matched = matchEvents(task, bpm, events);
+  const d: number[] = [];
+  for (let i = 0; i + 1 < matched.length; i++) {
+    const a = matched[i];
+    const b = matched[i + 1];
+    const gap = task.events[i + 1].beat - task.events[i].beat;
+    if (a && b && gap > 0) d.push(b.t - a.t - gap * beatMs);
+  }
+  if (d.length < 2) return null;
+  const mean = d.reduce((s, x) => s + x, 0) / d.length;
+  return Math.sqrt(d.reduce((s, x) => s + (x - mean) ** 2, 0) / d.length);
+}
+
+/**
  * Legato: a nota seguinte começa antes (ou até 30 ms depois) de a anterior soltar.
  * Staccato: a nota dura menos da metade do espaço até a próxima.
  * Retorna a fração de transições certas.
@@ -184,6 +203,8 @@ export interface PedalScore {
   stuck: number;
   /** Acordes em que o pedal não desceu junto. */
   missed: number;
+  /** Pedal legato: trocas antecipadas (o pedal subiu antes do acorde novo, deixando um buraco). */
+  early: number;
 }
 
 /**
@@ -191,8 +212,9 @@ export interface PedalScore {
  * (até 30 ms depois do ataque seguinte). Nas pausas de pelo menos 1 tempo, o pedal tem de estar em cima no meio da pausa.
  * Sem nenhum evento de pedal, retorna null (piano sem pedal ou sem MIDI).
  */
-export function pedalScore(task: TimedTask, bpm: number, pedal: PedalEvent[]): PedalScore | null {
+export function pedalScore(task: TimedTask, bpm: number, pedal: PedalEvent[], kind: 'direto' | 'legato' = 'direto'): PedalScore | null {
   if (!pedal.length) return null;
+  if (kind === 'legato') return legatoPedal(task, bpm, pedal);
   const beatMs = 60000 / bpm;
   const ev = [...pedal].sort((a, b) => a.t - b.t);
   const isDown = (t: number) => {
@@ -230,7 +252,42 @@ export function pedalScore(task: TimedTask, bpm: number, pedal: PedalEvent[]): P
   }
   const stuck = rests.filter((mid) => isDown(mid)).length;
   const total = onsets.length + rests.length;
-  return { score: total ? (ok + rests.length - stuck) / total : 0, muddy, stuck, missed };
+  return { score: total ? (ok + rests.length - stuck) / total : 0, muddy, stuck, missed, early: 0 };
+}
+
+/**
+ * Pedal legato (sincopado): no 1º acorde o pedal desce depois do ataque (até 400 ms). Em cada acorde seguinte,
+ * o pedal sobe e desce de novo logo DEPOIS do ataque (subida de 40 ms antes a 250 ms depois; descida até 400 ms depois).
+ * Subir antes disso deixa um buraco no som: troca antecipada. Não trocar: lama.
+ */
+function legatoPedal(task: TimedTask, bpm: number, pedal: PedalEvent[]): PedalScore {
+  const beatMs = 60000 / bpm;
+  const ev = [...pedal].sort((a, b) => a.t - b.t);
+  const onsets = [...new Set(task.events.map((e) => e.beat))].sort((a, b) => a - b).map((b) => b * beatMs);
+  let ok = 0;
+  let muddy = 0;
+  let missed = 0;
+  let early = 0;
+  onsets.forEach((at, i) => {
+    if (i === 0) {
+      if (ev.some((e) => e.down && e.t >= at - 40 && e.t <= at + 400)) ok++;
+      else missed++;
+      return;
+    }
+    const prev = onsets[i - 1];
+    if (ev.some((e) => !e.down && e.t > prev + 250 && e.t < at - 40)) {
+      early++;
+      return;
+    }
+    const up = ev.find((e) => !e.down && e.t >= at - 40 && e.t <= at + 250);
+    if (!up) {
+      muddy++;
+      return;
+    }
+    if (ev.some((e) => e.down && e.t > up.t && e.t <= at + 400)) ok++;
+    else missed++;
+  });
+  return { score: onsets.length ? ok / onsets.length : 0, muddy, stuck: 0, missed, early };
 }
 
 // ---------- força (velocity) ----------

@@ -2,6 +2,10 @@
 
 import type { Clef, Midi } from '../music/notes';
 import { parseLine, pick } from './music';
+
+const SCI = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+/** 66 → "F#4" (a grafia vale só para o texto; a pauta escolhe sustenido ou bemol pela armadura). */
+export const sci = (m: Midi) => `${SCI[((m % 12) + 12) % 12]}${Math.floor(m / 12) - 1}`;
 import type { Rng, TimedTask } from './types';
 
 function rangeOf(midis: Midi[], fallback: [Midi, Midi]): [Midi, Midi] {
@@ -16,7 +20,7 @@ function rangeOf(midis: Midi[], fallback: [Midi, Midi]): [Midi, Midi] {
 }
 
 /** Melodia de uma voz em texto ("C4 D4 E4:2 | …"): a pauta e o que tocar são a mesma linha. */
-export function melodyTask(text: string, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string; low?: Midi; high?: Midi }): TimedTask {
+export function melodyTask(text: string, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string; low?: Midi; high?: Midi; fifths?: number }): TimedTask {
   const bpb = opts.beatsPerBar ?? 4;
   const notes = parseLine(text, text.includes('|') ? bpb : undefined);
   const midis = notes.flatMap((x) => x.midis);
@@ -30,6 +34,7 @@ export function melodyTask(text: string, opts: { bpm: number; beatsPerBar?: numb
     low: opts.low ?? low,
     high: opts.high ?? high,
     caption: opts.caption,
+    fifths: opts.fifths,
   };
 }
 
@@ -55,7 +60,7 @@ export function randomRhythm(pool: string[], bars: number, bpm: number, caption?
 }
 
 /** Duas mãos: a pauta mostra a mão direita; os eventos incluem as duas. */
-export function twoHandTask(right: string, left: string, opts: { bpm: number; beatsPerBar?: number; caption?: string; low?: Midi; high?: Midi }): TimedTask {
+export function twoHandTask(right: string, left: string, opts: { bpm: number; beatsPerBar?: number; caption?: string; low?: Midi; high?: Midi; fifths?: number }): TimedTask {
   const bpb = opts.beatsPerBar ?? 4;
   const r = parseLine(right, bpb);
   const l = parseLine(left, bpb);
@@ -70,6 +75,7 @@ export function twoHandTask(right: string, left: string, opts: { bpm: number; be
     low: opts.low ?? low,
     high: opts.high ?? high,
     caption: opts.caption,
+    fifths: opts.fifths,
   };
 }
 
@@ -77,7 +83,7 @@ export function twoHandTask(right: string, left: string, opts: { bpm: number; be
  * Melodia com ligaduras de prolongamento: "~" no fim de uma nota liga ela à próxima (a mesma tecla).
  * A pauta mostra as duas figuras; o que se toca é uma nota só, com a duração somada.
  */
-export function tiedMelodyTask(text: string, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string }): TimedTask {
+export function tiedMelodyTask(text: string, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string; fifths?: number }): TimedTask {
   const bpb = opts.beatsPerBar ?? 4;
   const tied = text.split('|').flatMap((b) => b.trim().split(/\s+/)).filter(Boolean).map((t) => t.endsWith('~'));
   const base = melodyTask(text.replace(/~/g, ''), { ...opts, beatsPerBar: bpb });
@@ -91,9 +97,32 @@ export function tiedMelodyTask(text: string, opts: { bpm: number; beatsPerBar?: 
 }
 
 /** Transposição: a pauta mostra a melodia escrita em `text`; o que conta é tocá-la `semitones` acima (ou abaixo). */
-export function transposedTask(text: string, semitones: number, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string }): TimedTask {
+export function transposedTask(text: string, semitones: number, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string; fifths?: number }): TimedTask {
   const base = melodyTask(text, opts);
   const events = base.events.map((e) => ({ ...e, midi: e.midi === null ? null : e.midi + semitones }));
   const [low, high] = rangeOf(events.flatMap((e) => (e.midi === null ? [] : [e.midi])), [base.low, base.high]);
   return { ...base, events, low, high, transpose: semitones };
+}
+
+const READ_RHYTHMS = [[1, 1, 1, 1], [2, 1, 1], [1, 1, 2], [2, 2], [1, 2, 1]];
+
+/**
+ * Leitura à primeira vista: melodia nova a cada vez, na posição de cinco dedos a partir de `tonic` (pentacorde maior),
+ * andando por grau conjunto e saltos de 3ª, terminando na tônica com uma semibreve.
+ */
+export function sightReadingTask(rng: Rng, opts: { tonic: Midi; bars: number; bpm: number; fifths?: number; clef?: Clef; caption?: string }): TimedTask {
+  const pos = [0, 2, 4, 5, 7].map((x) => opts.tonic + x);
+  let i = pick(rng, [0, 2, 4]);
+  const bars: string[] = [];
+  for (let b = 0; b < opts.bars - 1; b++) {
+    const notes: string[] = [];
+    for (const beats of pick(rng, READ_RHYTHMS)) {
+      notes.push(beats === 1 ? sci(pos[i]) : `${sci(pos[i])}:${beats}`);
+      const moves = [-2, -1, -1, 1, 1, 2].filter((d) => i + d >= 0 && i + d < pos.length);
+      i += pick(rng, moves);
+    }
+    bars.push(notes.join(' '));
+  }
+  bars.push(`${sci(pos[0])}:4`);
+  return melodyTask(bars.join(' | '), { bpm: opts.bpm, fifths: opts.fifths, clef: opts.clef, caption: opts.caption ?? 'Primeira vista: olhe o trecho por alguns segundos e toque sem parar.' });
 }

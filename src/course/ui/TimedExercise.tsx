@@ -11,7 +11,7 @@ import { useNoteInput } from '../../input/useNoteInput';
 import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
-import { articulationScore, dynamicsScore, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
+import { articulationScore, dynamicsScore, ioiSd, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
 
@@ -30,6 +30,8 @@ interface TakeScore {
   noVelocity: boolean;
   /** Pedal medido (null = nenhum evento de pedal chegou). */
   ped: PedalScore | null;
+  /** Uniformidade (IOI-SD em ms). */
+  even: number | null;
   ok: boolean;
 }
 
@@ -136,10 +138,11 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     const vels = matchedVelocities(task, bpm, events);
     const noVelocity = !!ex.dynamics && vels.length === 0;
     const dyn = ex.dynamics && cal && vels.length ? dynamicsScore(vels, ex.dynamics, cal) : null;
-    const ped = ex.pedal ? pedalScore(task, bpm, pedalRef.current) : null;
+    const ped = ex.pedal ? pedalScore(task, bpm, pedalRef.current, ex.pedal) : null;
+    const even = ex.evenness ? ioiSd(task, bpm, events) : null;
     const need = ex.pass.accuracy;
-    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0) && (ped === null || ped.score >= 0.85);
-    const s = { r, artic, dyn, noVelocity, ped, ok };
+    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0) && (ped === null || ped.score >= 0.85) && (even === null || even <= ex.evenness!);
+    const s = { r, artic, dyn, noVelocity, ped, even, ok };
     setScore(s);
     setPhase('done');
     takeRef.current(s);
@@ -233,6 +236,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           clef={task.clef}
           durations={task.display.map((d) => d.beats)}
           beatsPerBar={task.beatsPerBar}
+          fifths={task.fifths}
           label="Pauta do exercício"
         />
       </div>
@@ -264,7 +268,12 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
             <p className="runner__note">
               {score.ped === null
                 ? 'O pedal só é medido com o piano conectado por MIDI e o pedal ligado nele. Esta passada contou só as notas.'
-                : `Pedal: ${pct(score.ped.score)} certo${score.ped.muddy ? `, ${score.ped.muddy} troca${score.ped.muddy > 1 ? 's' : ''} com som misturado (suba o pedal antes do próximo acorde)` : ''}${score.ped.stuck ? `, ${score.ped.stuck} pausa${score.ped.stuck > 1 ? 's' : ''} com pedal preso` : ''}${score.ped.missed ? `, ${score.ped.missed} acorde${score.ped.missed > 1 ? 's' : ''} sem pedal` : ''}.`}
+                : `Pedal: ${pct(score.ped.score)} certo${score.ped.muddy ? `, ${score.ped.muddy} troca${score.ped.muddy > 1 ? 's' : ''} com som misturado (suba o pedal antes do próximo acorde)` : ''}${score.ped.stuck ? `, ${score.ped.stuck} pausa${score.ped.stuck > 1 ? 's' : ''} com pedal preso` : ''}${score.ped.missed ? `, ${score.ped.missed} acorde${score.ped.missed > 1 ? 's' : ''} sem pedal` : ''}${score.ped.early ? `, ${score.ped.early} troca${score.ped.early > 1 ? 's' : ''} antecipada${score.ped.early > 1 ? 's' : ''} (troque logo depois do acorde novo, não antes)` : ''}.`}
+            </p>
+          )}
+          {score.even !== null && ex.evenness && (
+            <p className="runner__note">
+              Uniformidade: variação de {Math.round(score.even)} ms entre as notas (meta: até {ex.evenness} ms){score.even > ex.evenness ? '. Pense em notas iguais, como gotas: nem correr na passagem do polegar, nem frear depois.' : '.'}
             </p>
           )}
           {ex.noExtras && score.r.extras > 0 && (
