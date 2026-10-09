@@ -36,7 +36,8 @@ function fits(accept: Accept, midi: Midi): boolean {
 export function chordMatches(accept: Extract<Accept, { kind: 'chord' }>, held: Midi[]): boolean {
   if (!held.length) return false;
   const pcs = new Set(held.map(pcOf));
-  if (pcs.size !== accept.pcs.length || !accept.pcs.every((p) => pcs.has(p))) return false;
+  const required = accept.pcs.filter((p) => !accept.optional?.includes(p));
+  if (![...pcs].every((p) => accept.pcs.includes(p)) || !required.every((p) => pcs.has(p))) return false;
   if (accept.bass !== undefined && pcOf(Math.min(...held)) !== accept.bass) return false;
   return true;
 }
@@ -58,7 +59,7 @@ export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[])
     if (chordMatches(accept, held)) return advance(p, item);
     // Todas as classes, mas baixo errado: é inversão errada.
     const pcs = new Set(held.map(pcOf));
-    if (accept.bass !== undefined && accept.pcs.every((x) => pcs.has(x))) return { ...p, misses: p.misses + 1, lastWrong: Math.min(...held) };
+    if (accept.bass !== undefined && accept.pcs.filter((x) => !accept.optional?.includes(x)).every((x) => pcs.has(x))) return { ...p, misses: p.misses + 1, lastWrong: Math.min(...held) };
     return { ...p, lastWrong: null };
   }
   if (accept.kind === 'all') {
@@ -164,6 +165,72 @@ export function articulationScore(task: TimedTask, bpm: number, events: CourseEv
     return off - a.t < 0.5 * (b.t - a.t);
   });
   return ok.length / pairs.length;
+}
+
+// ---------- pedal (CC64) ----------
+
+export interface PedalEvent {
+  down: boolean;
+  /** ms desde o primeiro tempo. */
+  t: number;
+}
+
+export interface PedalScore {
+  /** Acertos / (acordes + pausas). */
+  score: number;
+  /** Acordes em que o pedal não subiu antes do próximo (som misturado). */
+  muddy: number;
+  /** Pausas com o pedal abaixado. */
+  stuck: number;
+  /** Acordes em que o pedal não desceu junto. */
+  missed: number;
+}
+
+/**
+ * Pedal direto: desce junto com cada acorde (de 100 ms antes a 400 ms depois do ataque) e sobe antes do próximo
+ * (até 30 ms depois do ataque seguinte). Nas pausas de pelo menos 1 tempo, o pedal tem de estar em cima no meio da pausa.
+ * Sem nenhum evento de pedal, retorna null (piano sem pedal ou sem MIDI).
+ */
+export function pedalScore(task: TimedTask, bpm: number, pedal: PedalEvent[]): PedalScore | null {
+  if (!pedal.length) return null;
+  const beatMs = 60000 / bpm;
+  const ev = [...pedal].sort((a, b) => a.t - b.t);
+  const isDown = (t: number) => {
+    let d = false;
+    for (const e of ev) {
+      if (e.t > t) break;
+      d = e.down;
+    }
+    return d;
+  };
+  const onsets = [...new Set(task.events.map((e) => e.beat))].sort((a, b) => a - b).map((b) => b * beatMs);
+  let ok = 0;
+  let muddy = 0;
+  let missed = 0;
+  onsets.forEach((at, i) => {
+    const press = ev.find((e) => e.down && e.t >= at - 100 && e.t <= at + 400);
+    if (!press) {
+      missed++;
+      return;
+    }
+    const next = onsets[i + 1];
+    if (next !== undefined && !ev.some((e) => !e.down && e.t > press.t && e.t <= next + 30)) {
+      muddy++;
+      return;
+    }
+    ok++;
+  });
+  // Pausas: trechos sem nenhuma nota soando, de pelo menos 1 tempo.
+  const spans = task.events.map((e) => [e.beat, e.beat + e.beats] as const).sort((a, b) => a[0] - b[0]);
+  const rests: number[] = [];
+  let until = 0;
+  for (const [a, b] of spans) {
+    if (a - until >= 1 - 1e-6) rests.push(((until + a) / 2) * beatMs);
+    until = Math.max(until, b);
+  }
+  const stuck = rests.filter((mid) => isDown(mid)).length;
+  const total = onsets.length + rests.length;
+  return { score: total ? (ok + rests.length - stuck) / total : 0, muddy, stuck, missed };
 }
 
 // ---------- força (velocity) ----------

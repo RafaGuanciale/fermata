@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Midi } from '../music/notes';
-import { COMPUTER_KEYS, NoteInputContext, parseMidiMessage, type MidiStatus, type NoteEvent, type NoteListener, type NoteSource } from './useNoteInput';
+import { COMPUTER_KEYS, NoteInputContext, parseMidiMessage, parsePedalMessage, type MidiStatus, type NoteEvent, type NoteListener, type NoteSource, type PedalListener } from './useNoteInput';
 
 const AUTO_KEY = 'fermata-midi-auto';
 
@@ -15,6 +15,7 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
     typeof navigator !== 'undefined' && 'requestMIDIAccess' in navigator ? { kind: 'idle' } : { kind: 'unsupported' },
   );
   const listeners = useRef(new Set<NoteListener>());
+  const pedalListeners = useRef(new Set<PedalListener>());
   const accessRef = useRef<MIDIAccess | null>(null);
 
   const emit = useCallback((type: 'on' | 'off', note: Midi, source: NoteSource, at: number = performance.now(), velocity?: number) => {
@@ -27,6 +28,13 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
     });
     const event: NoteEvent = { type, midi: note, at, source, velocity };
     listeners.current.forEach((l) => l(event));
+  }, []);
+
+  const subscribePedal = useCallback((listener: PedalListener) => {
+    pedalListeners.current.add(listener);
+    return () => {
+      pedalListeners.current.delete(listener);
+    };
   }, []);
 
   const subscribe = useCallback((listener: NoteListener) => {
@@ -75,6 +83,11 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
             const ev = parseMidiMessage(e.data);
             // O carimbo do MIDI é mais preciso que a hora em que o navegador entrega a mensagem.
             if (ev) emit(ev.type, ev.midi, 'midi', e.timeStamp || performance.now(), ev.velocity);
+            const pedal = ev ? null : parsePedalMessage(e.data);
+            if (pedal) {
+              const at = e.timeStamp || performance.now();
+              pedalListeners.current.forEach((l) => l({ down: pedal.down, at }));
+            }
           };
         });
         setMidi(names.length ? { kind: 'connected', names } : { kind: 'waiting' });
@@ -110,8 +123,9 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
       press: (m: Midi) => emit('on', m, 'screen'),
       release: (m: Midi) => emit('off', m, 'screen'),
       subscribe,
+      subscribePedal,
     }),
-    [held, midi, connectMidi, emit, subscribe],
+    [held, midi, connectMidi, emit, subscribe, subscribePedal],
   );
 
   return <NoteInputContext.Provider value={value}>{children}</NoteInputContext.Provider>;

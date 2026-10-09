@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
-import { degreeByEar, intervalAbove, intervalByEar, parseChord, playChord, readInterval, toneOrSemitone, whiteAbove } from './gens';
+import { degreeByEar, degreeSymbol, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
 import {
-  articulationScore, calibrate, chordMatches, dynamicsScore, judgeTask, labelsVisible, levelOf, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
+  articulationScore, calibrate, chordMatches, dynamicsScore, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
 } from './judge';
 import { n, parseLine, ptName, seeded } from './music';
 import { afterCheckpoint, canMaster, lessonKey, lessonState, nextLesson, rowsById, songPassed, unitComplete, warmupItems } from './progress';
@@ -105,6 +105,18 @@ describe('julgamento', () => {
     expect(dynamicsScore([30, 30, 100], 'p', cal)).toBeCloseTo(2 / 3);
   });
 
+  it('pedal direto: desce com o acorde, sobe antes do próximo, nunca preso na pausa', () => {
+    const task = melodyTask('C3+E3+G3:2 r:2 | F3+A3+C4:2 G3+B3+D4:2', { bpm: 60 });
+    const good = [{ down: true, t: 150 }, { down: false, t: 1500 }, { down: true, t: 4100 }, { down: false, t: 5900 }, { down: true, t: 6150 }, { down: false, t: 7900 }];
+    expect(pedalScore(task, 60, good)).toEqual({ score: 1, muddy: 0, stuck: 0, missed: 0 });
+    const held = [{ down: true, t: 100 }, { down: false, t: 7900 }];
+    const s = pedalScore(task, 60, held)!;
+    expect(s.stuck).toBe(1);
+    expect(s.muddy).toBe(1);
+    expect(s.missed).toBe(2);
+    expect(pedalScore(task, 60, [])).toBeNull();
+  });
+
   it('improviso: notas no conjunto, pausas e nota final', () => {
     const ev: CourseEvent[] = [
       { midi: 66, t: 0, off: 900 },
@@ -132,6 +144,35 @@ describe('geradores', () => {
     expect(chord.steps[0]).toEqual({ kind: 'chord', pcs: [7, 11, 2, 5], bass: undefined });
     const d = degreeByEar({ tonic: 60, degrees: [5] })(rng);
     expect(d.steps).toEqual([{ kind: 'pc', pcs: [7] }]);
+  });
+
+  it('graus, cadência, harmonização e ditado', () => {
+    const rng = seeded(7);
+    expect(degreeSymbol('G', 'V7')).toBe('D7');
+    expect(degreeSymbol('F', 'IV')).toBe('Bb');
+    expect(degreeSymbol('C', 'I')).toBe('C');
+    const g7 = playChord({ symbols: ['G7'], low: 48, high: 72, omitFifth: true })(rng).steps[0];
+    expect(g7).toEqual({ kind: 'chord', pcs: [7, 11, 2, 5], bass: undefined, optional: [2] });
+    if (g7.kind !== 'chord') throw new Error();
+    expect(chordMatches(g7, [47, 53, 55])).toBe(true); // Si, Fá, Sol: posição próxima
+    expect(chordMatches(g7, [47, 53])).toBe(false);
+    expect(chordMatches(g7, [43, 47, 50, 53])).toBe(true);
+    const iv = primaryChord({ keys: ['F'], degrees: ['IV'], low: 48, high: 72 })(rng);
+    expect(iv.prompt).toBe('Em Fá maior, toque o IV');
+    expect(iv.steps[0]).toMatchObject({ kind: 'chord', pcs: [10, 2, 5] });
+    const res = resolveCadence({ keys: ['G'], before: [['I', 'V7']] })(rng);
+    expect(res.steps[0]).toMatchObject({ kind: 'chord', pcs: [7, 11, 2] });
+    expect(res.listen?.steps).toHaveLength(2);
+    const h = harmonize({ key: 'C', bars: [{ notes: [65, 69, 72], degree: 'IV' }] })(rng);
+    expect(h.staff?.notes).toEqual([65, 69, 72]);
+    expect(h.steps[0]).toMatchObject({ pcs: [5, 9, 0] });
+    const bass = progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'V7', 'I']], answer: 'bass' })(rng);
+    expect(bass.steps).toEqual([{ kind: 'pc', pcs: [0] }, { kind: 'pc', pcs: [5] }, { kind: 'pc', pcs: [7] }, { kind: 'pc', pcs: [0] }]);
+    for (const step of bass.listen!.steps) expect(Math.min(...step.midis)).toBeLessThan(60);
+    expect(tonicByEar({ keys: ['D'] })(rng).steps).toEqual([{ kind: 'pc', pcs: [2] }]);
+    const tp = transposeProgression({ from: 'C', to: ['G'], progressions: [['I', 'IV', 'V7', 'I']] })(rng);
+    expect(tp.symbol).toBe('C – F – G7 – C');
+    expect(tp.steps.map((x) => (x.kind === 'chord' ? x.pcs : []))).toEqual([[7, 11, 2], [0, 4, 7], [2, 6, 9, 0], [7, 11, 2]]);
   });
 
   it('intervalos ouvidos, lidos na pauta, tom e semitom', () => {

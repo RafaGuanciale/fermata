@@ -192,11 +192,12 @@ export function parseChord(symbol: string): { root: Pc; pcs: Pc[]; bass?: Pc } {
 export const chordLabel = (symbol: string) => symbol.replace(/#/g, '♯').replace(/b(?=\d|$|\/|m|7|\()/g, '♭');
 
 /** "Toque o acorde de Fá maior" a partir de cifras. Com `bass`, a inversão é exigida. */
-export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requireBass?: boolean; skill?: string }): ItemGen {
+export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requireBass?: boolean; omitFifth?: boolean; skill?: string }): ItemGen {
   return (rng) => {
     const symbol = pick(rng, opts.symbols);
     const c = parseChord(symbol);
     const accept: Accept = { kind: 'chord', pcs: c.pcs, bass: opts.requireBass || c.bass !== undefined ? (c.bass ?? c.root) : undefined };
+    if (opts.omitFifth && c.pcs.length >= 4) accept.optional = [c.pcs[2]];
     // Dica: posição fechada a partir da fundamental mais perto do meio do trecho.
     const mid = Math.round((opts.low + opts.high) / 2) - 6;
     const base = mid + ((c.root - pcOf(mid) + 12) % 12);
@@ -208,6 +209,143 @@ export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requ
       hint: c.pcs.map((p) => PC_NAMES[p]).join(', '),
       steps: [accept],
       skill: opts.skill ?? 'acorde',
+    };
+  };
+}
+
+// ---------- graus na tonalidade (I, IV, V, V7) ----------
+
+const SHARP_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const FLAT_NAMES = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+const FLAT_KEYS = new Set([5, 10, 3, 8, 1]);
+const KEY_PT: Record<string, string> = { C: 'Dó', G: 'Sol', F: 'Fá', D: 'Ré', A: 'Lá', Bb: 'Si♭', E: 'Mi', Eb: 'Mi♭' };
+export type Degree = 'I' | 'IV' | 'V' | 'V7';
+const DEGREE_ROOT: Record<Degree, number> = { I: 0, IV: 5, V: 7, V7: 7 };
+
+/** Nome da tonalidade em português: "G" → "Sol". */
+export const keyName = (key: string) => KEY_PT[key] ?? key;
+
+/** Cifra do grau numa tonalidade maior: ("G", "V7") → "D7"; ("F", "IV") → "Bb". */
+export function degreeSymbol(key: string, degree: Degree): string {
+  const k = rootPc(key);
+  const names = FLAT_KEYS.has(k) ? FLAT_NAMES : SHARP_NAMES;
+  return names[(k + DEGREE_ROOT[degree]) % 12] + (degree === 'V7' ? '7' : '');
+}
+
+/** Acorde em posição fechada com a fundamental no baixo, uma oitava abaixo de `center` (para o app tocar). */
+function voiced(symbol: string, center: Midi): Midi[] {
+  const c = parseChord(symbol);
+  const bass = center - 12 - ((pcOf(center) - c.root + 12) % 12);
+  const upper = c.pcs.map((p) => center - 5 + ((p - pcOf(center - 5) + 12) % 12)).sort((a, b) => a - b);
+  return [bass, ...upper];
+}
+
+/** Aceite de um acorde por cifra, com a 5ª opcional nas tétrades (posição próxima: Si–Fá–Sol no G7). */
+function chordAccept(symbol: string, bass?: boolean): Accept {
+  const c = parseChord(symbol);
+  return { kind: 'chord', pcs: c.pcs, bass: bass ? c.root : undefined, optional: c.pcs.length >= 4 ? [c.pcs[2]] : undefined };
+}
+
+/** "Em Sol maior, toque o V7": acordes primários pelo grau. */
+export function primaryChord(opts: { keys: string[]; degrees: Degree[]; low: Midi; high: Midi; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const degree = pick(rng, opts.degrees);
+    const symbol = degreeSymbol(key, degree);
+    const c = parseChord(symbol);
+    return {
+      prompt: `Em ${keyName(key)} maior, toque o ${degree}`,
+      detail: 'Qualquer posição. No V7, a 5ª pode ficar de fora.',
+      hintKeys: voiced(symbol, Math.round((opts.low + opts.high) / 2)).slice(1),
+      hint: `${chordLabel(symbol)}: ${c.pcs.map((p) => PC_NAMES[p]).join(', ')}`,
+      steps: [chordAccept(symbol)],
+      skill: opts.skill ?? 'grau-acorde',
+    };
+  };
+}
+
+/** O app toca o começo de uma cadência; você toca o acorde que resolve (o I). */
+export function resolveCadence(opts: { keys: string[]; before: Degree[][]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const prog = pick(rng, opts.before);
+    const tonic = degreeSymbol(key, 'I');
+    return {
+      prompt: 'Complete a cadência: toque o acorde que resolve',
+      detail: `Tom de ${keyName(key)} maior. Ouça ${prog.join(' – ')} e responda com o acorde de repouso.`,
+      listen: { bpm: 80, steps: prog.map((d) => ({ midis: voiced(degreeSymbol(key, d), 64), beats: 2 })) },
+      hintKeys: voiced(tonic, 60).slice(1),
+      hint: `O I de ${keyName(key)}: ${chordLabel(tonic)}`,
+      steps: [chordAccept(tonic)],
+      skill: opts.skill ?? 'cadencia',
+    };
+  };
+}
+
+/** Harmonize: a pauta mostra um trecho de melodia; você toca o acorde (I, IV ou V7) que cabe embaixo. */
+export function harmonize(opts: { key: string; bars: { notes: Midi[]; degree: Degree }[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const bar = pick(rng, opts.bars);
+    const symbol = degreeSymbol(opts.key, bar.degree);
+    return {
+      prompt: 'Que acorde cabe embaixo deste trecho? Toque-o',
+      detail: `Tom de ${keyName(opts.key)} maior: I (${chordLabel(degreeSymbol(opts.key, 'I'))}), IV (${chordLabel(degreeSymbol(opts.key, 'IV'))}) ou V7 (${chordLabel(degreeSymbol(opts.key, 'V7'))}). Procure o acorde que contém as notas mais longas e as do tempo forte.`,
+      staff: { notes: bar.notes, clef: 'treble' },
+      listen: { bpm: 80, steps: bar.notes.map((m) => ({ midis: [m], beats: 1 })) },
+      hintKeys: voiced(symbol, 54).slice(1),
+      hint: `${bar.degree}: ${chordLabel(symbol)}`,
+      steps: [chordAccept(symbol)],
+      skill: opts.skill ?? 'harmonizar',
+    };
+  };
+}
+
+/** Ditado de progressão: o app toca 3 ou 4 acordes; você toca o baixo (a fundamental) de cada um, ou os acordes, em ordem. */
+export function progressionByEar(opts: { keys: string[]; progressions: Degree[][]; answer: 'bass' | 'chords'; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const prog = pick(rng, opts.progressions);
+    const symbols = prog.map((d) => degreeSymbol(key, d));
+    return {
+      prompt: opts.answer === 'bass' ? 'Ouça e toque o baixo de cada acorde, em ordem' : 'Ouça e toque os acordes, em ordem',
+      detail: `Tom de ${keyName(key)} maior, ${prog.length} acordes. O primeiro é o I.`,
+      listen: { bpm: 72, steps: symbols.map((x) => ({ midis: voiced(x, 64), beats: 2 })) },
+      hint: prog.join(' – ') + ': ' + symbols.map(chordLabel).join(' – '),
+      steps: opts.answer === 'bass' ? symbols.map((x) => ({ kind: 'pc', pcs: [parseChord(x).root] }) as Accept) : symbols.map((x) => chordAccept(x)),
+      skill: opts.skill ?? (opts.answer === 'bass' ? 'ditado-baixo' : 'ditado-progressao'),
+    };
+  };
+}
+
+/** Transponha a progressão: a cifra vem num tom; você toca os mesmos graus em outro tom, em ordem. */
+export function transposeProgression(opts: { from: string; to: string[]; progressions: Degree[][]; skill?: string }): ItemGen {
+  return (rng) => {
+    const to = pick(rng, opts.to);
+    const prog = pick(rng, opts.progressions);
+    const target = prog.map((d) => degreeSymbol(to, d));
+    return {
+      prompt: `Transponha para ${keyName(to)} maior`,
+      symbol: prog.map((d) => chordLabel(degreeSymbol(opts.from, d))).join(' – '),
+      detail: `A cifra está em ${keyName(opts.from)}. Pense nos graus (${prog.join(' – ')}) e toque os acordes de ${keyName(to)}, em ordem.`,
+      hint: target.map(chordLabel).join(' – '),
+      steps: target.map((x) => chordAccept(x)),
+      skill: opts.skill ?? 'transpor-progressao',
+    };
+  };
+}
+
+/** Achar a tônica: o app toca I–IV–V7 numa tonalidade sorteada (sem resolver); você toca a casa. */
+export function tonicByEar(opts: { keys: string[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const pre: Degree[] = ['I', 'IV', 'V7'];
+    return {
+      prompt: 'Qual é a casa? Toque a tônica',
+      detail: 'Qualquer oitava. Cante a nota em que a progressão quer parar.',
+      listen: { bpm: 80, steps: pre.map((d) => ({ midis: voiced(degreeSymbol(key, d), 64), beats: 2 })) },
+      hint: `Tom de ${keyName(key)}: a casa é ${keyName(key)}.`,
+      steps: [{ kind: 'pc', pcs: [rootPc(key)] }],
+      skill: opts.skill ?? 'tonica',
     };
   };
 }

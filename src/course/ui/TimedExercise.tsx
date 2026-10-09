@@ -11,7 +11,7 @@ import { useNoteInput } from '../../input/useNoteInput';
 import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
-import { articulationScore, dynamicsScore, judgeTask, matchedVelocities, taskBeats, type CourseEvent } from '../judge';
+import { articulationScore, dynamicsScore, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
 
@@ -28,6 +28,8 @@ interface TakeScore {
   dyn: number | null;
   /** A passada foi sem força medida (teclado da tela ou do computador). */
   noVelocity: boolean;
+  /** Pedal medido (null = nenhum evento de pedal chegou). */
+  ped: PedalScore | null;
   ok: boolean;
 }
 
@@ -86,13 +88,14 @@ export default function TimedExercise({ ex, hints, rng, onFinish }: { ex: TimedE
 
 function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: number; ex: TimedEx; hints: boolean; onTake: (s: TakeScore) => void }) {
   const metronome = useMetronome();
-  const { subscribe, press, release } = useNoteInput();
+  const { subscribe, subscribePedal, press, release } = useNoteInput();
   const [staffRef, staffWidth] = useElementWidth<HTMLDivElement>();
   const [phase, setPhaseState] = useState<Phase>('idle');
   const [now, setNow] = useState(0);
   const [score, setScore] = useState<TakeScore | null>(null);
   const trackRef = useRef<ScheduledTrack | null>(null);
   const eventsRef = useRef<CourseEvent[]>([]);
+  const pedalRef = useRef<PedalEvent[]>([]);
   const phaseRef = useRef<Phase>('idle');
   const takeRef = useRef(onTake);
   takeRef.current = onTake;
@@ -120,6 +123,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     if (!track) return;
     trackRef.current = track;
     eventsRef.current = [];
+    pedalRef.current = [];
     setScore(null);
     setPhase('countin');
   }, [bpm, task, beats, metronome]);
@@ -132,9 +136,10 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     const vels = matchedVelocities(task, bpm, events);
     const noVelocity = !!ex.dynamics && vels.length === 0;
     const dyn = ex.dynamics && cal && vels.length ? dynamicsScore(vels, ex.dynamics, cal) : null;
+    const ped = ex.pedal ? pedalScore(task, bpm, pedalRef.current) : null;
     const need = ex.pass.accuracy;
-    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0);
-    const s = { r, artic, dyn, noVelocity, ok };
+    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0) && (ped === null || ped.score >= 0.85);
+    const s = { r, artic, dyn, noVelocity, ped, ok };
     setScore(s);
     setPhase('done');
     takeRef.current(s);
@@ -173,6 +178,12 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
       if (i >= 0) eventsRef.current = eventsRef.current.map((x, k) => (k === i ? { ...x, off: t } : x));
     }
   }), [subscribe]);
+
+  useEffect(() => subscribePedal((e) => {
+    const track = trackRef.current;
+    if (!track || (phaseRef.current !== 'countin' && phaseRef.current !== 'playing')) return;
+    pedalRef.current = [...pedalRef.current, { down: e.down, t: e.at - track.firstBeat - (getLatency() ?? 0) }];
+  }), [subscribePedal]);
 
   const track = trackRef.current;
   const elapsed = track ? now - track.firstBeat : -Infinity;
@@ -249,6 +260,13 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           <Verdict tone={score.ok ? 'hit' : 'miss'}>
             {pct(score.r.accuracy)} no tempo{score.ok ? ': passada boa' : ` (precisa de ${pct(ex.pass.accuracy)})`}
           </Verdict>
+          {ex.pedal && (
+            <p className="runner__note">
+              {score.ped === null
+                ? 'O pedal só é medido com o piano conectado por MIDI e o pedal ligado nele. Esta passada contou só as notas.'
+                : `Pedal: ${pct(score.ped.score)} certo${score.ped.muddy ? `, ${score.ped.muddy} troca${score.ped.muddy > 1 ? 's' : ''} com som misturado (suba o pedal antes do próximo acorde)` : ''}${score.ped.stuck ? `, ${score.ped.stuck} pausa${score.ped.stuck > 1 ? 's' : ''} com pedal preso` : ''}${score.ped.missed ? `, ${score.ped.missed} acorde${score.ped.missed > 1 ? 's' : ''} sem pedal` : ''}.`}
+            </p>
+          )}
           {ex.noExtras && score.r.extras > 0 && (
             <p className="runner__note">
               {score.r.extras === 1 ? '1 nota a mais' : `${score.r.extras} notas a mais`}. Nota ligada não se toca de novo: segure até a próxima nota diferente.

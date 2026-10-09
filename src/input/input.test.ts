@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { COMPUTER_KEYS, parseMidiMessage } from './useNoteInput';
+import { COMPUTER_KEYS, parseMidiMessage, parsePedalMessage } from './useNoteInput';
 
 describe('parseMidiMessage', () => {
   it('lê tecla abaixada em qualquer canal', () => {
@@ -22,5 +22,15 @@ describe('COMPUTER_KEYS', () => {
   it('cobre uma oitava cromática sem buracos', () => {
     const notes = Object.values(COMPUTER_KEYS).sort((a, b) => a - b);
     expect(notes).toEqual(Array.from({ length: 13 }, (_, i) => 60 + i));
+  });
+});
+
+describe('parsePedalMessage', () => {
+  it('lê o pedal de sustentação (CC64) e ignora o resto', () => {
+    expect(parsePedalMessage([0xb0, 64, 127])).toEqual({ down: true });
+    expect(parsePedalMessage([0xb3, 64, 0])).toEqual({ down: false });
+    expect(parsePedalMessage([0xb0, 64, 63])).toEqual({ down: false });
+    expect(parsePedalMessage([0xb0, 7, 100])).toBeNull();
+    expect(parsePedalMessage([0x90, 64, 100])).toBeNull();
   });
 });

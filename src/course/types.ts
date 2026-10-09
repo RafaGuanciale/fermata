@@ -20,7 +20,7 @@ export type Accept =
   /** Uma destas teclas exatamente. */
   | { kind: 'exact'; midis: Midi[] }
   /** Acorde: todas as classes seguradas ao mesmo tempo, sem notas a mais. `bass` exige a nota mais grave. */
-  | { kind: 'chord'; pcs: Pc[]; bass?: Pc }
+  | { kind: 'chord'; pcs: Pc[]; bass?: Pc; /** Classes que podem faltar (a 5ª de uma tétrade em posição próxima). */ optional?: Pc[] }
   /** Apertar todas estas teclas, em qualquer ordem (por exemplo, todos os Fá do teclado). */
   | { kind: 'all'; midis: Midi[] };
 
@@ -118,6 +118,8 @@ export type Exercise =
       articulation?: 'legato' | 'staccato';
       /** Dinâmica pedida para todas as notas, ou crescendo ao longo da passada. */
       dynamics?: 'p' | 'mf' | 'f' | 'crescendo' | 'diminuendo';
+      /** Mede o pedal de sustentação (CC64): direto = desce com o acorde e sobe antes do próximo, nunca preso numa pausa. */
+      pedal?: 'direto';
       /** Nota a mais derruba a passada (por exemplo, reatacar uma nota ligada). */
       noExtras?: boolean;
       /** Sobe o BPM a cada passada boa até o alvo (escada). */

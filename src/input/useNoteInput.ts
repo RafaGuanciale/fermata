@@ -31,6 +31,15 @@ export function parseMidiMessage(data: ArrayLike<number>): { type: 'on' | 'off';
   return null;
 }
 
+/** Pedal de sustentação (controle 64): valor 64 ou mais = abaixado. Outras mensagens → null. */
+export function parsePedalMessage(data: ArrayLike<number>): { down: boolean } | null {
+  if (data.length < 3) return null;
+  if ((data[0] & 0xf0) !== 0xb0 || data[1] !== 64) return null;
+  return { down: data[2] >= 64 };
+}
+
+export type PedalListener = (e: { down: boolean; at: number }) => void;
+
 export interface NoteInputValue {
   held: ReadonlySet<Midi>;
   midi: MidiStatus;
@@ -39,6 +48,8 @@ export interface NoteInputValue {
   press: (midi: Midi) => void;
   release: (midi: Midi) => void;
   subscribe: (listener: NoteListener) => () => void;
+  /** Pedal de sustentação do piano MIDI (só existe com MIDI). */
+  subscribePedal: (listener: PedalListener) => () => void;
 }
 
 export const NoteInputContext = createContext<NoteInputValue | null>(null);
