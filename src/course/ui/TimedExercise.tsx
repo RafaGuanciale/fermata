@@ -11,6 +11,7 @@ import { useNoteInput } from '../../input/useNoteInput';
 import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
+import { swingBeat } from '../tasks';
 import { articulationScore, dynamicsScore, ioiSd, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
@@ -199,9 +200,10 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     return task.display.map((d) => {
       const at = b;
       b += d.beats;
-      return at;
+      // Swing: a colcheia do contratempo é tocada no último terço do tempo.
+      return task.swing ? swingBeat(at) : at;
     });
-  }, [task.display]);
+  }, [task.display, task.swing]);
   const shift = task.transpose ?? 0;
   let current = 0;
   displayStarts.forEach((b, i) => {

@@ -402,6 +402,30 @@ export interface ImprovScore {
 }
 
 /** `events` dentro da janela [0, lengthMs). */
+/**
+ * Notas-alvo: em cada troca de acorde da base, a primeira nota tocada perto do tempo 1 (de meio tempo antes até um tempo depois)
+ * caiu numa nota do acorde? Devolve chegadas e acertos.
+ */
+export function chordTargets(events: CourseEvent[], backing: Midi[][], bpm: number, bars: number, beatsPerBar: number): { arrivals: number; hits: number; ratio: number } {
+  const beatMs = 60000 / bpm;
+  const sorted = [...events].sort((a, b) => a.t - b.t);
+  let arrivals = 0;
+  let hits = 0;
+  for (let b = 1; b < bars; b++) {
+    const chord = backing[b % backing.length];
+    const prev = backing[(b - 1) % backing.length];
+    const pcs = new Set(chord.map(pcOf));
+    const prevPcs = new Set(prev.map(pcOf));
+    if (pcs.size === prevPcs.size && [...pcs].every((p) => prevPcs.has(p))) continue;
+    const at = b * beatsPerBar * beatMs;
+    const first = sorted.find((e) => e.t >= at - beatMs / 2 && e.t < at + beatMs);
+    if (!first) continue;
+    arrivals++;
+    if (pcs.has(pcOf(first.midi))) hits++;
+  }
+  return { arrivals, hits, ratio: arrivals ? hits / arrivals : 0 };
+}
+
 export function scoreImprov(events: CourseEvent[], pcs: Pc[], bpm: number, bars: number, beatsPerBar: number): ImprovScore {
   const beatMs = 60000 / bpm;
   const length = bars * beatsPerBar * beatMs;

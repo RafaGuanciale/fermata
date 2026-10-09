@@ -202,7 +202,7 @@ export const chordLabel = (symbol: string) => symbol.replace(/#/g, '♯').replac
 /** Notas de uma tríade com a grafia certa ("Mi♭, Sol♭, Si♭"), ou null se a cifra não é uma tríade simples. */
 function spelledHint(symbol: string): string | null {
   try {
-    return triadSpelling(symbol.split('/')[0]).map((x) => ptName(`${x}4`)).join(', ');
+    return chordSpelling(symbol.split('/')[0]).map((x) => ptName(`${x}4`)).join(', ');
   } catch {
     return null;
   }
@@ -844,10 +844,13 @@ export function qualityByEar(opts: { from: string[]; intervals: string[]; harmon
 /** "a, b ou c". */
 const orList = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ou ${xs[xs.length - 1]}`);
 
-const TRIAD_PT: Record<string, string> = { '': 'maior', m: 'menor', dim: 'diminuta', aug: 'aumentada' };
+const TRIAD_PT: Record<string, string> = {
+  '': 'maior', m: 'menor', dim: 'diminuta', aug: 'aumentada',
+  '7M': 'maior com 7ª maior (7M)', '7': 'dominante (7)', m7: 'menor com 7ª (m7)', ø: 'meio-diminuta (ø)', '°7': 'diminuta (°7)',
+};
 
 /** O app toca uma tríade; você toca uma tríade da mesma qualidade sobre outra fundamental (no estado fundamental). */
-export function chordQualityByEar(opts: { qualities: ('' | 'm' | 'dim' | 'aug')[]; roots: Midi[]; answerRoots: Midi[]; skill?: string }): ItemGen {
+export function chordQualityByEar(opts: { qualities: string[]; roots: Midi[]; answerRoots: Midi[]; skill?: string }): ItemGen {
   return (rng) => {
     const q = pick(rng, opts.qualities);
     const root = pick(rng, opts.roots);
@@ -860,7 +863,7 @@ export function chordQualityByEar(opts: { qualities: ('' | 'm' | 'dim' | 'aug')[
       detail: `Pode ser ${orList(opts.qualities.map((x) => TRIAD_PT[x]))}. A fundamental embaixo.`,
       listen: { bpm: 72, steps: [{ midis: triad, beats: 2 }, ...triad.map((m) => ({ midis: [m], beats: 0.5 })), { midis: triad, beats: 2 }] },
       hintKeys: ivs.map((x) => ans + x),
-      hint: `Tríade ${TRIAD_PT[q]}: ${spelledHint(SHARP_NAMES[pcOf(ans)] + q) ?? ivs.map((x) => PC_NAMES[pcOf(ans + x)]).join(', ')}.`,
+      hint: `${ivs.length > 3 ? 'Tétrade' : 'Tríade'} ${TRIAD_PT[q]}: ${spelledHint(SHARP_NAMES[pcOf(ans)] + q) ?? ivs.map((x) => PC_NAMES[pcOf(ans + x)]).join(', ')}.`,
       steps: [{ kind: 'chord', pcs: ivs.map((x) => pcOf(ans + x)), bass: pcOf(ans) }],
       skill: opts.skill ?? 'qualidade-ouvido',
     };
@@ -879,6 +882,22 @@ export function triadSpelling(symbol: string): string[] {
   const [third, fifth] = TRIAD_IVS[m[2] ?? ''];
   const root = `${m[1]}4`;
   return [root, spellInterval(root, third), spellInterval(root, fifth)].map((x) => x.replace(/-?\d+$/, ''));
+}
+
+const CHORD_IVS: Record<string, string[]> = {
+  '': ['3M', '5J'], m: ['3m', '5J'], dim: ['3m', '5d'], '°': ['3m', '5d'], aug: ['3M', '5A'], '+': ['3M', '5A'],
+  sus2: ['2M', '5J'], sus4: ['4J', '5J'],
+  '7': ['3M', '5J', '7m'], '7M': ['3M', '5J', '7M'], maj7: ['3M', '5J', '7M'], m7: ['3m', '5J', '7m'],
+  'm7(b5)': ['3m', '5d', '7m'], ø: ['3m', '5d', '7m'], '°7': ['3m', '5d', '7d'], dim7: ['3m', '5d', '7d'],
+};
+
+/** Acorde soletrado (tríades, sus e tétrades): "Bb7M" → ["Bb", "D", "F", "A"]; "C#ø" → ["C#", "E", "G", "B"]. */
+export function chordSpelling(symbol: string): string[] {
+  const m = /^([A-G](?:#|b)?)(.*)$/.exec(symbol);
+  const ivs = m ? CHORD_IVS[m[2]] : undefined;
+  if (!m || !ivs) throw new Error(`Acorde sem grafia: ${symbol}`);
+  const root = `${m[1]}4`;
+  return [root, ...ivs.map((iv) => spellInterval(root, iv))].map((x) => x.replace(/-?\d+$/, ''));
 }
 
 /** "F#m" → "Fá♯ menor". */
@@ -978,7 +997,8 @@ export function nearestVoicing(from: Midi[], pcs: Pc[]): Midi[] {
 }
 
 /** Progressão em sequência (cifras dadas): com `lead`, cada troca precisa andar no máximo o caminho mais curto + `lead` semitons. */
-export function chordSequence(opts: { sequences: { name?: string; symbols: string[] }[]; lead?: number; center?: Midi; skill?: string }): ItemGen {
+export function chordSequence(opts: { sequences: { name?: string; symbols: string[] }[]; lead?: number; center?: Midi; voicing?: 'full' | 'guide'; skill?: string }): ItemGen {
+  if (opts.voicing === 'guide') return guideSequence(opts);
   return (rng) => {
     const seq = pick(rng, opts.sequences);
     const first = parseChord(seq.symbols[0]);
@@ -1009,10 +1029,16 @@ export function chordSequence(opts: { sequences: { name?: string; symbols: strin
 
 // ---------- campo harmônico e funções (Unidade 7) ----------
 
-export type Roman = 'I' | 'ii' | 'iii' | 'IV' | 'V' | 'vi' | 'vii°' | 'V7';
-const DIATONIC: Record<Roman, [number, string]> = { I: [0, ''], ii: [2, 'm'], iii: [4, 'm'], IV: [5, ''], V: [7, ''], vi: [9, 'm'], 'vii°': [11, '°'], V7: [7, '7'] };
+export type Roman = 'I' | 'ii' | 'iii' | 'IV' | 'V' | 'vi' | 'vii°' | 'V7' | 'I7M' | 'ii7' | 'iii7' | 'IV7M' | 'vi7' | 'viiø';
+const DIATONIC: Record<Roman, [number, string]> = {
+  I: [0, ''], ii: [2, 'm'], iii: [4, 'm'], IV: [5, ''], V: [7, ''], vi: [9, 'm'], 'vii°': [11, '°'], V7: [7, '7'],
+  I7M: [0, '7M'], ii7: [2, 'm7'], iii7: [4, 'm7'], IV7M: [5, '7M'], vi7: [9, 'm7'], viiø: [11, 'm7(b5)'],
+};
 export const FIELD: Roman[] = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
-export const FUNCTION_OF: Record<Roman, 'T' | 'S' | 'D'> = { I: 'T', iii: 'T', vi: 'T', IV: 'S', ii: 'S', V: 'D', V7: 'D', 'vii°': 'D' };
+export const FIELD7: Roman[] = ['I7M', 'ii7', 'iii7', 'IV7M', 'V7', 'vi7', 'viiø'];
+export const FUNCTION_OF: Record<Roman, 'T' | 'S' | 'D'> = {
+  I: 'T', iii: 'T', vi: 'T', IV: 'S', ii: 'S', V: 'D', V7: 'D', 'vii°': 'D', I7M: 'T', iii7: 'T', vi7: 'T', IV7M: 'S', ii7: 'S', viiø: 'D',
+};
 
 /** Cifra de um grau do campo harmônico maior: ("D", "vii°") → "C#°"; ("Bb", "iii") → "Dm". */
 export function diatonicSymbol(key: string, roman: Roman): string {
@@ -1184,6 +1210,63 @@ export function completePhrase(opts: { phrases: { notes: Midi[]; accept: Pc[]; w
       hint: ph.why,
       steps: [{ kind: 'pc', pcs: ph.accept }],
       skill: opts.skill ?? 'completar-frase',
+    };
+  };
+}
+
+/** Só as notas-guia (3ª e 7ª) de cada tétrade, duas notas, conduzidas: ii7–V7–I7M com uma nota andando meio tom por vez. */
+function guideSequence(opts: { sequences: { name?: string; symbols: string[] }[]; lead?: number; skill?: string }): ItemGen {
+  return (rng) => {
+    const seq = pick(rng, opts.sequences);
+    const guides = seq.symbols.map((s) => {
+      const c = parseChord(s);
+      return [c.pcs[1], c.pcs[3] ?? c.pcs[2]];
+    });
+    const names = seq.symbols.map((s) => chordSpelling(s));
+    return {
+      prompt: 'Toque só as notas-guia (3ª e 7ª), conduzidas',
+      symbol: seq.symbols.map(chordLabel).join(' – '),
+      detail: `${seq.name ? `${seq.name} ` : ''}Duas notas por acorde. Uma fica, a outra anda meio tom ou um tom.`,
+      hint: seq.symbols.map((s, i) => `${chordLabel(s)}: ${ptName(`${names[i][1]}4`)} e ${ptName(`${names[i][names[i].length - 1]}4`)}`).join(' → '),
+      steps: guides.map((pcs) => ({ kind: 'chord', pcs, lead: opts.lead ?? 1 }) as Accept),
+      skill: opts.skill ?? 'notas-guia',
+    };
+  };
+}
+
+/** Eco transposto: o app toca um motivo em Dó; você toca o mesmo desenho a partir de outra nota (outro tom). */
+export function echoTransposed(opts: { motifs: Midi[][]; shifts: number[]; bpm?: number; skill?: string }): ItemGen {
+  return (rng) => {
+    const motif = pick(rng, opts.motifs);
+    const k = pick(rng, opts.shifts);
+    const target = motif.map((m) => m + k);
+    return {
+      prompt: `Ouça e toque o mesmo desenho começando em ${nameOf(target[0])}`,
+      detail: `O app toca a partir de ${nameOf(motif[0])}; você transpõe ${Math.abs(k)} semitons ${k > 0 ? 'acima' : 'abaixo'}.`,
+      listen: { bpm: opts.bpm ?? 92, steps: motif.map((m, i) => ({ midis: [m], beats: i === motif.length - 1 ? 2 : 1 })) },
+      hintKeys: target,
+      hint: target.map((m) => nameOf(m)).join(', '),
+      steps: target.map((m) => ({ kind: 'exact', midis: [m] }) as Accept),
+      skill: opts.skill ?? 'transpor-ouvido',
+    };
+  };
+}
+
+/** Shell de mão esquerda: fundamental, 3ª e 7ª (sem a 5ª), com a fundamental no baixo. `form` 1-3-7 ou 1-7-3 é só a dica. */
+export function shellChord(opts: { symbols: string[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const symbol = pick(rng, opts.symbols);
+    const c = parseChord(symbol);
+    const sp = chordSpelling(symbol);
+    const third = c.pcs[1];
+    const seventh = c.pcs[3];
+    return {
+      prompt: 'Toque o shell (fundamental, 3ª e 7ª)',
+      symbol: chordLabel(symbol),
+      detail: 'Sem a 5ª. Fundamental embaixo; por cima, 3ª e 7ª em qualquer ordem (1-3-7 ou 1-7-3).',
+      hint: `${ptName(`${sp[0]}4`)} embaixo, ${ptName(`${sp[1]}4`)} e ${ptName(`${sp[3]}4`)} em cima.`,
+      steps: [{ kind: 'chord', pcs: [c.root, third, seventh], bass: c.root }],
+      skill: opts.skill ?? 'shell',
     };
   };
 }

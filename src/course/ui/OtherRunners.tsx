@@ -9,7 +9,7 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { playNotes } from '../../audio/synth';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { Midi } from '../../music/notes';
-import { calibrate, levelOf, scoreImprov, type CourseEvent, type ImprovScore } from '../judge';
+import { calibrate, chordTargets, levelOf, scoreImprov, type CourseEvent, type ImprovScore } from '../judge';
 import { PC_NAMES, nameOf } from '../music';
 import type { Block, Exercise, Listen, Rng } from '../types';
 import { LEVEL_LABEL, RichText, Verdict, getVelocityCal, pct, playListen, setVelocityCal, useStopOnUnmount } from './shared';
@@ -28,6 +28,7 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
   const { subscribe, press, release } = useNoteInput();
   const [phase, setPhaseState] = useState<'idle' | 'countin' | 'playing' | 'done'>('idle');
   const [score, setScore] = useState<ImprovScore | null>(null);
+  const [targets, setTargets] = useState<ReturnType<typeof chordTargets> | null>(null);
   const [now, setNow] = useState(0);
   const trackRef = useRef<ScheduledTrack | null>(null);
   const stopBacking = useStopOnUnmount();
@@ -73,10 +74,13 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
       if (elapsed > lengthMs + 100) {
         trackRef.current = null;
         const s = scoreImprov(eventsRef.current, ex.pcs, ex.bpm, ex.bars, ex.beatsPerBar);
+        const tg = ex.pass.targets !== undefined ? chordTargets(eventsRef.current, ex.backing, ex.bpm, ex.bars, ex.beatsPerBar) : null;
         setScore(s);
+        setTargets(tg);
         setPhase('done');
         const endOk = !ex.pass.endOn || (s.lastPc !== null && ex.pass.endOn.includes(s.lastPc));
-        const passed = s.notes >= ex.bars && s.inSet >= ex.pass.inSet && s.restsPer4 >= ex.pass.restsPer4 && endOk;
+        const targetsOk = !tg || tg.ratio >= (ex.pass.targets ?? 0);
+        const passed = s.notes >= ex.bars && s.inSet >= ex.pass.inSet && s.restsPer4 >= ex.pass.restsPer4 && endOk && targetsOk;
         onFinish({ accuracy: s.inSet, passed });
         return;
       }
@@ -126,6 +130,11 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
             Pausas: {score.rests} {score.restsPer4 >= ex.pass.restsPer4 ? '(boa respiração entre as frases)' : `(faltou respirar: pelo menos ${ex.pass.restsPer4} a cada 4 compassos)`}
             {ex.pass.endOn && (endOk ? '. Terminou na casa.' : `. Termine num ${ex.pass.endOn.map((p) => PC_NAMES[p]).join(' ou ')} para soar como fim.`)}
           </p>
+          {targets && (
+            <p className="runner__note">
+              Trocas de acorde: {targets.hits} de {targets.arrivals} chegadas numa nota do acorde ({pct(targets.ratio)}; meta {pct(ex.pass.targets ?? 0)}).
+            </p>
+          )}
         </div>
       )}
       <div className="runner__keys">

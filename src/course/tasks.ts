@@ -150,3 +150,27 @@ export function compoundRhythm(pool: string[], bars: number, bpm: number, captio
     return { ...t, events: t.events.map((e) => ({ ...e, midi: null })), low: 55, high: 72 };
   };
 }
+
+/** Posição com swing: o contratempo (meio do tempo) vai para o último terço (2:1). */
+export function swingBeat(beat: number): number {
+  const frac = beat - Math.floor(beat);
+  return Math.abs(frac - 0.5) < 1e-6 ? Math.floor(beat) + 2 / 3 : beat;
+}
+
+/** Melodia com colcheias swingadas: escrita reta, tocada longa-curta (2:1, como tercina de semínima + colcheia). */
+export function swingTask(text: string, opts: { bpm: number; beatsPerBar?: number; clef?: Clef; caption?: string; fifths?: number }): TimedTask {
+  const base = melodyTask(text, opts);
+  const events = base.events.map((e) => {
+    const at = swingBeat(e.beat);
+    const frac = e.beat - Math.floor(e.beat);
+    const beats = Math.abs(e.beats - 0.5) < 1e-6 ? (frac === 0 ? 2 / 3 : 1 / 3) : e.beats;
+    return { ...e, beat: at, beats };
+  });
+  return { ...base, events, swing: true, caption: opts.caption ?? 'Swing: as colcheias estão escritas iguais, mas se tocam longa-curta, como "tá-a-ta".' };
+}
+
+/** Swing em duas mãos (pauta mostra a direita). */
+export function swingTwoHands(right: string, left: string, opts: { bpm: number; beatsPerBar?: number; caption?: string; fifths?: number }): TimedTask {
+  const base = twoHandTask(right, left, opts);
+  return { ...base, events: base.events.map((e) => ({ ...e, beat: swingBeat(e.beat) })), swing: true };
+}

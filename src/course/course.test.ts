@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
+import { chordSpelling, echoTransposed, shellChord } from './gens';
+import { swingTask } from './tasks';
+import { chordTargets } from './judge';
 import { cadenceChoice, diatonicSymbol, fieldSequence, harmonizeAny, playCadence } from './gens';
 import { chordSequence, inversionChord, nearestVoicing, spellTriadChoice, triadSpelling } from './gens';
 import { compoundRhythm, compoundTask } from './tasks';
@@ -206,6 +209,47 @@ describe('campo harmônico e funções', () => {
     const f = play([60, 65, 69]);
     expect(f.done).toBe(false);
     expect(f.misses).toBeGreaterThan(0);
+  });
+});
+
+describe('tétrades, swing e notas-alvo', () => {
+  it('soletra tétrades e o campo em tétrades', () => {
+    expect(chordSpelling('Bb7M')).toEqual(['Bb', 'D', 'F', 'A']);
+    expect(chordSpelling('C#ø')).toEqual(['C#', 'E', 'G', 'B']);
+    expect(chordSpelling('B°7')).toEqual(['B', 'D', 'F', 'Ab']);
+    expect(chordSpelling('F7')).toEqual(['F', 'A', 'C', 'Eb']);
+    expect(diatonicSymbol('C', 'viiø')).toBe('Bm7(b5)');
+    expect(diatonicSymbol('F', 'IV7M')).toBe('Bb7M');
+    expect(shellChord({ symbols: ['G7'] })(seeded(1)).steps[0]).toEqual({ kind: 'chord', pcs: [7, 11, 5], bass: 7 });
+  });
+
+  it('notas-guia conduzidas no ii–V–I', () => {
+    const item = chordSequence({ sequences: [{ symbols: ['Dm7', 'G7', 'C7M'] }], voicing: 'guide', lead: 1 })(seeded(1));
+    expect(item.steps.map((x) => (x.kind === 'chord' ? x.pcs : []))).toEqual([[5, 0], [11, 5], [4, 11]]);
+    const play = (p: ReturnType<typeof startItem>, keys: number[]) => keys.reduce((q, m, i) => pressItem(q, item, m, keys.slice(0, i + 1)), p);
+    let p = play(startItem(), [65, 72]); // Fá–Dó
+    p = play(p, [65, 71]); // Fá–Si: só o Dó desce
+    p = play(p, [64, 71]); // Mi–Si: só o Fá desce
+    expect(p.done).toBe(true);
+    expect(p.misses).toBe(0);
+  });
+
+  it('swing e eco transposto', () => {
+    const t = swingTask('C4:0.5 D4:0.5 E4:0.5 F4:0.5 G4:2', { bpm: 100 });
+    expect(t.events.map((e) => +e.beat.toFixed(3))).toEqual([0, 0.667, 1, 1.667, 2]);
+    expect(t.display.map((d) => d.beats)).toEqual([0.5, 0.5, 0.5, 0.5, 2]);
+    const e = echoTransposed({ motifs: [[60, 64, 67]], shifts: [5] })(seeded(1));
+    expect(e.steps).toEqual([65, 69, 72].map((m) => ({ kind: 'exact', midis: [m] })));
+  });
+
+  it('notas-alvo nas trocas de acorde', () => {
+    const backing = [[48, 52, 55], [53, 57, 60]]; // C | F
+    const beat = 500; // 120 BPM
+    const ev = (midi: number, t: number) => ({ midi, t, off: t + 200 });
+    // compasso 2 (F): chega no Lá (do acorde); compasso 3 (C): chega no Ré (fora); compasso 4 (F): chega no Fá.
+    const events = [ev(64, 0), ev(69, 4 * beat - 50), ev(62, 8 * beat + 30), ev(65, 12 * beat)];
+    const r = chordTargets(events, backing, 120, 4, 4);
+    expect(r).toEqual({ arrivals: 3, hits: 2, ratio: 2 / 3 });
   });
 });
 

@@ -98,6 +98,8 @@ export interface TimedTask {
   transpose?: number;
   /** Compasso composto (6/8): o tempo é a semínima pontuada; as durações estão em semínimas pontuadas (colcheia = 1/3). */
   compound?: boolean;
+  /** Colcheias com swing: a pauta mostra colcheias retas e os eventos do contratempo caem no último terço do tempo. */
+  swing?: boolean;
 }
 
 // ---------- exercícios ----------
@@ -152,7 +154,15 @@ export type Exercise =
       backing: Midi[][];
       low: Midi;
       high: Midi;
-      pass: { inSet: number; /** pausas de pelo menos um tempo a cada 4 compassos */ restsPer4: number; /** termina numa destas classes */ endOn?: Pc[] };
+      pass: {
+        inSet: number;
+        /** pausas de pelo menos um tempo a cada 4 compassos */
+        restsPer4: number;
+        /** termina numa destas classes */
+        endOn?: Pc[];
+        /** Nas trocas de acorde da base, fração mínima das chegadas (1ª nota perto do tempo 1) que caem numa nota do acorde. */
+        targets?: number;
+      };
     })
   | (ExerciseBase & {
       kind: 'dynamics';
