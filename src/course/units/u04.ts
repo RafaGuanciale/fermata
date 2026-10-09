@@ -348,20 +348,24 @@ const RHY_SYNC = ['x:0.5 x x:0.5 x:2', 'x x:0.5 x x:0.5 x', 'x:0.5 x x x x:0.5',
 // Ode à Alegria com o ritmo original de Beethoven nos fins de frase (semínima pontuada e colcheia).
 const ODE_DOT_R = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4:1.5 D4:0.5 D4:2 | E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4:1.5 C4:0.5 C4:2';
 const ODE_DOT_L = 'C3:4 | G3:4 | C3:4 | G3:4 | C3:4 | G3:4 | C3:4 | G3:2 C3:2';
+// A Ode inteira, como Beethoven escreveu a melodia (pontuadas, colcheias nos compassos 10 e 11, Sol grave no 12),
+// com a mão esquerda em intervalos de I (Dó–Sol) e V (Si–Sol, Si–Fá). Arranjo do Fermata.
+const ODE_FULL_R = `${ODE_DOT_R} | D4 D4 E4 C4 | D4 E4:0.5 F4:0.5 E4 C4 | D4 E4:0.5 F4:0.5 E4 D4 | C4 D4 G3:2 | E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4:1.5 C4:0.5 C4:2`;
+const ODE_FULL_L = 'C3+G3:4 | B2+G3:4 | C3+G3:4 | C3+G3:2 B2+G3:2 | C3+G3:4 | B2+G3:4 | C3+G3:4 | B2+G3:2 C3+G3:2 | B2+G3:2 C3+G3:2 | B2+G3:2 C3+E3:2 | B2+G3:2 B2+F3:2 | B2+F3:2 G2:2 | C3+G3:4 | B2+G3:4 | C3+G3:4 | B2+F3:2 C3+E3:2';
 // Melodia original com síncope (curta–longa–curta).
 const SYNC_R = 'C4:0.5 E4 G4:0.5 G4:2 | A4:0.5 G4 E4:0.5 G4:2 | F4:0.5 F4 E4:0.5 D4 E4 | D4:0.5 E4 D4:0.5 C4:2 | C4:0.5 E4 G4:0.5 G4:2 | A4:0.5 C5 A4:0.5 G4:2 | F4:0.5 E4 D4:0.5 E4 D4 | C4:4';
 const SYNC_L = 'C3:4 | C3:4 | G3:4 | C3:4 | C3:4 | C3:4 | G3:4 | C3:4';
 
 const odeDotted: SongSpec = {
   id: 'u04-ode-pontuada',
-  title: 'Ode à Alegria, ritmo original',
+  title: 'Ode à Alegria completa',
   composer: 'Ludwig van Beethoven',
-  arrangement: 'arranjo do Fermata: os 8 primeiros compassos com a semínima pontuada dos fins de frase, e bordão de Dó3 e Sol3',
+  arrangement: 'arranjo do Fermata: a melodia inteira com o ritmo original (pontuadas e colcheias) e a mão esquerda em intervalos de I e V',
   bpm: 76,
   beatsPerBar: 4,
   fifths: 0,
-  right: ODE_DOT_R,
-  left: ODE_DOT_L,
+  right: ODE_FULL_R,
+  left: ODE_FULL_L,
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
@@ -500,7 +504,7 @@ Síncope é o tempero de quase toda música popular brasileira, do choro ao samb
     { kind: 'exercise', id: 'l29-sincope', exercise: quickTimed('Síncope e contratempo', 'Dois compassos sorteados a 66 BPM. Duas passadas boas.', randomRhythm(RHY_SYNC, 2, 66), { reps: 2, window: 80 }) },
     { kind: 'exercise', id: 'l29-ode', exercise: quickTimed('Ode à Alegria com o ritmo original', '8 compassos, duas mãos, a 66 BPM. Atenção aos compassos 4 e 8.', () => twoHandTask(ODE_DOT_R, ODE_DOT_L, { bpm: 66 }), { reps: 2 }) },
     { kind: 'song', songId: 'u04-sincopado', why: 'Uma peça curta com síncope em todo compasso, para tocar no estúdio com a partitura e o modo Estudar.' },
-    { kind: 'song', songId: 'u04-ode-pontuada', why: 'A Ode à Alegria como Beethoven escreveu os fins de frase.' },
+    { kind: 'song', songId: 'u04-ode-pontuada', why: 'A Ode à Alegria inteira, com o ritmo original e a mão esquerda em intervalos: a versão completa, depois das simplificadas das unidades 1 e 2.' },
     { kind: 'exercise', id: 'l29-quiz', exercise: quiz('Pontuada e síncope', 'Quatro perguntas rápidas.', RHYTHM_DOT, 0.75) },
   ],
   review: [choice(RHYTHM_DOT, 'sincope'), degreeNames],
