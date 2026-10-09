@@ -2,9 +2,9 @@
 // A lição 33 é o Marco 1: checkpoint das unidades 1 a 4 e mini-recital.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
-import { buildScale, choice, degreeByEar, keyFromSignature, mix, primaryChord, readNote, scaleDegreeNote, type ChoiceQuestion } from '../gens';
+import { buildScale, choice, degreeByEar, findNote, intervalAbove, keyFromSignature, mix, playChord, primaryChord, readNote, scaleDegreeNote, type ChoiceQuestion } from '../gens';
 import { pick } from '../music';
-import { melodyTask, randomRhythm, sci, twoHandTask } from '../tasks';
+import { melodyTask, randomRhythm, sci, sightReadingTask, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
@@ -568,14 +568,276 @@ O drill clássico usa um encadeamento em que só algumas notas mudam: **I – IV
   exit: [choice(PEDAL_L, 'pedal-legato'), degreeNamesD],
 };
 
+const BLUES: ChoiceQuestion[] = [
+  { q: 'Quantos compassos tem o blues tradicional?', options: ['12', '8', '16'], answer: 0, why: 'Três frases de 4 compassos.' },
+  { q: 'Em Dó, os acordes do blues são…', options: ['C, F e G (I, IV e V)', 'C, Dm e Em', 'Só C'], answer: 0, why: 'Os três acordes primários.' },
+  { q: 'O 5º compasso do blues vai para…', options: ['O IV', 'O V', 'Fica no I'], answer: 0, why: 'I I I I | IV IV I I | V IV I V.' },
+  { q: 'O último compasso (V) serve para…', options: ['Voltar ao começo da forma', 'Acabar a música', 'Mudar de tom'], answer: 0, why: 'É o turnaround: a tensão que puxa para o I do próximo ciclo.' },
+  { q: 'Escala em movimento contrário é mais fácil porque…', options: ['As duas mãos usam os mesmos dedos ao mesmo tempo', 'É mais lenta', 'Não tem passagem'], answer: 0, why: 'As mãos são espelhadas: o polegar passa nas duas ao mesmo tempo.' },
+];
+
+const CIRCLE: ChoiceQuestion[] = [
+  { q: 'Andando de 5ª em 5ª a partir de Dó (Dó, Sol, Ré…), cada tonalidade ganha…', options: ['Um sustenido', 'Um bemol', 'Nada'], answer: 0, why: 'Dó (0), Sol (1♯), Ré (2♯), Lá (3♯)…' },
+  { q: 'Andando de 5ª em 5ª para baixo (Dó, Fá, Si♭…), cada tonalidade ganha…', options: ['Um bemol', 'Um sustenido', 'Uma nota'], answer: 0, why: 'Dó (0), Fá (1♭), Si♭ (2♭), Mi♭ (3♭)…' },
+  { q: 'Numa armadura de sustenidos, o último sustenido é…', options: ['A sensível: a tônica fica meio tom acima', 'A tônica', 'A dominante'], answer: 0, why: 'Ré maior: Fá♯, Dó♯. Dó♯ + meio tom = Ré.' },
+  { q: 'Numa armadura de bemóis, a tônica é…', options: ['O penúltimo bemol', 'O último bemol', 'Meio tom acima do último'], answer: 0, why: 'Si♭ maior: Si♭, Mi♭. Penúltimo = Si♭. (Com 1 bemol, decore: Fá.)' },
+  { q: 'Ré maior tem…', options: ['2 sustenidos: Fá♯ e Dó♯', '1 sustenido: Fá♯', '2 bemóis'], answer: 0, why: 'Ré, Mi, Fá♯, Sol, Lá, Si, Dó♯, Ré.' },
+  { q: 'Si♭ maior tem…', options: ['2 bemóis: Si♭ e Mi♭', '1 bemol', '3 bemóis'], answer: 0, why: 'Si♭, Dó, Ré, Mi♭, Fá, Sol, Lá, Si♭.' },
+];
+
+const contraryC = twoHandTask(
+  `${scaleLine(60).split(' | ')[0]} | ${scaleLine(60).split(' | ')[1]} | C4:4`,
+  'C3:0.5 B2:0.5 A2:0.5 G2:0.5 F2:0.5 E2:0.5 D2:0.5 C2:0.5 | C2:0.5 D2:0.5 E2:0.5 F2:0.5 G2:0.5 A2:0.5 B2:0.5 C3:0.5 | C3:4',
+  { bpm: 50, caption: 'Movimento contrário: a direita sobe a partir do Dó4, a esquerda desce a partir do Dó3, com os mesmos dedos.' },
+);
+const parallelC = twoHandTask(scaleLine(60), scaleLine(48), { bpm: 50, caption: 'Movimento paralelo: as duas mãos sobem juntas, uma oitava de distância. Os polegares não passam ao mesmo tempo.' });
+
+const BL_C = { l: 'C3 G3 C3 G3', r: 'r C4+E4+G4 r C4+E4+G4' };
+const BL_F = { l: 'F2 C3 F2 C3', r: 'r C4+F4+A4 r C4+F4+A4' };
+const BL_G = { l: 'G2 D3 G2 D3', r: 'r B3+D4+G4 r B3+D4+G4' };
+const BLUES_FORM = [BL_C, BL_C, BL_C, BL_C, BL_F, BL_F, BL_C, BL_C, BL_G, BL_F, BL_C, BL_G];
+const BLUES_R = BLUES_FORM.map((b) => b.r).join(' | ');
+const BLUES_L = BLUES_FORM.map((b) => b.l).join(' | ');
+
+const blues: SongSpec = {
+  id: 'u04-blues',
+  title: 'Blues em Dó',
+  composer: 'forma tradicional de 12 compassos',
+  arrangement: 'arranjo do Fermata: raiz e 5ª na mão esquerda, acordes nos tempos 2 e 4 na direita',
+  bpm: 80,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: BLUES_R,
+  left: BLUES_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const sigs22 = keyFromSignature({ fifths: [-2, -1, 0, 1, 2] });
+const scalesDBb = buildScale({ keys: ['D', 'Bb'], notes: 8 });
+
+const l31: Lesson = {
+  n: 31,
+  id: 'l31',
+  title: 'Mãos juntas em escala e o blues de 12 compassos',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar Dó maior com as duas mãos em movimento contrário, uniforme.',
+    'Consigo tocar a forma do blues de 12 compassos em Dó sem me perder.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Movimento contrário primeiro',
+      body: `Escala com as duas mãos começa pelo **movimento contrário**: a direita sobe a partir do Dó4 enquanto a esquerda desce a partir do Dó3. As mãos ficam espelhadas, e o dedilhado é **igual nas duas ao mesmo tempo**: 1 2 3, os dois polegares passam juntos, 1 2 3 4 5.
+
+Depois vem o **movimento paralelo** (as duas sobem juntas), que é bem mais difícil: na subida, a direita passa o polegar no Fá enquanto a esquerda cruza o 3 no Lá, em momentos diferentes. Por isso o paralelo fica como desafio.
+
+Comece devagar, mais devagar do que nas mãos separadas. A meta é a mesma: notas iguais, e as duas mãos **juntas**, como uma só.`,
+    },
+    {
+      kind: 'example',
+      title: 'Movimento contrário',
+      steps: [
+        { say: 'Dó maior, mãos em espelho: a direita sobe, a esquerda desce, e voltam.', play: { bpm: 60, steps: [...MAJOR, ...[...MAJOR].reverse().slice(1)].map((x, i, a) => ({ midis: [60 + x, 48 - x], beats: i === a.length - 1 ? 2 : 0.5 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l31-contrario', exercise: quickTimed('Dó maior em movimento contrário', 'Colcheias, de 50 a 66 BPM. Os polegares passam juntos. Variação até 40 ms.', () => contraryC, { ladder: { from: 50, to: 66, step: 4 }, window: 80, evenness: 40 }) },
+    { kind: 'exercise', id: 'l31-paralelo', exercise: quickTimed('Desafio: movimento paralelo', 'As duas mãos sobem juntas, uma oitava de distância, a 50 BPM. Duas passadas boas.', () => parallelC, { reps: 2, window: 80 }) },
+    {
+      kind: 'text',
+      title: 'O blues de 12 compassos',
+      body: `O **blues** é uma das formas mais importantes da música popular: o rock, o jazz e boa parte do pop nasceram dele. A forma tradicional tem **12 compassos** e usa só os três acordes primários, numa ordem fixa:
+
+- Compassos 1 a 4: **I, I, I, I**.
+- Compassos 5 a 8: **IV, IV, I, I**.
+- Compassos 9 a 12: **V, IV, I, V**.
+
+Em Dó: C C C C · F F C C · G F C G. São três frases de 4 compassos. O último compasso (V) é o **turnaround**: a tensão que devolve ao começo da forma, que se repete quantas vezes você quiser.
+
+No acompanhamento desta lição, a mão esquerda faz **raiz e 5ª** em semínimas (lição 20) e a direita toca o acorde nos tempos **2 e 4**, os tempos fracos, que é onde o blues e o jazz "batem palma". As tétrades e a escala blues vêm na Unidade 8.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'perder a forma',
+      body: 'Errar uma nota no blues é normal; perder o lugar na forma não. Conte os compassos em voz alta ("um, dois, três, quatro, QUATRO…") e saiba sempre em qual das três frases você está. Se se perder, espere o próximo compasso 1 da forma e entre de novo.',
+    },
+    { kind: 'exercise', id: 'l31-forma', exercise: quickTimed('A forma na mão esquerda', 'Só raiz e 5ª, os 12 compassos, a 76 BPM. Duas passadas boas.', () => melodyTask(BLUES_L, { bpm: 76, clef: 'bass' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l31-blues', exercise: quickTimed('Blues em Dó, duas mãos', 'Raiz e 5ª na esquerda, acordes no 2 e no 4 na direita. Dois ciclos sem erro de forma, a 72 BPM.', () => twoHandTask(BLUES_R, BLUES_L, { bpm: 72, caption: 'Forma: C C C C · F F C C · G F C G.' }), { reps: 2 }) },
+    { kind: 'song', songId: 'u04-blues', why: 'O blues na pauta dupla. No "Tocar junto", deixe repetir e conte as frases.' },
+    { kind: 'exercise', id: 'l31-quiz', exercise: quiz('Blues e escalas', 'Cinco perguntas rápidas.', BLUES) },
+  ],
+  review: [choice(BLUES, 'blues'), scalesWhite],
+  checkpoint: [
+    quickTimed('Movimento contrário a 60 BPM', 'Dó maior, mãos juntas, sem dicas. Variação até 40 ms.', () => contraryC, { window: 60, evenness: 40 }),
+    quickTimed('Blues em Dó', 'Um ciclo inteiro a 76 BPM, duas mãos.', () => twoHandTask(BLUES_R, BLUES_L, { bpm: 76 })),
+  ],
+  exit: [choice(BLUES, 'blues'), chordsRandom],
+};
+
+const l32: Lesson = {
+  n: 32,
+  id: 'l32',
+  title: 'Círculo de quintas; Ré e Si♭ maior',
+  minutes: 60,
+  objectives: [
+    'Consigo dizer a tonalidade maior de qualquer armadura até 2 sustenidos ou 2 bemóis.',
+    'Consigo tocar as escalas de Ré e Si♭ maior a 60 BPM, mãos separadas.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O mapa das tonalidades',
+      body: `Comece em Dó e suba de **5ª em 5ª**: Dó → Sol → Ré → Lá → Mi… Cada passo acrescenta **um sustenido** à armadura: Dó (nenhum), Sol (Fá♯), Ré (Fá♯, Dó♯), Lá (Fá♯, Dó♯, Sol♯).
+
+Agora desça de 5ª em 5ª: Dó → Fá → Si♭ → Mi♭… Cada passo acrescenta **um bemol**: Fá (Si♭), Si♭ (Si♭, Mi♭), Mi♭ (Si♭, Mi♭, Lá♭).
+
+Desenhadas num círculo, como as horas de um relógio, essas tonalidades formam o **círculo de quintas**: Dó no topo, os sustenidos do lado direito, os bemóis do lado esquerdo. Tonalidades vizinhas no círculo compartilham quase todas as notas, e por isso uma música passa facilmente de uma para a vizinha.`,
+    },
+    {
+      kind: 'text',
+      title: 'Ler a armadura em 2 segundos',
+      body: `Dois atalhos para descobrir a tonalidade maior pela armadura:
+
+- **Sustenidos**: o **último sustenido é a sensível**. Suba meio tom e está a tônica. Fá♯, Dó♯: Dó♯ + meio tom = **Ré maior**.
+- **Bemóis**: a tônica é o **penúltimo bemol**. Si♭, Mi♭: penúltimo = **Si♭ maior**. Com um bemol só, decore: **Fá maior**.
+
+No exercício a seguir, a resposta é **tocada**: você vê a armadura e toca a tônica.`,
+    },
+    { kind: 'exercise', id: 'l32-armaduras', exercise: { kind: 'items', title: 'Armadura → tônica', how: 'O app mostra a armadura; toque a tônica da tonalidade maior, em qualquer oitava.', gen: sigs22, count: 12, low: 48, high: 84, labels: 'off', pass: { accuracy: 0.9 } } },
+    {
+      kind: 'text',
+      title: 'Ré maior e Si♭ maior',
+      body: `- **Ré maior**: Ré, Mi, **Fá♯**, Sol, Lá, Si, **Dó♯**, Ré. Dedilhado igual ao de Dó nas duas mãos (direita 1 2 3 · 1 2 3 4 5; esquerda 5 4 3 2 1 · 3 2 1). É a tonalidade do Cânone de Pachelbel.
+- **Si♭ maior**: **Si♭**, Dó, Ré, **Mi♭**, Fá, Sol, Lá, **Si♭**. Aqui a tônica é preta, e o polegar não pode começar nela. Mão direita: **2 1 2 3 · 1 2 3 4** (polegar no Dó e no Fá). Mão esquerda: **3 2 1 · 4 3 2 1 · 2** (polegar no Ré e no Lá).
+
+De novo a regra: o polegar evita as pretas, e o dedilhado se organiza em torno disso.`,
+    },
+    { kind: 'exercise', id: 'l32-construir', exercise: { kind: 'items', title: 'Construa Ré e Si♭', how: 'Escala de Ré ou Si♭ maior, subindo a partir da oitava 4.', gen: scalesDBb, count: 6, low: 55, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
+    { kind: 'exercise', id: 'l32-re', exercise: quickTimed('Ré maior, mão direita', 'Colcheias de 45 a 60 BPM, com a armadura. Variação até 40 ms.', () => melodyTask(scaleLine(62), { bpm: 45, fifths: 2 }), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
+    { kind: 'exercise', id: 'l32-sib', exercise: quickTimed('Si♭ maior, mão direita', 'Dedilhado 2 1 2 3 · 1 2 3 4, de 45 a 60 BPM.', () => melodyTask(scaleLine(58), { bpm: 45, fifths: -2 }), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
+    { kind: 'exercise', id: 'l32-me', exercise: quickTimed('Ré ou Si♭, mão esquerda', 'Uma das duas, sorteada, a 55 BPM.', (rng) => (rng() < 0.5 ? melodyTask(scaleLine(50), { bpm: 55, fifths: 2, clef: 'bass' }) : melodyTask(scaleLine(46), { bpm: 55, fifths: -2, clef: 'bass' })), { reps: 2, evenness: 40 }) },
+    { kind: 'song', songId: 'u04-canone', why: 'O projeto final da unidade, em Ré maior: o baixo de 8 notas e três variações por cima. Use o pedal legato a cada mínima.' },
+    { kind: 'exercise', id: 'l32-quiz', exercise: quiz('Círculo de quintas', 'Seis perguntas rápidas.', CIRCLE) },
+  ],
+  review: [sigs22, scalesDBb, choice(CIRCLE, 'circulo')],
+  checkpoint: [
+    { kind: 'items', title: 'Armaduras', how: 'Até 2 sustenidos ou 2 bemóis, sem dicas. Meta: 90%.', gen: sigs22, count: 12, low: 48, high: 84, labels: 'off', pass: { accuracy: 0.9 } },
+    quickTimed('Escala sorteada a 60 BPM', 'Ré ou Si♭ maior, mão direita, variação até 40 ms.', (rng) => (rng() < 0.5 ? melodyTask(scaleLine(62), { bpm: 60, fifths: 2 }) : melodyTask(scaleLine(58), { bpm: 60, fifths: -2 })), { evenness: 40 }),
+  ],
+  exit: [sigs22, choice(CIRCLE, 'circulo')],
+};
+
+// Marco 1: revisão das unidades 1 a 4.
+const findAny = findNote({ pcs: [0, 2, 4, 5, 7, 9, 11], low: 48, high: 84 });
+const readTreble = readNote({ notes: [60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79], clef: 'treble' });
+const readBass = readNote({ notes: [43, 45, 47, 48, 50, 52, 53, 55, 57, 59, 60], clef: 'bass' });
+const intervals = intervalAbove({ sizes: [2, 3, 4, 5], from: [60, 62, 64, 65, 67, 69] });
+const chordsCFG = playChord({ symbols: ['C', 'F', 'G', 'D', 'A'], low: 48, high: 72, requireBass: true });
+const ear135 = degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6] });
+
+const sightGen = (bpm: number) => (rng: Rng) => {
+  const keys = [{ tonic: 60, fifths: 0 }, { tonic: 67, fifths: 1 }, { tonic: 65, fifths: -1 }, { tonic: 62, fifths: 2 }];
+  const k = pick(rng, keys);
+  return sightReadingTask(rng, { tonic: k.tonic, bars: 4, bpm, fifths: k.fifths });
+};
+
+const l33: Lesson = {
+  n: 33,
+  id: 'l33',
+  title: 'Marco 1: checkpoint das unidades 1 a 4 e mini-recital',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint cumulativo das unidades 1 a 4, sem dicas.',
+    'Consigo ler à primeira vista uma melodia nova de 4 compassos, com armadura.',
+    'Consigo apresentar um mini-recital de 4 peças e comparar com a lição 1.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Um terço do caminho',
+      body: `Esta é a primeira grande parada do curso. Em 32 lições você saiu de "onde fica o Dó?" para escalas com passagem do polegar, leitura nas duas claves com armadura, acordes primários em quatro tonalidades, cifra, pedal e a forma do blues.
+
+O Marco 1 tem duas partes:
+
+- Um **checkpoint cumulativo**: perguntas das quatro unidades misturadas, sem dicas. É mais longo que os outros, e é normal errar coisas antigas: é exatamente para isso que ele existe.
+- Um **mini-recital**: quatro peças tocadas em sequência, como numa apresentação, gravadas para você comparar com o que tocava na lição 1.`,
+    },
+    {
+      kind: 'text',
+      title: 'Primeira vista',
+      body: `Uma das peças do recital é **leitura à primeira vista**: uma melodia que você nunca viu, gerada na hora. O que se avalia não é tocar perfeito, é **não parar**.
+
+Antes de tocar, use 10 segundos para olhar:
+
+- A **armadura**: quais notas são sustenidas ou bemóis?
+- A **primeira nota** e a posição da mão: em qual nota fica o polegar?
+- O **ritmo**: onde estão as mínimas, onde está a semibreve final?
+
+Depois toque no andamento, lendo o desenho (sobe, desce, passo, salto) e não nota por nota. Se errar, siga em frente: o pulso vale mais que a nota.`,
+    },
+    { kind: 'exercise', id: 'l33-vista', exercise: quickTimed('Primeira vista', 'Melodia nova a cada passada, em Dó, Sol, Fá ou Ré, a 60 BPM. Três passadas boas.', sightGen(60), { reps: 3 }) },
+    {
+      kind: 'text',
+      title: 'O recital',
+      body: `Monte o seu recital com estas quatro peças, nesta ordem:
+
+1. **Clássica**: o **Cânone em Ré** de Pachelbel (o projeto final desta unidade).
+2. **Popular fácil**: **Amazing Grace** com acordes (Unidade 3).
+3. **Cifra em 2 tons**: **Brilha, brilha** em Dó e em Sol, com dois padrões de mão esquerda.
+4. **Primeira vista**: uma melodia gerada no exercício do projeto.
+
+Toque tudo seguido, sem recomeçar: apresentação é isso. Grave com o celular e compare com a gravação (ou a lembrança) da lição 1. Depois escreva três frases: o que melhorou, o que ainda trava, o que você quer tocar a seguir.`,
+    },
+    { kind: 'song', songId: 'u04-canone', why: 'A peça clássica do recital e o projeto final da unidade.' },
+  ],
+  review: [findAny, readTreble, readBass, intervals, chordsCFG, chordsRandom, scalesAll, sigs22, ear135],
+  checkpoint: [
+    {
+      kind: 'items',
+      title: 'Checkpoint cumulativo',
+      how: '30 perguntas misturadas das unidades 1 a 4: teclado, leitura, intervalos, acordes, graus, escalas, armaduras e ouvido. Meta: 85%.',
+      gen: mix([findAny, readTreble, readBass, intervals, chordsCFG, chordsRandom, scalesAll, sigs22, ear135, degreeNames, choice([...SCALE, ...THUMB, ...SIGNATURES, ...DEGREE_NAMES, ...RHYTHM_DOT, ...PEDAL_L, ...BLUES, ...CIRCLE])]),
+      count: 30,
+      low: 36,
+      high: 84,
+      labels: 'off',
+      pass: { accuracy: 0.85 },
+    },
+    quickTimed('Primeira vista', 'Melodia nova a 60 BPM, sem dicas.', sightGen(60)),
+    quickTimed('Ritmo', '4 compassos com pontuadas e síncopes a 72 BPM.', randomRhythm([...RHY_DOT, ...RHY_SYNC], 4, 72), { window: 60 }),
+  ],
+  project: {
+    title: 'Mini-recital nº 1',
+    brief: `Toque em sequência, sem recomeçar: o **Cânone em Ré**, **Amazing Grace** com acordes, **Brilha, brilha** em Dó e em Sol pela cifra, e uma **leitura à primeira vista** (exercício abaixo). Grave tudo e compare com a lição 1. Termine com uma autoavaliação escrita de três frases.`,
+    steps: [
+      'Passe cada peça no "Tocar a música" até ela sair com 90% das notas no andamento.',
+      'Escolha um horário sem pressa, ajuste o banco e faça um aquecimento de 5 minutos.',
+      'Grave as quatro peças em sequência, sem parar entre elas.',
+      'Faça a primeira vista no exercício abaixo, na primeira tentativa.',
+      'Ouça a gravação e escreva: o que melhorou desde a lição 1, o que ainda trava, o que quer tocar a seguir.',
+    ],
+    rubric: [
+      'As peças passaram com 90% ou mais das notas.',
+      'O pulso ficou estável, sem acelerar nos trechos fáceis nem frear nos difíceis.',
+      'Dá para ouvir dinâmica: frases que crescem e terminam leves.',
+      'O pedal ficou limpo no Cânone (sem lama nas trocas).',
+      'A autoavaliação escrita foi feita.',
+    ],
+    exercise: { kind: 'timed', title: 'Primeira vista do recital', how: 'Uma melodia nova, na primeira tentativa, a 60 BPM.', gen: sightGen(60), reps: 1, window: 100, pass: { accuracy: 0.9 } },
+  },
+  exit: [chordsRandom, sigs22, choice([...SCALE, ...SIGNATURES, ...CIRCLE, ...BLUES])],
+};
+
 const unit: Unit = {
   n: 4,
   id: 'u04',
   title: 'Escala maior e armaduras',
   goal: 'Construir e tocar escalas maiores com passagem do polegar, ler armaduras, usar o pedal legato e tocar a forma do blues.',
   technique: 'Escalas maiores de Dó, Sol, Ré, Fá e Si♭, uma oitava, mãos separadas e depois juntas em movimento contrário, em colcheias de 45 rumo a 80 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l25, l26, l27, l28, l29, l30],
-  songs: [canon, odeDotted, syncopated],
+  lessons: [l25, l26, l27, l28, l29, l30, l31, l32, l33],
+  songs: [canon, odeDotted, syncopated, blues],
   final: {
     songId: 'u04-canone',
     brief: 'O Cânone em Ré de Pachelbel, simplificado: a mão esquerda repete o baixo de 8 notas (Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá) e a direita toca três das variações que se empilham sobre ele. Junta a armadura de 2 sustenidos (Fá♯ e Dó♯), o pedal legato (troque a cada mínima, logo depois do baixo) e a leitura em duas claves.',
@@ -585,4 +847,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [tetra, scalesWhite, scalesAll, sigs12, readG, readF, degreeNames, degreeNamesD, chordsRandom, ear16];
+export const _gens: ItemGen[] = [tetra, scalesWhite, scalesAll, sigs12, readG, readF, degreeNames, degreeNamesD, chordsRandom, ear16, sigs22, scalesDBb, findAny, readTreble, readBass, intervals, chordsCFG, ear135];
