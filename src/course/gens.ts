@@ -69,16 +69,79 @@ export function intervalAbove(opts: { sizes: number[]; from: Midi[]; skill?: str
   return (rng) => {
     const from = pick(rng, opts.from);
     const size = pick(rng, opts.sizes); // 2 = segunda … 8 = oitava
-    const idx = WHITE_STEPS.indexOf(pcOf(from));
     const steps = size - 1;
-    const octave = Math.floor((idx + steps) / 7);
-    const target = from - WHITE_STEPS[idx] + 12 * octave + WHITE_STEPS[(idx + steps) % 7];
+    const target = whiteAbove(from, size);
     return {
       prompt: `Toque uma ${size}ª acima de ${nameOf(from)}`,
       detail: `${INTERVAL_NAMES[steps]}: conte ${size} teclas brancas, incluindo as duas pontas. Comece apertando ${nameOf(from)}.`,
       hintKeys: [from, target],
       steps: [{ kind: 'exact', midis: [from] }, { kind: 'exact', midis: [target] }],
       skill: 'intervalo',
+    };
+  };
+}
+
+/** Nota branca a um intervalo diatônico acima (`size` = 2 para segunda … 8 para oitava). `from` precisa ser branca. */
+export function whiteAbove(from: Midi, size: number): Midi {
+  const idx = WHITE_STEPS.indexOf(pcOf(from));
+  if (idx < 0) throw new Error(`Nota de partida precisa ser branca: ${from}`);
+  const j = idx + size - 1;
+  return from - WHITE_STEPS[idx] + 12 * Math.floor(j / 7) + WHITE_STEPS[j % 7];
+}
+
+/** O app toca um intervalo (melódico ou harmônico) a partir de uma nota dita; você toca as duas notas, em ordem. */
+export function intervalByEar(opts: { sizes: number[]; from: Midi[]; harmonic?: boolean; skill?: string }): ItemGen {
+  return (rng) => {
+    const from = pick(rng, opts.from);
+    const size = pick(rng, opts.sizes);
+    const target = whiteAbove(from, size);
+    const listen: Listen = opts.harmonic
+      ? { bpm: 72, steps: [{ midis: [from, target], beats: 2 }] }
+      : { bpm: 72, steps: [{ midis: [from], beats: 1 }, { midis: [target], beats: 2 }] };
+    return {
+      prompt: 'Ouça o intervalo e toque as duas notas',
+      detail: `Começa em ${nameOf(from)} e sobe. Pode ser ${opts.sizes.map((x) => `${x}ª`).join(', ')}.`,
+      listen,
+      hintKeys: [from, target],
+      hint: `${size}ª: ${nameOf(from)} → ${nameOf(target)}`,
+      steps: [{ kind: 'exact', midis: [from] }, { kind: 'exact', midis: [target] }],
+      skill: opts.skill ?? 'intervalo-ouvido',
+    };
+  };
+}
+
+/** Intervalo escrito na pauta (duas notas lado a lado): toque as duas, da esquerda para a direita. */
+export function readInterval(opts: { sizes: number[]; from: Midi[]; clef: Clef; skill?: string }): ItemGen {
+  return (rng) => {
+    const from = pick(rng, opts.from);
+    const size = pick(rng, opts.sizes);
+    const target = whiteAbove(from, size);
+    return {
+      prompt: 'Toque o intervalo da pauta',
+      detail: 'As duas notas, da esquerda para a direita.',
+      staff: { notes: [from, target], clef: opts.clef },
+      hintKeys: [from, target],
+      hint: `${size}ª: ${nameOf(from)} → ${nameOf(target)}`,
+      steps: [{ kind: 'exact', midis: [from] }, { kind: 'exact', midis: [target] }],
+      skill: opts.skill ?? 'ler-intervalo',
+    };
+  };
+}
+
+/** "Toque um semitom acima de Mi": primeiro a nota dada, depois a resposta (tecla vizinha ou duas teclas adiante). */
+export function toneOrSemitone(opts: { from: Midi[]; kinds: ('tom' | 'semitom')[]; dirs: ('acima' | 'abaixo')[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const from = pick(rng, opts.from);
+    const kind = pick(rng, opts.kinds);
+    const dir = pick(rng, opts.dirs);
+    const target = from + (kind === 'tom' ? 2 : 1) * (dir === 'acima' ? 1 : -1);
+    return {
+      prompt: `Toque um ${kind} ${dir} de ${nameOf(from)}`,
+      detail: `Primeiro ${nameOf(from)}, depois a resposta.`,
+      hintKeys: [from, target],
+      hint: kind === 'semitom' ? `Semitom: a tecla vizinha, preta ou branca. ${nameOf(target)}.` : `Tom: pule uma tecla, preta ou branca. ${nameOf(target)}.`,
+      steps: [{ kind: 'exact', midis: [from] }, { kind: 'exact', midis: [target] }],
+      skill: opts.skill ?? 'tom-semitom',
     };
   };
 }

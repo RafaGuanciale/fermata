@@ -111,6 +111,11 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
                 <line key={ls} className="staff__ledger" x1={x - 22} x2={x + 22} y1={y(ls)} y2={y(ls)} />
               ))}
               {state === 'current' && <circle className="staff__halo" cx={x} cy={cy} r={25} />}
+              {noteInfo(midi).isBlack && (
+                <text className={`staff__accidental${mod ? ` staff__head${mod}` : ''}`} x={x - HEAD_RX - 6} y={cy + 7} fontSize={1.4 * S} aria-hidden>
+                  ♯
+                </text>
+              )}
               {beats < 4 && <line className={`staff__stem${mod ? ` staff__stem${mod}` : ''}`} x1={stemX} x2={stemX} y1={cy} y2={stemEnd} />}
               {eighth && (
                 <path

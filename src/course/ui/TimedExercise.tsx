@@ -133,7 +133,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     const noVelocity = !!ex.dynamics && vels.length === 0;
     const dyn = ex.dynamics && cal && vels.length ? dynamicsScore(vels, ex.dynamics, cal) : null;
     const need = ex.pass.accuracy;
-    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need);
+    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0);
     const s = { r, artic, dyn, noVelocity, ok };
     setScore(s);
     setPhase('done');
@@ -248,6 +248,11 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           <Verdict tone={score.ok ? 'hit' : 'miss'}>
             {pct(score.r.accuracy)} no tempo{score.ok ? ': passada boa' : ` (precisa de ${pct(ex.pass.accuracy)})`}
           </Verdict>
+          {ex.noExtras && score.r.extras > 0 && (
+            <p className="runner__note">
+              {score.r.extras === 1 ? '1 nota a mais' : `${score.r.extras} notas a mais`}. Nota ligada não se toca de novo: segure até a próxima nota diferente.
+            </p>
+          )}
           {score.artic !== null && (
             <p className="runner__note">
               {ex.articulation === 'legato' ? 'Legato' : 'Staccato'}: {pct(score.artic)} das passagens certas

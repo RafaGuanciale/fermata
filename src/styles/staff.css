@@ -107,6 +107,11 @@
   fill: var(--text);
 }
 
+.staff__accidental {
+  fill: var(--text);
+  text-anchor: end;
+}
+
 .staff__rest {
   fill: var(--text);
   font-family: var(--font-music);

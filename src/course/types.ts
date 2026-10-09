@@ -116,6 +116,8 @@ export type Exercise =
       articulation?: 'legato' | 'staccato';
       /** Dinâmica pedida para todas as notas, ou crescendo ao longo da passada. */
       dynamics?: 'p' | 'mf' | 'f' | 'crescendo' | 'diminuendo';
+      /** Nota a mais derruba a passada (por exemplo, reatacar uma nota ligada). */
+      noExtras?: boolean;
       /** Sobe o BPM a cada passada boa até o alvo (escada). */
       ladder?: { from: number; to: number; step: number };
     })

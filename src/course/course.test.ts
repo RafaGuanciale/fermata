@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
-import { degreeByEar, intervalAbove, parseChord, playChord } from './gens';
+import { degreeByEar, intervalAbove, intervalByEar, parseChord, playChord, readInterval, toneOrSemitone, whiteAbove } from './gens';
 import {
   articulationScore, calibrate, chordMatches, dynamicsScore, judgeTask, labelsVisible, levelOf, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
 } from './judge';
@@ -124,6 +124,24 @@ describe('geradores', () => {
     expect(chord.steps[0]).toEqual({ kind: 'chord', pcs: [7, 11, 2, 5], bass: undefined });
     const d = degreeByEar({ tonic: 60, degrees: [5] })(rng);
     expect(d.steps).toEqual([{ kind: 'pc', pcs: [7] }]);
+  });
+
+  it('intervalos ouvidos, lidos na pauta, tom e semitom', () => {
+    const rng = seeded(5);
+    expect(whiteAbove(60, 5)).toBe(67);
+    expect(whiteAbove(71, 2)).toBe(72);
+    expect(whiteAbove(64, 4)).toBe(69);
+    expect(() => whiteAbove(61, 3)).toThrow();
+    const ear = intervalByEar({ sizes: [5], from: [62], harmonic: true })(rng);
+    expect(ear.steps).toEqual([{ kind: 'exact', midis: [62] }, { kind: 'exact', midis: [69] }]);
+    expect(ear.listen?.steps[0].midis).toEqual([62, 69]);
+    const read = readInterval({ sizes: [3], from: [55], clef: 'bass' })(rng);
+    expect(read.staff).toEqual({ notes: [55, 59], clef: 'bass' });
+    const up = toneOrSemitone({ from: [64], kinds: ['semitom'], dirs: ['acima'] })(rng);
+    expect(up.steps[1]).toEqual({ kind: 'exact', midis: [65] });
+    const down = toneOrSemitone({ from: [60], kinds: ['tom'], dirs: ['abaixo'] })(rng);
+    expect(down.prompt).toBe('Toque um tom abaixo de Dó');
+    expect(down.steps[1]).toEqual({ kind: 'exact', midis: [58] });
   });
 });
 
