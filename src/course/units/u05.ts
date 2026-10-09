@@ -1,0 +1,472 @@
+// Unidade 5 — Modo menor e intervalos com qualidade (lições 34 a 41). Projeto final: Für Elise, tema A (Lá menor).
+// Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
+
+import {
+  buildMinorScale, choice, chordQualityByEar, minorChord, minorSteps, mix, playChord, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellIntervalChoice, type ChoiceQuestion, type MinorForm,
+} from '../gens';
+import { melodyTask, sci } from '../tasks';
+import type { Midi } from '../../music/notes';
+import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
+
+// ---------- escrita ----------
+
+/** Escala menor de uma oitava em colcheias, subindo e descendo, terminando numa semibreve. A melódica desce natural. */
+function minorLine(tonic: Midi, form: MinorForm): string {
+  const up = (form === 'natural' ? minorSteps('natural') : form === 'harmonica' ? minorSteps('harmonica') : minorSteps('melodica').slice(0, 8)).map((x) => `${sci(tonic + x)}:0.5`).join(' ');
+  const downSteps = form === 'harmonica' ? [...minorSteps('harmonica')].reverse() : [...minorSteps('natural')].reverse();
+  const down = downSteps.map((x) => `${sci(tonic + x)}:0.5`).join(' ');
+  return `${up} | ${down} | ${sci(tonic)}:4`;
+}
+
+const quickTimed = (title: string, how: string, gen: (rng: Rng) => ReturnType<typeof melodyTask>, extra: Partial<Extract<Exercise, { kind: 'timed' }>> = {}): Exercise => ({
+  kind: 'timed', title, how, gen, reps: 1, window: 100, pass: { accuracy: 0.85 }, ...extra,
+});
+
+const quiz = (title: string, how: string, qs: ChoiceQuestion[], accuracy = 0.8): Exercise => ({
+  kind: 'quiz', title, how, questions: qs.map((q) => ({ q: q.q, options: q.options, answer: q.answer, why: q.why ?? '' })), pass: { accuracy },
+});
+
+const items = (title: string, how: string, gen: ItemGen, count: number, low: Midi, high: Midi, accuracy = 0.85, labels: 'on' | 'fade' | 'off' = 'fade'): Exercise => ({
+  kind: 'items', title, how, gen, count, low, high, labels, pass: { accuracy },
+});
+
+/** Armadura de cada tonalidade menor usada nas tarefas (relativa da maior). */
+const MINOR_FIFTHS: Record<string, number> = { A: 0, E: 1, D: -1 };
+const TONIC_MD: Record<string, Midi> = { A: 69, E: 64, D: 62 };
+const TONIC_ME: Record<string, Midi> = { A: 45, E: 40, D: 50 };
+
+const scaleTask = (key: 'A' | 'E' | 'D', form: MinorForm, bpm: number, hand: 'direita' | 'esquerda' = 'direita') =>
+  melodyTask(minorLine((hand === 'direita' ? TONIC_MD : TONIC_ME)[key], form), { bpm, fifths: MINOR_FIFTHS[key], clef: hand === 'direita' ? 'treble' : 'bass' });
+
+// ---------- perguntas ----------
+
+const RELATIVE: ChoiceQuestion[] = [
+  { q: 'A relativa menor de Dó maior é…', options: ['Lá menor', 'Dó menor', 'Mi menor'], answer: 0, why: 'Mesmas notas, mesma armadura; a casa desce uma 3ª menor: Dó → Lá.' },
+  { q: 'Tonalidades relativas têm…', options: ['A mesma armadura e tônicas diferentes', 'A mesma tônica e armaduras diferentes', 'Nada em comum'], answer: 0, why: 'Dó maior e Lá menor: nenhum acidente, casas diferentes.' },
+  { q: 'A tônica da relativa menor fica…', options: ['Uma 3ª menor (3 semitons) abaixo da tônica maior', 'Uma 5ª acima', 'Um tom abaixo'], answer: 0, why: 'É o 6º grau da escala maior: Sol maior → Mi menor.' },
+  { q: 'A fórmula da escala menor natural é…', options: ['T S T T S T T', 'T T S T T T S', 'T S T T T T S'], answer: 0, why: 'Lá, Si, Dó, Ré, Mi, Fá, Sol, Lá.' },
+  { q: 'O que mais diferencia o som maior do menor?', options: ['A 3ª: 4 semitons no maior, 3 no menor', 'O andamento', 'A oitava'], answer: 0, why: 'Lá–Dó♯ (3ª maior) contra Lá–Dó (3ª menor).' },
+  { q: 'A relativa menor de Fá maior (1 bemol) é…', options: ['Ré menor', 'Lá menor', 'Fá menor'], answer: 0, why: 'Fá → 3ª menor abaixo → Ré. Ré menor também tem 1 bemol.' },
+];
+
+const FORMS: ChoiceQuestion[] = [
+  { q: 'Na menor harmônica, o que muda em relação à natural?', options: ['O 7º grau sobe meio tom', 'O 3º grau sobe', 'O 6º e o 7º descem'], answer: 0, why: 'Lá menor harmônica: Sol vira Sol♯, a sensível.' },
+  { q: 'Para que serve a sensível na menor?', options: ['Faz o V virar maior e puxar para a tônica', 'Deixa a escala mais lenta', 'Muda a armadura'], answer: 0, why: 'Mi–Sol♯–Si (E) resolve em Lá menor com força; Mi–Sol–Si (Em) quase não puxa.' },
+  { q: 'A menor melódica clássica…', options: ['Sobe com 6º e 7º elevados e desce como a natural', 'É igual à harmônica', 'Desce com 6º e 7º elevados'], answer: 0, why: 'Lá: sobe Fá♯ e Sol♯, desce Sol e Fá.' },
+  { q: 'A menor melódica "bachiana" (ou de jazz)…', options: ['Usa 6º e 7º elevados subindo e descendo', 'Não tem sensível', 'Só existe em Lá'], answer: 0, why: 'Bach e o jazz usam a melódica igual nos dois sentidos.' },
+  { q: 'O Sol♯ de Lá menor vai…', options: ['Na nota, como acidente avulso', 'Na armadura', 'Em lugar nenhum: se toca sem escrever'], answer: 0, why: 'A armadura de Lá menor é a de Dó maior; a sensível sempre aparece escrita na nota.' },
+  { q: 'Entre o 6º e o 7º grau da harmônica há…', options: ['Um tom e meio (2ª aumentada)', 'Um semitom', 'Um tom'], answer: 0, why: 'Fá → Sol♯: 3 semitons. É o som "oriental" da harmônica.' },
+];
+
+const QUALITY: ChoiceQuestion[] = [
+  { q: 'Quantos semitons tem uma 3ª maior?', options: ['4', '3', '5'], answer: 0, why: 'Dó–Mi: 4 semitons. A 3ª menor (Dó–Mi♭) tem 3.' },
+  { q: 'Quantos semitons tem uma 5ª justa?', options: ['7', '6', '8'], answer: 0, why: 'Dó–Sol: 7 semitons.' },
+  { q: 'Quantos semitons tem uma 6ª menor?', options: ['8', '9', '7'], answer: 0, why: 'Dó–Lá♭: 8 semitons. A 6ª maior (Dó–Lá) tem 9.' },
+  { q: 'Quais intervalos podem ser justos?', options: ['Uníssono, 4ª, 5ª e 8ª', '2ª, 3ª, 6ª e 7ª', 'Todos'], answer: 0, why: 'Os outros (2ª, 3ª, 6ª, 7ª) são maiores ou menores.' },
+  { q: 'Na escala maior a partir da nota de baixo, a 3ª, a 6ª e a 7ª são…', options: ['Maiores', 'Menores', 'Justas'], answer: 0, why: 'E a 4ª, a 5ª e a 8ª são justas. É o método de comparação.' },
+  { q: 'Mi–Sol é uma 3ª…', options: ['Menor (3 semitons)', 'Maior (4 semitons)', 'Justa'], answer: 0, why: 'Mi maior teria Sol♯. Sol natural é meio tom abaixo: 3ª menor.' },
+  { q: 'Ré–Fá♯ e Ré–Sol♭ soam igual. Qual é a 3ª?', options: ['Ré–Fá♯', 'Ré–Sol♭', 'As duas'], answer: 0, why: 'A 3ª conta 3 letras: Ré, Mi, Fá. Ré–Sol♭ é uma 4ª diminuta.' },
+];
+
+// ---------- peças reaproveitadas ----------
+
+const relKeys = relativeKey({ majors: ['C', 'G', 'F', 'D', 'Bb'], ask: ['menor', 'maior'] });
+const majMinEar = chordQualityByEar({ qualities: ['', 'm'], roots: [57, 60, 62, 64, 65, 67], answerRoots: [60, 62, 64, 65, 67, 69] });
+const minorTriads = playChord({ symbols: ['Am', 'Dm', 'Em', 'A', 'D', 'E', 'Cm', 'Gm'], low: 48, high: 72, requireBass: true });
+const naturalScales = buildMinorScale({ keys: ['A', 'E', 'D'], forms: ['natural'] });
+const harmonicScales = buildMinorScale({ keys: ['A', 'E', 'D'], forms: ['harmonica'] });
+const allForms = buildMinorScale({ keys: ['A', 'E', 'D'], forms: ['natural', 'harmonica', 'melodica'] });
+const cadMinor = resolveMinor({ keys: ['A', 'D', 'E'], before: [['V7'], ['V'], ['iv', 'V7'], ['i', 'iv', 'V7']] });
+const fiveMinor = minorChord({ keys: ['A', 'D', 'E'], degrees: ['V', 'V7'], low: 48, high: 72 });
+
+const IV_FROM = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'Bb3', 'F#4', 'Eb4'];
+const MM_IVS = ['2m', '2M', '3m', '3M', '4J', '5J', '6m', '6M', '7m', '7M', '8J'];
+const ivAbove = qualityInterval({ from: IV_FROM, intervals: MM_IVS });
+const ivSpell = spellIntervalChoice({ from: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B3', 'F#4', 'Bb3', 'Eb4'], intervals: ['2m', '3m', '3M', '6m', '6M', '7m'] });
+const earContrast = qualityByEar({ from: ['C4', 'D4', 'F4', 'G4'], intervals: ['3M', '5J', '4J', '8J'] });
+
+// ---------- lições ----------
+
+const l34: Lesson = {
+  n: 34,
+  id: 'l34',
+  title: 'Relativa menor: Lá menor natural',
+  minutes: 60,
+  objectives: [
+    'Consigo achar a relativa menor de uma tonalidade maior, e o caminho de volta, em menos de 3 segundos.',
+    'Consigo tocar Lá menor natural com o dedilhado certo, mãos separadas, em colcheias a 60 BPM.',
+    'Consigo ouvir se um acorde é maior ou menor e tocar a mesma qualidade sobre outra nota.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'As mesmas notas, outra casa',
+      body: `Toque todas as brancas de **Lá3 a Lá4**: Lá, Si, Dó, Ré, Mi, Fá, Sol, Lá. São exatamente as notas de Dó maior, mas o som é outro: mais sombrio, mais sério. Isso é a escala de **Lá menor natural**.
+
+O que mudou não foram as notas, foi a **casa**. Em Dó maior tudo puxa para o Dó; aqui tudo puxa para o Lá. Como as distâncias são contadas a partir de outra nota, a fórmula muda:
+
+**Lá–Si** tom, **Si–Dó** semitom, **Dó–Ré** tom, **Ré–Mi** tom, **Mi–Fá** semitom, **Fá–Sol** tom, **Sol–Lá** tom.
+
+A fórmula da **menor natural** é **T S T T S T T**. Compare com a maior (T T S T T T S): os semitons trocaram de lugar. Na maior eles ficam entre o 3º e o 4º grau e entre o 7º e o 8º; na menor natural, entre o 2º e o 3º e entre o 5º e o 6º.`,
+    },
+    {
+      kind: 'keys',
+      low: 57,
+      high: 69,
+      lit: [57, 59, 60, 62, 64, 65, 67, 69],
+      labels: { 57: 'Lá', 59: 'Si', 60: 'Dó', 62: 'Ré', 64: 'Mi', 65: 'Fá', 67: 'Sol', 69: 'Lá' },
+      caption: 'Lá menor natural: só brancas, de Lá a Lá. Semitons entre Si–Dó e Mi–Fá.',
+    },
+    {
+      kind: 'text',
+      title: 'Tonalidades relativas',
+      body: `Duas tonalidades que usam as **mesmas notas** e a **mesma armadura**, mas têm casas diferentes, são **relativas**. Dó maior e Lá menor são relativas: nenhuma tem acidente.
+
+Toda tonalidade maior tem a sua relativa menor, e a regra para achar é uma só: **a tônica menor fica uma 3ª menor (3 semitons) abaixo da tônica maior**. Ela é o 6º grau da escala maior.
+
+- Dó maior → desce 3 semitons → **Lá menor** (nenhum acidente).
+- Sol maior (Fá♯) → **Mi menor** (Fá♯).
+- Fá maior (Si♭) → **Ré menor** (Si♭).
+- Ré maior (Fá♯, Dó♯) → **Si menor**.
+- Si♭ maior (Si♭, Mi♭) → **Sol menor**.
+
+O caminho de volta é o mesmo ao contrário: da menor, **suba 3 semitons** e chega na maior relativa. Ré menor → Fá maior.`,
+    },
+    {
+      kind: 'example',
+      title: 'Dó maior e Lá menor',
+      steps: [
+        { say: 'Dó maior, subindo: a casa é o Dó.', play: { bpm: 112, steps: [60, 62, 64, 65, 67, 69, 71, 72].map((m, i) => ({ midis: [m], beats: i === 7 ? 2 : 1 })) } },
+        { say: 'As mesmas teclas a partir do Lá: Lá menor natural. A casa agora é o Lá.', keys: [57, 69], play: { bpm: 112, steps: [57, 59, 60, 62, 64, 65, 67, 69].map((m, i) => ({ midis: [m], beats: i === 7 ? 2 : 1 })) } },
+        { say: 'Os dois acordes de casa: Dó maior (Dó, Mi, Sol) e Lá menor (Lá, Dó, Mi). Eles têm duas notas em comum.', play: { bpm: 72, steps: [{ midis: [48, 60, 64, 67], beats: 2 }, { midis: [45, 57, 60, 64], beats: 3 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l34-relativa', exercise: items('Relativas', 'O app diz uma tonalidade; toque a tônica da relativa, em qualquer oitava. Às vezes é da maior para a menor, às vezes o contrário.', relKeys, 10, 48, 72, 0.8, 'off') },
+    {
+      kind: 'text',
+      title: 'Por que o menor soa diferente',
+      body: `A diferença de cor entre maior e menor está quase toda numa nota: a **3ª da escala**.
+
+- Em **Lá maior**, do Lá até a 3ª (Dó♯) são **4 semitons**: uma **3ª maior**.
+- Em **Lá menor**, do Lá até a 3ª (Dó) são **3 semitons**: uma **3ª menor**.
+
+O mesmo vale para o acorde: **Lá maior** é Lá, Dó♯, Mi; **Lá menor** é Lá, **Dó**, Mi. Só a nota do meio desce meio tom, e o acorde muda de cor. Na cifra, o menor ganha um **m**: A é Lá maior, **Am** é Lá menor.
+
+A menor natural também tem o 6º e o 7º graus mais baixos que a maior (Fá e Sol em vez de Fá♯ e Sol♯). Isso pesa no som, mas cria um problema que você vai resolver na próxima lição: sem o Sol♯, falta à escala uma nota que puxe forte para o Lá.
+
+Por isso se diz que uma tonalidade menor tem **9 notas**: as 7 da natural e mais o 6º e o 7º graus elevados, que entram quando a música pede.`,
+    },
+    {
+      kind: 'example',
+      title: 'Maior e menor, lado a lado',
+      steps: [
+        { say: 'Lá maior: Lá, Dó♯, Mi.', keys: [57, 61, 64], play: { bpm: 72, steps: [{ midis: [57, 61, 64], beats: 2 }] } },
+        { say: 'Lá menor: o Dó♯ desce para Dó.', keys: [57, 60, 64], play: { bpm: 72, steps: [{ midis: [57, 60, 64], beats: 2 }] } },
+        { say: 'O mesmo em Ré: Ré maior (Ré, Fá♯, Lá) e Ré menor (Ré, Fá, Lá).', keys: [62, 65, 69], play: { bpm: 72, steps: [{ midis: [62, 66, 69], beats: 2 }, { midis: [62, 65, 69], beats: 2 }] } },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'triste ou alegre não é regra',
+      body: 'Menor não quer dizer triste, nem maior quer dizer alegre: muito samba animado é menor, e há canções de ninar maiores e melancólicas. O que o ouvido percebe é a cor da 3ª. Para reconhecer, ouça a nota do meio do acorde, não o "clima".',
+    },
+    { kind: 'exercise', id: 'l34-ouvido', exercise: items('Maior ou menor, em outra raiz', 'O app toca um acorde. Toque um acorde da mesma qualidade com a fundamental pedida, no estado fundamental (fundamental embaixo).', majMinEar, 12, 48, 84, 0.85, 'off') },
+    { kind: 'exercise', id: 'l34-acordes', exercise: items('Acordes maiores e menores', 'Toque o acorde da cifra com a fundamental embaixo. O "m" desce a 3ª meio tom.', minorTriads, 10, 48, 72) },
+    {
+      kind: 'text',
+      title: 'Dedilhado de Lá menor',
+      body: `Lá menor, como Dó maior, é só de brancas, e usa **o mesmo dedilhado de Dó**:
+
+- **Mão direita**, subindo: **1 2 3 · 1 2 3 4 5**. O polegar passa no Ré. Descendo: 5 4 3 2 1 · 3 2 1, o 3 cruza no Dó.
+- **Mão esquerda**, subindo: **5 4 3 2 1 · 3 2 1**. O 3 cruza no Fá. Descendo: 1 2 3 · 1 2 3 4 5.
+
+Mi menor e Ré menor (natural) também usam esse dedilhado nas duas mãos. Mi menor tem o Fá♯ da armadura de Sol; Ré menor, o Si♭ da armadura de Fá.
+
+Como na escala maior, o que conta é soar **igual**: o polegar se prepara cedo e o antebraço acompanha de lado.`,
+    },
+    { kind: 'exercise', id: 'l34-construir', exercise: items('Construa a menor natural', 'Lá, Mi ou Ré menor natural, subindo uma oitava. Siga T S T T S T T.', naturalScales, 6, 55, 84) },
+    { kind: 'exercise', id: 'l34-md', exercise: quickTimed('Lá menor natural, mão direita', 'Colcheias, subindo e descendo, de 45 a 60 BPM. Variação até 40 ms.', () => scaleTask('A', 'natural', 45), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
+    { kind: 'exercise', id: 'l34-me', exercise: quickTimed('Lá menor natural, mão esquerda', 'A partir do Lá2, dedilhado 5 4 3 2 1 3 2 1. De 45 a 60 BPM.', () => scaleTask('A', 'natural', 45, 'esquerda'), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
+    { kind: 'exercise', id: 'l34-quiz', exercise: quiz('Relativa e menor natural', 'Seis perguntas rápidas.', RELATIVE) },
+  ],
+  review: [relKeys, majMinEar, naturalScales, choice(RELATIVE, 'menor-natural')],
+  checkpoint: [
+    items('Relativas e qualidade', '12 perguntas: relativas e maior ou menor de ouvido, sem dicas. Meta: 85%.', mix([relKeys, majMinEar]), 12, 48, 84, 0.85, 'off'),
+    quickTimed('Lá menor natural a 60 BPM', 'Mão direita, colcheias, sem dicas. Variação até 40 ms.', () => scaleTask('A', 'natural', 60), { evenness: 40 }),
+  ],
+  exit: [relKeys, choice(RELATIVE, 'menor-natural')],
+};
+
+const l35: Lesson = {
+  n: 35,
+  id: 'l35',
+  title: 'Menor harmônica e melódica',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar as três formas da menor (natural, harmônica e melódica) em Lá, Mi e Ré.',
+    'Consigo explicar por que a harmônica existe: a sensível faz o V ficar maior.',
+    'Consigo resolver V–i e V7–i em Lá, Ré e Mi menor, sempre com o V maior.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que falta na menor natural',
+      body: `Na escala maior, o 7º grau fica a **meio tom** da tônica: Si → Dó. Essa nota se chama **sensível** porque é "sensível" à tônica, quase encostada, e puxa para ela. É ela que dá força à cadência V–I: o acorde de Sol (Sol, **Si**, Ré) resolve no Dó porque o Si sobe meio tom.
+
+Na **menor natural**, o 7º grau fica a **um tom** da tônica: Sol → Lá. Essa nota não puxa: é só uma **subtônica**. E o acorde do 5º grau fica menor (Mi, **Sol**, Si = Em), uma dominante sem força. Toque Em e depois Am: soa como um passeio, não como uma chegada.
+
+A solução, usada há mais de 300 anos: **subir o 7º grau meio tom**. Sol vira **Sol♯**, a sensível de Lá. O acorde do 5º grau vira **Mi maior** (Mi, Sol♯, Si = E) e, com a 7ª, **E7** (Mi, Sol♯, Si, Ré). Agora a cadência V–i chega de verdade.`,
+    },
+    {
+      kind: 'example',
+      title: 'Três cadências em Lá menor',
+      steps: [
+        { say: 'Com a natural: Em → Am. O Sol desce ou fica, e a chegada é fraca.', play: { bpm: 72, steps: [{ midis: [40, 55, 59, 64], beats: 2 }, { midis: [45, 57, 60, 64], beats: 3 }] } },
+        { say: 'Com a sensível: E → Am. O Sol♯ sobe meio tom para o Lá.', keys: [56, 57], play: { bpm: 72, steps: [{ midis: [40, 56, 59, 64], beats: 2 }, { midis: [45, 57, 60, 64], beats: 3 }] } },
+        { say: 'Com o E7: o Ré desce para o Dó e o Sol♯ sobe para o Lá. É o trítono resolvendo, como no G7 → C da Unidade 3.', play: { bpm: 72, steps: [{ midis: [40, 56, 62, 64], beats: 2 }, { midis: [45, 57, 60, 64], beats: 3 }] } },
+      ],
+    },
+    {
+      kind: 'text',
+      title: 'Menor harmônica',
+      body: `A escala que nasce dessa troca é a **menor harmônica** (o nome vem de "harmonia": ela existe para servir aos acordes):
+
+**Lá, Si, Dó, Ré, Mi, Fá, Sol♯, Lá.**
+
+A fórmula vira **T S T T S 1½ S**. Repare no salto entre o 6º e o 7º grau: **Fá → Sol♯** são 3 semitons, um tom e meio. Esse intervalo (uma **2ª aumentada**) dá à harmônica o som "oriental" que você reconhece de trilhas de filme.
+
+Nas outras tonalidades, a regra é a mesma, sempre a partir da natural:
+
+- **Mi menor**: Mi, Fá♯, Sol, Lá, Si, Dó, **Ré♯**, Mi. V = Si maior (B), V7 = B7.
+- **Ré menor**: Ré, Mi, Fá, Sol, Lá, Si♭, **Dó♯**, Ré. V = Lá maior (A), V7 = A7.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'a sensível não vai na armadura',
+      body: 'A armadura de uma tonalidade menor é a da sua relativa maior: Lá menor não tem acidentes, Ré menor tem só o Si♭. O Sol♯, o Dó♯ e o Ré♯ da harmônica aparecem **escritos na nota**, como acidente avulso, toda vez. Ver um Sol♯ "solto" numa música sem armadura é uma pista forte de Lá menor.',
+    },
+    { kind: 'exercise', id: 'l35-harmonica', exercise: items('Construa a harmônica', 'Lá, Mi ou Ré menor harmônica, subindo. A partir da natural, suba o 7º grau meio tom.', harmonicScales, 6, 55, 84) },
+    {
+      kind: 'text',
+      title: 'Menor melódica',
+      body: `O salto de tom e meio é ótimo para acordes e estranho para cantar. A **menor melódica** suaviza a subida elevando **também o 6º grau**:
+
+- **Subindo**: Lá, Si, Dó, Ré, Mi, **Fá♯**, **Sol♯**, Lá. Fórmula T S T T T T S: igual à maior, só com a 3ª menor.
+- **Descendo** (na versão clássica): volta a ser a **natural**, Lá, Sol, Fá, Mi, Ré, Dó, Si, Lá. Descendo não há sensível para resolver, então as notas voltam ao lugar.
+
+Bach usava a melódica igual nos dois sentidos, e o jazz também: é a **melódica "bachiana"** (ou de jazz). No curso, quando o exercício pedir "melódica", é a clássica: sobe alterada, desce natural.
+
+Resumo das três formas de Lá menor:
+
+- **Natural**: Lá Si Dó Ré Mi Fá Sol Lá.
+- **Harmônica**: ... Fá **Sol♯** Lá.
+- **Melódica**: ... **Fá♯ Sol♯** Lá subindo; natural descendo.`,
+    },
+    {
+      kind: 'example',
+      title: 'As três formas de Lá menor',
+      steps: [
+        { say: 'Natural.', play: { bpm: 120, steps: [69, 71, 72, 74, 76, 77, 79, 81].map((m, i) => ({ midis: [m], beats: i === 7 ? 2 : 1 })) } },
+        { say: 'Harmônica: repare no salto Fá → Sol♯.', keys: [77, 80], play: { bpm: 120, steps: [69, 71, 72, 74, 76, 77, 80, 81].map((m, i) => ({ midis: [m], beats: i === 7 ? 2 : 1 })) } },
+        { say: 'Melódica: sobe com Fá♯ e Sol♯, desce natural.', keys: [78, 80], play: { bpm: 120, steps: [69, 71, 72, 74, 76, 78, 80, 81, 79, 77, 76, 74, 72, 71, 69].map((m, i) => ({ midis: [m], beats: i === 14 ? 2 : 1 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l35-tres', exercise: items('As três formas', 'Forma e tonalidade sorteadas. A melódica sobe e desce (15 notas).', allForms, 9, 55, 84, 0.85) },
+    { kind: 'exercise', id: 'l35-v', exercise: items('O V em menor', 'Toque o V ou o V7 da tonalidade menor. Lembre: é sempre maior, com a sensível.', fiveMinor, 8, 48, 72, 0.9) },
+    { kind: 'exercise', id: 'l35-cadencia', exercise: items('Complete a cadência menor', 'O app toca o começo; você toca o i, o acorde de repouso.', cadMinor, 10, 48, 84, 0.85, 'off') },
+    { kind: 'exercise', id: 'l35-escala', exercise: quickTimed('Lá menor harmônica, mão direita', 'Colcheias, subindo e descendo com o Sol♯ nos dois sentidos. De 45 a 60 BPM, variação até 40 ms.', () => scaleTask('A', 'harmonica', 45), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
+    { kind: 'exercise', id: 'l35-melodica', exercise: quickTimed('Lá menor melódica, mão direita', 'Sobe com Fá♯ e Sol♯, desce natural, a 54 BPM. Duas passadas boas.', () => scaleTask('A', 'melodica', 54), { reps: 2, evenness: 40 }) },
+    { kind: 'exercise', id: 'l35-quiz', exercise: quiz('As formas da menor', 'Seis perguntas rápidas.', FORMS) },
+  ],
+  review: [allForms, fiveMinor, cadMinor, choice(FORMS, 'formas-menor')],
+  checkpoint: [
+    items('Três formas', '9 escalas sorteadas, sem dicas. Meta: 90% das notas.', allForms, 9, 55, 84, 0.9, 'off'),
+    items('V maior em menor', 'Cadências e dominantes: o V sempre maior. Meta: 100%.', mix([fiveMinor, cadMinor]), 8, 48, 84, 1, 'off'),
+  ],
+  exit: [harmonicScales, choice(FORMS, 'formas-menor')],
+};
+
+const l36: Lesson = {
+  n: 36,
+  id: 'l36',
+  title: 'Intervalos com qualidade I: maior, menor e justo',
+  minutes: 60,
+  objectives: [
+    'Consigo dar nome completo a um intervalo (número e qualidade) contando letras e semitons.',
+    'Consigo tocar qualquer 2ª, 3ª, 6ª e 7ª maior ou menor, e 4ª, 5ª e 8ª justas, acima de uma nota dada.',
+    'Consigo distinguir de ouvido 3ª maior de 5ª justa e 4ª justa de 8ª.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Número e qualidade',
+      body: `Na Unidade 2 você mediu intervalos contando **teclas brancas**: de Dó a Mi é uma 3ª, de Dó a Sol uma 5ª. Esse é o **número** do intervalo, e ele conta **letras**, incluindo as duas pontas: Dó (1), Ré (2), Mi (3).
+
+Só o número não basta. Dó–Mi e Dó–Mi♭ são as duas "3ª" (três letras), mas soam diferentes: Dó–Mi tem **4 semitons**, Dó–Mi♭ tem **3**. O nome completo diz as duas coisas: **número e qualidade**.
+
+- Dó–Mi: **3ª maior** (3M).
+- Dó–Mi♭: **3ª menor** (3m).
+
+As qualidades possíveis são cinco: **maior**, **menor**, **justa**, **aumentada** e **diminuta**. Nesta lição, as três primeiras; as outras duas vêm na próxima.`,
+    },
+    {
+      kind: 'text',
+      title: 'O método da escala maior',
+      body: `O jeito mais seguro de descobrir a qualidade é imaginar a **escala maior da nota de baixo**. A partir dela:
+
+- A **2ª, 3ª, 6ª e 7ª** da escala maior são **maiores**.
+- A **4ª, 5ª e 8ª** (e o uníssono) são **justas**.
+- Um intervalo maior encolhido meio tom (mesmas letras) vira **menor**.
+
+Exemplo: qual é o intervalo **Mi–Sol**? A escala de Mi maior tem Sol♯ (Mi, Fá♯, **Sol♯**). Mi–Sol♯ seria a 3ª maior; Sol natural está meio tom abaixo. Então Mi–Sol é uma **3ª menor**.
+
+Para conferir, conte os semitons. Esta tabela vale a pena decorar:
+
+- 2ª menor **1** · 2ª maior **2**
+- 3ª menor **3** · 3ª maior **4**
+- 4ª justa **5** · 5ª justa **7**
+- 6ª menor **8** · 6ª maior **9**
+- 7ª menor **10** · 7ª maior **11**
+- 8ª justa **12**`,
+    },
+    {
+      kind: 'example',
+      title: 'Construir acima de Ré',
+      steps: [
+        { say: 'A escala de Ré maior: Ré, Mi, Fá♯, Sol, Lá, Si, Dó♯, Ré.', play: { bpm: 120, steps: [62, 64, 66, 67, 69, 71, 73, 74].map((m, i) => ({ midis: [m], beats: i === 7 ? 2 : 1 })) } },
+        { say: '3ª maior acima de Ré: a 3ª nota da escala, **Fá♯** (4 semitons).', keys: [62, 66], play: { bpm: 72, steps: [{ midis: [62], beats: 1 }, { midis: [66], beats: 1 }, { midis: [62, 66], beats: 2 }] } },
+        { say: '3ª menor: meio tom abaixo, mesma letra: **Fá** (3 semitons).', keys: [62, 65], play: { bpm: 72, steps: [{ midis: [62], beats: 1 }, { midis: [65], beats: 1 }, { midis: [62, 65], beats: 2 }] } },
+        { say: '6ª maior: **Si**. 6ª menor: **Si♭**. 5ª justa: **Lá**.', keys: [62, 71, 70, 69], play: { bpm: 72, steps: [{ midis: [62, 71], beats: 2 }, { midis: [62, 70], beats: 2 }, { midis: [62, 69], beats: 2 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l36-construir', exercise: items('Construa o intervalo', 'Toque a nota dada e depois a nota pedida acima dela. Pense na escala maior da nota de baixo.', ivAbove, 16, 55, 84, 0.85) },
+    {
+      kind: 'text',
+      title: 'Grafia: a letra certa',
+      body: `Uma mesma tecla pode ter dois nomes: Fá♯ e Sol♭ são a mesma preta. No intervalo, a **letra** é decidida pelo número, nunca pela tecla.
+
+A **3ª maior acima de Ré** é **Fá♯**, e não Sol♭: uma 3ª tem três letras (Ré, Mi, **Fá**). Ré–Sol♭ seria uma 4ª (quatro letras) com 4 semitons, que tem outro nome (4ª diminuta, na próxima lição).
+
+O mesmo acima de Fá♯: a 6ª menor tem seis letras (Fá, Sol, Lá, Si, Dó, **Ré**) e 8 semitons. Fá♯ + 8 semitons cai no Ré. Resposta: **Ré**.
+
+Essa disciplina parece detalhe, mas é ela que faz a partitura ser legível: um acorde de Ré maior escrito Ré–Sol♭–Lá confunde qualquer pianista.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'contar semitons e esquecer as letras',
+      body: 'Contar só semitons dá a tecla certa e o nome errado. Faça sempre nos dois passos: primeiro a letra (o número), depois o acidente que dá os semitons. 6ª menor acima de Mi: letra Dó (Mi, Fá, Sol, Lá, Si, Dó); 8 semitons → Dó natural.',
+    },
+    { kind: 'exercise', id: 'l36-grafia', exercise: items('Qual é o nome certo?', 'Escolha a grafia correta da nota. Atenção às duas opções que soam igual.', ivSpell, 10, 48, 84, 0.8, 'off') },
+    {
+      kind: 'text',
+      title: 'Ouvir a qualidade',
+      body: `De ouvido, comece pelos pares que soam bem diferentes:
+
+- **3ª maior** (Dó–Mi) é doce e cheia, a cor do acorde maior. **5ª justa** (Dó–Sol) é aberta, "oca", estável, sem cor de maior nem de menor.
+- **4ª justa** (Dó–Fá) soa como um chamado, suspensa. **8ª** (Dó–Dó) soa como a mesma nota repetida mais aguda.
+
+Uma âncora que ajuda: **Amazing Grace** começa com uma 4ª justa (Ré → Sol), e **Brilha, brilha** com uma 5ª justa no salto do 2º para o 3º som (Dó → Sol). Cante o começo da música por dentro e compare.
+
+Neste exercício o app toca a partir de uma nota e você toca as duas notas do intervalo que ouviu.`,
+    },
+    { kind: 'exercise', id: 'l36-ouvido', exercise: items('3M, 5J, 4J ou 8J de ouvido', 'Ouça e toque as duas notas. Os quatro intervalos são bem diferentes entre si.', earContrast, 12, 55, 84, 0.85, 'off') },
+    { kind: 'exercise', id: 'l36-quiz', exercise: quiz('Qualidade dos intervalos', 'Sete perguntas rápidas.', QUALITY) },
+  ],
+  review: [ivAbove, ivSpell, earContrast, choice(QUALITY, 'qualidade')],
+  checkpoint: [
+    items('24 intervalos', 'Construção e grafia misturadas, sem dicas. Meta: 85%.', mix([ivAbove, ivAbove, ivSpell]), 24, 55, 84, 0.85, 'off'),
+  ],
+  exit: [ivAbove, choice(QUALITY, 'qualidade')],
+};
+
+// ---------- músicas ----------
+
+// Für Elise (Beethoven, 1810), tema A. Arranjo do Fermata: 3/4 com valores dobrados.
+const FE_A = 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5';
+const furElise: SongSpec = {
+  id: 'u05-fur-elise',
+  title: 'Für Elise, tema A',
+  composer: 'Ludwig van Beethoven',
+  arrangement: 'arranjo do Fermata: em 3/4 com os valores dobrados (colcheias no lugar das semicolcheias), só o tema A, final em Lá; mão esquerda em meio-arpejo; pedal a critério do aluno',
+  bpm: 60,
+  beatsPerBar: 3,
+  fifths: 0,
+  right: `r:2 E5:0.5 D#5:0.5 | ${FE_A} | A4 r:0.5 C4:0.5 E4:0.5 A4:0.5 | B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5 | C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5 | ${FE_A} | A4 r:0.5 C4:0.5 E4:0.5 A4:0.5 | B4 r:0.5 E4:0.5 C5:0.5 B4:0.5 | A4:3`,
+  left: 'r:3 | r:3 | A2:0.5 E3:0.5 A3:0.5 r:1.5 | E2:0.5 E3:0.5 G#3:0.5 r:1.5 | A2:0.5 E3:0.5 A3:0.5 r:1.5 | r:3 | A2:0.5 E3:0.5 A3:0.5 r:1.5 | E2:0.5 E3:0.5 G#3:0.5 r:1.5 | A2:0.5 E3:0.5 A3:2',
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+// Melodia original do Fermata para as tercinas (lição 39).
+export const triplets: SongSpec = {
+  id: 'u05-tercinas',
+  title: 'Tercinas em Lá menor',
+  composer: 'melodia original do Fermata',
+  arrangement: 'mão esquerda em mínimas e semibreves: i, iv e V de Lá menor',
+  bpm: 60,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: 'A4:1/3 B4:1/3 C5:1/3 E5:2 D5 | C5:1/3 B4:1/3 A4:1/3 B4 C5 A4 | D5:1/3 E5:1/3 F5:1/3 A5:2 F5 | E5:1/3 D5:1/3 C5:1/3 B4 G#4 E4 | A4:1/3 B4:1/3 C5:1/3 E5:2 D5 | C5:1/3 B4:1/3 A4:1/3 B4 C5 D5 | E5:1/3 D5:1/3 C5:1/3 B4:1/3 C5:1/3 D5:1/3 E5 G#4 | A4:4',
+  left: 'A2:4 | A2:2 E3:2 | D3:4 | E2:4 | A2:4 | A2:2 D3:2 | E2:4 | A2:4',
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+// Brilha, brilha (melodia folclórica francesa, "Ah! vous dirai-je, maman"): a mesma melodia em Dó maior e em Dó menor (lição 41).
+const TW_MAJ = 'C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2';
+const TW_MIN = 'C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2 | G4 G4 F4 F4 | Eb4 Eb4 D4:2 | G4 G4 F4 F4 | Eb4 Eb4 D4:2 | C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2';
+type Fn = 'T' | 'S' | 'D';
+const TW_HARM: [Fn, Fn][] = [['T', 'T'], ['S', 'T'], ['S', 'T'], ['D', 'T'], ['T', 'D'], ['T', 'D'], ['T', 'D'], ['T', 'D'], ['T', 'T'], ['S', 'T'], ['S', 'T'], ['D', 'T']];
+const VOICE_MAJ: Record<Fn, string> = { T: 'C3+E3+G3', S: 'C3+F3+A3', D: 'B2+F3+G3' };
+const VOICE_MIN: Record<Fn, string> = { T: 'C3+Eb3+G3', S: 'C3+F3+Ab3', D: 'B2+F3+G3' };
+const twLeft = (v: Record<Fn, string>) => TW_HARM.map(([a, b]) => `${v[a]}:2 ${v[b]}:2`).join(' | ');
+
+const twMajor: SongSpec = {
+  id: 'u05-brilha-maior',
+  title: 'Brilha, brilha em Dó maior',
+  composer: 'melodia folclórica francesa',
+  arrangement: 'arranjo do Fermata: I, IV e V7 em mínimas na mão esquerda, posição próxima',
+  bpm: 72,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: TW_MAJ,
+  left: twLeft(VOICE_MAJ),
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const twMinor: SongSpec = {
+  id: 'u05-brilha-menor',
+  title: 'Brilha, brilha em Dó menor',
+  composer: 'melodia folclórica francesa',
+  arrangement: 'arranjo do Fermata: a mesma melodia no homônimo menor (harmônica), com i, iv e V7 em mínimas',
+  bpm: 66,
+  beatsPerBar: 4,
+  fifths: -3,
+  right: TW_MIN,
+  left: twLeft(VOICE_MIN),
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const unit: Unit = {
+  n: 5,
+  id: 'u05',
+  title: 'Modo menor e intervalos',
+  goal: 'Tocar as três formas da escala menor, resolver cadências em menor, dar nome completo aos intervalos e reconhecer maior e menor de ouvido.',
+  technique: 'Escalas menores de Lá, Mi e Ré (natural, harmônica e melódica), uma oitava, mãos separadas, em colcheias de 45 rumo a 69 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
+  lessons: [l34, l35, l36],
+  songs: [furElise, twMajor, twMinor],
+  final: {
+    songId: 'u05-fur-elise',
+    brief: 'O tema A de Für Elise, a peça mais famosa em Lá menor: o vaivém Mi–Ré♯ (a sensível de Mi, o V), a mão esquerda em meio-arpejo (Lá–Mi–Lá e Mi–Mi–Sol♯) e o Sol♯ da menor harmônica que puxa de volta para o Lá. Escrito em 3/4 com valores dobrados para a leitura ficar mais fácil; o som é o mesmo.',
+  },
+};
+
+export default unit;
+
+/** Para os testes conferirem que todo gerador funciona. */
+export const _gens: ItemGen[] = [relKeys, majMinEar, minorTriads, naturalScales, harmonicScales, allForms, cadMinor, fiveMinor, ivAbove, ivSpell, earContrast];

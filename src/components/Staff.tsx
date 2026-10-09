@@ -53,6 +53,7 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
     step: (fifths > 0 ? SHARP_STEPS[i] : FLAT_STEPS[i]) - (clef === 'bass' ? 2 : 0),
   }));
   const nameY = BOTTOM + 2.6 * S;
+  const tuplets = tupletMiddles(durations);
 
   const bars: number[] = [];
   if (durations && beatsPerBar) {
@@ -118,7 +119,8 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           const stemEnd = stemUp ? cy - STEM : cy + STEM;
           const hollow = beats >= 2;
           const dotted = beats === 3 || beats === 1.5;
-          const eighth = beats === 0.5;
+          const triplet = isTriplet(beats);
+          const eighth = beats === 0.5 || triplet;
           return (
             <g key={start + i}>
               {ledgerSteps(step).map((ls) => (
@@ -145,6 +147,11 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
                 ry={HEAD_RY}
                 transform={`rotate(-20 ${x} ${cy})`}
               />
+              {tuplets.has(start + i) && (
+                <text className="staff__tuplet" x={stemUp ? stemX + 6 : x} y={stemUp ? stemEnd - 8 : stemEnd + 20} aria-hidden>
+                  3
+                </text>
+              )}
               {dotted && <circle className={`staff__dot${mod ? ` staff__head${mod}` : ''}`} cx={x + HEAD_RX + 8} cy={step % 2 === 0 ? cy - S / 2 : cy} r={3.2} />}
               {(showNames || mark) && (
                 <text className={'staff__name' + (state === 'current' ? ' staff__name-current' : '')} x={x} y={nameY}>
@@ -157,4 +164,23 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
       </svg>
     </div>
   );
+}
+
+/** Colcheia de tercina: um terço de tempo. */
+const isTriplet = (beats: number) => Math.abs(beats - 1 / 3) < 1e-6;
+
+/** Índices das notas do meio de cada grupo de tercina (é onde vai o "3"). */
+function tupletMiddles(durations?: number[]): Set<number> {
+  const out = new Set<number>();
+  if (!durations) return out;
+  let run = 0;
+  durations.forEach((d, i) => {
+    if (!isTriplet(d)) {
+      run = 0;
+      return;
+    }
+    run++;
+    if (run % 3 === 2) out.add(i);
+  });
+  return out;
 }

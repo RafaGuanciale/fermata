@@ -3,7 +3,7 @@
 // Unidades novas devem preferir estes geradores; um gerador novo entra aqui, com teste.
 
 import type { Clef, Midi } from '../music/notes';
-import { PC_NAMES, keysOf, nameOf, pcOf, pick } from './music';
+import { PC_NAMES, keysOf, n, nameOf, pcOf, pick, ptName, shuffle } from './music';
 import type { Accept, Item, ItemGen, Listen, Pc, Rng } from './types';
 
 /** "Toque um Fá" em qualquer oitava. */
@@ -441,23 +441,42 @@ export function cadence(tonic: Midi, bpm = 96): Listen {
   };
 }
 
+/** Cadência i–iv–V–i em menor (a do V tem a sensível), para "sentir a casa" menor. */
+export function minorCadence(tonic: Midi, bpm = 96): Listen {
+  return {
+    bpm,
+    steps: [
+      { midis: [tonic - 12, tonic, tonic + 3, tonic + 7], beats: 1 },
+      { midis: [tonic - 7, tonic, tonic + 5, tonic + 8], beats: 1 },
+      { midis: [tonic - 5, tonic - 1, tonic + 2, tonic + 7], beats: 1 },
+      { midis: [tonic - 12, tonic, tonic + 3, tonic + 7], beats: 2 },
+    ],
+  };
+}
+
 const DEGREE_STEPS = [0, 2, 4, 5, 7, 9, 11];
 const DEGREE_NAMES = ['1 (a casa)', '2', '3', '4', '5', '6', '7'];
+/** Graus em menor: a escala natural, e o 8 é o 7 elevado (a sensível, que aparece no V). */
+const MINOR_DEGREE_STEPS = [0, 2, 3, 5, 7, 8, 10, 11];
+const MINOR_DEGREE_NAMES = ['1 (a casa)', '2', '3 menor', '4', '5', '6 menor', '7 natural', '7 elevado (sensível)'];
 
-/** O app toca a cadência e uma nota; você responde tocando o grau (qualquer oitava). */
-export function degreeByEar(opts: { tonic: Midi; degrees: number[]; skill?: string }): ItemGen {
+/** O app toca a cadência e uma nota; você responde tocando o grau (qualquer oitava). Em menor, o grau 8 é a sensível. */
+export function degreeByEar(opts: { tonic: Midi; degrees: number[]; mode?: 'maior' | 'menor'; skill?: string }): ItemGen {
+  const minor = opts.mode === 'menor';
+  const stepsOf = minor ? MINOR_DEGREE_STEPS : DEGREE_STEPS;
+  const namesOf = minor ? MINOR_DEGREE_NAMES : DEGREE_NAMES;
   return (rng) => {
     const d = pick(rng, opts.degrees);
-    const target = opts.tonic + DEGREE_STEPS[d - 1];
-    const c = cadence(opts.tonic);
+    const target = opts.tonic + stepsOf[d - 1];
+    const c = minor ? minorCadence(opts.tonic) : cadence(opts.tonic);
     return {
       prompt: 'Que nota foi essa? Toque ela',
-      detail: `Primeiro a cadência mostra a casa (${nameOf(opts.tonic)}), depois vem a nota. Pode ser ${opts.degrees.map((x) => DEGREE_NAMES[x - 1]).join(', ')}.`,
+      detail: `Primeiro a cadência mostra a casa (${nameOf(opts.tonic)}${minor ? ' menor' : ''}), depois vem a nota. Pode ser ${opts.degrees.map((x) => namesOf[x - 1]).join(', ')}.`,
       listen: { bpm: c.bpm, steps: [...c.steps, { midis: [], beats: 1 }, { midis: [target], beats: 2 }] },
       hintKeys: [target],
-      hint: `Grau ${d}: ${nameOf(target)}`,
+      hint: `Grau ${namesOf[d - 1]}: ${nameOf(target)}`,
       steps: [{ kind: 'pc', pcs: [pcOf(target)] }],
-      skill: opts.skill ?? 'grau',
+      skill: opts.skill ?? (minor ? 'grau-menor' : 'grau'),
     };
   };
 }
@@ -570,6 +589,268 @@ export function stepOrLeap(opts: { from: Midi[] }): ItemGen {
       hint: `${nameOf(a)} → ${nameOf(b)}`,
       steps: [],
       skill: 'grau-conjunto',
+    };
+  };
+}
+
+// ---------- modo menor (Unidade 5) ----------
+
+const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const LETTER_PC: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const ACC = (k: number) => (k > 0 ? '#'.repeat(k) : 'b'.repeat(-k));
+
+/** Grafia de uma tecla com a letra pedida: (63, 'D', 4) → "D#4"; (63, 'E', 4) → "Eb4". */
+function spellWith(midi: Midi, letter: string, octave: number): string | null {
+  const k = midi - ((octave + 1) * 12 + LETTER_PC[letter]);
+  return Math.abs(k) <= 2 ? `${letter}${ACC(k)}${octave}` : null;
+}
+
+/** Grau (0 a 6) de cada distância em semitons, nas escalas maior e menores (Lá → Fá e Fá♯ são ambos o 6º grau). */
+const DEG_OF: Record<number, number> = { 0: 0, 1: 1, 2: 1, 3: 2, 4: 2, 5: 3, 6: 3, 7: 4, 8: 5, 9: 5, 10: 6, 11: 6 };
+
+/** Escala soletrada (uma letra por grau) a partir de uma tônica escrita ("A4", "F#4"); passos de 0 a 12 semitons, em qualquer ordem. */
+export function spellScale(tonic: string, steps: number[]): string[] {
+  const m = /^([A-G])(#{1,2}|b{1,2})?(-?\d)$/.exec(tonic);
+  if (!m) throw new Error(`Tônica inválida: ${tonic}`);
+  const li = LETTERS.indexOf(m[1]);
+  const t = n(tonic);
+  return steps.map((x) => {
+    const idx = li + (x === 12 ? 7 : DEG_OF[x]);
+    return spellWith(t + x, LETTERS[idx % 7], Number(m[3]) + Math.floor(idx / 7)) ?? nameOf(t + x);
+  });
+}
+
+export type MinorForm = 'natural' | 'harmonica' | 'melodica';
+const MINOR_FORMS: Record<MinorForm, number[]> = {
+  natural: [0, 2, 3, 5, 7, 8, 10, 12],
+  harmonica: [0, 2, 3, 5, 7, 8, 11, 12],
+  melodica: [0, 2, 3, 5, 7, 9, 11, 12],
+};
+const FORM_PT: Record<MinorForm, string> = { natural: 'natural', harmonica: 'harmônica', melodica: 'melódica' };
+const FORM_STEPS: Record<MinorForm, string> = {
+  natural: 'T S T T S T T',
+  harmonica: 'T S T T S 1½ S (o 7º grau sobe meio tom)',
+  melodica: 'Subindo T S T T T T S (6º e 7º sobem); descendo, a natural',
+};
+
+/** Passos (semitons a partir da tônica) da escala menor. A melódica sobe e desce (15 notas): sobe alterada, desce natural. */
+export function minorSteps(form: MinorForm): number[] {
+  if (form !== 'melodica') return MINOR_FORMS[form];
+  return [...MINOR_FORMS.melodica, ...[...MINOR_FORMS.natural].reverse().slice(1)];
+}
+
+/** Tônicas das tonalidades menores usadas no curso, com a grafia. */
+const MINOR_TONIC: Record<string, string> = { A: 'A4', E: 'E4', D: 'D4', B: 'B3', G: 'G4', C: 'C4', 'F#': 'F#4' };
+const MINOR_FLAT = new Set(['D', 'G', 'C', 'F']);
+
+/** Nome da tonalidade menor: "A" → "Lá menor". */
+export const minorKeyName = (key: string) => `${KEY_PT[key] ?? (key === 'F#' ? 'Fá♯' : key)} menor`;
+
+/** Construa a escala menor (natural, harmônica ou melódica) a partir da tônica, na oitava pedida pela tabela. */
+export function buildMinorScale(opts: { keys: string[]; forms: MinorForm[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const form = pick(rng, opts.forms);
+    const tonic = MINOR_TONIC[key];
+    const steps = minorSteps(form);
+    const t = n(tonic);
+    const spelled = spellScale(tonic, steps);
+    const names = spelled.map((x) => ptName(x));
+    return {
+      prompt: `Toque ${minorKeyName(key)} ${FORM_PT[form]}${form === 'melodica' ? ', subindo e descendo' : ', subindo'}`,
+      detail: `Comece no ${names[0]}${tonic.slice(-1)}. ${FORM_STEPS[form]}.`,
+      hintKeys: [...new Set(steps.map((x) => t + x))],
+      hint: names.join(', '),
+      steps: steps.map((x) => ({ kind: 'exact', midis: [t + x] }) as Accept),
+      skill: opts.skill ?? `escala-menor-${form}`,
+    };
+  };
+}
+
+export type MinorDegree = 'i' | 'iv' | 'V' | 'V7';
+
+/** Cifra do grau numa tonalidade menor (com o V maior da harmônica): ("A", "V7") → "E7"; ("D", "iv") → "Gm". */
+export function minorDegreeSymbol(key: string, degree: MinorDegree): string {
+  const k = rootPc(key);
+  const names = MINOR_FLAT.has(key) ? FLAT_NAMES : SHARP_NAMES;
+  const off = degree === 'i' ? 0 : degree === 'iv' ? 5 : 7;
+  const suffix = degree === 'i' || degree === 'iv' ? 'm' : degree === 'V7' ? '7' : '';
+  return names[(k + off) % 12] + suffix;
+}
+
+/** "Em Lá menor, toque o iv": acordes de uma tonalidade menor pelo grau. */
+export function minorChord(opts: { keys: string[]; degrees: MinorDegree[]; low: Midi; high: Midi; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const degree = pick(rng, opts.degrees);
+    const symbol = minorDegreeSymbol(key, degree);
+    const c = parseChord(symbol);
+    return {
+      prompt: `Em ${minorKeyName(key)}, toque o ${degree}`,
+      detail: degree.startsWith('V') ? 'O V é maior: use a sensível (o 7º grau elevado). No V7, a 5ª pode ficar de fora.' : 'Qualquer posição.',
+      hintKeys: voiced(symbol, Math.round((opts.low + opts.high) / 2)).slice(1),
+      hint: `${chordLabel(symbol)}: ${c.pcs.map((p) => PC_NAMES[p]).join(', ')}`,
+      steps: [chordAccept(symbol)],
+      skill: opts.skill ?? 'grau-menor-acorde',
+    };
+  };
+}
+
+/** O app toca o começo de uma cadência em menor; você toca o i (o acorde de repouso). */
+export function resolveMinor(opts: { keys: string[]; before: MinorDegree[][]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const prog = pick(rng, opts.before);
+    const tonic = minorDegreeSymbol(key, 'i');
+    return {
+      prompt: 'Complete a cadência: toque o acorde que resolve',
+      detail: `${minorKeyName(key)}. Ouça ${prog.join(' – ')} e responda com o i.`,
+      listen: { bpm: 80, steps: prog.map((d) => ({ midis: voiced(minorDegreeSymbol(key, d), 64), beats: 2 })) },
+      hintKeys: voiced(tonic, 60).slice(1),
+      hint: `O i de ${minorKeyName(key)}: ${chordLabel(tonic)}`,
+      steps: [chordAccept(tonic)],
+      skill: opts.skill ?? 'cadencia-menor',
+    };
+  };
+}
+
+const REL_PT: Record<string, string> = { C: 'Dó', G: 'Sol', D: 'Ré', F: 'Fá', Bb: 'Si♭', A: 'Lá', E: 'Mi', Eb: 'Mi♭' };
+const RELATIVE: Record<string, string> = { C: 'A', G: 'E', D: 'B', F: 'D', Bb: 'G', A: 'F#', E: 'C#', Eb: 'C' };
+const REL_MINOR_PT: Record<string, string> = { A: 'Lá', E: 'Mi', B: 'Si', D: 'Ré', G: 'Sol', 'F#': 'Fá♯', 'C#': 'Dó♯', C: 'Dó' };
+
+/** "Qual é a relativa menor de Sol maior? Toque a tônica" (ou o caminho inverso). */
+export function relativeKey(opts: { majors: string[]; ask: ('menor' | 'maior')[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const major = pick(rng, opts.majors);
+    const minor = RELATIVE[major];
+    const ask = pick(rng, opts.ask);
+    const toMinor = ask === 'menor';
+    return {
+      prompt: toMinor ? `Qual é a relativa menor de ${REL_PT[major]} maior? Toque a tônica` : `Qual é a relativa maior de ${REL_MINOR_PT[minor]} menor? Toque a tônica`,
+      detail: 'Qualquer oitava. A relativa tem a mesma armadura.',
+      hint: toMinor ? `Desça uma 3ª menor (3 semitons) a partir de ${REL_PT[major]}: ${REL_MINOR_PT[minor]} menor.` : `Suba uma 3ª menor (3 semitons) a partir de ${REL_MINOR_PT[minor]}: ${REL_PT[major]} maior.`,
+      steps: [{ kind: 'pc', pcs: [rootPc(toMinor ? minor : major)] }],
+      skill: opts.skill ?? 'relativa',
+    };
+  };
+}
+
+// ---------- intervalos com qualidade ----------
+
+/** Semitons de cada intervalo: número + qualidade (m menor, M maior, J justo, A aumentado, d diminuto). */
+export const IV_SEMIS: Record<string, number> = {
+  '2m': 1, '2M': 2, '2A': 3, '3d': 2, '3m': 3, '3M': 4, '4d': 4, '4J': 5, '4A': 6, '5d': 6, '5J': 7, '5A': 8,
+  '6m': 8, '6M': 9, '7d': 9, '7m': 10, '7M': 11, '8J': 12,
+};
+const Q_PT: Record<string, string> = { m: 'menor', M: 'maior', J: 'justa', A: 'aumentada', d: 'diminuta' };
+
+/** "6m" → "6ª menor"; "8J" → "8ª justa". */
+export const ivLabel = (iv: string) => `${iv[0]}ª ${Q_PT[iv.slice(1)]}`;
+
+/** A nota a um intervalo de outra, com a grafia certa: ("F#4", "6m", 1) → "D5"; ("C4", "4A", 1) → "F#4". */
+export function spellInterval(from: string, iv: string, dir: 1 | -1 = 1): string {
+  const m = /^([A-G])(#{1,2}|b{1,2})?(-?\d)$/.exec(from);
+  if (!m || IV_SEMIS[iv] === undefined) throw new Error(`Intervalo inválido: ${from} ${iv}`);
+  const idx = LETTERS.indexOf(m[1]) + dir * (Number(iv[0]) - 1);
+  const oct = Number(m[3]) + Math.floor(idx / 7);
+  const letter = LETTERS[((idx % 7) + 7) % 7];
+  const out = spellWith(n(from) + dir * IV_SEMIS[iv], letter, oct);
+  if (!out) throw new Error(`Grafia impossível: ${iv} de ${from}`);
+  return out;
+}
+
+/** "Toque uma 6ª menor acima de Fá♯": primeiro a nota dada, depois a resposta. */
+export function qualityInterval(opts: { from: string[]; intervals: string[]; dir?: 'acima' | 'abaixo'; skill?: string }): ItemGen {
+  return (rng) => {
+    const from = pick(rng, opts.from);
+    const iv = pick(rng, opts.intervals);
+    const d = opts.dir === 'abaixo' ? -1 : 1;
+    const target = spellInterval(from, iv, d);
+    return {
+      prompt: `Toque uma ${ivLabel(iv)} ${d > 0 ? 'acima' : 'abaixo'} de ${ptName(from)}`,
+      detail: `Primeiro ${ptName(from)}${from.slice(-1)}, depois a resposta.`,
+      hintKeys: [n(from), n(target)],
+      hint: `${ptName(target)}: ${iv[0]} letras contando as duas pontas, ${IV_SEMIS[iv]} semitons.`,
+      steps: [{ kind: 'exact', midis: [n(from)] }, { kind: 'exact', midis: [n(target)] }],
+      skill: opts.skill ?? 'intervalo-qualidade',
+    };
+  };
+}
+
+/** Soletrar: "Qual é a 3ª menor acima de Ré?" com a grafia certa, a enarmônica (letra errada) e uma de qualidade errada. */
+export function spellIntervalChoice(opts: { from: string[]; intervals: string[]; dir?: 'acima' | 'abaixo'; skill?: string }): ItemGen {
+  return (rng) => {
+    const from = pick(rng, opts.from);
+    const iv = pick(rng, opts.intervals);
+    const d = opts.dir === 'abaixo' ? -1 : 1;
+    const right = spellInterval(from, iv, d);
+    const tm = /^([A-G])(#{1,2}|b{1,2})?(-?\d)$/.exec(right)!;
+    const li = LETTERS.indexOf(tm[1]);
+    // A enarmônica (mesma tecla, letra vizinha) só entra com um acidente no máximo; senão, as duas erradas mudam a qualidade.
+    const enh = [1, -1]
+      .map((k) => {
+        const j = li + k;
+        return spellWith(n(right), LETTERS[((j % 7) + 7) % 7], Number(tm[3]) + Math.floor(j / 7));
+      })
+      .find((x) => x !== null && !/##|bb/.test(x));
+    const dk = rng() < 0.5 ? 1 : -1;
+    const off = (d: number) => spellWith(n(right) + d, tm[1], Number(tm[3]));
+    const offQuality = off(dk) ?? off(-dk)!;
+    const third = enh ?? off(-dk) ?? offQuality;
+    const opts3 = shuffle(rng, [right, third, offQuality].filter((x, i, a) => a.indexOf(x) === i));
+    const names = opts3.map((x) => ptName(x));
+    return {
+      prompt: `Qual é a ${ivLabel(iv)} ${d > 0 ? 'acima' : 'abaixo'} de ${ptName(from)}?`,
+      choices: names,
+      answer: opts3.indexOf(right),
+      hint: `${ptName(right)}: ${iv[0]} letras (${ptName(from)} … ${ptName(right)}) e ${IV_SEMIS[iv]} semitons.`,
+      steps: [],
+      skill: opts.skill ?? 'soletrar-intervalo',
+    };
+  };
+}
+
+/** O app toca um intervalo; você toca o mesmo intervalo, a partir da nota dita ou de outra raiz (mais difícil). */
+export function qualityByEar(opts: { from: string[]; intervals: string[]; harmonic?: boolean; answerFrom?: string[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const from = n(pick(rng, opts.from));
+    const iv = pick(rng, opts.intervals);
+    const semis = IV_SEMIS[iv];
+    const start = opts.answerFrom ? n(pick(rng, opts.answerFrom)) : from;
+    const listen: Listen = opts.harmonic
+      ? { bpm: 72, steps: [{ midis: [from, from + semis], beats: 2 }] }
+      : { bpm: 72, steps: [{ midis: [from], beats: 1 }, { midis: [from + semis], beats: 2 }] };
+    return {
+      prompt: opts.answerFrom ? `Ouça o intervalo e toque o mesmo intervalo a partir de ${nameOf(start)}` : 'Ouça o intervalo e toque as duas notas',
+      detail: `${opts.answerFrom ? `O app toca a partir de ${nameOf(from)}; você responde a partir de ${nameOf(start)}.` : `Começa em ${nameOf(from)} e sobe.`} Pode ser ${opts.intervals.map(ivLabel).join(', ')}.`,
+      listen,
+      hintKeys: [start, start + semis],
+      hint: `${ivLabel(iv)}: ${semis} semitons.`,
+      steps: [{ kind: 'exact', midis: [start] }, { kind: 'exact', midis: [start + semis] }],
+      skill: opts.skill ?? 'intervalo-ouvido-qualidade',
+    };
+  };
+}
+
+const TRIAD_PT: Record<string, string> = { '': 'maior', m: 'menor', dim: 'diminuta', aug: 'aumentada' };
+
+/** O app toca uma tríade; você toca uma tríade da mesma qualidade sobre outra fundamental (no estado fundamental). */
+export function chordQualityByEar(opts: { qualities: ('' | 'm' | 'dim' | 'aug')[]; roots: Midi[]; answerRoots: Midi[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const q = pick(rng, opts.qualities);
+    const root = pick(rng, opts.roots);
+    let ans = pick(rng, opts.answerRoots);
+    if (opts.answerRoots.length > 1) while (pcOf(ans) === pcOf(root)) ans = pick(rng, opts.answerRoots);
+    const ivs = QUALITIES[q];
+    const triad = ivs.map((x) => root + x);
+    return {
+      prompt: `Ouça o acorde e toque um da mesma qualidade com fundamental em ${PC_NAMES[pcOf(ans)]}`,
+      detail: `Pode ser ${opts.qualities.map((x) => TRIAD_PT[x]).join(' ou ')}. A fundamental embaixo.`,
+      listen: { bpm: 72, steps: [{ midis: triad, beats: 2 }, ...triad.map((m) => ({ midis: [m], beats: 0.5 })), { midis: triad, beats: 2 }] },
+      hintKeys: ivs.map((x) => ans + x),
+      hint: `Tríade ${TRIAD_PT[q]}: ${ivs.map((x) => PC_NAMES[pcOf(ans + x)]).join(', ')}.`,
+      steps: [{ kind: 'chord', pcs: ivs.map((x) => pcOf(ans + x)), bass: pcOf(ans) }],
+      skill: opts.skill ?? 'qualidade-ouvido',
     };
   };
 }

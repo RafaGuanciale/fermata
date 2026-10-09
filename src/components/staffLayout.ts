@@ -31,7 +31,9 @@ export const FLAT_STEPS = [4, 7, 3, 6, 2, 5, 1];
 /** Grafia de uma tecla na armadura: posição na pauta, acidente a desenhar ('' se a armadura já diz) e nome. */
 export function spellOnStaff(midi: Midi, clef: Clef, fifths = 0): { step: number; accidental: '' | '♯' | '♭' | '♮'; name: string } {
   const info = noteInfo(midi);
-  const flat = info.isBlack && fifths < 0;
+  // Com bemóis na armadura, a preta vira bemol se esse bemol está na armadura ou é o próximo da ordem (Mi♭ em Fá maior).
+  // Fora disso é sustenido: a sensível das menores (Dó♯ em Ré menor, Fá♯ em Sol menor).
+  const flat = info.isBlack && fifths < 0 && FLAT_LETTERS.indexOf((info.letter + 1) % 7) < -fifths + 1;
   const letter = flat ? (info.letter + 1) % 7 : info.letter;
   const step = flat ? staffStep(midi + 1, clef) : staffStep(midi, clef);
   const inKey = fifths > 0 ? SHARP_LETTERS.slice(0, fifths) : FLAT_LETTERS.slice(0, -fifths);

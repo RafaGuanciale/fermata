@@ -52,9 +52,15 @@ export interface ParsedNote {
   bar: number;
 }
 
+/** "2" → 2, "0.5" → 0,5, "1/3" → um terço (colcheia de tercina). */
+function parseBeats(dur: string): number {
+  const f = /^(\d+)\/(\d+)$/.exec(dur);
+  return f ? Number(f[1]) / Number(f[2]) : Number(dur);
+}
+
 /**
  * "E4 E4 F4 G4 | G4:2 r:2" → notas com início e compasso.
- * Duração depois de ":" em tempos (semínima = 1; aceita 0.5, 1.5…). "r" = pausa. Acorde: "C3+E3+G3:4".
+ * Duração depois de ":" em tempos (semínima = 1; aceita 0.5, 1.5… e frações: "1/3" é a colcheia de tercina). "r" = pausa. Acorde: "C3+E3+G3:4".
  * Se `beatsPerBar` vier, confere se cada compasso soma certo (erro de escrita vira exceção nos testes).
  */
 export function parseLine(text: string, beatsPerBar?: number): ParsedNote[] {
@@ -65,7 +71,7 @@ export function parseLine(text: string, beatsPerBar?: number): ParsedNote[] {
     let inBar = 0;
     for (const tok of bar.split(/\s+/)) {
       const [body, dur] = tok.split(':');
-      const beats = dur ? Number(dur) : 1;
+      const beats = dur ? parseBeats(dur) : 1;
       if (!(beats > 0)) throw new Error(`Duração inválida: ${tok}`);
       const spelled = body === 'r' ? [] : body.split('+');
       out.push({ midis: spelled.map(n), spelled, beats, beat, bar: i + 1 });

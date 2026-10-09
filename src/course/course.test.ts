@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
+import { buildMinorScale, chordQualityByEar, minorChord, minorDegreeSymbol, minorSteps, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellInterval, spellIntervalChoice, spellScale } from './gens';
 import { buildScale, degreeByEar, degreeSymbol, keyFromSignature, scaleDegreeNote, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
 import {
   articulationScore, calibrate, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
@@ -58,6 +59,67 @@ describe('escrita de melodias', () => {
     expect(tr.events.map((e) => e.midi)).toEqual([67, 69, 71]);
     expect(tr.transpose).toBe(7);
     expect(tr.low <= 67 && tr.high >= 71).toBe(true);
+  });
+});
+
+describe('modo menor e intervalos com qualidade', () => {
+  it('escalas menores soletradas', () => {
+    expect(spellScale('A4', minorSteps('natural'))).toEqual(['A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5']);
+    expect(spellScale('A4', minorSteps('harmonica'))[6]).toBe('G#5');
+    expect(spellScale('D4', minorSteps('harmonica'))).toEqual(['D4', 'E4', 'F4', 'G4', 'A4', 'Bb4', 'C#5', 'D5']);
+    const mel = spellScale('E4', minorSteps('melodica'));
+    expect(mel).toHaveLength(15);
+    expect(mel.slice(5, 7)).toEqual(['C#5', 'D#5']);
+    expect(mel.slice(8, 10)).toEqual(['D5', 'C5']);
+    const it = buildMinorScale({ keys: ['A'], forms: ['harmonica'] })(seeded(1));
+    expect(it.steps.map((s) => (s.kind === 'exact' ? s.midis[0] : 0))).toEqual([69, 71, 72, 74, 76, 77, 80, 81]);
+    expect(it.hint).toContain('Sol♯');
+  });
+
+  it('acordes e cadência em menor', () => {
+    expect(minorDegreeSymbol('A', 'V7')).toBe('E7');
+    expect(minorDegreeSymbol('D', 'iv')).toBe('Gm');
+    expect(minorDegreeSymbol('E', 'V')).toBe('B');
+    expect(minorDegreeSymbol('C', 'iv')).toBe('Fm');
+    const c = minorChord({ keys: ['A'], degrees: ['V7'], low: 48, high: 72 })(seeded(2));
+    expect(c.steps[0]).toEqual({ kind: 'chord', pcs: [4, 8, 11, 2], bass: undefined, optional: [11] });
+    const r = resolveMinor({ keys: ['D'], before: [['iv', 'V7']] })(seeded(2));
+    expect(r.steps[0]).toMatchObject({ kind: 'chord', pcs: [2, 5, 9] });
+    expect(relativeKey({ majors: ['G'], ask: ['menor'] })(seeded(1)).steps[0]).toEqual({ kind: 'pc', pcs: [4] });
+    expect(relativeKey({ majors: ['F'], ask: ['maior'] })(seeded(1)).steps[0]).toEqual({ kind: 'pc', pcs: [5] });
+  });
+
+  it('intervalos com qualidade e grafia', () => {
+    expect(spellInterval('F#4', '6m')).toBe('D5');
+    expect(spellInterval('C4', '4A')).toBe('F#4');
+    expect(spellInterval('C4', '5d')).toBe('Gb4');
+    expect(spellInterval('E4', '3m', -1)).toBe('C#4');
+    expect(spellInterval('Bb3', '8J')).toBe('Bb4');
+    const q = qualityInterval({ from: ['D4'], intervals: ['3m'] })(seeded(1));
+    expect(q.steps).toEqual([{ kind: 'exact', midis: [62] }, { kind: 'exact', midis: [65] }]);
+    for (let seed = 1; seed < 40; seed++) {
+      const c = spellIntervalChoice({ from: ['C4', 'D4', 'E4', 'F#4', 'Bb3'], intervals: ['3m', '3M', '6m', '4A', '5d'] })(seeded(seed));
+      expect(c.choices!.length).toBeGreaterThanOrEqual(2);
+      expect(new Set(c.choices).size).toBe(c.choices!.length);
+      expect(c.answer).toBeGreaterThanOrEqual(0);
+    }
+    const e = qualityByEar({ from: ['C4'], intervals: ['5J'], answerFrom: ['E4'] })(seeded(1));
+    expect(e.steps).toEqual([{ kind: 'exact', midis: [64] }, { kind: 'exact', midis: [71] }]);
+    const t = chordQualityByEar({ qualities: ['m'], roots: [57], answerRoots: [62, 64] })(seeded(3));
+    const s0 = t.steps[0];
+    expect(s0.kind === 'chord' && s0.bass !== undefined && s0.pcs.length === 3).toBe(true);
+    expect(s0.kind === 'chord' && (s0.pcs[1] - s0.pcs[0] + 12) % 12).toBe(3);
+  });
+
+  it('tercinas: escrita, pauta e partitura', () => {
+    const p = parseLine('C4:1/3 D4:1/3 E4:1/3 F4 G4:2', 4);
+    expect(p[3].beat).toBe(1);
+    const song = { id: 't', title: 't', composer: 'x', bpm: 60, beatsPerBar: 4, fifths: 0, right: 'C4:1/3 D4:1/3 E4:1/3 F4 G4:2', hands: 'direita' as const, pass: { accuracy: 0.85 } };
+    const xml = songXml(song);
+    expect(xml).toContain('<actual-notes>3</actual-notes>');
+    expect(xml.match(/tuplet type="start"/g)).toHaveLength(1);
+    expect(xml.match(/tuplet type="stop"/g)).toHaveLength(1);
+    expect(xml).toContain('<divisions>12</divisions>');
   });
 });
 

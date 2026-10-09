@@ -139,5 +139,9 @@ describe('grafia na armadura', () => {
     expect(spellOnStaff(63, 'treble', -1)).toMatchObject({ accidental: '♭', name: 'Mi♭' });
     expect(spellOnStaff(60, 'treble', 2).accidental).toBe('♮');
     expect(spellOnStaff(61, 'treble', 2).accidental).toBe('');
+    // Sensível das menores com bemóis: Dó♯ em Ré menor, Fá♯ em Sol menor.
+    expect(spellOnStaff(73, 'treble', -1)).toMatchObject({ accidental: '♯', name: 'Dó♯' });
+    expect(spellOnStaff(66, 'treble', -2)).toMatchObject({ accidental: '♯', name: 'Fá♯' });
+    expect(spellOnStaff(68, 'treble', -3)).toMatchObject({ accidental: '', name: 'Lá♭' });
   });
 });
