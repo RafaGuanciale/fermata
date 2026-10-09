@@ -1006,3 +1006,184 @@ export function chordSequence(opts: { sequences: { name?: string; symbols: strin
     };
   };
 }
+
+// ---------- campo harmônico e funções (Unidade 7) ----------
+
+export type Roman = 'I' | 'ii' | 'iii' | 'IV' | 'V' | 'vi' | 'vii°' | 'V7';
+const DIATONIC: Record<Roman, [number, string]> = { I: [0, ''], ii: [2, 'm'], iii: [4, 'm'], IV: [5, ''], V: [7, ''], vi: [9, 'm'], 'vii°': [11, '°'], V7: [7, '7'] };
+export const FIELD: Roman[] = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+export const FUNCTION_OF: Record<Roman, 'T' | 'S' | 'D'> = { I: 'T', iii: 'T', vi: 'T', IV: 'S', ii: 'S', V: 'D', V7: 'D', 'vii°': 'D' };
+
+/** Cifra de um grau do campo harmônico maior: ("D", "vii°") → "C#°"; ("Bb", "iii") → "Dm". */
+export function diatonicSymbol(key: string, roman: Roman): string {
+  const k = rootPc(key);
+  const names = FLAT_KEYS.has(k) ? FLAT_NAMES : SHARP_NAMES;
+  const [off, q] = DIATONIC[roman];
+  return names[(k + off) % 12] + q;
+}
+
+/** "Em Ré maior, toque o iii": qualquer grau do campo harmônico. */
+export function diatonicChord(opts: { keys: string[]; romans: Roman[]; low: Midi; high: Midi; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const roman = pick(rng, opts.romans);
+    const symbol = diatonicSymbol(key, roman);
+    return {
+      prompt: `Em ${keyName(key)} maior, toque o ${roman}`,
+      detail: 'Qualquer posição.',
+      hintKeys: voiced(symbol, Math.round((opts.low + opts.high) / 2)).slice(1),
+      hint: `${chordLabel(symbol)}: ${spelledHint(symbol) ?? parseChord(symbol).pcs.map((p) => PC_NAMES[p]).join(', ')}`,
+      steps: [chordAccept(symbol)],
+      skill: opts.skill ?? 'campo-harmonico',
+    };
+  };
+}
+
+/** "Toque o campo harmônico de Sol maior, subindo": os 7 acordes e o I de novo, em ordem. */
+export function fieldSequence(opts: { keys: string[]; dirs: ('subindo' | 'descendo')[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const dir = pick(rng, opts.dirs);
+    const romans: Roman[] = dir === 'subindo' ? [...FIELD, 'I'] : ['I', ...[...FIELD].reverse()];
+    const symbols = romans.map((r) => diatonicSymbol(key, r));
+    return {
+      prompt: `Toque o campo harmônico de ${keyName(key)} maior, ${dir}`,
+      detail: 'Uma tríade por grau, em ordem. Pode subir a mão em bloco (posição fundamental) ou conduzir.',
+      symbol: symbols.map(chordLabel).join(' '),
+      hint: romans.join(' '),
+      steps: symbols.map((x) => chordAccept(x)),
+      skill: opts.skill ?? 'campo-sequencia',
+    };
+  };
+}
+
+/** Ditado com o campo inteiro: o app toca 3 ou 4 acordes; você toca o baixo de cada um ou os acordes. */
+export function diatonicByEar(opts: { keys: string[]; progressions: Roman[][]; answer: 'bass' | 'chords'; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const prog = pick(rng, opts.progressions);
+    const symbols = prog.map((d) => diatonicSymbol(key, d));
+    return {
+      prompt: opts.answer === 'bass' ? 'Ouça e toque o baixo de cada acorde, em ordem' : 'Ouça e toque os acordes, em ordem',
+      detail: `Tom de ${keyName(key)} maior, ${prog.length} acordes. O primeiro é o I.`,
+      listen: { bpm: 72, steps: symbols.map((x) => ({ midis: voiced(x, 64), beats: 2 })) },
+      hint: `${prog.join(' – ')}: ${symbols.map(chordLabel).join(' – ')}`,
+      steps: opts.answer === 'bass' ? symbols.map((x) => ({ kind: 'pc', pcs: [parseChord(x).root] }) as Accept) : symbols.map((x) => chordAccept(x)),
+      skill: opts.skill ?? (opts.answer === 'bass' ? 'ditado-baixo' : 'ditado-progressao'),
+    };
+  };
+}
+
+/** Transponha pelos graus: a cifra vem num tom, você toca os mesmos graus em outro. */
+export function transposeDiatonic(opts: { from: string; to: string[]; progressions: Roman[][]; skill?: string }): ItemGen {
+  return (rng) => {
+    const to = pick(rng, opts.to);
+    const prog = pick(rng, opts.progressions);
+    const target = prog.map((d) => diatonicSymbol(to, d));
+    return {
+      prompt: `Transponha para ${keyName(to)} maior`,
+      symbol: prog.map((d) => chordLabel(diatonicSymbol(opts.from, d))).join(' – '),
+      detail: `A cifra está em ${keyName(opts.from)}. Analise em graus e toque os mesmos graus em ${keyName(to)}.`,
+      hint: `${prog.join(' – ')}: ${target.map(chordLabel).join(' – ')}`,
+      steps: target.map((x) => chordAccept(x)),
+      skill: opts.skill ?? 'transpor-graus',
+    };
+  };
+}
+
+export type CadenceKind = 'perfeita' | 'plagal' | 'meia' | 'deceptiva';
+const CADENCE_PT: Record<CadenceKind, string> = { perfeita: 'perfeita (V–I)', plagal: 'plagal (IV–I)', meia: 'meia cadência (termina no V)', deceptiva: 'deceptiva (V–vi)' };
+const CADENCE_LEAD: Record<CadenceKind, Roman[]> = { perfeita: ['I', 'IV', 'V7', 'I'], plagal: ['I', 'vi', 'IV', 'I'], meia: ['I', 'vi', 'ii', 'V'], deceptiva: ['I', 'IV', 'V7', 'vi'] };
+const CADENCE_ASK: Record<CadenceKind, Roman[]> = { perfeita: ['V7', 'I'], plagal: ['IV', 'I'], meia: ['IV', 'V'], deceptiva: ['V7', 'vi'] };
+
+/** O app toca uma frase de 4 acordes; você diz que cadência fecha a frase. */
+export function cadenceChoice(opts: { keys: string[]; kinds: CadenceKind[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const kind = pick(rng, opts.kinds);
+    const symbols = CADENCE_LEAD[kind].map((r) => diatonicSymbol(key, r));
+    return {
+      prompt: 'Que cadência fecha a frase?',
+      detail: `Tom de ${keyName(key)} maior. Preste atenção nos dois últimos acordes.`,
+      listen: { bpm: 72, steps: symbols.map((x, i) => ({ midis: voiced(x, 64), beats: i === symbols.length - 1 ? 3 : 2 })) },
+      choices: opts.kinds.map((k) => CADENCE_PT[k]),
+      answer: opts.kinds.indexOf(kind),
+      hint: `${CADENCE_LEAD[kind].join(' – ')}: ${CADENCE_PT[kind]}.`,
+      steps: [],
+      skill: opts.skill ?? 'cadencia-ouvido',
+    };
+  };
+}
+
+/** "Toque uma cadência plagal em Sol maior": os dois acordes da cadência, em ordem. */
+export function playCadence(opts: { keys: string[]; kinds: CadenceKind[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const kind = pick(rng, opts.kinds);
+    const romans = CADENCE_ASK[kind];
+    const symbols = romans.map((r) => diatonicSymbol(key, r));
+    return {
+      prompt: `Toque uma cadência ${kind === 'meia' ? 'meia (semicadência)' : kind} em ${keyName(key)} maior`,
+      detail: 'Os dois acordes, em ordem, qualquer posição.',
+      hint: `${romans.join(' – ')}: ${symbols.map(chordLabel).join(' – ')}`,
+      steps: symbols.map((x) => chordAccept(x)),
+      skill: opts.skill ?? 'cadencia-tocar',
+    };
+  };
+}
+
+/** Harmonize com funções: a pauta mostra um compasso de melodia; qualquer acorde do campo que tenha a nota do tempo forte serve. */
+export function harmonizeAny(opts: { key: string; bars: { notes: Midi[]; cadence?: Roman }[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const bar = pick(rng, opts.bars);
+    const strong = pcOf(bar.notes[0]);
+    const romans: Roman[] = bar.cadence ? [bar.cadence] : (['I', 'ii', 'iii', 'IV', 'V', 'vi'] as Roman[]).filter((r) => parseChord(diatonicSymbol(opts.key, r)).pcs.includes(strong));
+    const symbols = romans.map((r) => diatonicSymbol(opts.key, r));
+    return {
+      prompt: bar.cadence ? 'Último compasso: toque o acorde da cadência' : 'Que acorde cabe embaixo deste compasso? Toque um',
+      detail: bar.cadence ? `Tom de ${keyName(opts.key)} maior. A frase termina em casa.` : `Tom de ${keyName(opts.key)} maior. Qualquer acorde do campo que contenha a 1ª nota (o tempo forte) serve.`,
+      staff: { notes: bar.notes, clef: 'treble' },
+      listen: { bpm: 80, steps: bar.notes.map((m) => ({ midis: [m], beats: 1 })) },
+      hint: `Servem: ${romans.map((r, i) => `${r} (${chordLabel(symbols[i])})`).join(', ')}.`,
+      steps: [{ kind: 'anyChord', options: symbols.map((x) => ({ pcs: parseChord(x).pcs })) }],
+      skill: opts.skill ?? 'harmonizar-funcoes',
+    };
+  };
+}
+
+/** O app toca I – ? – V – I; o acorde do meio é o IV ou o ii (ou I ou vi)? Ouvir a substituição de mesma função. */
+export function substituteChoice(opts: { keys: string[]; pairs: [Roman, Roman][]; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const pair = pick(rng, opts.pairs);
+    const which = rng() < 0.5 ? 0 : 1;
+    const mid = pair[which];
+    const prog: Roman[] = ['I', mid, 'V7', 'I'];
+    return {
+      prompt: `O segundo acorde é o ${pair[0]} ou o ${pair[1]}?`,
+      detail: `Tom de ${keyName(key)} maior: I – ? – V7 – I.`,
+      listen: { bpm: 72, steps: prog.map((r) => ({ midis: voiced(diatonicSymbol(key, r), 64), beats: 2 })) },
+      choices: [`${pair[0]} (${chordLabel(diatonicSymbol(key, pair[0]))})`, `${pair[1]} (${chordLabel(diatonicSymbol(key, pair[1]))})`],
+      answer: which,
+      hint: `Era o ${mid}: ${pair[0] === 'IV' || pair[1] === 'IV' ? 'o ii é menor e mais suave; o IV é maior e mais aberto' : 'o vi é menor e mais escuro; o I soa como casa'}.`,
+      steps: [],
+      skill: opts.skill ?? 'funcao-ouvido',
+    };
+  };
+}
+
+/** Complete a frase: a pauta mostra a melodia sem a última nota; qualquer nota de `accept` termina bem (várias respostas). */
+export function completePhrase(opts: { phrases: { notes: Midi[]; accept: Pc[]; why: string }[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const ph = pick(rng, opts.phrases);
+    return {
+      prompt: 'Complete a frase: toque a última nota',
+      detail: 'Qualquer oitava. Mais de uma resposta serve: escolha a que fecha melhor.',
+      staff: { notes: ph.notes, clef: 'treble' },
+      listen: { bpm: 84, steps: ph.notes.map((m) => ({ midis: [m], beats: 1 })) },
+      hint: ph.why,
+      steps: [{ kind: 'pc', pcs: ph.accept }],
+      skill: opts.skill ?? 'completar-frase',
+    };
+  };
+}

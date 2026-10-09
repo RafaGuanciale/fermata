@@ -30,7 +30,9 @@ export type Accept =
       lead?: number;
     }
   /** Apertar todas estas teclas, em qualquer ordem (por exemplo, todos os Fá do teclado). */
-  | { kind: 'all'; midis: Midi[] };
+  | { kind: 'all'; midis: Midi[] }
+  /** Qualquer um destes acordes serve (harmonização com várias respostas certas). */
+  | { kind: 'anyChord'; options: { pcs: Pc[]; bass?: Pc }[] };
 
 /** Algo que o app toca antes da resposta (ditado, eco, cadência). Cada passo é uma nota ou um acorde. */
 export interface Listen {

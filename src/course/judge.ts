@@ -61,6 +61,8 @@ function fits(accept: Accept, midi: Midi): boolean {
     case 'exact':
     case 'all':
       return accept.midis.includes(midi);
+    case 'anyChord':
+      return accept.options.some((o) => o.pcs.includes(pcOf(midi)));
   }
 }
 
@@ -103,6 +105,11 @@ export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[])
     // Todas as classes, mas baixo errado: é inversão errada.
     const pcs = new Set(held.map(pcOf));
     if (accept.bass !== undefined && accept.pcs.filter((x) => !accept.optional?.includes(x)).every((x) => pcs.has(x))) return { ...p, misses: p.misses + 1, lastWrong: Math.min(...held) };
+    return { ...p, lastWrong: null, why: undefined };
+  }
+  if (accept.kind === 'anyChord') {
+    const hit = accept.options.find((o) => chordMatches({ kind: 'chord', pcs: o.pcs, bass: o.bass }, held));
+    if (hit) return advance(p, item, [...held].sort((a, b) => a - b));
     return { ...p, lastWrong: null, why: undefined };
   }
   if (accept.kind === 'all') {

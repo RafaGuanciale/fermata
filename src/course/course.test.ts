@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
+import { cadenceChoice, diatonicSymbol, fieldSequence, harmonizeAny, playCadence } from './gens';
 import { chordSequence, inversionChord, nearestVoicing, spellTriadChoice, triadSpelling } from './gens';
 import { compoundRhythm, compoundTask } from './tasks';
 import { optimalMove, voiceMove } from './judge';
@@ -177,6 +178,34 @@ describe('tríades, inversões, condução e 6/8', () => {
     const xml = songXml({ id: 't', title: 't', composer: 'x', bpm: 90, beatsPerBar: 3, time: { beats: 6, beatType: 8 }, fifths: 0, right: 'C4:1 D4:0.5 E4:1.5', hands: 'direita', pass: { accuracy: 0.85 } });
     expect(xml).toContain('<beats>6</beats><beat-type>8</beat-type>');
     expect(xml).toContain('<beat-unit-dot/><per-minute>60</per-minute>');
+  });
+});
+
+describe('campo harmônico e funções', () => {
+  it('graus do campo e cadências', () => {
+    expect(diatonicSymbol('D', 'vii°')).toBe('C#°');
+    expect(diatonicSymbol('Bb', 'iii')).toBe('Dm');
+    expect(diatonicSymbol('F', 'IV')).toBe('Bb');
+    expect(fieldSequence({ keys: ['G'], dirs: ['subindo'] })(seeded(1)).steps).toHaveLength(8);
+    const pc = playCadence({ keys: ['C'], kinds: ['deceptiva'] })(seeded(1));
+    expect(pc.steps[1]).toMatchObject({ kind: 'chord', pcs: [9, 0, 4] });
+    for (let seed = 1; seed < 20; seed++) {
+      const c = cadenceChoice({ keys: ['C', 'G'], kinds: ['perfeita', 'plagal', 'meia', 'deceptiva'] })(seeded(seed));
+      expect(c.answer! >= 0 && c.answer! < 4).toBe(true);
+    }
+  });
+
+  it('harmonização com várias respostas certas', () => {
+    const item = harmonizeAny({ key: 'C', bars: [{ notes: [64, 62, 60, 62] }] })(seeded(1));
+    const step = item.steps[0];
+    expect(step.kind).toBe('anyChord');
+    // Mi no tempo forte: C, Em e Am servem; F não.
+    const play = (keys: number[]) => keys.reduce((p, m, i) => pressItem(p, item, m, keys.slice(0, i + 1)), startItem());
+    expect(play([57, 60, 64]).done).toBe(true);
+    expect(play([60, 64, 67]).done).toBe(true);
+    const f = play([60, 65, 69]);
+    expect(f.done).toBe(false);
+    expect(f.misses).toBeGreaterThan(0);
   });
 });
 
