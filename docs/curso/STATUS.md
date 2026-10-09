@@ -15,7 +15,7 @@ Uma unidade "em construção" há mais de 3 horas foi abandonada (limite de uso)
 | 8 Tétrades, blues e improviso | pronta | 2026-10-09 06:04 | rodada agendada; projeto final The Entertainer + blues; lição 65 = Marco 2 |
 | 9 Leitura clássica e textura | pronta | 2026-10-09 06:13 | rodada agendada; projeto final Minueto em Sol, BWV Anh. 114 |
 | 10 Harmonia cromática | em construção | 2026-10-09 06:09 | rodada agendada |
-| 11 Brasil ao piano | a fazer | | |
+| 11 Brasil ao piano | em construção | 2026-10-09 06:14 | rodada agendada |
 | 12 Arranjo, forma e repertório | a fazer | | |
 
 ## Diário
