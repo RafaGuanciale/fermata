@@ -2,7 +2,7 @@
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
-  buildMinorScale, choice, chordQualityByEar, minorChord, minorSteps, mix, playChord, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellIntervalChoice, type ChoiceQuestion, type MinorForm,
+  buildMinorScale, choice, chordQualityByEar, degreeByEar, echo, minorChord, minorSteps, mix, playChord, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellIntervalChoice, type ChoiceQuestion, type MinorForm,
 } from '../gens';
 import { pick } from '../music';
 import { melodyTask, randomRhythm, sci, twoHandTask } from '../tasks';
@@ -372,7 +372,7 @@ Essa disciplina parece detalhe, mas é ela que faz a partitura ser legível: um 
 - **3ª maior** (Dó–Mi) é doce e cheia, a cor do acorde maior. **5ª justa** (Dó–Sol) é aberta, "oca", estável, sem cor de maior nem de menor.
 - **4ª justa** (Dó–Fá) soa como um chamado, suspensa. **8ª** (Dó–Dó) soa como a mesma nota repetida mais aguda.
 
-Uma âncora que ajuda: **Amazing Grace** começa com uma 4ª justa (Ré → Sol), e **Brilha, brilha** com uma 5ª justa no salto do 2º para o 3º som (Dó → Sol). Cante o começo da música por dentro e compare.
+Uma âncora que ajuda: **Amazing Grace** começa com uma 4ª justa (na versão da Unidade 3, Sol → Dó), e **Brilha, brilha** com uma 5ª justa no salto do 2º para o 3º som (Dó → Sol). Cante o começo da música por dentro e compare.
 
 Neste exercício o app toca a partir de uma nota e você toca as duas notas do intervalo que ouviu.`,
     },
@@ -584,7 +584,7 @@ A **posição próxima** funciona como em Dó maior: a mão quase não sai do lu
 
 - **Am**: Lá–Dó–Mi.
 - **Dm**: Lá–Ré–Fá (o Lá fica, os outros sobem).
-- **E7**: Sol♯–Ré–Mi (o Lá desce meio tom para Sol♯, o Ré fica, o Mi fica; a 5ª, Si, sai).
+- **E7**: Sol♯–Ré–Mi. Vindo do Am, o Lá desce meio tom para Sol♯, o Dó sobe para Ré e o Mi fica; a 5ª do E7 (Si) fica de fora.
 
 Compare com o **Si–Fá–Sol** do G7 em Dó: é o mesmo desenho.`,
     },
@@ -711,7 +711,7 @@ Esta lição pede a **sequência** (2 num tempo, 3 no outro). Tocar 3 numa mão 
       title: 'Tercinas na melodia',
       body: `Na melodia, a tercina costuma aparecer como um **floreio** que leva de uma nota a outra: três notas rápidas subindo ou descendo até a nota longa. É o caso da peça desta lição, **Tercinas em Lá menor**, uma melodia original escrita para o curso.
 
-Ela junta tudo da unidade: Lá menor com o **Sol♯** da harmônica, a mão esquerda nos acordes i, iv e V (Lá, Ré e Mi) e uma tercina abrindo quase todos os compassos.
+Ela junta tudo da unidade: Lá menor com o **Sol♯** da harmônica, a mão esquerda nas fundamentais de i, iv e V (Lá, Ré e Mi) e uma tercina abrindo quase todos os compassos.
 
 Toque primeiro só o ritmo na tecla Lá, depois as notas devagar. A tercina tem que chegar **no tempo** da nota longa, sem atrasar a chegada.`,
     },
@@ -798,13 +798,241 @@ const twMinor: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
+const EAR_MINOR: ChoiceQuestion[] = [
+  { q: 'Em Lá menor, o 3º grau é…', options: ['Dó', 'Dó♯', 'Si'], answer: 0, why: 'A 3ª menor acima de Lá: Dó. É a nota que dá a cor menor.' },
+  { q: 'Em menor, qual grau puxa com mais força para a tônica, subindo?', options: ['O 7º elevado (a sensível)', 'O 7º natural', 'O 4º'], answer: 0, why: 'A sensível fica a meio tom da tônica: Sol♯ → Lá.' },
+  { q: 'O 6º grau menor (Fá em Lá menor) tende a…', options: ['Descer meio tom para o 5º', 'Subir para a tônica', 'Ficar parado'], answer: 0, why: 'Fá → Mi: meio tom para baixo, um suspiro.' },
+  { q: 'Dó maior e Dó menor são tonalidades…', options: ['Homônimas: mesma tônica, armaduras diferentes', 'Relativas: mesma armadura', 'Vizinhas no círculo'], answer: 0, why: 'Dó maior (sem acidentes) e Dó menor (3 bemóis).' },
+  { q: 'Para passar uma melodia de Dó maior para Dó menor (harmônica), você abaixa…', options: ['O 3º e o 6º graus (Mi e Lá)', 'Só o 7º', 'Todas as notas'], answer: 0, why: 'Mi → Mi♭, Lá → Lá♭. O Si fica natural: é a sensível.' },
+  { q: 'A armadura de Dó menor tem…', options: ['3 bemóis: Si♭, Mi♭, Lá♭', '1 bemol', 'Nenhum acidente'], answer: 0, why: 'É a armadura de Mi♭ maior, a relativa. Na harmônica, o Si♭ vira Si natural escrito na nota.' },
+];
+
+const earMajor7 = degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6, 7] });
+const earMinor = degreeByEar({ tonic: 57, degrees: [1, 2, 3, 4, 5, 6, 8], mode: 'menor' });
+const earMinorAll = degreeByEar({ tonic: 57, degrees: [1, 2, 3, 4, 5, 6, 7, 8], mode: 'menor' });
+const MOTIFS_MINOR = [
+  [69, 71, 72, 71, 69], [76, 74, 72, 71, 69], [69, 72, 76, 72, 69], [68, 69, 71, 72], [76, 72, 71, 68, 69],
+  [72, 71, 69, 68, 69], [64, 69, 72, 71, 69], [69, 76, 74, 72, 71], [77, 76, 74, 72], [71, 68, 69, 64],
+];
+const MOTIFS_MAJOR = [
+  [60, 64, 67, 64, 60], [67, 65, 64, 62, 60], [60, 67, 65, 64, 62], [64, 60, 65, 62, 67], [72, 67, 64, 65, 67],
+  [62, 65, 64, 60], [67, 72, 71, 69, 67], [60, 62, 64, 67, 60],
+];
+const echoMinor = echo({ motifs: MOTIFS_MINOR, bpm: 96, skill: 'ditado-menor' });
+const echoMajor = echo({ motifs: MOTIFS_MAJOR, bpm: 96, skill: 'ditado-maior' });
+
+const l40: Lesson = {
+  n: 40,
+  id: 'l40',
+  title: 'Ouvido 3: graus em maior e menor',
+  minutes: 60,
+  objectives: [
+    'Consigo reconhecer os 7 graus de Dó maior depois de uma cadência, com 85% de acerto.',
+    'Consigo reconhecer os graus de Lá menor, inclusive a sensível, depois de uma cadência menor.',
+    'Consigo repetir de ouvido uma melodia de 4 a 5 notas, com saltos, em maior e em menor.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Cada grau tem um papel',
+      body: `Na Unidade 1 você ouviu o 1, o 3 e o 5; na Unidade 4, os graus de 1 a 6. Agora, os **sete graus**, em maior e em menor.
+
+O segredo de ouvir graus não é decorar alturas: é sentir **para onde cada nota quer ir** depois que a cadência mostrou a casa.
+
+- **1**: repouso total.
+- **2**: quer descer para o 1.
+- **3**: repousa, com cor (maior ou menor).
+- **4**: quer descer meio tom para o 3 (em maior).
+- **5**: estável, mas aberto, como uma pergunta.
+- **6**: em maior, leve, quer descer para o 5.
+- **7**: em maior, a **sensível**: tensão máxima, quer subir meio tom para o 1.
+
+Quando ouvir uma nota, cante por dentro o caminho até a casa. Se ela desce um passo e chega, era o 2. Se sobe meio tom e chega, era o 7.`,
+    },
+    { kind: 'exercise', id: 'l40-maior', exercise: items('Os 7 graus em Dó maior', 'Depois da cadência, toque a nota que ouviu, em qualquer oitava.', earMajor7, 14, 55, 79, 0.85, 'off') },
+    {
+      kind: 'text',
+      title: 'Os graus em menor',
+      body: `Em menor, a cadência muda (**i – iv – V – i**: Am, Dm, E, Am) e alguns graus mudam de cor:
+
+- O **3** é menor (Dó em Lá menor): ainda repousa, mas escuro.
+- O **6** é menor (Fá): pesado, quer **descer meio tom** para o 5 (Mi), como um suspiro.
+- O **7** tem duas versões. O **natural** (Sol) fica a um tom da casa e não puxa; soa "antigo", modal. O **elevado** (Sol♯), a sensível, puxa forte para o Lá, exatamente como o Si em Dó maior.
+
+O app chama o 7 natural de "7 natural" e o elevado de "7 elevado (sensível)". No primeiro exercício só aparece a sensível; o desafio mistura os dois.`,
+    },
+    {
+      kind: 'example',
+      title: 'A cadência menor e três graus',
+      steps: [
+        { say: 'A cadência em Lá menor: Am, Dm, E, Am.', play: { bpm: 96, steps: [{ midis: [45, 57, 60, 64], beats: 1 }, { midis: [50, 57, 62, 65], beats: 1 }, { midis: [52, 56, 59, 64], beats: 1 }, { midis: [45, 57, 60, 64], beats: 2 }] } },
+        { say: 'O **3**, Dó: repousa, escuro.', keys: [60], play: { bpm: 80, steps: [{ midis: [60], beats: 2 }] } },
+        { say: 'O **6**, Fá: pesa e desce para o Mi.', keys: [65, 64], play: { bpm: 80, steps: [{ midis: [65], beats: 2 }, { midis: [64], beats: 2 }] } },
+        { say: 'O **7 elevado**, Sol♯: sobe para o Lá.', keys: [68, 69], play: { bpm: 80, steps: [{ midis: [68], beats: 2 }, { midis: [69], beats: 2 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l40-menor', exercise: items('Graus em Lá menor', 'Depois da cadência menor, toque a nota que ouviu. O 7 é sempre a sensível (Sol♯).', earMinor, 14, 55, 79, 0.85, 'off') },
+    { kind: 'exercise', id: 'l40-desafio', exercise: items('Desafio: 7 natural ou sensível', 'Agora o 7 pode ser Sol ou Sol♯. Ouça se a nota puxa para a casa ou não.', earMinorAll, 12, 55, 79, 0.8, 'off') },
+    {
+      kind: 'text',
+      title: 'Melodias de um compasso',
+      body: `O passo seguinte é ouvir **várias notas seguidas**: uma melodia curta, de 4 ou 5 notas, que cabe num compasso. É um **ditado**: o app toca, você repete.
+
+Não tente lembrar nota por nota. Ouça em camadas:
+
+1. **Contorno**: sobe, desce, faz curva?
+2. **Passos e saltos**: onde ela pula?
+3. **Graus**: em que grau começa e em que grau termina? A primeira nota é dita no enunciado; a última quase sempre é 1, 3 ou 5.
+
+Cante a melodia uma vez antes de tocar. Se a voz acerta, os dedos acertam.
+
+Nos músicos que tiram música de ouvido, esse é o passo mais importante: transformar som em graus e graus em teclas.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'ouça de novo antes de tocar',
+      body: 'O botão de ouvir de novo não é trapaça. Ouça uma vez para o contorno, outra para os graus, e só então toque. O que conta é a primeira tentativa no teclado, não no ouvido.',
+    },
+    { kind: 'exercise', id: 'l40-ditado-maior', exercise: items('Ditado em Dó maior', 'O app toca 4 ou 5 notas, com saltos. Repita nas mesmas teclas.', echoMajor, 8, 55, 79, 0.8, 'off') },
+    { kind: 'exercise', id: 'l40-ditado-menor', exercise: items('Ditado em Lá menor', 'Agora em menor, com o Sol♯ e o Fá. Repita nas mesmas teclas.', echoMinor, 8, 55, 79, 0.8, 'off') },
+    { kind: 'exercise', id: 'l40-quiz', exercise: quiz('Graus em menor e homônimos', 'Seis perguntas rápidas.', EAR_MINOR) },
+  ],
+  review: [earMajor7, earMinor, echoMinor, choice(EAR_MINOR, 'graus-menor')],
+  checkpoint: [
+    items('Graus em maior e menor', '16 notas depois de cadências em Dó maior e Lá menor, sem dicas. Meta: 85%.', mix([earMajor7, earMinor]), 16, 55, 79, 0.85, 'off'),
+    items('Ditado', '8 melodias curtas, em maior e menor. Meta: 80%.', mix([echoMajor, echoMinor]), 8, 55, 79, 0.8, 'off'),
+  ],
+  exit: [earMinor, choice(EAR_MINOR, 'graus-menor')],
+};
+
+/** Escala menor harmônica de 2 oitavas em colcheias (sobe 2 compassos, desce 2), mão direita a partir de Lá3. */
+function twoOctaves(tonic: Midi): string {
+  const h = [0, 2, 3, 5, 7, 8, 11];
+  const up = [...h, ...h.map((x) => x + 12), 24];
+  const down = [...up].reverse();
+  const line = (xs: number[]) => xs.map((x) => `${sci(tonic + x)}:0.5`);
+  const u = line(up);
+  const d = line(down);
+  return `${u.slice(0, 8).join(' ')} | ${u.slice(8).join(' ')} r:0.5 | ${d.slice(0, 8).join(' ')} | ${d.slice(8).join(' ')} r:0.5 | ${sci(tonic)}:4`;
+}
+
+const TW_MAJ_A = 'C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2';
+const TW_MIN_A = 'C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2';
+const TW_MIN_LEFT_A = 'C3+Eb3+G3:2 C3+Eb3+G3:2 | C3+F3+Ab3:2 C3+Eb3+G3:2 | C3+F3+Ab3:2 C3+Eb3+G3:2 | B2+F3+G3:2 C3+Eb3+G3:2';
+
+const l41: Lesson = {
+  n: 41,
+  id: 'l41',
+  title: 'Checkpoint da unidade 5 e projeto: mesma melodia, dois modos',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 5, sem dicas.',
+    'Consigo passar uma melodia de maior para o homônimo menor (harmônica) e acompanhá-la com i, iv e V7.',
+    'Consigo tocar Lá menor harmônica em 2 oitavas, mãos separadas, a pelo menos 52 BPM em colcheias.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que a unidade juntou',
+      body: `Em sete lições você ganhou o outro lado da música tonal: o **modo menor**. Relativas, as três formas da escala, a sensível e o V maior, intervalos com nome completo (maior, menor, justo, aumentado, diminuto), inversão, tríades pelas terças, i–iv–V7, o meio-arpejo, as tercinas e os graus de ouvido nos dois modos.
+
+O checkpoint de hoje mistura tudo isso, sem dicas. Depois vem o projeto, que usa quase tudo de uma vez.`,
+    },
+    {
+      kind: 'text',
+      title: 'Homônimo: mesma casa, outro modo',
+      body: `**Relativas** (lição 34) têm a mesma armadura e casas diferentes: Dó maior e Lá menor. **Homônimas** têm a **mesma casa** e armaduras diferentes: **Dó maior** e **Dó menor**.
+
+Passar uma melodia de maior para o homônimo menor é trocar a cor sem mudar o desenho. A receita, com a menor harmônica:
+
+- Abaixe o **3º grau**: Mi → **Mi♭**.
+- Abaixe o **6º grau**: Lá → **Lá♭**.
+- Deixe o **7º grau** como está: **Si natural**, a sensível.
+- Nos acordes: I → **i** (Cm), IV → **iv** (Fm), e o V7 continua **G7** (Sol, Si, Ré, Fá).
+
+A armadura de Dó menor tem 3 bemóis (Si♭, Mi♭, Lá♭), a de Mi♭ maior, sua relativa. Como a harmônica usa Si natural, ele aparece escrito com bequadro.
+
+Gustav Mahler fez exatamente isso no 3º movimento da Sinfonia nº 1 (1888): pegou a canção infantil "Frère Jacques" e a transformou numa marcha fúnebre em menor. A melodia é a mesma; o efeito é outro mundo.`,
+    },
+    {
+      kind: 'example',
+      title: 'Brilha, brilha nos dois modos',
+      steps: [
+        { say: 'Em Dó maior, com C e F na esquerda.', play: { bpm: 96, steps: [[60, 48, 52, 55], [60], [67, 48, 52, 55], [67], [69, 53, 57, 60], [69], [67, 48, 52, 55]].map((midis, i) => ({ midis, beats: i === 6 ? 2 : 1 })) } },
+        { say: 'Em Dó menor: Lá♭ no lugar de Lá, Cm e Fm no lugar de C e F. O Mi♭ aparece logo depois, no compasso 3.', keys: [63, 68], play: { bpm: 88, steps: [[60, 48, 51, 55], [60], [67, 48, 51, 55], [67], [68, 53, 56, 60], [68], [67, 48, 51, 55]].map((midis, i) => ({ midis, beats: i === 6 ? 2 : 1 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l41-maior', exercise: quickTimed('A melodia em Dó maior', 'Os 4 primeiros compassos de Brilha, brilha, mão direita, a 72 BPM.', () => melodyTask(TW_MAJ_A, { bpm: 72 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l41-menor', exercise: quickTimed('A mesma melodia em Dó menor', 'Agora com Mi♭ e Lá♭, a 72 BPM. A pauta já tem a armadura de 3 bemóis.', () => melodyTask(TW_MIN_A, { bpm: 72, fifths: -3 }), { reps: 2 }) },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'esquecer um grau no caminho',
+      body: 'O erro típico é abaixar o 3º grau e esquecer o 6º (tocar Lá em vez de Lá♭ no compasso 2), ou abaixar demais e trocar o Si natural do G7 por Si♭. Antes de tocar, diga em voz alta as três notas que mudam e a que não muda: Mi♭, Lá♭, Si natural.',
+    },
+    { kind: 'exercise', id: 'l41-acordes', exercise: quickTimed('i, iv e V7 com pedal legato', 'Melodia em Dó menor com os acordes da esquerda em mínimas (Cm, Fm, G7), a 60 BPM. Troque o pedal logo depois de cada acorde.', () => twoHandTask(TW_MIN_A, TW_MIN_LEFT_A, { bpm: 60, fifths: -3, caption: 'Esquerda: Cm Cm | Fm Cm | Fm Cm | G7 Cm, em posição próxima.' }), { reps: 2, pedal: 'legato' }) },
+    { kind: 'song', songId: 'u05-brilha-maior', why: 'A versão em Dó maior inteira, para comparar.' },
+    { kind: 'song', songId: 'u05-brilha-menor', why: 'A versão em Dó menor inteira: é a peça do projeto.' },
+    {
+      kind: 'text',
+      title: 'A meta técnica: 2 oitavas',
+      body: `A unidade fecha com a escala menor harmônica em **duas oitavas**, mãos separadas. A meta de referência é 69 BPM em colcheias; para passar, basta **75% dela, 52 BPM**, com as notas iguais.
+
+O dedilhado de Lá menor em 2 oitavas na mão direita é **1 2 3 · 1 2 3 4 · 1 2 3 · 1 2 3 4 5**: o polegar passa no Ré e no Lá do meio, e depois no Ré de novo. O 4 cai no Sol♯ de cada oitava. Na esquerda: **5 4 3 2 1 · 3 2 1 · 4 3 2 1 · 3 2 1**.
+
+Na passagem do meio (o Lá que liga as duas oitavas), o antebraço continua andando de lado, sem parar.`,
+    },
+    { kind: 'exercise', id: 'l41-escala', exercise: quickTimed('Lá menor harmônica em 2 oitavas', 'Mão direita, colcheias, de 44 a 52 BPM. Variação até 40 ms.', () => melodyTask(twoOctaves(57), { bpm: 44 }), { ladder: { from: 44, to: 52, step: 4 }, evenness: 40 }) },
+    { kind: 'exercise', id: 'l41-escala-me', exercise: quickTimed('Lá menor harmônica em 2 oitavas, esquerda', 'A partir do Lá2, de 44 a 52 BPM.', () => melodyTask(twoOctaves(45), { bpm: 44, clef: 'bass' }), { ladder: { from: 44, to: 52, step: 4 }, evenness: 40 }) },
+    { kind: 'song', songId: 'u05-fur-elise', why: 'O projeto final da unidade: Für Elise, tema A. Mão direita sozinha no modo Estudar, depois a esquerda, depois juntas a 50 BPM até chegar em 60.' },
+  ],
+  review: [relKeys, allForms, ivAbove, ivBelow, earMinor, minorDegrees],
+  checkpoint: [
+    {
+      kind: 'items',
+      title: 'Checkpoint da unidade 5',
+      how: '24 perguntas misturadas: relativas, escalas menores, intervalos, acordes e cadências em menor, ouvido. Meta: 85%.',
+      gen: mix([relKeys, allForms, ivAbove, ivAug, ivBelow, ivSpell, majMinEar, earThirds, minorDegrees, cadMinor, earMinor, choice([...RELATIVE, ...FORMS, ...QUALITY, ...AUG_DIM, ...MINOR_CHORDS, ...TRIPLETS, ...EAR_MINOR])]),
+      count: 24,
+      low: 48,
+      high: 84,
+      labels: 'off',
+      pass: { accuracy: 0.85 },
+    },
+    quickTimed('Tercinas e colcheias', '4 compassos sorteados a 66 BPM, ±50 ms.', randomRhythm([...RHY_TRI, ...RHY_32], 4, 66), { window: 50 }),
+    quickTimed('Escala em 2 oitavas a 52 BPM', 'Lá menor harmônica, mão direita, sem dicas. Variação até 40 ms.', () => melodyTask(twoOctaves(57), { bpm: 52 }), { evenness: 40 }),
+  ],
+  project: {
+    title: 'Mesma melodia, dois modos',
+    brief: `Toque **Brilha, brilha** inteira (12 compassos) em **Dó maior** com I, IV e V7, e depois em **Dó menor** (harmônica) com i, iv e V7, **com pedal legato** a cada acorde. As duas versões seguidas, como uma pequena peça em duas partes.`,
+    steps: [
+      'Toque a versão maior no "Tocar a música" até passar a 72 BPM.',
+      'Escreva (ou diga) as notas que mudam na versão menor: Mi → Mi♭, Lá → Lá♭; o Si do G7 fica natural.',
+      'Toque a melodia menor só com a direita, depois os acordes só com a esquerda.',
+      'Junte as mãos devagar e acrescente o pedal legato: troque logo depois de cada acorde.',
+      'Toque as duas versões em sequência e grave. Ouça: o que muda no clima? Onde a sensível (Si) aparece?',
+      'Passe o exercício abaixo: a versão menor inteira com pedal.',
+    ],
+    rubric: [
+      'As duas versões passaram com 85% ou mais das notas.',
+      'Na versão menor, nenhum Mi ou Lá natural escapou, e o G7 manteve o Si natural.',
+      'O pedal ficou limpo: sem lama nas trocas e sem pedal preso no fim.',
+      'Dá para ouvir a diferença de cor entre as versões, não só de notas.',
+      'A escala de Lá menor harmônica em 2 oitavas passou a 52 BPM ou mais.',
+    ],
+    exercise: { kind: 'timed', title: 'Brilha, brilha em Dó menor com pedal', how: 'Os 12 compassos, duas mãos, a 60 BPM, pedal legato.', gen: () => twoHandTask(twMinor.right, twMinor.left!, { bpm: 60, fifths: -3 }), reps: 1, window: 100, pass: { accuracy: 0.85 }, pedal: 'legato' },
+  },
+  exit: [earMinor, ivBelow, choice([...RELATIVE, ...FORMS, ...AUG_DIM, ...EAR_MINOR])],
+};
+
 const unit: Unit = {
   n: 5,
   id: 'u05',
   title: 'Modo menor e intervalos',
   goal: 'Tocar as três formas da escala menor, resolver cadências em menor, dar nome completo aos intervalos e reconhecer maior e menor de ouvido.',
   technique: 'Escalas menores de Lá, Mi e Ré (natural, harmônica e melódica), uma oitava, mãos separadas, em colcheias de 45 rumo a 69 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l34, l35, l36, l37, l38, l39],
+  lessons: [l34, l35, l36, l37, l38, l39, l40, l41],
   songs: [furElise, triplets, twMajor, twMinor],
   final: {
     songId: 'u05-fur-elise',
@@ -815,4 +1043,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [relKeys, majMinEar, minorTriads, naturalScales, harmonicScales, allForms, cadMinor, fiveMinor, ivAbove, ivSpell, earContrast, ivAug, ivBelow, earThirds, earThirdsHarm, earFourths, earOther, triadsAll, minorDegrees];
+export const _gens: ItemGen[] = [relKeys, majMinEar, minorTriads, naturalScales, harmonicScales, allForms, cadMinor, fiveMinor, ivAbove, ivSpell, earContrast, ivAug, ivBelow, earThirds, earThirdsHarm, earFourths, earOther, triadsAll, minorDegrees, earMajor7, earMinor, earMinorAll, echoMinor, echoMajor];
