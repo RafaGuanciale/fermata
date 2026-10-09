@@ -1141,7 +1141,7 @@ export function harmonizeAny(opts: { key: string; bars: { notes: Midi[]; cadence
     const symbols = romans.map((r) => diatonicSymbol(opts.key, r));
     return {
       prompt: bar.cadence ? 'Último compasso: toque o acorde da cadência' : 'Que acorde cabe embaixo deste compasso? Toque um',
-      detail: bar.cadence ? `Tom de ${keyName(opts.key)} maior. A frase termina em casa.` : `Tom de ${keyName(opts.key)} maior. Qualquer acorde do campo que contenha a 1ª nota (o tempo forte) serve.`,
+      detail: bar.cadence ? `Tom de ${keyName(opts.key)} maior. ${bar.cadence === 'I' ? 'A frase termina em casa: cadência perfeita.' : bar.cadence === 'V' ? 'A frase para na dominante: meia cadência.' : 'Fim de frase.'}` : `Tom de ${keyName(opts.key)} maior. Qualquer acorde do campo que contenha a 1ª nota (o tempo forte) serve.`,
       staff: { notes: bar.notes, clef: 'treble' },
       listen: { bpm: 80, steps: bar.notes.map((m) => ({ midis: [m], beats: 1 })) },
       hint: `Servem: ${romans.map((r, i) => `${r} (${chordLabel(symbols[i])})`).join(', ')}.`,
@@ -1173,12 +1173,12 @@ export function substituteChoice(opts: { keys: string[]; pairs: [Roman, Roman][]
 }
 
 /** Complete a frase: a pauta mostra a melodia sem a última nota; qualquer nota de `accept` termina bem (várias respostas). */
-export function completePhrase(opts: { phrases: { notes: Midi[]; accept: Pc[]; why: string }[]; skill?: string }): ItemGen {
+export function completePhrase(opts: { phrases: { notes: Midi[]; accept: Pc[]; why: string; say?: string }[]; skill?: string }): ItemGen {
   return (rng) => {
     const ph = pick(rng, opts.phrases);
     return {
       prompt: 'Complete a frase: toque a última nota',
-      detail: 'Qualquer oitava. Mais de uma resposta serve: escolha a que fecha melhor.',
+      detail: `${ph.say ? `${ph.say} ` : ''}Qualquer oitava. Mais de uma resposta serve.`,
       staff: { notes: ph.notes, clef: 'treble' },
       listen: { bpm: 84, steps: ph.notes.map((m) => ({ midis: [m], beats: 1 })) },
       hint: ph.why,

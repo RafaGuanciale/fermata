@@ -2,7 +2,7 @@
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
-  cadenceChoice, chordSequence, playCadence, choice, diatonicByEar, diatonicChord, fieldSequence, harmonizeAny, mix, substituteChoice, transposeDiatonic, type ChoiceQuestion, type Roman,
+  cadenceChoice, chordSequence, completePhrase, playCadence, choice, diatonicByEar, diatonicChord, fieldSequence, harmonizeAny, mix, substituteChoice, transposeDiatonic, type ChoiceQuestion, type Roman,
 } from '../gens';
 import { pick } from '../music';
 import { melodyTask, sci, twoHandTask } from '../tasks';
@@ -501,6 +501,180 @@ Lembre do limite de saúde: se o polegar ou o antebraço doer, o andamento não 
   exit: [choice(SCALE2_Q, 'escalas-2-oitavas')],
 };
 
+const PERIOD_Q: ChoiceQuestion[] = [
+  { q: 'Um período tem…', options: ['Antecedente e consequente', 'Introdução e refrão', 'Só uma frase'], answer: 0, why: 'Pergunta e resposta, geralmente 4 + 4 compassos.' },
+  { q: 'O antecedente costuma terminar…', options: ['No V (meia cadência)', 'No I (cadência perfeita)', 'No vi'], answer: 0, why: 'Ele pergunta: para na dominante, em suspenso.' },
+  { q: 'O consequente costuma terminar…', options: ['No I (cadência perfeita)', 'No V', 'No IV'], answer: 0, why: 'Ele responde: volta para casa.' },
+  { q: 'Nota de passagem é…', options: ['Nota fora do acorde, em tempo fraco, entre duas notas por grau conjunto', 'Qualquer nota errada', 'A nota do tempo forte'], answer: 0, why: 'Mi–Fá–Sol sobre C: o Fá passa entre duas notas do acorde.' },
+  { q: 'Período duplo é…', options: ['Dois períodos seguidos: 16 compassos', 'Um período tocado duas vezes mais rápido', 'Duas mãos'], answer: 0, why: 'Quatro frases: as três primeiras abertas ou parciais, a última fecha.' },
+];
+
+// Período de 8 compassos em Dó: antecedente termina no V, consequente no I.
+const PERIOD_R = 'E4 G4 C5 G4 | A4 F4 A4 C5 | G4 E4 C4 E4 | F4 E4 D4:2 | E4 G4 C5 G4 | A4 F4 A4 C5 | D5 B4 G4 F4 | E4 D4 C4:2';
+const PERIOD_L = 'C3+E3+G3:4 | C3+F3+A3:4 | C3+E3+G3:4 | B2+D3+G3:4 | C3+E3+G3:4 | C3+F3+A3:4 | B2+F3+G3:4 | C3+E3+G3:4';
+const PERIOD_BARS: { notes: Midi[]; cadence?: Roman }[] = [
+  { notes: [64, 67, 72, 67] }, { notes: [69, 65, 69, 72] }, { notes: [67, 64, 60, 64] }, { notes: [65, 64, 62], cadence: 'V' },
+  { notes: [74, 71, 67, 65] }, { notes: [64, 62, 60], cadence: 'I' },
+];
+const harmPeriod = harmonizeAny({ key: 'C', bars: PERIOD_BARS });
+const complete = completePhrase({
+  phrases: [
+    { notes: [64, 67, 72, 67, 69, 65, 69, 72, 67, 64, 60, 64, 65, 64], accept: [7, 11, 2], say: 'Antecedente em Dó: a frase pede uma vírgula.', why: 'Termine numa nota do V (Sol, Si ou Ré): meia cadência, a frase fica em suspenso.' },
+    { notes: [64, 67, 72, 67, 69, 65, 69, 72, 74, 71, 67, 65, 64, 62], accept: [0, 4], say: 'Consequente em Dó: ponto final.', why: 'Termine na tônica (Dó) ou no Mi: cadência perfeita.' },
+    { notes: [67, 71, 74, 71, 72, 69, 66], accept: [2, 6, 9], say: 'Antecedente em Sol maior.', why: 'Uma nota do V (Ré, Fá♯ ou Lá): a frase para na dominante.' },
+    { notes: [74, 72, 71, 69, 67, 69, 71, 69], accept: [7, 11], say: 'Consequente em Sol maior.', why: 'Sol (a tônica) ou Si: a frase volta para casa.' },
+  ],
+});
+
+const l56: Lesson = {
+  n: 56,
+  id: 'l56',
+  title: 'Frase, período e harmonização',
+  minutes: 60,
+  objectives: [
+    'Consigo reconhecer antecedente e consequente num período de 8 compassos.',
+    'Consigo harmonizar 8 compassos com acordes do campo, cadências no lugar certo e notas de passagem nos tempos fracos.',
+    'Consigo completar o fim de uma frase de acordo com a cadência que ela pede.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Pergunta e resposta, de novo',
+      body: `Na lição 4 você improvisou pergunta e resposta nas teclas pretas. Na música tonal essa ideia tem nome e forma: o **período**.
+
+- Uma **frase** tem, em geral, **4 compassos** e termina numa cadência.
+- Um **período** são **duas frases** (8 compassos) que se completam:
+  - o **antecedente** começa a ideia e termina **aberto**, quase sempre numa **meia cadência** (no V): é a pergunta;
+  - o **consequente** começa igual (ou parecido) e termina **fechado**, numa **cadência perfeita** (V–I): é a resposta.
+
+A Ode à Alegria, que você tocou na primeira unidade, é exatamente isso: a primeira frase termina no Ré (suspensa), a segunda começa igual e termina no Dó.
+
+Dois períodos seguidos formam um **período duplo** (16 compassos), a forma do projeto desta unidade.`,
+    },
+    {
+      kind: 'example',
+      title: 'Um período de 8 compassos',
+      steps: [
+        { say: 'Antecedente (4 compassos): C, F, C, G. Termina no V: pergunta.', play: { bpm: 96, steps: [[64, 48, 52, 55], [67], [72], [67], [69, 48, 53, 57], [65], [69], [72], [67, 48, 52, 55], [64], [60], [64], [65, 43, 47, 50], [64], [62]].map((midis, i) => ({ midis, beats: i === 14 ? 2 : 1 })) } },
+        { say: 'Consequente: começa igual e termina em casa, com G7 → C.', play: { bpm: 96, steps: [[64, 48, 52, 55], [67], [72], [67], [69, 48, 53, 57], [65], [69], [72], [74, 43, 47, 53], [71], [67], [65], [64, 48, 52, 55], [62], [60]].map((midis, i) => ({ midis, beats: i === 14 ? 2 : 1 })) } },
+      ],
+    },
+    {
+      kind: 'text',
+      title: 'Notas de passagem',
+      body: `Ao harmonizar, a regra da lição 52 continua: o acorde precisa conter a nota do **tempo forte**. E as outras?
+
+Elas podem ser **notas de passagem**: notas fora do acorde, nos **tempos fracos**, que **passam por grau conjunto** de uma nota do acorde para outra. No compasso 4 do exemplo (Fá–Mi–Ré sobre G), o Fá é a 7ª do acorde e o Mi passa entre o Fá e o Ré. No compasso 2 (Lá–Fá–Lá–Dó sobre F), todas são do acorde.
+
+O que não pode: nota fora do acorde no **tempo forte** sem resolver logo depois. Isso soa como erro, não como passagem.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'cadência no lugar errado',
+      body: 'Harmonizar cada compasso certo e esquecer a forma é o erro mais comum: o compasso 4 termina no V (meia cadência) e o 8 no I (cadência perfeita). Se o compasso 4 cai no I, a pergunta vira resposta antes da hora e o período perde o sentido.',
+    },
+    { kind: 'exercise', id: 'l56-harmonizar', exercise: items('Harmonize o período', 'Compassos do período do exemplo. Nos compassos de cadência, toque o acorde da cadência.', harmPeriod, 12, 48, 72, 0.85) },
+    { kind: 'exercise', id: 'l56-completar', exercise: items('Complete a frase', 'Ouça e veja a frase sem a última nota. Antecedente para no V; consequente volta ao I.', complete, 8, 55, 84, 0.85, 'off') },
+    { kind: 'exercise', id: 'l56-periodo', exercise: quickTimed('O período, no tempo', 'Melodia na direita, acordes em semibreve na esquerda, de 60 a 72 BPM. Pedal legato a cada compasso, se tiver.', () => twoHandTask(PERIOD_R, PERIOD_L, { bpm: 60, caption: 'Antecedente: C F C G · Consequente: C F G7 C.' }), { ladder: { from: 60, to: 72, step: 6 } }) },
+    { kind: 'exercise', id: 'l56-quiz', exercise: quiz('Frase e período', 'Cinco perguntas rápidas.', PERIOD_Q) },
+  ],
+  review: [harmPeriod, complete, choice(PERIOD_Q, 'periodo')],
+  checkpoint: [
+    items('Harmonizar e completar', '12 itens, sem dicas. Meta: 85%.', mix([harmPeriod, harmC, complete]), 12, 48, 84, 0.85, 'off'),
+  ],
+  exit: [complete, choice(PERIOD_Q, 'periodo')],
+};
+
+// Base do projeto: período duplo em Dó, um acorde por compasso.
+const DOUBLE_PERIOD: Roman[] = ['I', 'IV', 'I', 'V', 'I', 'IV', 'V', 'I', 'vi', 'IV', 'I', 'V', 'I', 'ii', 'V', 'I'];
+const backing = DOUBLE_PERIOD.map((r) => {
+  const c = { I: [48, 52, 55], ii: [50, 53, 57], IV: [53, 57, 60], V: [43, 47, 50], vi: [45, 48, 52], iii: [52, 55, 59], 'vii°': [47, 50, 53], V7: [43, 47, 53] } as Record<Roman, Midi[]>;
+  return c[r];
+});
+
+const l57: Lesson = {
+  n: 57,
+  id: 'l57',
+  title: 'Checkpoint da unidade 7 e projeto: minha primeira canção',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 7, sem dicas.',
+    'Consigo compor uma melodia de 16 compassos (período duplo) no campo de Dó, com cadências no lugar certo, e analisá-la em graus.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que a unidade juntou',
+      body: `Você agora enxerga a harmonia de dentro: o **campo harmônico** de qualquer tom maior, os **graus** que valem em todos os tons, as **funções** (tônica, subdominante, dominante) e as substituições que elas permitem, as **cadências** que pontuam as frases, as **progressões** que movem o pop, o anime e o cinema, e a **forma** do período.
+
+O projeto junta tudo numa coisa nova: a sua primeira canção.`,
+    },
+    {
+      kind: 'text',
+      title: 'Compor 16 compassos',
+      body: `A base é um **período duplo** em Dó, um acorde por compasso:
+
+- Frase 1: **I – IV – I – V** (termina aberta)
+- Frase 2: **I – IV – V – I** (fecha)
+- Frase 3: **vi – IV – I – V** (contraste: começa no vi, termina aberta)
+- Frase 4: **I – ii – V – I** (fecha de vez)
+
+Um método simples para a melodia:
+
+1. Em cada compasso, ponha no **tempo 1** uma nota do acorde.
+2. Ligue essas notas por **grau conjunto**, com notas de passagem nos tempos fracos.
+3. Termine as frases 1 e 3 numa nota do **V** (Sol, Si, Ré) e as frases 2 e 4 no **Dó**.
+4. Deixe **respirar**: uma pausa ou nota longa no fim de cada frase.
+5. Repita ideias: a frase 2 pode começar igual à 1; a 4 pode lembrar a 2.
+
+Depois de pronta, **analise**: escreva os graus embaixo de cada compasso e as cadências no fim de cada frase.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'comece pelo ritmo',
+      body: 'Se a página em branco travar, escolha primeiro um ritmo de 2 compassos (por exemplo, semínima, semínima, mínima | quatro semínimas) e use o mesmo ritmo em todas as frases. Com o ritmo fixo, escolher as notas fica muito mais fácil.',
+    },
+    { kind: 'song', songId: 'u07-preludio', why: 'O projeto final da unidade: Bach construiu uma peça inteira só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },
+  ],
+  review: [fieldRandom, transpose, harmC, cadenceEar, royalLead, complete],
+  checkpoint: [
+    {
+      kind: 'items',
+      title: 'Checkpoint da unidade 7',
+      how: '24 perguntas misturadas: campo harmônico, transposição, harmonização, cadências, progressões e ouvido. Meta: 85%.',
+      gen: mix([fieldRandom, transpose, earBass, harmC, harmPeriod, subIVii, cadencePlay, cadenceEar, popEarBass, complete, choice([...FIELD_Q, ...ROMAN_Q, ...FUNCTION_Q, ...CADENCE_Q, ...PROG_Q, ...PERIOD_Q])]),
+      count: 24,
+      low: 36,
+      high: 84,
+      labels: 'off',
+      pass: { accuracy: 0.85 },
+    },
+    quickTimed('Escala em 2 oitavas', 'Sol, Fá ou Lá menor, mãos juntas, a 60 BPM. ±40 ms, variação até 35 ms.', (rng) => parallel(pick(rng, ['G', 'F', 'Am']), 60), { window: 40, evenness: 35 }),
+  ],
+  project: {
+    title: 'Minha primeira canção',
+    brief: `Componha e toque uma melodia de **16 compassos** sobre o período duplo da base (I IV I V · I IV V I · vi IV I V · I ii V I), em Dó maior, a 72 BPM. Toque no exercício abaixo (a base toca os acordes), grave, e escreva a análise em graus com as cadências.`,
+    steps: [
+      'Toque a base sozinha no exercício e cante por cima, só para sentir a forma.',
+      'Escreva (ou memorize) a melodia das frases 1 e 2, nota do acorde no tempo 1 de cada compasso.',
+      'Faça as frases 3 e 4, com o contraste no vi.',
+      'Toque a melodia inteira sobre a base e grave.',
+      'Escreva a análise: graus de cada compasso e o nome da cadência no fim de cada frase.',
+    ],
+    rubric: [
+      'As frases 1 e 3 terminam abertas (no V) e as frases 2 e 4 em casa.',
+      'O tempo 1 de cada compasso tem uma nota do acorde; as notas fora do acorde estão em tempo fraco e andam por grau conjunto.',
+      'Cada frase respira no fim.',
+      'Há repetição de ideias (a canção tem identidade, não 16 compassos diferentes).',
+      'A análise em graus e as cadências estão corretas.',
+    ],
+    exercise: { kind: 'improv', title: 'Sua canção sobre a base', how: '16 compassos a 72 BPM, só com notas de Dó maior (brancas). Respire no fim de cada frase e termine no Dó.', pcs: [0, 2, 4, 5, 7, 9, 11], bars: 16, bpm: 72, beatsPerBar: 4, backing, low: 60, high: 84, pass: { inSet: 0.95, restsPer4: 1, endOn: [0] } },
+  },
+  exit: [fieldRandom, cadenceEar, choice([...FIELD_Q, ...FUNCTION_Q, ...CADENCE_Q, ...PERIOD_Q])],
+};
+
 // ---------- músicas ----------
 
 // Prelúdio em Dó, BWV 846 (J. S. Bach, Cravo Bem Temperado I, 1722): 8 primeiros compassos.
@@ -538,7 +712,7 @@ const unit: Unit = {
   title: 'Campo harmônico e funções',
   goal: 'Montar o campo harmônico de qualquer tom maior, analisar e transpor em graus, harmonizar por funções, reconhecer cadências e as progressões mais usadas.',
   technique: 'Escalas maiores em 2 oitavas, mãos juntas em movimento paralelo (Dó, Sol, Fá e Lá menor), em colcheias de 56 rumo a 80 BPM, variação abaixo de 35 ms (referência: RCM Level 2). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l50, l51, l52, l53, l54, l55],
+  lessons: [l50, l51, l52, l53, l54, l55, l56, l57],
   songs: [prelude],
   final: {
     songId: 'u07-preludio',
@@ -549,4 +723,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [fieldRandom, fieldC, fieldSeq, fieldSeqC, transpose, earBass, earChords, harmC, subIVii, subIvi, cadenceEar, cadencePlay, royalLead, royalTwice, andaluzaLead, popEar, popEarBass];
+export const _gens: ItemGen[] = [fieldRandom, fieldC, fieldSeq, fieldSeqC, transpose, earBass, earChords, harmC, subIVii, subIvi, cadenceEar, cadencePlay, royalLead, royalTwice, andaluzaLead, popEar, popEarBass, harmPeriod, complete];
