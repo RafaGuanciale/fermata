@@ -154,7 +154,8 @@ export interface Milestone {
 }
 
 /** Marcos: o primeiro momento em que cada conquista aconteceu (null = ainda não). */
-export function milestones(runs: TrainingRun[], byDay: Map<string, number>, piecesLearnedAt: number[]): Milestone[] {
+/** `extra`: marcos do curso calculados fora (lições, unidades, técnica no alvo). */
+export function milestones(runs: TrainingRun[], byDay: Map<string, number>, piecesLearnedAt: number[], extra: Milestone[] = []): Milestone[] {
   const sorted = [...runs].sort((a, b) => a.at - b.at);
   const first = (f: (r: TrainingRun) => boolean) => sorted.find(f)?.at ?? null;
   const days = [...byDay.entries()].filter(([, m]) => m > 0).map(([d]) => d).sort();
@@ -177,10 +178,8 @@ export function milestones(runs: TrainingRun[], byDay: Map<string, number>, piec
   }
   return [
     { title: 'Primeira passada limpa no tempo', at: first((r) => r.kind === 'timed' && !!r.clean) },
-    { title: 'Primeira música tocada junto com 85% ou mais', at: first((r) => r.treinoId.startsWith('peca-') && (r.accuracy ?? 0) >= 0.85) },
-    { title: 'Aquecimento subiu de nível', at: first((r) => r.treinoId === 'aquecimento' && r.kind === 'level' && (r.level ?? 1) > 1) },
-    { title: 'Leitura subiu de nível', at: first((r) => r.treinoId === 'leitura' && r.kind === 'level' && (r.level ?? 1) > 1) },
-    { title: 'Prova da Fase 1', at: first((r) => r.treinoId === 'prova-1' && !!r.passed) },
+    { title: 'Primeira música tocada junto com 85% ou mais', at: first((r) => (r.treinoId.startsWith('peca-') || r.treinoId.startsWith('curso-')) && (r.accuracy ?? 0) >= 0.85) },
+    ...extra,
     { title: 'Primeira música aprendida', at: piecesLearnedAt.length ? Math.min(...piecesLearnedAt) : null },
     { title: '7 dias seguidos tocando', at: weekAt },
     { title: '10 horas de piano', at: tenHoursAt },

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Attempt, type Session } from '../db/db';
 import { DAY, avgFindMs, dailyAvgFindMs, firstTryRate, practiceMinutes, startOfWeek, weakestNote } from '../db/stats';
@@ -8,11 +8,9 @@ import PhotoCard from '../components/PhotoCard';
 import PieceList from '../components/PieceList';
 import StatTile from '../components/StatTile';
 import { PlayIcon } from '../components/Icons';
-import { useRuns } from '../training/runs';
-import { currentPhase, currentWarmupLevel, nextTreino } from '../training/progress';
+import { useTrainingToday } from './PracticeHubPage';
 
 export default function TodayPage() {
-  const location = useLocation();
   const now = Date.now();
   const since = now - 28 * DAY;
   const data = useLiveQuery(async () => {
@@ -24,20 +22,8 @@ export default function TodayPage() {
     return { sessions, attempts, learning };
   }, []);
 
-  const runs = useRuns();
-  const plan = runs
-    ? (() => {
-        const cur = currentPhase(runs);
-        const next = nextTreino(cur);
-        return {
-          phase: cur.phase.n,
-          warmLevel: currentWarmupLevel(runs).n,
-          title: next?.title ?? (cur.examUnlocked ? `Prova da fase ${cur.phase.n}` : cur.phase.title),
-          how: next ? next.how.charAt(0).toLowerCase() + next.how.slice(1) : 'a prova da fase, sem ajudas.',
-          treinoId: next?.id ?? null,
-        };
-      })()
-    : null;
+  const training = useTrainingToday();
+  const lessonTitle = training?.next?.lesson.title;
 
   return (
     <>
@@ -46,20 +32,24 @@ export default function TodayPage() {
         <h1 className="page__title">Seu estudo de hoje</h1>
       </header>
 
-      <PhotoCard photo="todayHero" size="hero" eyebrow={plan ? `Treino de hoje · fase ${plan.phase} · cerca de 15 min` : 'Treino de hoje'} title={plan?.title ?? 'Seu treino'} sizes="100vw">
-        <span className="photoCard__body">{plan ? `Aquecimento no nível ${plan.warmLevel}, depois: ${plan.how}` : 'Aquecimento, o próximo treino da fase e um trecho de leitura.'}</span>
+      <PhotoCard
+        photo="todayHero"
+        size="hero"
+        eyebrow={training ? `Treino de hoje · unidade ${training.unit} · cerca de 20 min` : 'Treino de hoje'}
+        title={training ? (training.done >= training.total ? 'Treino de hoje completo' : `${training.done} de ${training.total} partes feitas`) : 'Seu treino'}
+        sizes="100vw"
+      >
+        <span className="photoCard__body">
+          {lessonTitle ? `Aquecimento, revisão, técnica, leitura e ouvido. Lição do curso: ${lessonTitle}.` : 'Aquecimento, revisão, técnica, leitura e ouvido, no nível da sua unidade.'}
+        </span>
         <span className="photoCard__actions">
-          <Link className="button button-primary" to="/treino/aquecimento" state={{ background: location }}>
+          <Link className="button button-primary" to="/treino">
             <PlayIcon className="button__icon" />
-            Aquecer
+            Treinar
           </Link>
-          {plan?.treinoId ? (
-            <Link className="button button-secondary" to={`/treino/t/${plan.treinoId}`} state={{ background: location }}>
-              Ir para o treino
-            </Link>
-          ) : (
-            <Link className="button button-secondary" to="/treino">
-              Ver o caminho
+          {training?.next && (
+            <Link className="button button-secondary" to={`/estudo/unidade/${training.next.unit.n}/${training.next.lesson.id}`}>
+              Lição: {training.next.lesson.title}
             </Link>
           )}
         </span>

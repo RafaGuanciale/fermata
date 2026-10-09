@@ -384,3 +384,139 @@
     padding: var(--space-4);
   }
 }
+
+/* Treino de hoje */
+.dayPlan {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dayPlan__item {
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.dayPlan__item-open {
+  border-color: var(--line-strong);
+}
+
+.dayPlan__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.dayPlan__head:hover {
+  background: var(--surface-raised);
+}
+
+.dayPlan__num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  font: 600 14px var(--font-body);
+}
+
+.dayPlan__item-done .dayPlan__num {
+  background: var(--hit);
+  border-color: var(--hit);
+  color: var(--on-key-lit);
+}
+
+.dayPlan__check {
+  width: 16px;
+  height: 16px;
+}
+
+.dayPlan__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dayPlan__title {
+  font: 600 16px/22px var(--font-body);
+}
+
+.dayPlan__meta {
+  font: 400 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.dayPlan__body {
+  padding: 0 var(--space-6) var(--space-6);
+}
+
+.dayPlan__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.techList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.techList__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.techList__title {
+  font: 500 14px/20px var(--font-body);
+}
+
+.techList__value {
+  grid-column: 1 / -1;
+  font: 400 13px/18px var(--font-body);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.techList__item .progress__bar {
+  grid-column: 1 / -1;
+}
+
+a.progress__phaseTitle {
+  color: inherit;
+}
+
+@media (max-width: 720px) {
+  .dayPlan__head {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .dayPlan__body {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+}

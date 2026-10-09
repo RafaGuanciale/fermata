@@ -40,7 +40,8 @@ interface TakeScore {
 
 type Phase = 'idle' | 'countin' | 'playing' | 'done';
 
-export default function TimedExercise({ ex, hints, rng, onFinish }: { ex: TimedEx; hints: boolean; rng: Rng; onFinish: (o: TimedOutcome) => void }) {
+/** `onTake`: cada passada (para quem quer guardar o BPM alcançado, como a escada do Treino). */
+export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEachTake }: { ex: TimedEx; hints: boolean; rng: Rng; onFinish: (o: TimedOutcome) => void; onTake?: (t: { bpm: number; accuracy: number; ok: boolean }) => void }) {
   const [task, setTask] = useState<TimedTask>(() => ex.gen(rng));
   const [bpm, setBpm] = useState(() => ex.ladder?.from ?? task.bpm);
   const [streak, setStreak] = useState(0);
@@ -51,6 +52,7 @@ export default function TimedExercise({ ex, hints, rng, onFinish }: { ex: TimedE
   finishRef.current = onFinish;
 
   const onTake = (s: TakeScore) => {
+    onEachTake?.({ bpm, accuracy: s.r.accuracy, ok: s.ok });
     setBest((b) => Math.max(b, s.r.accuracy));
     if (!s.ok) {
       setStreak(0);

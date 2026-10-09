@@ -23,8 +23,7 @@ import CourseUnitPage from './pages/CourseUnitPage';
 import CourseLessonPage from './pages/CourseLessonPage';
 import { findSong } from './course';
 import AccountPage from './pages/AccountPage';
-import TrainingSessionPage from './pages/TrainingSessionPage';
-import { CalibratePage, ExamPage, ReadingPage, WarmupPage } from './pages/TrainingExtrasPages';
+import { CalibratePage } from './pages/TrainingExtrasPages';
 
 // O leitor de PDF é pesado: só carrega quando você abre uma partitura.
 const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
@@ -84,7 +83,7 @@ function TreinoPopup({ label, render }: { label: string; render: (close: () => v
   );
 }
 
-const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/t/:id', '/treino/aquecimento', '/treino/leitura', '/treino/prova/:n', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId'];
+const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId'];
 
 export default function App() {
   const location = useLocation();
@@ -123,10 +122,6 @@ export default function App() {
         {immersive && (
           <Routes>
             <Route path="/treino/sessao" element={<SessionPopup />} />
-            <Route path="/treino/t/:id" element={<TreinoPopup label="Treino" render={(c) => <TrainingSessionPage onClose={c} />} />} />
-            <Route path="/treino/aquecimento" element={<TreinoPopup label="Aquecimento" render={(c) => <WarmupPage onClose={c} />} />} />
-            <Route path="/treino/leitura" element={<TreinoPopup label="Leitura à primeira vista" render={(c) => <ReadingPage onClose={c} />} />} />
-            <Route path="/treino/prova/:n" element={<TreinoPopup label="Prova" render={(c) => <ExamPage onClose={c} />} />} />
             <Route path="/treino/calibrar" element={<TreinoPopup label="Ajustar atraso" render={(c) => <CalibratePage onClose={c} />} />} />
             <Route path="/partitura/:id" element={<SheetPopup />} />
             <Route path="/peca/:id/estudar" element={<ScorePopup />} />

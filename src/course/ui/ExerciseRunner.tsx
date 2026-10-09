@@ -22,7 +22,7 @@ export function drawItems(gen: (r: () => number) => Item, count: number): Item[]
 
 const sameItem = (a: Item, b: Item) => a.prompt === b.prompt && a.symbol === b.symbol && JSON.stringify(a.steps) === JSON.stringify(b.steps);
 
-export function ExerciseRunner({ ex, hints, onFinish }: { ex: Exercise; hints: boolean; onFinish: (o: Outcome) => void }) {
+export function ExerciseRunner({ ex, hints, onFinish, onTake }: { ex: Exercise; hints: boolean; onFinish: (o: Outcome) => void; onTake?: (t: { bpm: number; accuracy: number; ok: boolean }) => void }) {
   switch (ex.kind) {
     case 'items':
       return (
@@ -37,7 +37,7 @@ export function ExerciseRunner({ ex, hints, onFinish }: { ex: Exercise; hints: b
         />
       );
     case 'timed':
-      return <TimedExercise ex={ex} hints={hints} rng={rng} onFinish={onFinish} />;
+      return <TimedExercise ex={ex} hints={hints} rng={rng} onFinish={onFinish} onTake={onTake} />;
     case 'improv':
       return <ImprovRunner ex={ex} onFinish={onFinish} />;
     case 'dynamics':

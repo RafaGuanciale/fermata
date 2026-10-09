@@ -8,8 +8,11 @@ import { DAY } from '../db/stats';
 import { noteLabel } from '../music/notes';
 import { formatPercent, formatSeconds } from '../format';
 import StatTile from '../components/StatTile';
-import { PHASES } from '../training/program';
-import { dayKey, phaseState, TREINO_STATUS_LABEL } from '../training/progress';
+import { dayKey } from '../training/progress';
+import { PLAN, UNITS } from '../course';
+import { finalPassedAt, isPassed, lessonKey, unitComplete, unitUnlocked } from '../course/progress';
+import { ALL_TRACKS, bestTechBpm, techRunId, techStatus } from '../course/track';
+import { useCourseRows } from './CourseLessonPage';
 import { useRuns } from '../training/runs';
 import { bestByTreino, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyReading, weeklyTotals, type HeatCell, type WeekReading, type WeekTotal } from '../progress/stats';
 
@@ -24,6 +27,7 @@ export default function ProgressPage() {
   const location = useLocation();
   const now = Date.now();
   const runs = useRuns();
+  const rows = useCourseRows();
   const data = useLiveQuery(async () => {
     const since = Date.now() - 120 * DAY;
     const [practice, sessions, attempts, pieces] = await Promise.all([
@@ -35,7 +39,7 @@ export default function ProgressPage() {
     return { practice, sessions, attempts, pieces };
   }, []);
 
-  if (!data || !runs) return null;
+  if (!data || !runs || !rows) return null;
 
   const byDay = minutesByDay(data.practice, data.sessions);
   const weeks = weeklyTotals(byDay, now, 8);
@@ -51,9 +55,26 @@ export default function ProgressPage() {
   const weak = weakNotes(recentAttempts);
   const best = bestByTreino(runs);
 
-  const phases = PHASES.map((p) => phaseState(p, runs));
-  const timedTreinos = PHASES.flatMap((p) => p.treinos.filter((t) => t.kind === 'timed' && t.timed && best.has(t.id)).map((t) => ({ treino: t, status: phases[p.n - 1].statuses[t.id] })));
-  const stale = PHASES.flatMap((p) => p.treinos.filter((t) => phases[p.n - 1].statuses[t.id] === 'andamento' && now - (best.get(t.id)?.last ?? now) > 7 * DAY));
+  // Técnica do Treino: cada item com registro, o melhor BPM e se está parado há mais de 7 dias.
+  const techItems = ALL_TRACKS.flatMap((t) => t.technique.map((item) => ({ item, unit: t.unit })));
+  const techMeters = techItems.filter(({ item }) => best.has(techRunId(item))).map(({ item, unit }) => ({ item, unit, best: bestTechBpm(item, runs), status: techStatus(item, runs), last: best.get(techRunId(item))!.last }));
+  const stale = techMeters.filter((t) => t.status !== 'no alvo' && now - t.last > 7 * DAY);
+
+  // Curso: estado de cada unidade e os marcos.
+  const passedAts = [...rows.values()].flatMap((r) => (r.passedAt ? [r.passedAt] : []));
+  const courseMarks = [
+    { title: 'Primeira lição do curso concluída', at: passedAts.length ? Math.min(...passedAts) : null },
+    ...UNITS.slice(0, 3).map((u) => {
+      const lessonsAt = u.lessons.map((l) => rows.get(lessonKey(u, l))?.passedAt ?? null);
+      const fin = finalPassedAt(u, runs);
+      const done = unitComplete(u, rows, runs) && fin !== null && lessonsAt.every((x) => x !== null);
+      return { title: `Unidade ${u.n} concluída`, at: done ? Math.max(fin!, ...(lessonsAt as number[])) : null };
+    }),
+    { title: 'Primeira técnica no andamento alvo', at: (() => {
+      const hits = techItems.flatMap(({ item }) => runs.filter((r) => r.treinoId === techRunId(item) && r.clean && (r.bpm ?? 0) >= item.target).map((r) => r.at));
+      return hits.length ? Math.min(...hits) : null;
+    })() },
+  ];
 
   const pieceByKey = new Map<string, Piece>();
   for (const p of data.pieces) pieceByKey.set(`peca-${p.uid ?? p.id}`, p);
@@ -61,7 +82,7 @@ export default function ProgressPage() {
   const songWeak = songs.filter((s) => s.lastWeak);
 
   const learnedAt = data.pieces.filter((p) => p.status === 'learned' || p.status === 'repertoire').map((p) => p.updatedAt);
-  const marks = milestones(runs, byDay, learnedAt).sort((a, b) => (a.at === null ? 1 : 0) - (b.at === null ? 1 : 0) || (a.at ?? 0) - (b.at ?? 0));
+  const marks = milestones(runs, byDay, learnedAt, courseMarks).sort((a, b) => (a.at === null ? 1 : 0) - (b.at === null ? 1 : 0) || (a.at ?? 0) - (b.at ?? 0));
 
   const empty = totalMinutes === 0 && runs.length === 0 && data.attempts.length === 0;
 
@@ -110,25 +131,20 @@ export default function ProgressPage() {
               </figure>
               <div className="progress__figure">
                 <h3 className="progress__caption">Melhor andamento limpo</h3>
-                {timedTreinos.length === 0 && songs.length === 0 ? (
+                {techMeters.length === 0 && songs.length === 0 ? (
                   <p className="progress__muted">Faça um treino no tempo ou toque junto uma música para ver o andamento subir.</p>
                 ) : (
                   <ul className="progress__meters">
-                    {timedTreinos.map(({ treino, status }) => {
-                      const b = best.get(treino.id)!;
-                      const target = treino.timed!.target;
-                      const value = b.bestClean ?? 0;
-                      return (
-                        <li key={treino.id} className="progress__meter">
-                          <span className="progress__meterName">{treino.title}</span>
-                          <span className="progress__meterValue">{b.bestClean ? `${b.bestClean} de ${target} BPM` : `sem passada limpa · alvo ${target} BPM`}</span>
-                          <span className="progress__bar" role="img" aria-label={`${value} de ${target} BPM`}>
-                            <span className="progress__barFill" style={{ width: `${Math.min(100, (value / target) * 100)}%` }} />
-                          </span>
-                          <span className="progress__meterStatus">{TREINO_STATUS_LABEL[status]}</span>
-                        </li>
-                      );
-                    })}
+                    {techMeters.map(({ item, unit, best: b, status }) => (
+                      <li key={item.id} className="progress__meter">
+                        <span className="progress__meterName">{item.title}</span>
+                        <span className="progress__meterValue">{b ? `${b} de ${item.target} BPM` : `sem passada boa · alvo ${item.target} BPM`} · unidade {unit}</span>
+                        <span className="progress__bar" role="img" aria-label={`${b ?? 0} de ${item.target} BPM`}>
+                          <span className="progress__barFill" style={{ width: `${Math.min(100, ((b ?? 0) / item.target) * 100)}%` }} />
+                        </span>
+                        <span className="progress__meterStatus">{status === 'no alvo' ? 'No alvo' : 'Subindo'}</span>
+                      </li>
+                    ))}
                     {songs.map((s) => {
                       const target = s.piece.bpm ?? null;
                       const value = s.bestClean ?? 0;
@@ -173,12 +189,12 @@ export default function ProgressPage() {
                 )}
                 {stale.length > 0 && (
                   <div className="progress__card">
-                    <h3 className="progress__cardTitle">Treinos parados</h3>
-                    <p className="progress__muted">Começados e sem treino há mais de 7 dias.</p>
+                    <h3 className="progress__cardTitle">Técnica parada</h3>
+                    <p className="progress__muted">Começada, abaixo do alvo e sem treino há mais de 7 dias.</p>
                     <ul className="progress__list">
                       {stale.map((t) => (
-                        <li key={t.id}>
-                          <Link to={`/treino/t/${t.id}`} state={{ background: location }}>{t.title}</Link>
+                        <li key={t.item.id}>
+                          <Link to="/treino">{t.item.title} (unidade {t.unit})</Link>
                         </li>
                       ))}
                     </ul>
@@ -207,16 +223,21 @@ export default function ProgressPage() {
             <h2 className="page__sectionTitle" id="pg-conq">Conquistas</h2>
             <div className="progress__stuck">
               <div className="progress__card">
-                <h3 className="progress__cardTitle">Fases do treino</h3>
+                <h3 className="progress__cardTitle">Unidades do curso</h3>
                 <ol className="progress__phases">
-                  {phases.map((s, i) => {
-                    const current = !s.complete && phases.slice(0, i).every((p) => p.complete);
-                    const label = s.complete ? 'Concluída' : current ? `${s.passedCount} de ${s.phase.treinos.length} treinos vencidos` : s.phase.ready ? 'Ainda não' : 'Em preparação';
+                  {PLAN.map((p) => {
+                    const i = UNITS.findIndex((u) => u.n === p.n);
+                    const unit = i >= 0 ? UNITS[i] : null;
+                    const open = unit ? unitUnlocked(UNITS, i, rows, runs) : false;
+                    const complete = unit ? unitComplete(unit, rows, runs) : false;
+                    const passed = unit ? unit.lessons.filter((l) => isPassed(rows.get(lessonKey(unit, l)))).length : 0;
+                    const current = open && !complete;
+                    const label = !unit ? 'Em construção' : complete ? 'Concluída' : open ? `${passed} de ${unit.lessons.length} lições` : 'Bloqueada';
                     return (
-                      <li key={s.phase.n} className={`progress__phase${s.complete ? ' progress__phase-done' : current ? ' progress__phase-current' : ''}`}>
-                        <span className="progress__phaseN">{s.phase.n}</span>
+                      <li key={p.n} className={`progress__phase${complete ? ' progress__phase-done' : current ? ' progress__phase-current' : ''}`}>
+                        <span className="progress__phaseN">{p.n}</span>
                         <span className="progress__phaseText">
-                          <span className="progress__phaseTitle">{s.phase.title}</span>
+                          {unit ? <Link className="progress__phaseTitle" to={`/estudo/unidade/${p.n}`}>{p.title}</Link> : <span className="progress__phaseTitle">{p.title}</span>}
                           <span className="progress__muted">{label}</span>
                         </span>
                       </li>

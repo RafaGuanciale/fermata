@@ -103,7 +103,7 @@ export interface TrainingRun extends Synced {
   id?: number;
   /** id do treino ("f1-escada-md"), "aquecimento", "leitura" ou "prova-1" */
   treinoId: string;
-  kind: 'timed' | 'locate' | 'names' | 'warmup' | 'reading' | 'exam' | 'level';
+  kind: 'timed' | 'locate' | 'names' | 'warmup' | 'reading' | 'exam' | 'level' | 'review' | 'ear';
   at: number;
   /** Dia local "2026-10-08": as regras contam dias diferentes. */
   day: string;
