@@ -7,7 +7,7 @@ Uma unidade "em construção" há mais de 3 horas foi abandonada (limite de uso)
 |---|---|---|---|
 | 1 Teclado, pulso e postura | pronta | 2026-10-08 | escrita à mão na conversa; projeto final Ode à Alegria |
 | 2 Pauta dupla e intervalos | pronta | 2026-10-09 01:23 | rodada agendada; projeto final Ode à Alegria com mão esquerda |
-| 3 Primeiros acordes e cifra | a fazer | | |
+| 3 Primeiros acordes e cifra | em construção | 2026-10-09 01:24 | rodada agendada |
 | 4 Escala maior e armaduras | a fazer | | |
 | 5 Modo menor e intervalos | a fazer | | |
 | 6 Tríades, inversões e condução | a fazer | | |
