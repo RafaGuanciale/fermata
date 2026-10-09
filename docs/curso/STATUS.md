@@ -13,7 +13,7 @@ Uma unidade "em construção" há mais de 3 horas foi abandonada (limite de uso)
 | 6 Tríades, inversões e condução | pronta | 2026-10-09 05:43 | rodada agendada; projeto final Canção em quatro acordes (original) |
 | 7 Campo harmônico e funções | pronta | 2026-10-09 05:53 | rodada agendada; projeto final Prelúdio em Dó, BWV 846 (8 compassos) |
 | 8 Tétrades, blues e improviso | pronta | 2026-10-09 06:04 | rodada agendada; projeto final The Entertainer + blues; lição 65 = Marco 2 |
-| 9 Leitura clássica e textura | a fazer | | |
+| 9 Leitura clássica e textura | em construção | 2026-10-09 06:04 | rodada agendada |
 | 10 Harmonia cromática | a fazer | | |
 | 11 Brasil ao piano | a fazer | | |
 | 12 Arranjo, forma e repertório | a fazer | | |
