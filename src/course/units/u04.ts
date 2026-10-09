@@ -2,9 +2,9 @@
 // A lição 33 é o Marco 1: checkpoint das unidades 1 a 4 e mini-recital.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
-import { buildScale, choice, keyFromSignature, readNote, type ChoiceQuestion } from '../gens';
+import { buildScale, choice, degreeByEar, keyFromSignature, mix, primaryChord, readNote, scaleDegreeNote, type ChoiceQuestion } from '../gens';
 import { pick } from '../music';
-import { melodyTask, sci } from '../tasks';
+import { melodyTask, randomRhythm, sci, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
@@ -313,14 +313,269 @@ const canon: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
+const DEGREE_NAMES: ChoiceQuestion[] = [
+  { q: 'O 1º grau da escala se chama…', options: ['Tônica', 'Dominante', 'Mediante'], answer: 0, why: 'A tônica é a casa, o grau que dá nome à tonalidade.' },
+  { q: 'O 5º grau se chama…', options: ['Dominante', 'Subdominante', 'Sensível'], answer: 0, why: 'Dominante: o grau mais forte depois da tônica.' },
+  { q: 'O 4º grau se chama…', options: ['Subdominante', 'Superdominante', 'Supertônica'], answer: 0, why: 'Sub = abaixo: a dominante de baixo (uma 5ª abaixo da tônica).' },
+  { q: 'O 7º grau, meio tom abaixo da tônica, se chama…', options: ['Sensível', 'Mediante', 'Dominante'], answer: 0, why: 'Ele "sente" a tônica logo acima e puxa para ela.' },
+  { q: 'O 3º grau se chama…', options: ['Mediante', 'Supertônica', 'Subdominante'], answer: 0, why: 'Mediante: fica no meio do caminho entre a tônica e a dominante.' },
+  { q: 'O 2º e o 6º graus se chamam…', options: ['Supertônica e superdominante', 'Mediante e sensível', 'Subdominante e dominante'], answer: 0, why: 'Super = acima: logo acima da tônica e logo acima da dominante.' },
+  { q: 'Em Ré maior, a dominante é…', options: ['Lá', 'Sol', 'Fá♯'], answer: 0, why: 'Ré, Mi, Fá♯, Sol, Lá: 5º grau.' },
+];
+
+const RHYTHM_DOT: ChoiceQuestion[] = [
+  { q: 'Quanto vale a semínima pontuada?', options: ['1 tempo e meio', '2 tempos', '3 tempos'], answer: 0, why: '1 + metade de 1.' },
+  { q: 'Depois de uma semínima pontuada, para completar 2 tempos, vem…', options: ['Uma colcheia', 'Uma semínima', 'Uma mínima'], answer: 0, why: '1,5 + 0,5 = 2.' },
+  { q: 'Síncope é…', options: ['Uma nota que começa num tempo fraco e se prolonga pelo forte', 'Uma pausa longa', 'Tocar mais rápido'], answer: 0, why: 'O acento sai do lugar esperado: a nota "atravessa" o tempo forte.' },
+  { q: 'Contratempo é…', options: ['Nota no "e", com pausa no tempo', 'Nota no tempo forte', 'Duas notas juntas'], answer: 0, why: 'O tempo fica em silêncio e a nota cai na metade.' },
+];
+
+const PEDAL_L: ChoiceQuestion[] = [
+  { q: 'No pedal legato, o pedal troca…', options: ['Logo depois do ataque do acorde novo', 'Antes do acorde novo', 'Só no fim da música'], answer: 0, why: 'Primeiro os dedos tocam; depois o pé sobe e desce. O som não para.' },
+  { q: 'Trocar o pedal antes do acorde novo…', options: ['Deixa um buraco no som', 'Deixa o som mais limpo', 'Não muda nada'], answer: 0, why: 'Entre a subida do pedal e o acorde novo, nada soa: o "soluço".' },
+  { q: 'Trocar tarde demais…', options: ['Mistura os dois acordes (lama)', 'Deixa um buraco', 'Abafa tudo'], answer: 0, why: 'O acorde velho continua soando por baixo do novo.' },
+  { q: 'Enquanto o pé troca, os dedos…', options: ['Ficam presos nas teclas do acorde novo', 'Soltam as teclas', 'Tocam de novo'], answer: 0, why: 'Os dedos seguram o som enquanto o pedal sobe; quando ele desce de novo, pega o acorde novo.' },
+];
+
+const degreeNames = scaleDegreeNote({ keys: ['C', 'G', 'F'], degrees: [1, 2, 3, 4, 5, 6, 7] });
+const degreeNamesD = scaleDegreeNote({ keys: ['C', 'G', 'F', 'D', 'Bb'], degrees: [1, 3, 4, 5, 7] });
+const chordsRandom = primaryChord({ keys: ['C', 'G', 'F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
+const ear16 = degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6] });
+
+const RHY_DOT = ['x:1.5 x:0.5 x x', 'x:1.5 x:0.5 x:2', 'x x:1.5 x:0.5 x', 'x:1.5 x:0.5 x:1.5 x:0.5', 'x x x:1.5 x:0.5'];
+const RHY_SYNC = ['x:0.5 x x:0.5 x:2', 'x x:0.5 x x:0.5 x', 'x:0.5 x x x x:0.5', 'r:0.5 x:0.5 r:0.5 x:0.5 x:2', 'x:0.5 x x:0.5 x x', 'x:2 x:0.5 x x:0.5'];
+
+// Ode à Alegria com o ritmo original de Beethoven nos fins de frase (semínima pontuada e colcheia).
+const ODE_DOT_R = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4:1.5 D4:0.5 D4:2 | E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4:1.5 C4:0.5 C4:2';
+const ODE_DOT_L = 'C3:4 | G3:4 | C3:4 | G3:4 | C3:4 | G3:4 | C3:4 | G3:2 C3:2';
+// Melodia original com síncope (curta–longa–curta).
+const SYNC_R = 'C4:0.5 E4 G4:0.5 G4:2 | A4:0.5 G4 E4:0.5 G4:2 | F4:0.5 F4 E4:0.5 D4 E4 | D4:0.5 E4 D4:0.5 C4:2 | C4:0.5 E4 G4:0.5 G4:2 | A4:0.5 C5 A4:0.5 G4:2 | F4:0.5 E4 D4:0.5 E4 D4 | C4:4';
+const SYNC_L = 'C3:4 | C3:4 | G3:4 | C3:4 | C3:4 | C3:4 | G3:4 | C3:4';
+
+const odeDotted: SongSpec = {
+  id: 'u04-ode-pontuada',
+  title: 'Ode à Alegria, ritmo original',
+  composer: 'Ludwig van Beethoven',
+  arrangement: 'arranjo do Fermata: os 8 primeiros compassos com a semínima pontuada dos fins de frase, e bordão de Dó3 e Sol3',
+  bpm: 76,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: ODE_DOT_R,
+  left: ODE_DOT_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const syncopated: SongSpec = {
+  id: 'u04-sincopado',
+  title: 'Sincopado',
+  composer: 'Fermata (melodia original)',
+  arrangement: 'melodia na posição de Dó com síncope curta–longa–curta; bordão na mão esquerda',
+  bpm: 72,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: SYNC_R,
+  left: SYNC_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const PEDAL_DRILL = 'C4+E4+G4:2 C4+F4+A4:2 | C4+E4+G4:2 B3+D4+F4+G4:2 | C4+E4+G4:4';
+
+const l28: Lesson = {
+  n: 28,
+  id: 'l28',
+  title: 'Graus da escala',
+  minutes: 60,
+  objectives: [
+    'Consigo dar nome aos 7 graus: tônica, supertônica, mediante, subdominante, dominante, superdominante e sensível.',
+    'Consigo tocar o I, IV ou V7 de Dó, Sol ou Fá em menos de 2 s.',
+    'Consigo reconhecer de ouvido os graus 1 a 6 em Dó maior.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Cada grau tem um nome e um papel',
+      body: `Você já chama os acordes pelo número romano (I, IV, V). As **notas** da escala também têm números (graus 1 a 7) e, além disso, **nomes** que descrevem o papel de cada uma:
+
+1. **Tônica**: a casa.
+2. **Supertônica**: logo acima da tônica.
+3. **Mediante**: no meio do caminho entre a tônica e a dominante.
+4. **Subdominante**: a "dominante de baixo", uma 5ª abaixo da tônica.
+5. **Dominante**: o grau mais forte depois da tônica, base do acorde de tensão.
+6. **Superdominante**: logo acima da dominante.
+7. **Sensível**: meio tom abaixo da tônica, puxando para ela.
+
+Os nomes não mudam de tonalidade para tonalidade. Em Dó, a dominante é Sol; em Sol, é Ré; em Fá, é Dó. Pensar em graus é o que permite transpor e tocar de ouvido em qualquer tom.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'porque',
+      title: 'por que a sensível puxa',
+      body: 'A sensível fica a um semitom da tônica, a menor distância possível. O ouvido, acostumado a ouvir essa nota resolver para cima, sente a falta da tônica quando ela fica parada. É por isso que o V7, que contém a sensível, pede tanto o I.',
+    },
+    { kind: 'exercise', id: 'l28-nomes', exercise: { kind: 'items', title: 'O grau pelo nome', how: 'O app diz o nome do grau e a tonalidade; toque a nota, em qualquer oitava.', gen: degreeNames, count: 14, low: 48, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
+    {
+      kind: 'text',
+      title: 'Graus ao vivo',
+      body: `Músicos que acompanham cantores ouvem o tempo todo pedidos como "vai pro IV!" ou "segura no V". Para responder rápido, o caminho é **não traduzir**: ver "IV em Fá" e a mão já ir para o Si♭, sem passar por "Fá, Sol, Lá, Si♭… é Si♭".
+
+No exercício abaixo, o app sorteia tom e grau, e mede o tempo. A meta é responder em **menos de 2 s**. Se demorar, não tem problema: a velocidade vem da repetição espaçada, não do esforço de uma tarde.`,
+    },
+    { kind: 'exercise', id: 'l28-graus', exercise: { kind: 'items', title: 'I, IV ou V7, rápido', how: 'Tom e grau sorteados. Meta: 85% e média abaixo de 2 s.', gen: chordsRandom, count: 18, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85, avgMs: 2000 } } },
+    {
+      kind: 'text',
+      title: 'Ouvir os graus 1 a 6',
+      body: `Na lição 5 você reconheceu 1, 3 e 5 de ouvido. Agora entram o **2**, o **4** e o **6**. Cada um tem uma sensação depois da cadência:
+
+- **2**: instável, quer descer para o 1 ou subir para o 3.
+- **4**: pesado, quer descer para o 3.
+- **6**: doce e um pouco melancólico, quer descer para o 5.
+
+Se ficar em dúvida, cante a nota e deixe ela "cair" para onde quer ir: o lugar onde ela repousa entrega quem ela é.`,
+    },
+    { kind: 'exercise', id: 'l28-ouvido', exercise: { kind: 'items', title: 'Graus 1 a 6 de ouvido', how: 'Depois da cadência em Dó, toque a nota que você ouviu.', gen: ear16, count: 12, low: 48, high: 84, labels: 'off', pass: { accuracy: 0.8 } } },
+    { kind: 'exercise', id: 'l28-quiz', exercise: quiz('Nomes dos graus', 'Sete perguntas rápidas.', DEGREE_NAMES) },
+  ],
+  review: [degreeNames, chordsRandom, ear16, choice(DEGREE_NAMES, 'nomes-graus')],
+  checkpoint: [
+    { kind: 'items', title: 'Graus ao vivo', how: 'I, IV ou V7 em Dó, Sol ou Fá, sem dicas. Meta: 85% e média abaixo de 2 s.', gen: chordsRandom, count: 18, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85, avgMs: 2000 } },
+    { kind: 'items', title: 'Nomes e ouvido', how: 'Nomes dos graus e graus 1 a 6 de ouvido, misturados. Meta: 85%.', gen: mix([degreeNames, ear16]), count: 14, low: 48, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
+  ],
+  exit: [degreeNames, chordsRandom, choice(DEGREE_NAMES, 'nomes-graus')],
+};
+
+const l29: Lesson = {
+  n: 29,
+  id: 'l29',
+  title: 'Semínima pontuada e síncope simples',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar a semínima pontuada seguida de colcheia no tempo.',
+    'Consigo tocar síncopes e contratempos simples com 85% das notas em ±60 ms.',
+    'Consigo tocar uma peça curta com síncope.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'A semínima pontuada',
+      body: `O ponto soma metade do valor (lição 12). Na semínima: **1 + ½ = 1 tempo e meio**. Ela quase sempre vem seguida de uma **colcheia**, para fechar 2 tempos: "**1** (e) 2 **e**".
+
+Conte as colcheias: "**1** e 2 **e**". A semínima pontuada começa no 1 e segura pelo "e" e pelo 2; a colcheia cai no "e" do 2. O ritmo resultante é longo–curto, como um passo manco.
+
+Você já ouviu esse ritmo: no fim da primeira frase da Ode à Alegria, Beethoven escreveu "Mi (pontuada), Ré (colcheia), Ré (mínima)". A versão de método que você tocou até agora simplificou isso para semínimas.`,
+    },
+    {
+      kind: 'example',
+      title: 'Pontuada e colcheia',
+      steps: [
+        { say: 'Semínima pontuada e colcheia, duas vezes: longo, curto.', play: { bpm: 72, steps: [1.5, 0.5, 1.5, 0.5].map((b) => ({ midis: [60], beats: b })) } },
+        { say: 'Na Ode à Alegria, o fim da frase com o ritmo original.', play: { bpm: 80, steps: [[64, 1], [64, 1], [62, 1], [60, 1], [64, 1.5], [62, 0.5], [62, 2]].map(([m, b]) => ({ midis: [m], beats: b })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l29-pontuada', exercise: quickTimed('Ritmo pontuado', 'Dois compassos sorteados a 66 BPM, em qualquer tecla. Conte as colcheias. Duas passadas boas.', randomRhythm(RHY_DOT, 2, 66), { reps: 2, window: 80 }) },
+    {
+      kind: 'text',
+      title: 'Síncope e contratempo: o acento fora do lugar',
+      body: `No 4/4, o ouvido espera os acentos no 1 e no 3. A **síncope** desloca o acento: uma nota começa num ponto fraco (no "e") e **se prolonga por cima** do ponto forte seguinte. O exemplo mais comum é **curta–longa–curta**: colcheia, semínima, colcheia. A semínima do meio começa no "e" do 1 e atravessa o 2.
+
+No **contratempo**, o tempo fica em silêncio e a nota cai no "e": pausa de colcheia, colcheia.
+
+Síncope é o tempero de quase toda música popular brasileira, do choro ao samba. A regra para tocar certo é a mesma de sempre: **o pulso não para**. Conte "1 e 2 e" em voz alta e coloque cada nota no lugar da contagem, sem empurrar o tempo.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'adiantar a nota sincopada',
+      body: 'A tendência é antecipar a nota longa da síncope para "chegar logo" no tempo forte, ou atrasar a próxima para compensar. Bata o pé nos tempos enquanto toca: o pé fica no tempo, as mãos ficam no contratempo.',
+    },
+    {
+      kind: 'example',
+      title: 'Ouvir a síncope',
+      steps: [
+        { say: 'Curta–longa–curta, e uma mínima: "1 E 2 e" com o acento no "e".', play: { bpm: 72, steps: [0.5, 1, 0.5, 2].map((b) => ({ midis: [60], beats: b })) } },
+        { say: 'Contratempo: pausa no tempo, nota no "e".', play: { bpm: 72, steps: [{ midis: [], beats: 0.5 }, { midis: [60], beats: 0.5 }, { midis: [], beats: 0.5 }, { midis: [60], beats: 0.5 }, { midis: [60], beats: 2 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l29-sincope', exercise: quickTimed('Síncope e contratempo', 'Dois compassos sorteados a 66 BPM. Duas passadas boas.', randomRhythm(RHY_SYNC, 2, 66), { reps: 2, window: 80 }) },
+    { kind: 'exercise', id: 'l29-ode', exercise: quickTimed('Ode à Alegria com o ritmo original', '8 compassos, duas mãos, a 66 BPM. Atenção aos compassos 4 e 8.', () => twoHandTask(ODE_DOT_R, ODE_DOT_L, { bpm: 66 }), { reps: 2 }) },
+    { kind: 'song', songId: 'u04-sincopado', why: 'Uma peça curta com síncope em todo compasso, para tocar no estúdio com a partitura e o modo Estudar.' },
+    { kind: 'song', songId: 'u04-ode-pontuada', why: 'A Ode à Alegria como Beethoven escreveu os fins de frase.' },
+    { kind: 'exercise', id: 'l29-quiz', exercise: quiz('Pontuada e síncope', 'Quatro perguntas rápidas.', RHYTHM_DOT, 0.75) },
+  ],
+  review: [choice(RHYTHM_DOT, 'sincope'), degreeNames],
+  checkpoint: [
+    quickTimed('Pontuada e síncope', '4 compassos sorteados a 72 BPM, ±60 ms, sem dicas.', randomRhythm([...RHY_DOT, ...RHY_SYNC], 4, 72), { window: 60 }),
+    quickTimed('Sincopado', 'A peça com síncope, mão direita, a 66 BPM.', () => melodyTask(SYNC_R, { bpm: 66 }), { window: 80 }),
+  ],
+  exit: [choice(RHYTHM_DOT, 'sincope'), chordsRandom],
+};
+
+const l30: Lesson = {
+  n: 30,
+  id: 'l30',
+  title: 'Pedal legato',
+  minutes: 60,
+  objectives: [
+    'Consigo trocar o pedal logo depois do ataque do acorde novo, sem buraco e sem lama.',
+    'Consigo fazer o encadeamento I–IV–I–V7–I com pedal legato em 3 passadas sem troca antecipada.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Ligar acordes com o pé',
+      body: `No pedal direto (lição 22), o pé subia **antes** do acorde novo. Isso deixa um respiro entre os acordes, ótimo para música com pausas, mas que quebra uma linha que deveria ser ligada.
+
+O **pedal legato** (ou sincopado) inverte a ordem:
+
+1. Os dedos tocam o **acorde novo**.
+2. **Logo depois**, o pé **sobe** (o acorde velho para de soar; o novo continua, porque os dedos estão segurando as teclas).
+3. O pé **desce** de novo, pegando o acorde novo.
+
+O resultado é um som contínuo, sem buraco e sem mistura. O pé fica sempre um pouquinho **atrasado** em relação às mãos: por isso "sincopado".`,
+    },
+    {
+      kind: 'text',
+      title: 'Os dois erros e a janela certa',
+      body: `- **Trocar cedo** (antes do acorde novo): entre a subida do pedal e o ataque, nada soa. É o "soluço" na frase.
+- **Trocar tarde** (ou não trocar): o acorde velho continua soando por baixo do novo. É a **lama**.
+
+A janela certa é pequena: o app aceita a subida do pedal até **250 ms** depois do ataque e a descida logo em seguida. Com o tempo, o movimento vira um só gesto do tornozelo, "sobe-desce", logo depois de cada acorde.
+
+O drill clássico usa um encadeamento em que só algumas notas mudam: **I – IV – I – V7 – I**, com o Dó comum segurando a mão no lugar. Em Dó maior: Dó–Mi–Sol, Dó–Fá–Lá, Dó–Mi–Sol, Si–Ré–Fá–Sol, Dó–Mi–Sol.`,
+    },
+    {
+      kind: 'example',
+      title: 'O drill, ligado',
+      steps: [
+        { say: 'I – IV – I – V7 – I, mínimas, ligados pelo pedal: o som nunca para e nunca mistura.', play: { bpm: 60, steps: [[60, 64, 67], [60, 65, 69], [60, 64, 67], [59, 62, 65, 67], [60, 64, 67]].map((m, i) => ({ midis: m, beats: i === 4 ? 4 : 2 })) } },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'conte "toca, pé"',
+      body: 'Diga em voz alta "toca" no ataque e "pé" logo depois. Comece bem devagar, a 50 BPM. Se o app acusar troca antecipada, você está trocando no "toca": espere o som do acorde novo antes de mexer o pé.',
+    },
+    { kind: 'exercise', id: 'l30-drill', exercise: quickTimed('Drill do pedal legato', 'I–IV–I–V7–I na mão direita, mínimas a 56 BPM, pedal legato. Três passadas boas seguidas.', () => melodyTask(PEDAL_DRILL, { bpm: 56 }), { reps: 3, pedal: 'legato' }) },
+    { kind: 'exercise', id: 'l30-canone', exercise: quickTimed('O baixo do Cânone com pedal', 'Mão esquerda: Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá em mínimas, a 60 BPM, trocando o pedal a cada nota. Duas passadas boas.', () => melodyTask(`${CANON_BASS} | D3:4`, { bpm: 60, clef: 'bass', fifths: 2 }), { reps: 2, pedal: 'legato' }) },
+    { kind: 'exercise', id: 'l30-quiz', exercise: quiz('Pedal legato', 'Quatro perguntas rápidas.', PEDAL_L, 0.75) },
+  ],
+  review: [choice(PEDAL_L, 'pedal-legato'), chordsRandom],
+  checkpoint: [
+    quickTimed('Pedal legato', 'O drill a 60 BPM, sem dicas. Meta: 85% das trocas depois do ataque e nenhuma antecipada.', () => melodyTask(PEDAL_DRILL, { bpm: 60 }), { pedal: 'legato' }),
+  ],
+  exit: [choice(PEDAL_L, 'pedal-legato'), degreeNamesD],
+};
+
 const unit: Unit = {
   n: 4,
   id: 'u04',
   title: 'Escala maior e armaduras',
   goal: 'Construir e tocar escalas maiores com passagem do polegar, ler armaduras, usar o pedal legato e tocar a forma do blues.',
   technique: 'Escalas maiores de Dó, Sol, Ré, Fá e Si♭, uma oitava, mãos separadas e depois juntas em movimento contrário, em colcheias de 45 rumo a 80 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l25, l26, l27],
-  songs: [canon],
+  lessons: [l25, l26, l27, l28, l29, l30],
+  songs: [canon, odeDotted, syncopated],
   final: {
     songId: 'u04-canone',
     brief: 'O Cânone em Ré de Pachelbel, simplificado: a mão esquerda repete o baixo de 8 notas (Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá) e a direita toca três das variações que se empilham sobre ele. Junta a armadura de 2 sustenidos (Fá♯ e Dó♯), o pedal legato (troque a cada mínima, logo depois do baixo) e a leitura em duas claves.',
@@ -330,4 +585,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [tetra, scalesWhite, scalesAll, sigs12, readG, readF];
+export const _gens: ItemGen[] = [tetra, scalesWhite, scalesAll, sigs12, readG, readF, degreeNames, degreeNamesD, chordsRandom, ear16];
