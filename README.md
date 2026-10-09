@@ -28,6 +28,7 @@ O nome vem do sinal de fermata, que manda sustentar a nota além do tempo. É a 
 - **Leitor de partitura** em tela cheia com zoom, igual no notebook, tablet e celular (PDF.js)
 - **Estudo em seis módulos** (Teclado, Leitura, Ritmo, Acordes, Escalas, Harmonia), com lições marcáveis como aprendidas. Lições prontas: teclas e oitavas, clave de sol, tríades com inversões e escala maior, todas interativas com o piano
 - **Hoje:** treino sugerido, músicas que você está aprendendo e evolução (minutos, tempo para achar a nota, acertos de primeira, nota que mais erra)
+- **Estudo (curso):** 12 unidades, cerca de 100 lições de uma hora: aquecimento de revisão espaçada, teoria em texto, exemplos que o app toca, prática guiada no teclado, checkpoint de 85% para avançar, mini-projeto e ticket de saída. Cada unidade fecha com uma música (projeto final). Plano e protocolo em `docs/curso/`
 - **Progresso:** constância (minutos por semana, dias seguidos, calendário de 16 semanas), evolução (tempo de leitura por semana, melhor andamento limpo por treino e por música), onde você trava (notas que mais erra, treinos parados, trechos difíceis das músicas) e conquistas (fases e marcos). Os minutos vêm do relógio de prática: um minuto conta quando houve alguma nota tocada
 - Tema escuro por padrão, com tema claro
 
@@ -143,3 +144,7 @@ Fotos do [Unsplash](https://unsplash.com), sob a licença Unsplash. Os identific
 ## Autor
 
 Rafael Guanciale Nacarato
+
+## Créditos de som
+
+Amostras de piano: Salamander Grand Piano, de Alexander Holm (licença CC BY 3.0), via tonejs-instruments.

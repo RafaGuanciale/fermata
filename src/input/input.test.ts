@@ -3,8 +3,8 @@ import { COMPUTER_KEYS, parseMidiMessage } from './useNoteInput';
 
 describe('parseMidiMessage', () => {
   it('lê tecla abaixada em qualquer canal', () => {
-    expect(parseMidiMessage([0x90, 60, 100])).toEqual({ type: 'on', midi: 60 });
-    expect(parseMidiMessage([0x93, 64, 1])).toEqual({ type: 'on', midi: 64 });
+    expect(parseMidiMessage([0x90, 60, 100])).toEqual({ type: 'on', midi: 60, velocity: 100 });
+    expect(parseMidiMessage([0x93, 64, 1])).toEqual({ type: 'on', midi: 64, velocity: 1 });
   });
 
   it('lê tecla solta, inclusive note on com força zero', () => {

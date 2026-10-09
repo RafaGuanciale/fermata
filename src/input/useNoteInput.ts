@@ -6,7 +6,8 @@ import { createContext, useContext, useEffect, useRef } from 'react';
 import type { Midi } from '../music/notes';
 
 export type NoteSource = 'midi' | 'screen' | 'computer';
-export type NoteEvent = { type: 'on' | 'off'; midi: Midi; at: number; source: NoteSource };
+/** `velocity` (1–127) só vem do piano MIDI; teclado da tela e do computador não têm força. */
+export type NoteEvent = { type: 'on' | 'off'; midi: Midi; at: number; source: NoteSource; velocity?: number };
 export type NoteListener = (e: NoteEvent) => void;
 
 export type MidiStatus =
@@ -22,10 +23,10 @@ export const COMPUTER_KEYS: Record<string, Midi> = {
 };
 
 /** Mensagem MIDI → evento de nota. "Note on" com força 0 conta como tecla solta. */
-export function parseMidiMessage(data: ArrayLike<number>): { type: 'on' | 'off'; midi: Midi } | null {
+export function parseMidiMessage(data: ArrayLike<number>): { type: 'on' | 'off'; midi: Midi; velocity?: number } | null {
   if (data.length < 3) return null;
   const command = data[0] & 0xf0;
-  if (command === 0x90) return { type: data[2] > 0 ? 'on' : 'off', midi: data[1] };
+  if (command === 0x90) return data[2] > 0 ? { type: 'on', midi: data[1], velocity: data[2] } : { type: 'off', midi: data[1] };
   if (command === 0x80) return { type: 'off', midi: data[1] };
   return null;
 }

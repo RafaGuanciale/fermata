@@ -78,10 +78,24 @@ export interface StoredFile extends Synced {
 }
 
 export interface LessonProgress extends Synced {
-  /** "modulo/licao" */
+  /** "modulo/licao" (consulta) ou "curso/u01/l01" (curso) */
   id: string;
   status: LearnStatus;
   updatedAt: number;
+  // Só nas lições do curso:
+  /** Blocos feitos (exercícios guiados, mini-projeto, ticket de saída). */
+  done?: string[];
+  /** Melhor nota no checkpoint (0 a 1). */
+  checkpoint?: number;
+  /** Primeira vez que passou no checkpoint (85%): lição concluída. */
+  passedAt?: number;
+  /** Passou de novo 7 dias depois: lição dominada. */
+  masteredAt?: number;
+  /** Revisão espaçada: itens desta lição que voltaram no aquecimento, e quantos errou. */
+  reviewSeen?: number;
+  reviewMiss?: number;
+  /** Ticket de saída: sentiu dor ou tensão? Segura o aumento de andamento. */
+  tension?: boolean;
 }
 
 /** Resultado de um treino do programa (fases, aquecimento, leitura, prova) ou mudança de nível. */

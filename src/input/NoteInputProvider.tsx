@@ -17,7 +17,7 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
   const listeners = useRef(new Set<NoteListener>());
   const accessRef = useRef<MIDIAccess | null>(null);
 
-  const emit = useCallback((type: 'on' | 'off', note: Midi, source: NoteSource, at: number = performance.now()) => {
+  const emit = useCallback((type: 'on' | 'off', note: Midi, source: NoteSource, at: number = performance.now(), velocity?: number) => {
     setHeld((prev) => {
       if (type === 'on' ? prev.has(note) : !prev.has(note)) return prev;
       const next = new Set(prev);
@@ -25,7 +25,7 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
       else next.delete(note);
       return next;
     });
-    const event: NoteEvent = { type, midi: note, at, source };
+    const event: NoteEvent = { type, midi: note, at, source, velocity };
     listeners.current.forEach((l) => l(event));
   }, []);
 
@@ -74,7 +74,7 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
             if (!e.data) return;
             const ev = parseMidiMessage(e.data);
             // O carimbo do MIDI é mais preciso que a hora em que o navegador entrega a mensagem.
-            if (ev) emit(ev.type, ev.midi, 'midi', e.timeStamp || performance.now());
+            if (ev) emit(ev.type, ev.midi, 'midi', e.timeStamp || performance.now(), ev.velocity);
           };
         });
         setMidi(names.length ? { kind: 'connected', names } : { kind: 'waiting' });

@@ -7,7 +7,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { OpenSheetMusicDisplay, type Note } from 'opensheetmusicdisplay';
-import { db, type Piece } from '../db/db';
+import { db } from '../db/db';
+import type { SongSpec } from '../course/types';
+import { songXml } from '../course/song';
+import { songPassed } from '../course/progress';
 import { getFile, setPieceBpm } from '../repertoire/repo';
 import { useNoteInput, useNoteOn, midiStatusLabel } from '../input/useNoteInput';
 import { useMetronome } from '../metronome/MetronomeProvider';
@@ -32,7 +35,7 @@ import {
 } from '../score/practice';
 import { judgeExpected, windowsFor, type PlayedEvent, type TakeResult } from '../training/timing';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../training/clickTrack';
-import { playNotes as synth } from '../audio/synth';
+import { loadPiano, playNotes as synth } from '../audio/synth';
 import { saveRun } from '../training/runs';
 import { canFullscreen, enterFullscreen, useFullscreenState } from '../hooks/useFullscreen';
 import { FullKeyboard, type FitMark } from '../components/KeyboardDock';
@@ -47,7 +50,15 @@ interface NoteEl {
 }
 
 interface Loaded {
-  piece: Piece;
+  title: string;
+  /** BPM ideal salvo (música do repertório) ou alvo (música do curso). */
+  ideal: number | null;
+  /** Id do registro de treino: "peca-<uid>" ou "curso-<id da música>". */
+  runId: string;
+  /** Só músicas do repertório: onde salvar o BPM ideal. */
+  pieceId: number | null;
+  /** Só músicas do curso: o que precisa para passar. */
+  song: SongSpec | null;
   steps: ScoreStep[];
   staffCount: number;
   beatsPerBar: number;
@@ -117,7 +128,10 @@ function keyGeometry(low: Midi, high: Midi) {
   return map;
 }
 
-export default function ScorePracticePage({ onClose }: { onClose: () => void }) {
+const CLICK_KEY = 'fermata-score-click';
+
+/** Toca uma música do repertório (pelo id da rota) ou uma música do curso (`song`). */
+export default function ScorePracticePage({ onClose, song }: { onClose: () => void; song?: SongSpec }) {
   const id = Number(useParams().id);
   // A página de Progresso pode abrir direto num trecho difícil.
   const startAt = useLocation().state as { from?: number; to?: number } | null;
@@ -142,20 +156,49 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
   const [guideKeys, setGuideKeys] = useState(true);
   const [cascade, setCascade] = useState(true);
   const [otherHand, setOtherHand] = useState(true);
+  const [click, setClick] = useState(() => {
+    try {
+      return localStorage.getItem(CLICK_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const toggleClick = (on: boolean) => {
+    setClick(on);
+    try {
+      localStorage.setItem(CLICK_KEY, on ? '1' : '0');
+    } catch {
+      // sem armazenamento: vale só nesta visita
+    }
+  };
+
+  useEffect(() => {
+    void loadPiano();
+  }, []);
 
   // ---------- carregar ----------
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const piece = await db.pieces.get(id);
-      if (!piece?.scoreFileId) return setError('Esta música ainda não tem o MusicXML. Adicione em Editar.');
-      let file;
-      try {
-        file = await getFile(piece.scoreFileId);
-      } catch (err) {
-        return setError(err instanceof Error ? err.message : 'Não deu para baixar o arquivo.');
+      let source: Blob | string;
+      let meta: Pick<Loaded, 'title' | 'ideal' | 'runId' | 'pieceId' | 'song'>;
+      if (song) {
+        source = songXml(song);
+        meta = { title: song.title, ideal: song.bpm, runId: `curso-${song.id}`, pieceId: null, song };
+      } else {
+        const piece = await db.pieces.get(id);
+        if (!piece?.scoreFileId) return setError('Esta música ainda não tem o MusicXML. Adicione em Editar.');
+        let file;
+        try {
+          file = await getFile(piece.scoreFileId);
+        } catch (err) {
+          return setError(err instanceof Error ? err.message : 'Não deu para baixar o arquivo.');
+        }
+        if (!file) return;
+        source = file.blob;
+        meta = { title: piece.title, ideal: piece.bpm ?? null, runId: `peca-${piece.uid ?? piece.id}`, pieceId: piece.id ?? null, song: null };
       }
-      if (!file || !hostRef.current || cancelled) return;
+      if (!hostRef.current || cancelled) return;
       const osmd = new OpenSheetMusicDisplay(hostRef.current, {
         autoResize: false,
         backend: 'svg',
@@ -164,7 +207,7 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
         followCursor: false,
       });
       try {
-        await osmd.load(file.blob, piece.title);
+        await osmd.load(source, meta.title);
         if (cancelled) return;
         osmd.render();
       } catch (err) {
@@ -178,10 +221,9 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
       const minNote = Math.min(...all, 60);
       const maxNote = Math.max(...all, 72);
       // Teclado do trecho da música, de Dó a Dó, com pelo menos duas oitavas.
-      let low = Math.max(21, minNote - (((minNote % 12) + 12) % 12));
-      let high = Math.min(108, maxNote + ((12 - (((maxNote % 12) + 12) % 12)) % 12));
-      if (high - low < 24) high = Math.min(108, low + 24);
-      if (high - low < 24) low = Math.max(21, high - 24);
+      // Teclado inteiro (88 teclas), como o piano de verdade.
+      const low = Math.min(21, minNote);
+      const high = Math.max(108, maxNote);
       const ts = osmd.Sheet.SourceMeasures[0]?.ActiveTimeSignature;
       const beatsPerBar = ts ? Math.round((ts.Numerator * 4) / ts.Denominator) || 4 : 4;
       const tempo = osmd.Sheet.DefaultStartTempoInBpm;
@@ -189,16 +231,17 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
       const total = measureCount(steps);
       if (startFrom && startTo && startFrom <= startTo && startTo <= total) setRange({ from: startFrom, to: startTo });
       else setRange({ from: 1, to: total });
-      setBpm(piece.bpm ?? scoreTempo ?? 80);
+      setBpm(meta.song ? Math.round(meta.song.bpm * 0.8) : (meta.ideal ?? scoreTempo ?? 80));
       setHand('direita');
-      setLoaded({ piece, steps, staffCount, beatsPerBar, low, high, scoreTempo });
+      setLoaded({ ...meta, steps, staffCount, beatsPerBar, low, high, scoreTempo });
+      if (meta.song) setHand(meta.song.hands);
     })();
     return () => {
       cancelled = true;
       osmdRef.current?.clear();
       osmdRef.current = null;
     };
-  }, [id, startFrom, startTo]);
+  }, [id, song, startFrom, startTo]);
 
   // Redesenha a partitura quando a largura muda (os elementos SVG mudam, então relê).
   useEffect(() => {
@@ -276,12 +319,13 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
     if (metronome.running) metronome.stop();
     const plan = timedPlan(loaded.steps, hand, loaded.staffCount, range, bpm);
     if (!plan.stepTimes.length) return;
-    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar, volume: listenOnly ? 0.35 : 0.6 });
+    // A contagem sempre toca; o clique durante a música é opcional.
+    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar, volume: listenOnly ? 0.35 : 0.6, pulse: click });
     if (!track) return;
     // O app toca: tudo (ouvir) ou só a outra mão (acompanhamento).
     const sounding = allNotes.filter((n) => listenOnly || (otherHand && hand !== 'duas' && n.hand !== hand));
     stopSoundRef.current = sounding.length
-      ? synth(sounding.map((n) => ({ midi: n.midi, at: track.firstBeatCtx + n.t / 1000, dur: n.dur / 1000 })), listenOnly ? 0.4 : 0.3)
+      ? synth(sounding.map((n) => ({ midi: n.midi, at: track.firstBeatCtx + n.t / 1000, dur: n.dur / 1000 })), listenOnly ? 0.75 : 0.55)
       : null;
     planRef.current = plan;
     trackRef.current = track;
@@ -315,14 +359,15 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
         const weak = weakestRange(measureAccuracy(plan, r.notes.map((n) => n?.grade)));
         setResult({ r, weak, plan });
         setTake('done');
-        void saveRun({ treinoId: `peca-${loaded.piece.uid ?? loaded.piece.id}`, kind: 'timed', bpm, accuracy: r.accuracy, clean: r.clean, weakFrom: weak?.from, weakTo: weak?.to });
+        const passed = loaded.song ? songPassed(loaded.song, { bpm, accuracy: r.accuracy, hand, from: range.from, to: range.to, bars: measureCount(loaded.steps) }) : undefined;
+        void saveRun({ treinoId: loaded.runId, kind: 'timed', bpm, accuracy: r.accuracy, clean: r.clean, weakFrom: weak?.from, weakTo: weak?.to, passed });
         return;
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [take, loaded, bpm, listening]);
+  }, [take, loaded, bpm, listening, hand, range]);
 
   // ---------- entrada de notas ----------
   useNoteOn((m, at) => {
@@ -439,13 +484,13 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
   const countdown = take === 'countin' && track ? Math.max(1, Math.ceil(-(now - track.firstBeat) / track.beatMs)) : null;
   const setFrom = (v: number) => setRange((r) => ({ from: Math.min(Math.max(1, v), r.to), to: r.to }));
   const setTo = (v: number) => setRange((r) => ({ from: r.from, to: Math.max(Math.min(total, v), r.from) }));
-  const ideal = loaded?.piece.bpm ?? loaded?.scoreTempo ?? null;
+  const ideal = loaded?.ideal ?? loaded?.scoreTempo ?? null;
   const busy = take === 'countin' || take === 'playing';
 
   const saveIdeal = async () => {
-    if (!loaded) return;
-    await setPieceBpm(loaded.piece.id!, bpm);
-    setLoaded({ ...loaded, piece: { ...loaded.piece, bpm } });
+    if (!loaded?.pieceId) return;
+    await setPieceBpm(loaded.pieceId, bpm);
+    setLoaded({ ...loaded, ideal: bpm });
   };
 
   return (
@@ -456,7 +501,7 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
         </button>
         <div className="session__title">
           <p className="page__eyebrow">Tocar a música</p>
-          <h1 className="session__name">{loaded?.piece.title ?? ''}</h1>
+          <h1 className="session__name">{loaded?.title ?? ''}</h1>
         </div>
         <div className="session__controls">
           <div className="segmented" role="group" aria-label="Modo">
@@ -513,7 +558,9 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
                   </button>
                   <span className="scoreStage__bpmValue">
                     <strong>{bpm} BPM</strong>
-                    {ideal !== null && (
+                    {loaded?.song ? (
+                      <small>alvo para passar: {loaded.song.bpm} BPM</small>
+                    ) : ideal !== null && (
                       bpm === ideal ? <small>ideal da música</small> : (
                         <button className="linkButton" type="button" onClick={() => void saveIdeal()}>
                           usar como ideal
@@ -535,6 +582,12 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
                   <label className="metronome__check">
                     <input type="checkbox" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
                     Cascata
+                  </label>
+                )}
+                {mode === 'junto' && (
+                  <label className="metronome__check">
+                    <input type="checkbox" checked={click} onChange={(e) => toggleClick(e.target.checked)} />
+                    Clique
                   </label>
                 )}
                 {mode === 'junto' && hand !== 'duas' && loaded && loaded.staffCount > 1 && (
@@ -578,6 +631,14 @@ export default function ScorePracticePage({ onClose }: { onClose: () => void }) 
                     {result ? (
                       <span className="timed__hint">
                         <TakeSummary result={result.r} />
+                        {loaded.song && (
+                          <strong className="scoreStage__verdict">
+                            {' · '}
+                            {songPassed(loaded.song, { bpm, accuracy: result.r.accuracy, hand, from: range.from, to: range.to, bars: total })
+                              ? 'Aprovado: projeto final concluído'
+                              : `Para passar: música inteira, ${loaded.song.hands === 'duas' ? 'duas mãos' : `mão ${loaded.song.hands}`}, ${loaded.song.bpm} BPM e ${Math.round(loaded.song.pass.accuracy * 100)}% de acerto`}
+                          </strong>
+                        )}
                         {result.weak && (
                           <>
                             {' · '}

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import type React from 'react';
-import { Navigate, Route, Routes, matchPath, useLocation, type Location } from 'react-router-dom';
+import { Navigate, Route, Routes, matchPath, useLocation, useParams, type Location } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { NoteInputProvider } from './input/NoteInputProvider';
 import { MetronomeProvider } from './metronome/MetronomeProvider';
@@ -19,6 +19,9 @@ import StudyPage from './pages/StudyPage';
 import ModulePage from './pages/ModulePage';
 import LessonPage from './pages/LessonPage';
 import ProgressPage from './pages/ProgressPage';
+import CourseUnitPage from './pages/CourseUnitPage';
+import CourseLessonPage from './pages/CourseLessonPage';
+import { findSong } from './course';
 import AccountPage from './pages/AccountPage';
 import TrainingSessionPage from './pages/TrainingSessionPage';
 import { CalibratePage, ExamPage, ReadingPage, WarmupPage } from './pages/TrainingExtrasPages';
@@ -34,6 +37,19 @@ function ScorePopup() {
     <ImmersiveFrame onClose={close} label="Tocar a música">
       <Suspense fallback={<div className="session" />}>
         <ScorePracticePage onClose={close} />
+      </Suspense>
+    </ImmersiveFrame>
+  );
+}
+
+function CourseSongPopup() {
+  const close = useCloseImmersive('/estudo');
+  const song = findSong(useParams().songId ?? '');
+  if (!song) return <Navigate to="/estudo" replace />;
+  return (
+    <ImmersiveFrame onClose={close} label="Tocar a música">
+      <Suspense fallback={<div className="session" />}>
+        <ScorePracticePage onClose={close} song={song} />
       </Suspense>
     </ImmersiveFrame>
   );
@@ -68,7 +84,7 @@ function TreinoPopup({ label, render }: { label: string; render: (close: () => v
   );
 }
 
-const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/t/:id', '/treino/aquecimento', '/treino/leitura', '/treino/prova/:n', '/treino/calibrar', '/peca/:id/estudar'];
+const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/t/:id', '/treino/aquecimento', '/treino/leitura', '/treino/prova/:n', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId'];
 
 export default function App() {
   const location = useLocation();
@@ -94,6 +110,8 @@ export default function App() {
             <Route path="/repertorio/peca/:id/editar" element={<PieceFormPage />} />
             <Route path="/conta" element={<AccountPage />} />
             <Route path="/estudo" element={<StudyPage />} />
+            <Route path="/estudo/unidade/:n" element={<CourseUnitPage />} />
+            <Route path="/estudo/unidade/:n/:lessonId" element={<CourseLessonPage />} />
             <Route path="/estudo/:moduleId" element={<ModulePage />} />
             <Route path="/estudo/:moduleId/:lessonId" element={<LessonPage />} />
             <Route path="/progresso" element={<ProgressPage />} />
@@ -112,6 +130,7 @@ export default function App() {
             <Route path="/treino/calibrar" element={<TreinoPopup label="Ajustar atraso" render={(c) => <CalibratePage onClose={c} />} />} />
             <Route path="/partitura/:id" element={<SheetPopup />} />
             <Route path="/peca/:id/estudar" element={<ScorePopup />} />
+            <Route path="/curso/musica/:songId" element={<CourseSongPopup />} />
           </Routes>
         )}
         </MetronomeProvider>

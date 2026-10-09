@@ -580,7 +580,7 @@ a.chip {
 
 .scorePaper {
   flex: 1 1 0;
-  min-height: 140px;
+  min-height: 110px;
   overflow-y: auto;
   border-radius: var(--radius-l);
   background: var(--color-off-white);
@@ -647,7 +647,7 @@ a.chip {
 }
 
 .fullKeyboard-score {
-  height: clamp(84px, 14vh, 130px);
+  height: clamp(110px, 24vh, 220px);
   min-width: 0;
 }
 
