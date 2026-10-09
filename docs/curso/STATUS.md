@@ -11,7 +11,7 @@ Uma unidade "em construção" há mais de 3 horas foi abandonada (limite de uso)
 | 4 Escala maior e armaduras | pronta | 2026-10-09 01:52 | rodada agendada; projeto final Cânone em Ré; lição 33 = Marco 1 |
 | 5 Modo menor e intervalos | pronta | 2026-10-09 05:29 | rodada agendada; projeto final Für Elise, tema A |
 | 6 Tríades, inversões e condução | pronta | 2026-10-09 05:43 | rodada agendada; projeto final Canção em quatro acordes (original) |
-| 7 Campo harmônico e funções | a fazer | | |
+| 7 Campo harmônico e funções | em construção | 2026-10-09 05:43 | rodada agendada |
 | 8 Tétrades, blues e improviso | a fazer | | |
 | 9 Leitura clássica e textura | a fazer | | |
 | 10 Harmonia cromática | a fazer | | |
