@@ -9,8 +9,8 @@ Uma unidade "em construção" há mais de 3 horas foi abandonada (limite de uso)
 | 2 Pauta dupla e intervalos | pronta | 2026-10-09 01:23 | rodada agendada; projeto final Ode à Alegria com mão esquerda |
 | 3 Primeiros acordes e cifra | pronta | 2026-10-09 01:37 | rodada agendada; projeto final Amazing Grace com acordes |
 | 4 Escala maior e armaduras | pronta | 2026-10-09 01:52 | rodada agendada; projeto final Cânone em Ré; lição 33 = Marco 1 |
-| 5 Modo menor e intervalos | pronta | 2026-10-09 05:40 | rodada agendada; projeto final Für Elise, tema A |
-| 6 Tríades, inversões e condução | a fazer | | |
+| 5 Modo menor e intervalos | pronta | 2026-10-09 05:29 | rodada agendada; projeto final Für Elise, tema A |
+| 6 Tríades, inversões e condução | em construção | 2026-10-09 05:29 | rodada agendada |
 | 7 Campo harmônico e funções | a fazer | | |
 | 8 Tétrades, blues e improviso | a fazer | | |
 | 9 Leitura clássica e textura | a fazer | | |
