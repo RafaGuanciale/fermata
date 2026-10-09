@@ -1,7 +1,7 @@
 // Unidade 3 — Primeiros acordes, cifra e acompanhamento (lições 17 a 24). Projeto final: Amazing Grace com acordes.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
-import { choice, harmonize, mix, playChord, primaryChord, resolveCadence, transposeProgression, type ChoiceQuestion } from '../gens';
+import { choice, harmonize, mix, playChord, primaryChord, progressionByEar, resolveCadence, tonicByEar, transposeProgression, type ChoiceQuestion } from '../gens';
 import { n, pick } from '../music';
 import { melodyTask, randomRhythm, twoHandTask } from '../tasks';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
@@ -714,14 +714,204 @@ Na Unidade 4 você aprende o **pedal legato** (sincopado), em que o pedal troca 
   exit: [choice(PEDAL, 'pedal'), gChords],
 };
 
+const EAR2: ChoiceQuestion[] = [
+  { q: 'De I para IV em Dó, o baixo vai de Dó para…', options: ['Fá (sobe uma 4ª)', 'Sol (sobe uma 5ª)', 'Mi'], answer: 0, why: 'I → IV: Dó → Fá.' },
+  { q: 'O movimento de baixo que soa mais como "fim" é…', options: ['Sol → Dó (V → I)', 'Dó → Fá (I → IV)', 'Fá → Sol (IV → V)'], answer: 0, why: 'A cadência autêntica: baixo do V para o I.' },
+  { q: 'Para achar a tônica de ouvido, o melhor é…', options: ['Cantar a nota em que a música quer parar', 'Contar as notas', 'Ouvir só a primeira nota'], answer: 0, why: 'A tônica é o repouso: a nota que encerraria a música.' },
+  { q: 'O IV soa como…', options: ['Afastamento suave, um passeio', 'Tensão máxima', 'Fim'], answer: 0, why: 'Subdominante: sai de casa sem urgência.' },
+  { q: 'No ditado de progressão, por onde começar?', options: ['Pelo baixo', 'Pela nota mais aguda', 'Pelo ritmo'], answer: 0, why: 'O baixo mostra a fundamental de cada acorde; com ele, o acorde quase se resolve sozinho.' },
+];
+
+const KEY_F: ChoiceQuestion[] = [
+  { q: 'Em Fá maior, o IV é…', options: ['Si♭ (B♭)', 'Si (B)', 'Dó (C)'], answer: 0, why: 'Fá, Sol, Lá, Si♭: em Fá maior o Si é bemol.' },
+  { q: 'Em Fá maior, o V7 é…', options: ['C7', 'G7', 'B♭7'], answer: 0, why: 'Fá, Sol, Lá, Si♭, Dó: o 5º grau é Dó.' },
+  { q: 'O C7 tem quais notas?', options: ['Dó, Mi, Sol, Si♭', 'Dó, Mi, Sol, Si', 'Dó, Mi♭, Sol, Si♭'], answer: 0, why: 'Dó maior mais a 7ª da dominante: Si♭.' },
+  { q: 'A sensível de Fá maior é…', options: ['Mi', 'Mi♭', 'Sol'], answer: 0, why: 'Meio tom abaixo do Fá: Mi. Ela está no C7.' },
+];
+
+const bassC = progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'V7', 'I'], ['I', 'I', 'IV', 'I'], ['I', 'IV', 'I', 'V7'], ['I', 'IV', 'IV', 'V7']], answer: 'bass' });
+const chordsByEar = progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'I'], ['I', 'V7', 'I'], ['I', 'IV', 'V7'], ['I', 'IV', 'V7', 'I']], answer: 'chords' });
+const tonic = tonicByEar({ keys: ['C', 'G', 'F', 'D'] });
+const fChords = primaryChord({ keys: ['F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
+const allKeys = primaryChord({ keys: ['C', 'G', 'F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
+
+// Brilha, brilha com raiz e 5ª na esquerda (C: Dó–Sol, F: Fá–Dó, G7: Sol–Ré), e as versões em Fá.
+const TWF_A = 'C3 G3 C3 G3 | F2 C3 C3 G3 | F2 C3 C3 G3 | G2 D3 C3 G3';
+const TWF_B = 'C3 G3 G2 D3 | C3 G3 G2 D3 | C3 G3 G2 D3 | C3 G3 G2 D3';
+const TWINKLE_FIFTH = `${TWF_A} | ${TWF_B} | ${TWF_A}`;
+const TWINKLE_F_R = shift(TWINKLE_R, 5, true);
+const TWINKLE_F_L = shift(TWINKLE_L, -7, true);
+const TWINKLE_F_FIFTH = shift(TWINKLE_FIFTH, 5, true);
+
+const twinkleF: SongSpec = {
+  id: 'u03-brilha-f',
+  title: 'Brilha, brilha, estrelinha (em Fá)',
+  composer: 'melodia folclórica francesa',
+  arrangement: 'arranjo do Fermata: a versão em Dó transposta para Fá, com F, B♭ e C7 em posição próxima',
+  bpm: 76,
+  beatsPerBar: 4,
+  fifths: -1,
+  right: TWINKLE_F_R,
+  left: TWINKLE_F_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const l23: Lesson = {
+  n: 23,
+  id: 'l23',
+  title: 'Ouvido 2: baixo e função',
+  minutes: 60,
+  objectives: [
+    'Consigo achar a tônica de uma progressão em Dó, Sol, Fá ou Ré.',
+    'Consigo tocar o baixo de uma progressão de 4 acordes com I, IV e V7.',
+    'Consigo tocar de ouvido progressões curtas com I, IV e V7.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Primeiro passo: achar a casa',
+      body: `Tocar de ouvido segue sempre a mesma ordem: **tônica**, depois **baixo**, depois **acordes**. O primeiro passo é o mais importante: sem saber onde é a casa, nenhum grau faz sentido.
+
+Para achar a tônica, ouça o trecho e **cante a nota em que ele quer parar**. Depois procure essa nota no teclado. Em geral é a nota com que as frases terminam e a nota mais grave do último acorde.
+
+Uma dica que ajuda muito: progressões que acabam no V7 deixam a casa "no ar". O ouvido completa sozinho a resolução. Cante essa resolução: é a tônica.`,
+    },
+    { kind: 'exercise', id: 'l23-tonica', exercise: { kind: 'items', title: 'Ache a casa', how: 'O app toca I–IV–V7 numa tonalidade sorteada, sem resolver. Toque a tônica, em qualquer oitava.', gen: tonic, count: 10, low: 48, high: 72, labels: 'off', pass: { accuracy: 0.85 } } },
+    {
+      kind: 'text',
+      title: 'O baixo conta a história',
+      body: `Num acompanhamento simples, a nota mais grave de cada acorde é a **fundamental**. Por isso o **baixo** é o atalho para os acordes: se você sabe o baixo, já sabe o acorde.
+
+Em Dó maior, o baixo dos três acordes primários é **Dó (I)**, **Fá (IV)** e **Sol (V7)**. Cada movimento tem uma cara:
+
+- **I → IV** (Dó → Fá): o baixo sobe uma 4ª. Soa como abrir uma porta, sair de casa.
+- **I → V** (Dó → Sol): sobe uma 5ª (ou desce uma 4ª). Soa como tensão chegando.
+- **V → I** (Sol → Dó): o movimento mais forte da harmonia, o ponto final.
+- **IV → V** (Fá → Sol): um passo, a subida para a tensão.
+
+Para ouvir o baixo, tente cantar só a nota mais grave de cada acorde, ignorando o resto. No começo parece impossível; com algumas repetições, o ouvido aprende a "descer".`,
+    },
+    {
+      kind: 'example',
+      title: 'Ouvir o baixo',
+      steps: [
+        { say: 'Só o baixo: Dó, Fá, Sol, Dó.', play: { bpm: 72, steps: [36, 41, 43, 36].map((m, i) => ({ midis: [m], beats: i === 3 ? 4 : 2 })) } },
+        { say: 'O mesmo baixo com os acordes por cima. Cante só a nota de baixo.', play: { bpm: 72, steps: [[36, 52, 55, 60], [41, 53, 57, 60], [43, 53, 55, 59], [36, 52, 55, 60]].map((m, i) => ({ midis: m, beats: i === 3 ? 4 : 2 })) } },
+        { say: 'Outra ordem: Dó, Sol, Sol, Dó.', play: { bpm: 72, steps: [[36, 52, 55, 60], [43, 53, 55, 59], [43, 53, 55, 59], [36, 52, 55, 60]].map((m, i) => ({ midis: m, beats: i === 3 ? 4 : 2 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l23-baixo', exercise: { kind: 'items', title: 'Ditado do baixo', how: 'O app toca 4 acordes em Dó maior. Toque o baixo de cada um (Dó, Fá ou Sol), em ordem, em qualquer oitava.', gen: bassC, count: 8, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } } },
+    {
+      kind: 'text',
+      title: 'Do baixo ao acorde',
+      body: `Com o baixo certo, o acorde vem quase de graça: Dó no baixo → C; Fá → F; Sol → G7. Agora o desafio é tocar os acordes inteiros, em ordem, logo depois de ouvir.
+
+Use a posição próxima da lição 19: C (Dó–Mi–Sol), F (Dó–Fá–Lá), G7 (Si–Fá–Sol). A mão quase não sai do lugar, e você pode prestar atenção no som em vez de procurar teclas.
+
+Se errar, ouça de novo e cante o baixo antes de tocar. A regra do curso vale aqui também: errar e corrigir fixa mais do que acertar de primeira por sorte.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'confundir IV e V7',
+      body: 'Os dois saem de casa, mas de jeitos diferentes. O IV soa como um passeio tranquilo; o V7 soa como uma pergunta que exige resposta. Se depois do acorde você sente vontade urgente de voltar ao I, é o V7.',
+    },
+    { kind: 'exercise', id: 'l23-acordes', exercise: { kind: 'items', title: 'Ditado de progressão', how: 'O app toca 3 ou 4 acordes em Dó maior. Toque os acordes, em ordem. O primeiro é sempre o C.', gen: chordsByEar, count: 8, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.8 } } },
+    { kind: 'exercise', id: 'l23-quiz', exercise: quiz('Baixo e função', 'Cinco perguntas rápidas.', EAR2) },
+  ],
+  review: [tonic, bassC, chordsByEar, choice(EAR2, 'ouvido-funcao')],
+  checkpoint: [
+    { kind: 'items', title: 'Ouvido misturado', how: '15 perguntas: tônica, baixo e progressões, sem dicas. Meta: 85%.', gen: mix([tonic, bassC, bassC, chordsByEar]), count: 15, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
+  ],
+  exit: [tonic, bassC, choice(EAR2, 'ouvido-funcao')],
+};
+
+const l24: Lesson = {
+  n: 24,
+  id: 'l24',
+  title: 'Checkpoint da unidade e projeto "Folclore em três tons"',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 3, sem dicas.',
+    'Consigo tocar I, IV e V7 em Dó, Sol e Fá.',
+    'Consigo acompanhar uma canção folclórica em três tons, com dois padrões de mão esquerda.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que você já sabe',
+      body: `Nesta unidade você montou o acorde maior pela fórmula 4 + 3, aprendeu as três funções (casa, afastamento e tensão) com I, IV e V7, leu cifra, encadeou acordes em posição próxima, tocou colcheias e três padrões de mão esquerda, mudou de tonalidade para Sol, usou o pedal direto e começou a tirar baixo e acordes de ouvido.
+
+O checkpoint de hoje mistura tudo isso, com perguntas novas e sem dicas. O projeto junta tudo numa coisa só: acompanhar uma canção em três tons.`,
+    },
+    {
+      kind: 'text',
+      title: 'O terceiro tom: Fá maior',
+      body: `Contando a partir de Fá: Fá (I), Sol, Lá, **Si♭ (IV)**, **Dó (V)**. Em Fá maior o Si é sempre **Si♭**, assim como em Sol o Fá era sempre Fá♯. Os acordes primários:
+
+- **I = F** (Fá, Lá, Dó).
+- **IV = B♭** (Si♭, Ré, Fá).
+- **V7 = C7** (Dó, Mi, Sol, **Si♭**). A sensível é o **Mi**, meio tom abaixo do Fá.
+
+Em posição próxima na mão esquerda: **F** = Fá2, Lá2, Dó3; **B♭** = Fá2, Si♭2, Ré3; **C7** = Mi2, Si♭2, Dó3. O desenho é o mesmo de Dó e de Sol, de novo: o que muda é a casa.`,
+    },
+    {
+      kind: 'example',
+      title: 'I – IV – V7 – I em Fá',
+      steps: [{ say: 'F – B♭ – C7 – F na mão esquerda.', play: { bpm: 72, steps: [[41, 45, 48], [41, 46, 50], [40, 46, 48], [41, 45, 48]].map((m, i) => ({ midis: m, beats: i === 3 ? 4 : 2 })) } }],
+    },
+    { kind: 'exercise', id: 'l24-fa', exercise: { kind: 'items', title: 'Graus em Fá', how: 'I, IV ou V7 de Fá maior. Lembre do Si♭.', gen: fChords, count: 12, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
+    { kind: 'exercise', id: 'l24-brilha-fa', exercise: quickTimed('Brilha, brilha em Fá', 'Duas mãos, F, B♭ e C7 em bloco. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_F_R, TWINKLE_F_L, { bpm: 56 }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-brilha-f', why: 'A versão em Fá na pauta dupla, com o bemol na armadura.' },
+    { kind: 'exercise', id: 'l24-quiz', exercise: quiz('Fá maior', 'Quatro perguntas rápidas.', KEY_F, 0.75) },
+    { kind: 'song', songId: 'u03-amazing', why: 'O projeto final da unidade: Amazing Grace com acordes, em 3/4 e com anacruse.' },
+  ],
+  review: [allKeys, HARM_C, bassC, choice([...CHORDS, ...DOMINANT, ...FUNCTIONS, ...EIGHTHS, ...KEY_G, ...PEDAL, ...EAR2, ...KEY_F])],
+  checkpoint: [
+    {
+      kind: 'items',
+      title: 'Acordes, cifra e ouvido',
+      how: '20 perguntas misturadas das lições 17 a 23, com algumas da Unidade 2. Meta: 85%.',
+      gen: mix([allKeys, allKeys, chordsCFG7, HARM_C, cadenceC, toG, bassC, tonic, choice([...CHORDS, ...DOMINANT, ...FUNCTIONS, ...KEY_G, ...PEDAL, ...EAR2])]),
+      count: 20,
+      low: 36,
+      high: 84,
+      labels: 'off',
+      pass: { accuracy: 0.85 },
+    },
+    quickTimed('Colcheias', '4 compassos sorteados a 80 BPM, ±60 ms.', randomRhythm(RHY_8, 4, 80), { window: 60 }),
+    quickTimed('Raiz e 5ª com a melodia', 'Brilha, brilha em Dó, 12 compassos, a 72 BPM. Meta: 90%.', () => twoHandTask(TWINKLE_R, TWINKLE_FIFTH, { bpm: 72 }), { pass: { accuracy: 0.9 } }),
+  ],
+  project: {
+    title: 'Folclore em três tons',
+    brief: `Acompanhe **Brilha, brilha, estrelinha** em **Dó, Sol e Fá**, usando **dois padrões** de mão esquerda: bloco e raiz com 5ª. A mesma progressão (I, IV e V7) em três casas, com a melodia por cima. Se quiser, faça o mesmo com outra canção folclórica que você conheça (cantiga de roda, por exemplo), descobrindo os acordes pelo ouvido.`,
+    steps: [
+      'Escreva a progressão da música em graus (I, IV, V7), compasso por compasso.',
+      'Toque em Dó com o padrão de bloco e depois com raiz e 5ª.',
+      'Transponha para Sol: mesmos graus, acordes G, C e D7.',
+      'Transponha para Fá: F, B♭ e C7. Cuidado com o Si♭.',
+      'Toque a versão em Fá com raiz e 5ª no exercício abaixo. Grave as três versões, se quiser comparar depois.',
+    ],
+    rubric: [
+      'Os acordes estavam certos em 95% ou mais dos compassos, nos três tons.',
+      'O pulso ficou estável, sem parar nas trocas de acorde.',
+      'A mão esquerda ficou mais leve que a melodia.',
+      'Os dois padrões foram usados.',
+    ],
+    exercise: { kind: 'timed', title: 'Em Fá, raiz e 5ª', how: 'Melodia em Fá na direita; raiz e 5ª (Fá–Dó, Si♭–Fá, Dó–Sol) na esquerda, a 72 BPM.', gen: () => twoHandTask(TWINKLE_F_R, TWINKLE_F_FIFTH, { bpm: 72, caption: 'Esquerda: raiz e 5ª de F, B♭ e C7.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
+  },
+  exit: [allKeys, bassC, choice(KEY_F, 'tom-fa')],
+};
+
 const unit: Unit = {
   n: 3,
   id: 'u03',
   title: 'Primeiros acordes e cifra',
   goal: 'Montar acordes maiores, acompanhar melodias com I, IV e V7 lendo cifra, em Dó, Sol e Fá, e usar o pedal.',
   technique: 'Trocas de acorde (C–F–G7) em posição próxima, acordes quebrados e padrões de mão esquerda em semínimas e colcheias, de 60 rumo a 96 BPM (referência: RCM Preparatory B). Nos dias sem lição nova, 5 minutos de chuva de cifras.',
-  lessons: [l17, l18, l19, l20, l21, l22],
-  songs: [mary, twinkleC, twinkleG, amazing],
+  lessons: [l17, l18, l19, l20, l21, l22, l23, l24],
+  songs: [mary, twinkleC, twinkleG, twinkleF, amazing],
   final: {
     songId: 'u03-amazing',
     brief: 'Amazing Grace em Dó, 3/4 com anacruse: a melodia na mão direita, uma oitava acima do Dó central, e um acorde por compasso na esquerda (I, IV, V e V7 em posição próxima). Junta o que a unidade ensinou: acordes primários, cifra, trocas no tempo e a anacruse da Unidade 2. No compasso 8 a mão direita sobe até o Sol5: prepare o salto no compasso anterior.',
@@ -731,4 +921,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, HARM_C, gChords, cgChords, toG];
+export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, HARM_C, gChords, cgChords, toG, bassC, chordsByEar, tonic, fChords, allKeys];
