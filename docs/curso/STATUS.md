@@ -12,7 +12,7 @@ Uma unidade "em construção" há mais de 3 horas foi abandonada (limite de uso)
 | 5 Modo menor e intervalos | pronta | 2026-10-09 05:29 | rodada agendada; projeto final Für Elise, tema A |
 | 6 Tríades, inversões e condução | pronta | 2026-10-09 05:43 | rodada agendada; projeto final Canção em quatro acordes (original) |
 | 7 Campo harmônico e funções | pronta | 2026-10-09 05:53 | rodada agendada; projeto final Prelúdio em Dó, BWV 846 (8 compassos) |
-| 8 Tétrades, blues e improviso | a fazer | | |
+| 8 Tétrades, blues e improviso | em construção | 2026-10-09 05:54 | rodada agendada |
 | 9 Leitura clássica e textura | a fazer | | |
 | 10 Harmonia cromática | a fazer | | |
 | 11 Brasil ao piano | a fazer | | |
