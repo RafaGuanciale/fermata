@@ -8,7 +8,7 @@ import PhotoCard from '../components/PhotoCard';
 import PieceList from '../components/PieceList';
 import StatTile from '../components/StatTile';
 import { PlayIcon } from '../components/Icons';
-import { useTrainingToday } from './PracticeHubPage';
+import { useTrainingToday } from '../course/useTrainingToday';
 
 export default function TodayPage() {
   const now = Date.now();

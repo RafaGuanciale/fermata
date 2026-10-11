@@ -7,7 +7,7 @@ import { BackIcon, PlayIcon } from '../components/Icons';
 import { useRuns } from '../training/runs';
 import { UNITS, findSong } from '../course';
 import { LESSON_STATE_LABEL, finalPassedAt, isPassed, lessonKey, lessonState, unitUnlocked } from '../course/progress';
-import { useCourseRows } from './CourseLessonPage';
+import { useCourseRows } from '../course/useCourseRows';
 import { UNIT_PHOTOS } from './StudyPage';
 
 export default function CourseUnitPage() {

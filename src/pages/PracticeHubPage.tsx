@@ -9,7 +9,7 @@ import { getLatency } from '../training/clickTrack';
 import { saveRun, useRuns } from '../training/runs';
 import { dayIndex, dayKey } from '../training/progress';
 import { PLAN, UNITS } from '../course';
-import { afterReview, isPassed, lessonKey, nextLesson, unitUnlocked, warmupItems } from '../course/progress';
+import { afterReview, nextLesson, unitUnlocked, warmupItems } from '../course/progress';
 import {
   DAY_PARTS, DAY_PART_LABEL, bestTechBpm, dayRunId, partsDone, techRunId, techStartBpm, techStatus, techniqueForDay, trackFor, trainingUnit,
   type DayPart, type TechItem,
@@ -18,7 +18,7 @@ import type { Exercise } from '../course/types';
 import ItemsRunner from '../course/ui/ItemsRunner';
 import { ExerciseRunner } from '../course/ui/ExerciseRunner';
 import { Verdict } from '../course/ui/shared';
-import { useCourseRows } from './CourseLessonPage';
+import { useCourseRows } from '../course/useCourseRows';
 
 const KIND: Record<DayPart, 'warmup' | 'review' | 'timed' | 'reading' | 'ear'> = {
   aquecimento: 'warmup', revisao: 'review', tecnica: 'timed', leitura: 'reading', ouvido: 'ear',
@@ -273,18 +273,4 @@ function TechCard({ item, startBpm, best }: { item: TechItem; startBpm: number; 
       />
     </div>
   );
-}
-
-/** Resumo do dia para a página Hoje. */
-export function useTrainingToday() {
-  const runs = useRuns();
-  const rows = useCourseRows();
-  if (!runs || !rows) return null;
-  const next = nextLesson(UNITS, rows, runs);
-  const anyPassed = [...rows.values()].some((r) => r.passedAt);
-  const unit = trainingUnit(next, UNITS[UNITS.length - 1]?.n ?? 1, anyPassed);
-  const done = partsDone(runs, dayKey(Date.now()));
-  const hasReview = UNITS.some((u) => u.lessons.some((l) => isPassed(rows.get(lessonKey(u, l)))));
-  const total = DAY_PARTS.length - (hasReview ? 0 : 1);
-  return { next, unit, done: [...done].filter((p) => p !== 'revisao' || hasReview).length, total };
 }

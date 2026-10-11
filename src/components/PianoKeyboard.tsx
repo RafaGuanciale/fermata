@@ -78,8 +78,9 @@ export default function PianoKeyboard({
   return (
     <div
       className={
-        'pianoKeyboard' + (size === 'small' ? ' pianoKeyboard-small' : '') + (interactive ? '' : ' pianoKeyboard-static')
+        'pianoKeyboard' + (size === 'small' ? ' pianoKeyboard-small' : '') + (interactive ? '' : ' pianoKeyboard-static') + (whites.length > 14 ? ' pianoKeyboard-many' : '')
       }
+      style={{ '--whites': whites.length } as React.CSSProperties}
       role="group"
       aria-label={label}
     >
@@ -89,6 +90,7 @@ export default function PianoKeyboard({
           <Tag
             key={m}
             data-midi={m}
+            data-c={m % 12 === 0 ? '' : undefined}
             className={markClass('pianoKeyboard__white', m)}
             {...keyProps(m, `${n.name} ${n.sci}`)}
           >

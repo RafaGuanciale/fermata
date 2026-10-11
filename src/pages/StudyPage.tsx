@@ -4,7 +4,7 @@ import type { PhotoKey } from '../media/photos';
 import { useRuns } from '../training/runs';
 import { PLAN, UNITS } from '../course';
 import { courseSummary, isPassed, lessonKey, nextLesson, unitComplete, unitUnlocked } from '../course/progress';
-import { useCourseRows } from './CourseLessonPage';
+import { useCourseRows } from '../course/useCourseRows';
 
 /** Foto de cada unidade (reaproveita as fotos dos módulos e do repertório). */
 export const UNIT_PHOTOS: PhotoKey[] = ['teclado', 'leitura', 'acordes', 'escalas', 'ritmo', 'harmonia', 'acordes', 'jazz', 'classico', 'harmonia', 'mpb', 'filmes'];

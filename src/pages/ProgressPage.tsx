@@ -12,7 +12,7 @@ import { dayKey } from '../training/progress';
 import { PLAN, UNITS } from '../course';
 import { finalPassedAt, isPassed, lessonKey, unitComplete, unitUnlocked } from '../course/progress';
 import { ALL_TRACKS, bestTechBpm, techRunId, techStatus } from '../course/track';
-import { useCourseRows } from './CourseLessonPage';
+import { useCourseRows } from '../course/useCourseRows';
 import { useRuns } from '../training/runs';
 import { bestByTreino, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyReading, weeklyTotals, type HeatCell, type WeekReading, type WeekTotal } from '../progress/stats';
 

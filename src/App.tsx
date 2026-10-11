@@ -8,7 +8,6 @@ import PracticeClock from './progress/PracticeClock';
 import AppLayout from './components/AppLayout';
 import ImmersiveFrame, { useCloseImmersive, type ImmersiveState } from './components/ImmersiveFrame';
 import TodayPage from './pages/TodayPage';
-import PracticeHubPage from './pages/PracticeHubPage';
 import PracticeSessionPage from './pages/PracticeSessionPage';
 import RepertoirePage from './pages/RepertoirePage';
 import CategoryPage from './pages/CategoryPage';
@@ -16,18 +15,17 @@ import MusiciansPage from './pages/MusiciansPage';
 import PieceFormPage from './pages/PieceFormPage';
 import PiecePage from './pages/PiecePage';
 import StudyPage from './pages/StudyPage';
-import ModulePage from './pages/ModulePage';
-import LessonPage from './pages/LessonPage';
-import ProgressPage from './pages/ProgressPage';
-import ReferencePage from './pages/ReferencePage';
-import CourseUnitPage from './pages/CourseUnitPage';
-import CourseLessonPage from './pages/CourseLessonPage';
 import { findSong } from './course';
 import AccountPage from './pages/AccountPage';
-import { CalibratePage } from './pages/TrainingExtrasPages';
+import CalibratePage from './pages/CalibratePage';
 
 // O leitor de PDF é pesado: só carrega quando você abre uma partitura.
 const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
+const PracticeHubPage = lazy(() => import('./pages/PracticeHubPage'));
+const CourseLessonPage = lazy(() => import('./pages/CourseLessonPage'));
+const CourseUnitPage = lazy(() => import('./pages/CourseUnitPage'));
+const ReferencePage = lazy(() => import('./pages/ReferencePage'));
+const ProgressPage = lazy(() => import('./pages/ProgressPage'));
 // A partitura interativa (OpenSheetMusicDisplay) também só carrega quando você estuda uma peça.
 const ScorePracticePage = lazy(() => import('./pages/ScorePracticePage'));
 
@@ -112,8 +110,6 @@ export default function App() {
             <Route path="/estudo" element={<StudyPage />} />
             <Route path="/estudo/unidade/:n" element={<CourseUnitPage />} />
             <Route path="/estudo/unidade/:n/:lessonId" element={<CourseLessonPage />} />
-            <Route path="/estudo/:moduleId" element={<ModulePage />} />
-            <Route path="/estudo/:moduleId/:lessonId" element={<LessonPage />} />
             <Route path="/progresso" element={<ProgressPage />} />
             <Route path="/consulta" element={<ReferencePage />} />
             <Route path="/consulta/:secao" element={<ReferencePage />} />

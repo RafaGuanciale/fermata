@@ -40,7 +40,7 @@ import { saveRun } from '../training/runs';
 import { canFullscreen, enterFullscreen, useFullscreenState } from '../hooks/useFullscreen';
 import { FullKeyboard, type FitMark } from '../components/KeyboardDock';
 import ThemeToggle from '../components/ThemeToggle';
-import { TakeSummary } from '../components/TimedRunner';
+import { TakeSummary } from '../components/TakeSummary';
 import { CloseIcon, ExpandIcon, MinusIcon, PlayIcon, PlugIcon, PlusIcon } from '../components/Icons';
 
 interface NoteEl {

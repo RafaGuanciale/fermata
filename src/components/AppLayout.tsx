@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import Logo from '../brand/Logo';
 import { BookIcon, ProgressIcon, PracticeIcon, RepertoireIcon, StudyIcon, TodayIcon } from './Icons';
@@ -56,7 +57,9 @@ export default function AppLayout() {
         </div>
         <main className="page__main">
           <div className="page__inner">
-            <Outlet />
+            <Suspense fallback={null}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

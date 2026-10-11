@@ -29,6 +29,8 @@ O nome vem do sinal de fermata, que manda sustentar a nota além do tempo. É a 
 - **Estudo em seis módulos** (Teclado, Leitura, Ritmo, Acordes, Escalas, Harmonia), com lições marcáveis como aprendidas. Lições prontas: teclas e oitavas, clave de sol, tríades com inversões e escala maior, todas interativas com o piano
 - **Hoje:** treino sugerido, músicas que você está aprendendo e evolução (minutos, tempo para achar a nota, acertos de primeira, nota que mais erra)
 - **Estudo (curso):** 12 unidades, cerca de 100 lições de uma hora: aquecimento de revisão espaçada, teoria em texto, exemplos que o app toca, prática guiada no teclado, checkpoint de 85% para avançar, mini-projeto e ticket de saída. Cada unidade fecha com uma música (projeto final). Plano e protocolo em `docs/curso/`
+- **Treino:** todo dia, cerca de 20 minutos, no nível da unidade do curso: aquecimento, revisão das lições, técnica com escada de andamento que continua de um dia para o outro, leitura à primeira vista e ouvido
+- **Consulta:** acordes (qualquer cifra, com inversões e reconhecimento do que você toca), escalas com dedilhado, campo harmônico e progressões, intervalos, claves, ritmo, círculo de quintas e termos, com busca
 - **Progresso:** constância (minutos por semana, dias seguidos, calendário de 16 semanas), evolução (tempo de leitura por semana, melhor andamento limpo por treino e por música), onde você trava (notas que mais erra, treinos parados, trechos difíceis das músicas) e conquistas (fases e marcos). Os minutos vêm do relógio de prática: um minuto conta quando houve alguma nota tocada
 - Tema escuro por padrão, com tema claro
 

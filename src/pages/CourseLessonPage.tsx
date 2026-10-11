@@ -2,26 +2,21 @@
 // checkpoint (portão de 85%), mini-projeto e ticket de saída. Tudo respondido no teclado.
 
 import { useCallback, useMemo, useState } from 'react';
+import { useCourseRows } from '../course/useCourseRows';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type LessonProgress } from '../db/db';
 import PianoKeyboard from '../components/PianoKeyboard';
 import { BackIcon, CheckIcon, PlayIcon } from '../components/Icons';
 import { useRuns } from '../training/runs';
 import { UNITS, findSong } from '../course';
 import {
-  LESSON_STATE_LABEL, afterCheckpoint, afterReview, canMaster, findLesson, lessonKey, lessonState, markDone, rowsById, unitUnlocked, warmupItems,
+  LESSON_STATE_LABEL, afterCheckpoint, afterReview, canMaster, findLesson, lessonKey, lessonState, markDone, unitUnlocked, warmupItems,
 } from '../course/progress';
 import type { Block, Exercise, Item } from '../course/types';
 import { RichText, Verdict, pct } from '../course/ui/shared';
 import ItemsRunner from '../course/ui/ItemsRunner';
 import { CheckpointRunner, ExerciseRunner, drawItems } from '../course/ui/ExerciseRunner';
 import { ExamplePlayer } from '../course/ui/OtherRunners';
-
-export function useCourseRows() {
-  const rows = useLiveQuery(() => db.lessons.where('id').startsWith('curso/').toArray(), []);
-  return useMemo(() => (rows ? rowsById(rows) : undefined), [rows]);
-}
 
 const CALLOUT_LABEL = { erro: 'Erro comum', porque: 'Por que soa assim', dica: 'Dica', saude: 'Saúde' } as const;
 

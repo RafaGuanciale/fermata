@@ -14,6 +14,9 @@
 
 .pianoKeyboard__white {
   position: relative;
+  /* Encolhe por igual quando não cabe; as pretas acompanham pela porcentagem. */
+  flex: 0 1 var(--key-w);
+  min-width: 0;
   width: var(--key-w);
   height: var(--key-h);
   margin: 0 1px;
@@ -33,9 +36,10 @@
 .pianoKeyboard__black {
   position: absolute;
   top: var(--space-2);
-  /* --slot = quantas teclas brancas ficam à esquerda; cada branca ocupa a largura + 2px de margem */
-  left: calc(var(--space-2) + var(--slot) * (var(--key-w) + 2px) - var(--black-w) / 2);
-  width: var(--black-w);
+  /* --slot = quantas teclas brancas ficam à esquerda; --whites = total de brancas. Proporcional à largura real do teclado. */
+  --white-span: calc((100% - 2 * var(--space-2)) / var(--whites));
+  left: calc(var(--space-2) + var(--slot) * var(--white-span) - min(var(--white-span) * 0.31, var(--black-w) / 2));
+  width: min(calc(var(--white-span) * 0.62), var(--black-w));
   height: var(--black-h);
   padding: 0 0 10px;
   border: 0;
@@ -98,5 +102,19 @@
     --key-h: 140px;
     --black-w: 24px;
     --black-h: 88px;
+  }
+}
+
+/* Muitas teclas num espaço estreito: nomes menores, e só os Dós quando aperta mais. */
+@media (max-width: 900px) {
+  .pianoKeyboard-many .pianoKeyboard__white {
+    font-size: 9px;
+    padding-bottom: 8px;
+  }
+}
+
+@media (max-width: 560px) {
+  .pianoKeyboard-many .pianoKeyboard__white:not([data-c]) > span {
+    visibility: hidden;
   }
 }
