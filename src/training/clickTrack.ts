@@ -76,15 +76,19 @@ const LATENCY_KEY = 'fermata-latency-ms';
 export function getLatency(): number | null {
   try {
     const v = localStorage.getItem(LATENCY_KEY);
-    return v === null ? null : Number(v);
+    if (v === null) return null;
+    const n = Number(v);
+    // Medidas antigas fora da faixa (antecipação, por exemplo) atrapalhariam todos os exercícios: ignora.
+    return Number.isFinite(n) && n >= -40 && n <= 200 ? n : null;
   } catch {
     return null;
   }
 }
 
-export function setLatency(ms: number) {
+export function setLatency(ms: number | null) {
   try {
-    localStorage.setItem(LATENCY_KEY, String(Math.round(ms)));
+    if (ms === null) localStorage.removeItem(LATENCY_KEY);
+    else localStorage.setItem(LATENCY_KEY, String(Math.round(ms)));
   } catch {
     // vale só agora
   }

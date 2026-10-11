@@ -225,12 +225,16 @@ export function CalibrateRunner({ onFinish }: { onFinish: (o: Outcome) => void }
   const [loud, setLoud] = useState<number[]>([]);
   const [result, setResult] = useState(getVelocityCal());
   const [error, setError] = useState(false);
+  // Para conferir que o piano está mandando a força: o último toque aparece na tela.
+  const [last, setLast] = useState<{ source: string; velocity?: number } | null>(null);
   const stage = soft.length < 6 ? 'soft' : loud.length < 6 ? 'loud' : 'done';
   const finishRef = useRef(onFinish);
   finishRef.current = onFinish;
 
   useEffect(() => subscribe((e) => {
-    if (e.type !== 'on' || e.velocity === undefined) return;
+    if (e.type !== 'on') return;
+    setLast({ source: e.source, velocity: e.velocity });
+    if (e.velocity === undefined) return;
     if (stage === 'soft') setSoft((s) => [...s, e.velocity!]);
     else if (stage === 'loud') {
       const next = [...loud, e.velocity];
@@ -264,6 +268,18 @@ export function CalibrateRunner({ onFinish }: { onFinish: (o: Outcome) => void }
       {stage === 'soft' && <Verdict tone="neutral">Toque 6 notas quaisquer o mais leve que conseguir, sem a nota falhar ({soft.length} de 6)</Verdict>}
       {stage === 'loud' && <Verdict tone="neutral">Agora 6 notas fortes, com o peso do braço, sem bater ({loud.length} de 6)</Verdict>}
       {stage === 'done' && result && !error && <Verdict tone="hit">Calibrado: leve perto de {result.soft}, forte perto de {result.loud} (escala MIDI de 1 a 127)</Verdict>}
+      {last && stage !== 'done' && (
+        <p className="runner__note">
+          {last.velocity !== undefined
+            ? `Último toque: força ${last.velocity} (de 1 a 127).`
+            : last.source === 'midi'
+              ? 'O piano mandou a nota sem a força. Confira se a sensibilidade ao toque (touch) do piano não está desligada ou fixa.'
+              : 'Esse toque veio do teclado da tela ou do computador, que não têm força. Toque no piano.'}
+        </p>
+      )}
+      {stage !== 'soft' && !error && (
+        <button className="linkButton" type="button" onClick={() => { setSoft([]); setLoud([]); setError(false); }}>Calibrar de novo</button>
+      )}
       {error && (
         <>
           <Verdict tone="miss">Leve e forte ficaram parecidos demais. Exagere a diferença.</Verdict>

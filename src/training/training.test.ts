@@ -80,3 +80,14 @@ describe('escada de BPM', () => {
   });
 });
 
+
+describe('relatório do atraso', () => {
+  it('aceita atraso normal e recusa antecipação ou toques espalhados', async () => {
+    const { latencyReport } = await import('./timing');
+    const beats = Array.from({ length: 12 }, (_, i) => i * 750);
+    expect(latencyReport(beats.map((b) => b + 35), beats)).toMatchObject({ ms: 35, usable: true });
+    expect(latencyReport(beats.map((b) => b - 157), beats)).toMatchObject({ ms: -157, usable: false, reason: 'early' });
+    const messy = beats.map((b, i) => b + (i % 2 ? 140 : -60));
+    expect(latencyReport(messy, beats)?.reason).toBe('spread');
+  });
+});

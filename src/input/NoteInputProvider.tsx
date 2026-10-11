@@ -81,11 +81,13 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
           input.onmidimessage = (e) => {
             if (!e.data) return;
             const ev = parseMidiMessage(e.data);
-            // O carimbo do MIDI é mais preciso que a hora em que o navegador entrega a mensagem.
-            if (ev) emit(ev.type, ev.midi, 'midi', e.timeStamp || performance.now(), ev.velocity);
+            // O carimbo do MIDI é mais preciso que a hora da entrega, mas em alguns sistemas (Windows) ele vem
+            // noutro relógio. Só vale se cair nos últimos 40 ms; senão, usa a hora em que a mensagem chegou.
+            const now = performance.now();
+            const at = e.timeStamp && e.timeStamp <= now + 1 && now - e.timeStamp < 40 ? e.timeStamp : now;
+            if (ev) emit(ev.type, ev.midi, 'midi', at, ev.velocity);
             const pedal = ev ? null : parsePedalMessage(e.data);
             if (pedal) {
-              const at = e.timeStamp || performance.now();
               pedalListeners.current.forEach((l) => l({ down: pedal.down, at }));
             }
           };

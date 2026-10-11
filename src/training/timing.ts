@@ -193,3 +193,27 @@ export function latencyFromTaps(taps: number[], beats: number[]): number | null 
   const median = diffs.length % 2 ? diffs[mid] : (diffs[mid - 1] + diffs[mid]) / 2;
   return Math.round(median);
 }
+
+/** Faixa aceitável de atraso (ms): negativo demais é antecipação; positivo demais é medida ruim. */
+export const LATENCY_RANGE = { min: -40, max: 200 } as const;
+
+/**
+ * Relatório da medida de atraso: a mediana, a dispersão (diferença entre o 1º e o 3º quartil) e se dá para usar.
+ * Antecipar o clique dá número negativo; toques espalhados demais (mais de 80 ms) também não servem.
+ */
+export function latencyReport(taps: number[], beats: number[]): { ms: number; spread: number; n: number; usable: boolean; reason?: 'early' | 'late' | 'spread' } | null {
+  const ms = latencyFromTaps(taps, beats);
+  if (ms === null) return null;
+  const diffs: number[] = [];
+  for (const t of taps) {
+    let best = Infinity;
+    for (const b of beats) if (Math.abs(t - b) < Math.abs(best)) best = t - b;
+    if (Math.abs(best) <= 250) diffs.push(best);
+  }
+  diffs.sort((a, b) => a - b);
+  const q = (f: number) => diffs[Math.min(diffs.length - 1, Math.floor(f * (diffs.length - 1)))];
+  const spread = Math.round(q(0.75) - q(0.25));
+  const reason = ms < LATENCY_RANGE.min ? 'early' : ms > LATENCY_RANGE.max ? 'late' : spread > 80 ? 'spread' : undefined;
+  return { ms, spread, n: diffs.length, usable: !reason, reason };
+}
+

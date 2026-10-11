@@ -1,10 +1,9 @@
 // Ajustar o atraso do piano: o aluno toca junto com o clique e o app mede a diferença (vale para tudo que é no tempo).
 
 import { useRef, useState, type ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { useNoteInput, useNoteOn, midiStatusLabel } from '../input/useNoteInput';
 import { getLatency, scheduleTrack, setLatency } from '../training/clickTrack';
-import { latencyFromTaps } from '../training/timing';
+import { latencyReport } from '../training/timing';
 import { canFullscreen, enterFullscreen, useFullscreenState } from '../hooks/useFullscreen';
 import ThemeToggle from '../components/ThemeToggle';
 import { CloseIcon, ExpandIcon, PlugIcon } from '../components/Icons';
@@ -15,10 +14,11 @@ const CAL_BPM = 80;
 const CAL_BEATS = 12;
 
 export default function CalibratePage({ onClose }: { onClose: () => void }) {
-  const location = useLocation();
   const [state, setState] = useState<'idle' | 'running' | 'done'>('idle');
-  const [value, setValue] = useState<number | null>(getLatency());
+  const [saved, setSaved] = useState<number | null>(getLatency());
+  const [report, setReport] = useState<ReturnType<typeof latencyReport>>(null);
   const [error, setError] = useState<string | null>(null);
+  const [beat, setBeat] = useState(0);
   const tapsRef = useRef<number[]>([]);
   const beatsRef = useRef<number[]>([]);
   const firstRef = useRef(0);
@@ -34,16 +34,24 @@ export default function CalibratePage({ onClose }: { onClose: () => void }) {
     firstRef.current = track.firstBeat;
     beatsRef.current = Array.from({ length: CAL_BEATS }, (_, i) => i * track.beatMs);
     setError(null);
+    setReport(null);
+    setBeat(-4);
     setState('running');
+    // Contagem na tela: 4, 3, 2, 1 e depois os toques.
+    const tick = window.setInterval(() => setBeat(Math.floor((performance.now() - track.firstBeat) / track.beatMs)), 50);
     window.setTimeout(() => {
-      const ms = latencyFromTaps(tapsRef.current, beatsRef.current);
-      if (ms === null) {
+      window.clearInterval(tick);
+      const r = latencyReport(tapsRef.current, beatsRef.current);
+      if (r === null) {
         setError('Não deu para medir: toque junto com cada clique depois da contagem. Tente de novo.');
         setState('idle');
         return;
       }
-      setLatency(ms);
-      setValue(ms);
+      setReport(r);
+      if (r.usable) {
+        setLatency(r.ms);
+        setSaved(r.ms);
+      }
       setState('done');
     }, track.firstBeat - performance.now() + CAL_BEATS * track.beatMs + 400);
   };
@@ -52,19 +60,53 @@ export default function CalibratePage({ onClose }: { onClose: () => void }) {
     <Shell eyebrow="Treino no tempo" title="Ajustar o atraso do piano" onClose={onClose}>
       <div className="training__done">
         <p className="training__how">
-          Entre o piano, o cabo e o computador sempre existe um pequeno atraso. Toque qualquer tecla junto com cada clique depois dos 4 da contagem, 12 vezes. O app mede a diferença e desconta nos treinos.
+          Entre o piano, o cabo e o computador sempre existe um pequeno atraso. Depois da contagem de 4, toque qualquer tecla <strong>quando ouvir</strong> cada clique, 12 vezes. Não tente adivinhar o clique: toque no som dele. O app mede a diferença e desconta em todos os exercícios no tempo.
         </p>
         {error && <p className="form__error">{error}</p>}
-        {state === 'running' ? (
-          <p className="timed__count">Toque junto com o clique</p>
-        ) : (
-          <button className="button button-primary" type="button" onClick={start}>
-            {value === null ? 'Começar' : 'Medir de novo'}
-          </button>
+
+        {state === 'running' && (
+          <p className="timed__count" aria-live="polite">
+            {beat < 0 ? Math.max(1, -beat) : `Toque junto com o clique · ${Math.min(CAL_BEATS, beat + 1)} de ${CAL_BEATS}`}
+          </p>
         )}
-        {value !== null && state !== 'running' && (
-          <p className="training__message">
-            Atraso medido: <strong>{value} ms</strong>. {state === 'done' && <Link to="/treino" state={location.state}>Voltar ao treino</Link>}
+
+        {state === 'done' && report && (
+          <div className={'training__message' + (report.usable ? '' : ' training__message-warn')}>
+            {report.usable ? (
+              <>
+                <p><strong>Pronto: {report.ms} ms de atraso.</strong> O app já desconta esse tempo nos exercícios no tempo, no Treino e no "Tocar a música".</p>
+                <p className="runner__note">Seus toques variaram {report.spread} ms entre si{report.spread <= 40 ? ': medida firme.' : '. Se quiser uma medida mais firme, meça de novo com calma.'}</p>
+              </>
+            ) : report.reason === 'early' ? (
+              <p><strong>A medida deu {report.ms} ms: você tocou antes do clique.</strong> Isso é antecipação, muito comum: a mão tenta adivinhar o próximo clique. Meça de novo tocando só quando o som chegar. Esta medida não foi guardada.</p>
+            ) : report.reason === 'late' ? (
+              <p><strong>A medida deu {report.ms} ms, alto demais para o cabo.</strong> Confira se o som do computador sai por fone Bluetooth (ele atrasa muito o clique). Use o alto-falante ou um fone com fio e meça de novo. Esta medida não foi guardada.</p>
+            ) : (
+              <p><strong>Os toques ficaram espalhados demais ({report.spread} ms entre si).</strong> Meça de novo, com calma, tocando sempre no som do clique. Esta medida não foi guardada.</p>
+            )}
+          </div>
+        )}
+
+        {state !== 'running' && (
+          <div className="runner__actions">
+            {state === 'done' && report?.usable ? (
+              <>
+                <button className="button button-primary" type="button" onClick={onClose}>Concluir</button>
+                <button className="button button-secondary" type="button" onClick={start}>Medir de novo</button>
+              </>
+            ) : (
+              <>
+                <button className="button button-primary" type="button" onClick={start}>{state === 'done' ? 'Medir de novo' : 'Começar'}</button>
+                {state === 'done' && <button className="button button-secondary" type="button" onClick={onClose}>Fechar</button>}
+              </>
+            )}
+          </div>
+        )}
+
+        {state === 'idle' && saved !== null && (
+          <p className="runner__note">
+            Atraso guardado neste aparelho: {saved} ms.{' '}
+            <button className="linkButton" type="button" onClick={() => { setLatency(null); setSaved(null); }}>Zerar</button>
           </p>
         )}
       </div>
