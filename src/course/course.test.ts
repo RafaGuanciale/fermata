@@ -583,3 +583,13 @@ describe('vozes conduzidas para o app tocar', () => {
     expect(i2).toEqual([48, 64, 67, 72]);
   });
 });
+
+describe('paralelas', () => {
+  it('acha 5ª e oitava paralela com o baixo, e não acusa o movimento contrário', async () => {
+    const { hasParallels } = await import('./judge');
+    // IV → V com a direita subindo junto com o baixo: Fá–Dó (5ª) vira Sol–Ré (5ª).
+    expect(hasParallels([41, 65, 69, 72], [43, 67, 71, 74])).toBe(true);
+    // Direita descendo enquanto o baixo sobe: sem paralelas.
+    expect(hasParallels([41, 65, 69, 72], [43, 62, 67, 71])).toBe(false);
+  });
+});

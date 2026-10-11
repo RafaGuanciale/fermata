@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Midi } from '../music/notes';
 import { UNITS } from '.';
-import { articulationScore, judgeTask, pedalOnsets, pedalScore, pressItem, scoreImprov, startItem, voiceMove, type CourseEvent, type ItemProgress } from './judge';
+import { articulationScore, hasParallels, judgeTask, pedalOnsets, pedalScore, pressItem, scoreImprov, startItem, voiceMove, type CourseEvent, type ItemProgress } from './judge';
 import { pcOf, seeded } from './music';
 import type { Accept, Exercise, Item, Pc, TimedTask, Unit } from './types';
 
@@ -28,16 +28,26 @@ function playChord(accept: Extract<Accept, { kind: 'chord' }>, prev: Midi[] | un
   if (accept.lead !== undefined && prev?.length) {
     const withBass = accept.bass !== undefined && prev.length === pcs.length + 1;
     const prevUpper = withBass ? prev.slice(1) : prev;
+    const withLowBass = (v: Midi[]) => [Math.min(...v) - 12 - ((pcOf(Math.min(...v)) - accept.bass! + 12) % 12), ...v].sort((a, b) => a - b);
+    // Baixo perto do anterior (andando pouco), como a esquerda faria.
+    const placeBass = (v: Midi[]) => {
+      const full = withLowBass(v);
+      const b0 = prev[0];
+      const cands = [-12, 0, 12].map((o) => full[0] + o).filter((b) => b < Math.min(...v));
+      const bass = cands.sort((x, y) => Math.abs(x - b0) - Math.abs(y - b0))[0] ?? full[0];
+      return [bass, ...v].sort((a, b) => a - b);
+    };
     let best: Midi[] = [];
     let bestMove = Infinity;
     for (const v of voicings(pcs, Math.round(prevUpper.reduce((a, b) => a + b, 0) / prevUpper.length))) {
       const m = voiceMove(prevUpper, v);
+      if (withBass && accept.bass === accept.pcs[0] && hasParallels(prev, placeBass(v))) continue;
       if (m < bestMove) {
         best = v;
         bestMove = m;
       }
     }
-    if (withBass) return [Math.min(...best) - 12 - ((pcOf(Math.min(...best)) - accept.bass! + 12) % 12), ...best].sort((a, b) => a - b);
+    if (withBass) return placeBass(best);
     return best;
   }
   const upper = voicings(pcs, center)[0] ?? [];

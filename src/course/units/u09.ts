@@ -41,22 +41,22 @@ const ALBERTI_Q: ChoiceQuestion[] = [
 const FOUR_Q: ChoiceQuestion[] = [
   { q: 'Quintas paralelas acontecem quando…', options: ['Duas vozes a uma 5ª justa se movem para outra 5ª justa', 'Duas vozes ficam paradas', 'Uma voz salta uma 5ª'], answer: 0, why: 'Dó–Sol → Ré–Lá: as duas vozes "grudam" e perdem a independência.' },
   { q: 'Movimento contrário é…', options: ['Uma voz sobe e a outra desce', 'As duas sobem', 'Uma fica parada'], answer: 0, why: 'É o melhor remédio contra paralelas.' },
-  { q: 'Movimento oblíquo é…', options: ['Uma voz fica e a outra se move', 'As duas se movem na mesma direção', 'As duas se cruzam'], answer: 0, why: 'Notas comuns parados = movimento oblíquo.' },
+  { q: 'Movimento oblíquo é…', options: ['Uma voz fica e a outra se move', 'As duas se movem na mesma direção', 'As duas se cruzam'], answer: 0, why: 'Nota comum parada e a outra andando = movimento oblíquo.' },
   { q: 'No "estilo teclado" a quatro vozes…', options: ['O baixo fica na esquerda e as três outras vozes na direita', 'Cada mão toca duas vozes', 'Só a direita toca'], answer: 0, why: 'A direita conduz como na lição 44; a esquerda faz o baixo.' },
   { q: 'Qual nota se dobra (aparece duas vezes) num acorde de 4 vozes em posição fundamental?', options: ['De preferência a fundamental', 'A 3ª', 'A sensível'], answer: 0, why: 'A sensível nunca se dobra: ela tem um caminho só (subir para a tônica).' },
 ];
 
 // ---------- notas estranhas ----------
 
-const STRANGE: { chord: string; notes: Midi[]; strange: Midi[]; kind: StrangeKind }[] = [
+const STRANGE: { chord: string; notes: Midi[]; strange: Midi[]; kind: StrangeKind; prev?: { chord: string; note: Midi }; next?: { chord: string; note: Midi } }[] = [
   { chord: 'C', notes: [64, 65, 67, 64], strange: [65], kind: 'passagem' },
   { chord: 'C', notes: [67, 65, 64, 60], strange: [65], kind: 'passagem' },
   { chord: 'F', notes: [69, 70, 69, 65], strange: [70], kind: 'bordadura' },
   { chord: 'C', notes: [64, 62, 64, 67], strange: [62], kind: 'bordadura' },
   { chord: 'C', notes: [74, 72, 67, 64], strange: [74], kind: 'apojatura' },
   { chord: 'G', notes: [69, 67, 71, 74], strange: [69], kind: 'apojatura' },
-  { chord: 'C', notes: [65, 64, 67, 72], strange: [65], kind: 'retardo' },
-  { chord: 'G', notes: [62, 67, 71, 72], strange: [72], kind: 'antecipação' },
+  { chord: 'C', notes: [65, 64, 67, 72], strange: [65], kind: 'retardo', prev: { chord: 'G7', note: 65 } },
+  { chord: 'G', notes: [62, 67, 71, 72], strange: [72], kind: 'antecipação', next: { chord: 'C', note: 72 } },
   { chord: 'C', notes: [64, 65, 60, 64], strange: [65], kind: 'escapada' },
   { chord: 'Am', notes: [69, 71, 72, 74, 76], strange: [71, 74], kind: 'passagem' },
 ];
@@ -118,7 +118,7 @@ E uma especial:
       title: 'Ornamentar uma melodia',
       body: `Agora o caminho inverso: pegar uma melodia "seca", só com notas do acorde, e enfeitá-la com notas estranhas, como fazem os compositores e os improvisadores.
 
-Melodia seca sobre C – F – G – C: **Mi** (2 tempos) **Mi** | **Fá** (2) **Lá** | **Sol** (2) **Ré** | **Dó** (4).
+Melodia seca sobre C – F – G – C: **Mi** (2 tempos) **Sol** | **Fá** (2) **Lá** | **Sol** (2) **Sol** | **Mi** (4).
 
 Ornamentada: Mi–**Fá**–Sol–Mi | Fá–**Sol**–Lá–Fá | Sol–**Lá**–Sol–**Fá** | Mi... As notas em negrito são passagens e bordaduras, todas em **tempo fraco**: o desenho de cada compasso continua apoiado na nota do acorde no tempo 1.
 
@@ -175,7 +175,7 @@ A mão fica **parada** e os dedos só giram, como uma roda. O polegar, que toca 
     {
       kind: 'text',
       title: 'A melodia por cima',
-      body: `Com as duas mãos, aparece o desafio central do piano clássico: **equilíbrio**. A esquerda toca quatro notas para cada nota da direita; se as duas mãos tocarem com a mesma força, o acompanhamento engole a melodia.
+      body: `Com as duas mãos, aparece o desafio central do piano clássico: **equilíbrio**. A esquerda toca duas a quatro notas para cada nota da direita; se as duas mãos tocarem com a mesma força, o acompanhamento engole a melodia.
 
 A solução é tocar as mãos em **dinâmicas diferentes ao mesmo tempo**: a direita em **mf**, cantando, com o peso do braço; a esquerda em **p**, com os dedos perto das teclas. No começo isso parece impossível. Treine assim:
 
@@ -255,7 +255,7 @@ Você já sabe metade disso: a direita conduzindo as vozes (lição 44) e a esqu
 - **Contrário**: uma sobe, a outra desce.
 - **Oblíquo**: uma fica, a outra anda.
 
-A regra mais famosa da harmonia tradicional: **nada de 5ªs nem 8ªs paralelas**. Se duas vozes estão a uma 5ª justa (ou oitava) e andam juntas para outra 5ª (ou oitava), elas soam como uma voz só, "engrossada", e a textura perde a independência. É por isso que o pop está cheio de 5ªs paralelas (o "power chord" do rock) e Bach evita todas.
+A regra mais famosa da harmonia tradicional: **nada de 5ªs nem 8ªs paralelas**. Se duas vozes estão a uma 5ª justa (ou oitava) e andam juntas para outra 5ª (ou oitava), elas soam como uma voz só, "engrossada", e a textura perde a independência. O rock usa isso de propósito (o "power chord" soa grosso); a harmonia tradicional evita, para manter as vozes independentes.
 
 O remédio é o **movimento contrário**: quando o baixo sobe, a direita desce, e vice-versa. No I–IV–V–I com a direita conduzida, isso já acontece quase sozinho.`,
     },
@@ -276,7 +276,7 @@ O remédio é o **movimento contrário**: quando o baixo sobe, a direita desce, 
       kind: 'callout',
       tone: 'porque',
       title: 'o que o app mede e o que não mede',
-      body: 'O app confere o baixo, as notas do acorde e o movimento total da direita. As paralelas ele ainda não procura sozinho: com a direita conduzida pelo caminho mais curto e o baixo andando ao contrário, elas quase nunca aparecem. Se quiser conferir, toque devagar e olhe a voz de cima contra o baixo.',
+      body: 'O app confere o baixo, as notas do acorde, o movimento total da direita e as 5ªs e oitavas paralelas entre o baixo e cada voz de cima. O caso clássico é o IV → V: o baixo sobe (Fá → Sol), então a direita tem de descer (Fá–Lá–Dó → Ré–Sol–Si). Se a direita subir junto, dá paralelas e o app marca.',
     },
     { kind: 'exercise', id: 'l68-quiz', exercise: quiz('Quatro vozes', 'Cinco perguntas rápidas.', FOUR_Q) },
   ],
@@ -403,7 +403,7 @@ const ORN_Q: ChoiceQuestion[] = [
   { q: 'A apojatura (ornamento) dura…', options: ['Uma boa parte do valor da nota principal, no tempo', 'Quase nada', 'O dobro da nota'], answer: 0, why: 'Ao contrário da acciaccatura, ela "pesa" no tempo forte.' },
 ];
 
-const TRILL = 'D5:0.25 C5:0.25 D5:0.25 C5:0.25 D5:0.25 C5:0.25 D5:0.25 C5:0.25 B4:0.25 C5:0.25 D5:0.5 C5:1 | C5:4';
+const TRILL = 'D5:0.25 C5:0.25 D5:0.25 C5:0.25 D5:0.25 C5:0.25 D5:0.25 C5:0.25 B4:0.25 C5:0.25 C5:1.5 | r:4';
 const MORDENT = 'C5:0.25 D5:0.25 C5:1.5 G4:2 | E5:0.25 F5:0.25 E5:1.5 C5:2 | D5:0.25 C5:0.25 B4:0.25 C5:0.25 D5:1 G4:2 | C5:4';
 
 const l70: Lesson = {
@@ -422,7 +422,7 @@ const l70: Lesson = {
       title: 'Os enfeites da música antiga',
       body: `Na música barroca e clássica, os compositores escreviam pequenos sinais sobre as notas para pedir **ornamentos**: enfeites rápidos que o intérprete toca a partir da nota escrita. Os cinco mais comuns:
 
-- **Trinado** (tr): alternar rápido a nota com a **vizinha de cima**. No barroco (Bach), começa pela nota de cima; no clássico e depois, em geral, pela própria nota.
+- **Trinado** (tr): alternar rápido a nota com a **vizinha de cima**. No barroco e no clássico, em geral começa pela nota de cima; a partir do século XIX, pela própria nota.
 - **Mordente** (um zigue-zague curto): nota, **vizinha de cima**, nota, bem rápido, no tempo. É um "trinado de três notas". Com um risco vertical, é o mordente **inferior** (vizinha de baixo).
 - **Grupeto** (um S deitado, ∽): vizinha de cima, nota, vizinha de baixo, nota. Em Dó: Ré–Dó–Si–Dó.
 - **Apojatura** (notinha sem risco): uma nota "de apoio" que **ocupa uma parte do tempo** da principal, no tempo forte, e resolve nela (como a apojatura da lição 66).
@@ -445,7 +445,7 @@ O app mede o resultado escrito por extenso: as notas rápidas aparecem como semi
       title: 'Trinado igual',
       body: `O trinado bom é **igual**: as notas do mesmo tamanho, como um zumbido regular. O desigual soa como um tropeço repetido.
 
-Use dois dedos **não vizinhos de força parecida**: **2–3** ou **1–3** na direita costumam funcionar melhor que 3–4. Movimento pequeno, dedos perto da tecla, e a rotação do antebraço ajudando (um leve balanço de um lado para o outro, como girar uma maçaneta).
+Use dois dedos **fortes**: **1–3**, **2–4** ou **2–3** na direita costumam funcionar melhor que 3–4 ou 4–5. Movimento pequeno, dedos perto da tecla, e a rotação do antebraço ajudando (um leve balanço de um lado para o outro, como girar uma maçaneta).
 
 Comece devagar, em semicolcheias medidas, e só acelere quando ficar igual. O exercício mede a variação entre as notas: a meta é ficar abaixo de **30 ms**, com pelo menos 6 notas seguidas.`,
     },
@@ -478,15 +478,24 @@ O arranjo do curso tem só a primeira parte, com a esquerda em notas longas. No 
   exit: [choice(ORN_Q, 'ornamentos')],
 };
 
-// Frère Jacques (canção folclórica francesa) em cânone entre as mãos: a esquerda entra 2 compassos depois, uma oitava abaixo.
+// Frère Jacques (canção folclórica francesa) em cânone entre as mãos: a esquerda entra 2 compassos depois, duas oitavas abaixo
+// (a direita em Dó5, a esquerda em Dó3: separadas assim, as mãos nunca disputam a mesma tecla).
 const FJ = ['C4 D4 E4 C4', 'C4 D4 E4 C4', 'E4 F4 G4:2', 'E4 F4 G4:2', 'G4:0.5 A4:0.5 G4:0.5 F4:0.5 E4 C4', 'G4:0.5 A4:0.5 G4:0.5 F4:0.5 E4 C4', 'C4 G3 C4:2', 'C4 G3 C4:2'];
 const down = (bar: string) => bar.replace(/([A-G]#?b?)(\d)/g, (_, l: string, o: string) => `${l}${Number(o) - 1}`);
-const CANON_R = [...FJ, 'C4:4', 'C4:4'].join(' | ');
+const up = (bar: string) => bar.replace(/([A-G]#?b?)(\d)/g, (_, l: string, o: string) => `${l}${Number(o) + 1}`);
+const CANON_R = [...FJ, 'C4:4', 'C4:4'].map(up).join(' | ');
 const CANON_L = ['r:4', 'r:4', ...FJ.map(down)].join(' | ');
 
-const POLY_Q: ChoiceQuestion[] = [
+/** Cânone e imitação: lição 71. */
+const CANON_Q: ChoiceQuestion[] = [
   { q: 'Num cânone, a segunda voz…', options: ['Repete a primeira, entrando depois', 'Toca outra melodia', 'Toca só acordes'], answer: 0, why: 'Como numa ronda cantada: "Frère Jacques" é um cânone.' },
   { q: 'Imitação é…', options: ['Uma voz repetir o motivo da outra, às vezes em outra altura', 'Tocar igual ao professor', 'Duas vozes juntas em oitava'], answer: 0, why: 'É a base do contraponto de Bach.' },
+  { q: 'Para estudar duas vozes independentes, o melhor começo é…', options: ['Cada mão sozinha, cantando a outra voz', 'Mãos juntas no andamento final', 'Só a mão direita'], answer: 0, why: 'Cantar uma voz enquanto toca a outra faz o ouvido seguir as duas.' },
+  { q: 'No contraponto, a harmonia…', options: ['Nasce do encontro das melodias', 'Vem de acordes em bloco na esquerda', 'Não existe'], answer: 0, why: 'Duas melodias juntas formam intervalos, e os intervalos formam a harmonia.' },
+];
+
+/** 2 contra 3 e saltos: lição 72. */
+const POLY_Q: ChoiceQuestion[] = [
   { q: '2 contra 3 cabe numa grade de…', options: ['6 partes por tempo', '5 partes', '4 partes'], answer: 0, why: 'O menor múltiplo comum de 2 e 3.' },
   { q: 'Na grade de 6, as 3 notas caem em…', options: ['1, 3 e 5', '1, 4', '1, 2 e 3'], answer: 0, why: 'E as 2 notas em 1 e 4. Juntas: 1 (as duas), 3, 4, 5.' },
   { q: 'Para acertar um salto grande no tempo, o mais importante é…', options: ['Olhar e mover o braço antes, com a mão já em forma', 'Esticar o dedo', 'Tocar mais forte'], answer: 0, why: 'Os olhos chegam primeiro, o braço leva a mão pronta.' },
@@ -499,7 +508,7 @@ const l71: Lesson = {
   minutes: 60,
   objectives: [
     'Consigo tocar duas melodias independentes, uma em cada mão, com ritmos diferentes.',
-    'Consigo tocar um cânone entre as mãos com 85% das notas certas em cada mão.',
+    'Consigo tocar um cânone entre as mãos com 85% das notas certas.',
   ],
   blocks: [
     {
@@ -521,25 +530,25 @@ O jeito mais simples de começar é a **imitação**: uma voz apresenta um motiv
 3. Toque uma mão e **cante** a outra. Depois troque.
 4. Junte de novo, prestando atenção nos pontos em que as duas mãos atacam **juntas**: eles são o "esqueleto" que segura a coordenação.
 
-No cânone desta lição, a esquerda entra **2 compassos depois**, uma oitava abaixo. Nos compassos 5 e 6, a direita está nas colcheias enquanto a esquerda está nas mínimas: é o trecho mais difícil.`,
+No cânone desta lição, a esquerda entra **2 compassos depois**, duas oitavas abaixo. Nos compassos 5 e 6, a direita está nas colcheias enquanto a esquerda toca semínimas e mínimas: é o trecho mais difícil.`,
     },
     {
       kind: 'example',
       title: 'O cânone',
       steps: [
-        { say: 'Primeiro a direita sozinha, depois a esquerda entrando no compasso 3, uma oitava abaixo.', play: { bpm: 100, steps: [[60], [62], [64], [60], [60], [62], [64], [60], [64, 48], [65, 50], [67, 52], [], [64, 48], [65, 50], [67, 52], []].map((midis) => ({ midis, beats: 1 })) } },
+        { say: 'Primeiro a direita sozinha, depois a esquerda entrando no compasso 3, duas oitavas abaixo.', play: { bpm: 100, steps: [[72], [74], [76], [72], [72], [74], [76], [72], [76, 48], [77, 50], [79, 52], [48], [76, 48], [77, 50], [79, 52], [48]].map((midis) => ({ midis, beats: 1 })) } },
       ],
     },
     { kind: 'exercise', id: 'l71-me', exercise: quickTimed('A esquerda sozinha', 'A melodia uma oitava abaixo, de 72 a 88 BPM.', () => melodyTask(FJ.map(down).join(' | '), { bpm: 72, clef: 'bass' }), { ladder: { from: 72, to: 88, step: 8 } }) },
-    { kind: 'exercise', id: 'l71-canone', exercise: quickTimed('O cânone, duas mãos', '10 compassos, de 66 a 84 BPM. Ouça as duas melodias.', () => twoHandTask(CANON_R, CANON_L, { bpm: 66, caption: 'A pauta mostra a direita. A esquerda entra no compasso 3 com a mesma melodia, uma oitava abaixo.' }), { ladder: { from: 66, to: 84, step: 6 }, window: 80 }) },
+    { kind: 'exercise', id: 'l71-canone', exercise: quickTimed('O cânone, duas mãos', '10 compassos, de 66 a 84 BPM. Ouça as duas melodias.', () => twoHandTask(CANON_R, CANON_L, { bpm: 66, caption: 'A pauta mostra a direita. A esquerda entra no compasso 3 com a mesma melodia, duas oitavas abaixo.' }), { ladder: { from: 66, to: 84, step: 6 }, window: 80 }) },
     { kind: 'song', songId: 'u09-canone', why: 'O cânone na pauta dupla: dá para ver a imitação.' },
-    { kind: 'exercise', id: 'l71-quiz', exercise: quiz('Contraponto e polirritmia', 'Cinco perguntas rápidas.', POLY_Q) },
+    { kind: 'exercise', id: 'l71-quiz', exercise: quiz('Contraponto', 'Quatro perguntas rápidas.', CANON_Q, 0.75) },
   ],
-  review: [choice(POLY_Q, 'contraponto')],
+  review: [choice(CANON_Q, 'contraponto')],
   checkpoint: [
     quickTimed('Cânone a 84 BPM', 'Duas mãos, sem dicas. Meta: 85%.', () => twoHandTask(CANON_R, CANON_L, { bpm: 84 }), { window: 80 }),
   ],
-  exit: [choice(POLY_Q, 'contraponto')],
+  exit: [choice(CANON_Q, 'contraponto')],
 };
 
 // 2 contra 3: direita em tercinas, esquerda em colcheias, sobre Dó e Sol.
@@ -599,6 +608,7 @@ Juntando as duas mãos, o desenho é: **1** (as duas juntas), **3** (direita), *
 Comece devagar, a ponto de não errar nenhum salto; a velocidade vem da segurança.`,
     },
     { kind: 'exercise', id: 'l72-saltos', exercise: quickTimed('Saltos na esquerda', 'Baixo grave no tempo, acorde no meio do teclado no tempo seguinte. De 56 a 76 BPM.', () => melodyTask(JUMPS, { bpm: 56, clef: 'bass' }), { ladder: { from: 56, to: 76, step: 5 }, window: 80 }) },
+    { kind: 'exercise', id: 'l72-quiz', exercise: quiz('2 contra 3 e saltos', 'Três perguntas rápidas.', POLY_Q, 0.66) },
   ],
   review: [choice(POLY_Q, 'contraponto')],
   checkpoint: [
@@ -644,14 +654,14 @@ O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma música 
     },
     { kind: 'song', songId: 'u09-minueto', why: 'O projeto final: toque com as duas mãos até 95% das notas no andamento que escolher (a referência é 96 BPM).' },
   ],
-  review: [strangePlay, fourVoices, choice([...STRANGE_Q, ...ORN_Q, ...POLY_Q])],
+  review: [strangePlay, fourVoices, choice([...STRANGE_Q, ...ORN_Q, ...CANON_Q, ...POLY_Q])],
   checkpoint: [
-    items('Checkpoint da unidade 9', '20 perguntas: notas estranhas, quatro vozes, ornamentos, contraponto e primeira vista. Meta: 85%.', mix([strangePlay, strangeName, fourVoices, choice([...STRANGE_Q, ...ALBERTI_Q, ...FOUR_Q, ...SIGHT_Q, ...ORN_Q, ...POLY_Q])]), 20, 36, 84, 0.85, 'off'),
+    items('Checkpoint da unidade 9', '20 perguntas: notas estranhas, quatro vozes, ornamentos, contraponto e primeira vista. Meta: 85%.', mix([strangePlay, strangeName, fourVoices, choice([...STRANGE_Q, ...ALBERTI_Q, ...FOUR_Q, ...SIGHT_Q, ...ORN_Q, ...CANON_Q, ...POLY_Q])]), 20, 36, 84, 0.85, 'off'),
     quickTimed('Primeira vista', '8 compassos novos a 56 BPM, duas mãos.', sight2(56)),
   ],
   project: {
     title: 'Música clássica com análise',
-    brief: `Toque o **Minueto em Sol** inteiro (16 compassos, duas mãos) com 95% das notas, no andamento que você escolher (a referência é 96 BPM). Grave, e escreva a análise: forma, graus, cadências e notas estranhas.`,
+    brief: `Toque a primeira parte do **Minueto em Sol** (16 compassos, duas mãos) com 95% das notas, a 84 BPM ou mais (a referência é 96 BPM). Grave, e escreva a análise: forma, graus, cadências e notas estranhas.`,
     steps: [
       'Estude mãos separadas no modo Estudar até não errar.',
       'Junte as mãos devagar (72 BPM) e suba até o seu andamento.',
@@ -660,7 +670,7 @@ O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma música 
       'Escreva a análise: graus de cada compasso, as duas cadências, três notas estranhas com o nome.',
     ],
     rubric: [
-      '95% das notas no andamento escolhido.',
+      '95% das notas, a 84 BPM ou mais.',
       'Dinâmica: frases com começo, meio e fim; a melodia acima da esquerda.',
       'Articulação: colcheias ligadas, semínimas levemente destacadas, como numa dança.',
       'A análise de forma e de harmonia está correta.',
@@ -674,7 +684,7 @@ const canon: SongSpec = {
   id: 'u09-canone',
   title: 'Cânone de Frère Jacques',
   composer: 'canção folclórica francesa',
-  arrangement: 'arranjo do Fermata: cânone entre as mãos, a esquerda entra 2 compassos depois, uma oitava abaixo',
+  arrangement: 'arranjo do Fermata: cânone entre as mãos, a esquerda entra 2 compassos depois, duas oitavas abaixo',
   bpm: 84,
   beatsPerBar: 4,
   fifths: 0,

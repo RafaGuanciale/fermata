@@ -214,7 +214,7 @@ export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requ
     const symbol = pick(rng, opts.symbols);
     const c = parseChord(symbol);
     const accept: Accept = { kind: 'chord', pcs: c.pcs, bass: opts.requireBass || c.bass !== undefined ? (c.bass ?? c.root) : undefined };
-    if (opts.omitFifth && c.pcs.length >= 4) accept.optional = [c.pcs[2]];
+    if (opts.omitFifth && c.pcs.length >= 4 && (c.pcs[2] - c.root + 12) % 12 === 7) accept.optional = [c.pcs[2]];
     // Dica: posição fechada a partir da fundamental mais perto do meio do trecho.
     const mid = Math.round((opts.low + opts.high) / 2) - 6;
     const base = mid + ((c.root - pcOf(mid) + 12) % 12);
@@ -266,10 +266,11 @@ function voiced(symbol: string, center: Midi): Midi[] {
   return [bass, ...upper];
 }
 
-/** Aceite de um acorde por cifra, com a 5ª opcional nas tétrades (posição próxima: Si–Fá–Sol no G7). */
+/** Aceite de um acorde por cifra, com a 5ª justa opcional nas tétrades (posição próxima: Si–Fá–Sol no G7). A 5ª diminuta do ø e do °7 é obrigatória: sem ela, Bø vira Bm7. */
 function chordAccept(symbol: string, bass?: boolean): Accept {
   const c = parseChord(symbol);
-  return { kind: 'chord', pcs: c.pcs, bass: bass ? c.root : undefined, optional: c.pcs.length >= 4 ? [c.pcs[2]] : undefined };
+  const perfectFifth = (c.pcs[2] - c.root + 12) % 12 === 7;
+  return { kind: 'chord', pcs: c.pcs, bass: bass ? c.root : undefined, optional: c.pcs.length >= 4 && perfectFifth ? [c.pcs[2]] : undefined };
 }
 
 /** "Em Sol maior, toque o V7": acordes primários pelo grau. */
@@ -1279,7 +1280,7 @@ function guideSequence(opts: { sequences: { name?: string; symbols: string[] }[]
     return {
       prompt: 'Toque só as notas-guia (3ª e 7ª), conduzidas',
       symbol: seq.symbols.map(chordLabel).join(' – '),
-      detail: `${seq.name ? `${seq.name} ` : ''}Duas notas por acorde. Uma fica, a outra anda meio tom ou um tom.`,
+      detail: `${seq.name ? `${seq.name} ` : ''}Duas notas por acorde. Em geral uma fica e a outra desce meio tom ou um tom; do dominante para um acorde menor, as duas descem.`,
       hint: seq.symbols.map((s, i) => `${chordLabel(s)}: ${ptName(`${names[i][1]}4`)} e ${ptName(`${names[i][names[i].length - 1]}4`)}`).join(' → '),
       steps: guides.map((pcs) => ({ kind: 'chord', pcs, lead: opts.lead ?? 1 }) as Accept),
       skill: opts.skill ?? 'notas-guia',
@@ -1327,12 +1328,28 @@ export function shellChord(opts: { symbols: string[]; skill?: string }): ItemGen
 export type StrangeKind = 'passagem' | 'bordadura' | 'apojatura' | 'retardo' | 'antecipação' | 'escapada';
 
 /** Notas estranhas: a pauta mostra uma melodia sobre um acorde; você toca só as notas fora do acorde, ou diz o tipo. */
-export function nonChordTones(opts: { examples: { chord: string; notes: Midi[]; strange: Midi[]; kind: StrangeKind }[]; ask: 'play' | 'name'; skill?: string }): ItemGen {
+export function nonChordTones(opts: {
+  examples: { chord: string; notes: Midi[]; strange: Midi[]; kind: StrangeKind; /** Acorde antes, com a nota da melodia (o retardo vem preso dele). */ prev?: { chord: string; note: Midi }; /** Acorde depois, com a nota da melodia (a antecipação chega nele antes da hora). */ next?: { chord: string; note: Midi } }[];
+  ask: 'play' | 'name';
+  skill?: string;
+}): ItemGen {
   const kinds: StrangeKind[] = ['passagem', 'bordadura', 'apojatura', 'retardo', 'antecipação', 'escapada'];
   return (rng) => {
     const ex = pick(rng, opts.examples);
-    const chord = voiced(ex.chord, 60).slice(0, 1).concat(voiced(ex.chord, 48).slice(1));
-    const listen: Listen = { bpm: 72, steps: ex.notes.map((m, i) => ({ midis: i === 0 ? [...chord, m] : [m], beats: 1 })) };
+    const chordOf = (x: string) => voiced(x, 60).slice(0, 1).concat(voiced(x, 48).slice(1));
+    const chord = chordOf(ex.chord);
+    const listen: Listen = {
+      bpm: 72,
+      steps: [
+        ...(ex.prev ? [{ midis: [...chordOf(ex.prev.chord), ex.prev.note], beats: 2 }] : []),
+        ...ex.notes.map((m, i) => ({ midis: i === 0 ? [...chord, m] : [m], beats: 1 })),
+        ...(ex.next ? [{ midis: [...chordOf(ex.next.chord), ex.next.note], beats: 2 }] : []),
+      ],
+    };
+    const context = [
+      ex.prev ? `Antes vem ${chordLabel(ex.prev.chord)}, com ${nameOf(ex.prev.note)} na melodia.` : '',
+      ex.next ? `Depois vem ${chordLabel(ex.next.chord)}, com ${nameOf(ex.next.note)} na melodia.` : '',
+    ].filter(Boolean).join(' ');
     const base = { staff: { notes: ex.notes, clef: 'treble' as const }, listen, symbol: chordLabel(ex.chord), skill: opts.skill ?? 'notas-estranhas' };
     if (opts.ask === 'play') {
       return {
@@ -1349,7 +1366,7 @@ export function nonChordTones(opts: { examples: { chord: string; notes: Midi[]; 
     return {
       ...base,
       prompt: 'Que tipo de nota estranha aparece aqui?',
-      detail: `Acorde ${chordLabel(ex.chord)}.`,
+      detail: `Acorde ${chordLabel(ex.chord)}.${context ? ` ${context}` : ''}`,
       choices: options,
       answer: options.indexOf(ex.kind),
       hint: `${ex.strange.map((m) => nameOf(m)).join(', ')}: ${ex.kind}.`,

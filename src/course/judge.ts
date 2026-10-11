@@ -32,6 +32,26 @@ export function voiceMove(from: Midi[], to: Midi[]): number {
   return a.reduce((s, m, i) => s + Math.abs(m - b[i]), 0);
 }
 
+/**
+ * 5ª ou 8ª paralela entre o baixo e alguma voz de cima: a voz e o baixo andam na mesma direção e o intervalo
+ * entre eles (5ª justa ou oitava) se repete. Acordes ordenados do grave para o agudo, o baixo primeiro.
+ */
+export function hasParallels(prev: Midi[], next: Midi[]): boolean {
+  if (prev.length !== next.length || prev.length < 2) return false;
+  const a = [...prev].sort((x, y) => x - y);
+  const b = [...next].sort((x, y) => x - y);
+  const db = b[0] - a[0];
+  if (db === 0) return false;
+  for (let k = 1; k < a.length; k++) {
+    const dv = b[k] - a[k];
+    if (dv === 0 || Math.sign(dv) !== Math.sign(db)) continue;
+    const i1 = (((a[k] - a[0]) % 12) + 12) % 12;
+    const i2 = (((b[k] - b[0]) % 12) + 12) % 12;
+    if (i1 === i2 && (i1 === 0 || i1 === 7)) return true;
+  }
+  return false;
+}
+
 /** Menor movimento possível de `from` até um acorde com estas classes (uma nota por classe, cada voz vai para a oitava mais perto). */
 export function optimalMove(from: Midi[], pcs: Pc[]): number {
   const voices = [...from].sort((x, y) => x - y);
@@ -112,6 +132,10 @@ export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[])
         const best = optimalMove(prevUpper, accept.pcs);
         if (moved > best + accept.lead) {
           return { ...p, misses: p.misses + 1, lastWrong: null, why: `Acorde certo, mas a mão andou ${moved} semitons (o mais curto é ${best}). Segure as notas comuns e ande por grau conjunto.` };
+        }
+        // Paralelas só no estilo coral (baixo na fundamental); na cifra com barra a nota do baixo aparece também em cima.
+        if (withBass && accept.bass === accept.pcs[0] && p.lastChord.length === chord.length && hasParallels(p.lastChord, chord)) {
+          return { ...p, misses: p.misses + 1, lastWrong: null, why: 'Acorde certo, mas deu 5ª ou oitava paralela com o baixo. Quando o baixo sobe, leve as vozes de cima para baixo (e vice-versa).' };
         }
       }
       return advance(p, item, chord);

@@ -55,7 +55,7 @@ const FIELD7_Q: ChoiceQuestion[] = [
 ];
 
 const GUIDE_Q: ChoiceQuestion[] = [
-  { q: 'As notas que definem uma tétrade são…', options: ['A 3ª e a 7ª', 'A fundamental e a 5ª', 'A 5ª e a 7ª'], answer: 0, why: 'A 3ª diz maior ou menor; a 7ª diz 7M, 7 ou m7. A 5ª quase não muda nada.' },
+  { q: 'As notas que definem uma tétrade são…', options: ['A 3ª e a 7ª', 'A fundamental e a 5ª', 'A 5ª e a 7ª'], answer: 0, why: 'A 3ª diz maior ou menor; a 7ª diz se a 7ª é maior (7M) ou menor (7, m7). Juntas, definem 7M, 7 e m7.' },
   { q: 'Um shell 1-3-7 em G7 é…', options: ['Sol, Si, Fá', 'Sol, Ré, Fá', 'Sol, Si, Ré'], answer: 0, why: 'Fundamental, 3ª e 7ª. A 5ª (Ré) fica de fora.' },
   { q: 'No ii–V–I em Dó (Dm7 – G7 – C7M), as notas-guia andam…', options: ['Fá–Dó → Fá–Si → Mi–Si', 'Todas saltando', 'Ré–Lá → Sol–Ré → Dó–Sol'], answer: 0, why: 'A cada troca, uma fica e a outra desce meio tom.' },
   { q: 'Por que a 7ª de um acorde desce para a 3ª do próximo no ciclo de quintas?', options: ['Porque fica a meio tom ou um tom dela', 'Por regra de escrita', 'Não desce'], answer: 0, why: 'Fá (7ª de G7) → Mi (3ª de C). É a resolução do trítono.' },
@@ -187,7 +187,7 @@ const l59: Lesson = {
 - **vi7**: Am7 (Lá–Dó–Mi–Sol)
 - **viiø**: Bm7(♭5) (Si–Ré–Fá–Lá)
 
-O padrão de qualidades, igual em todos os tons: **7M, m7, m7, 7M, 7, m7, ø**. Repare que **só o V7 é dominante**: é o único acorde do campo com o trítono (Si–Fá) e a vontade de resolver. O I7M e o IV7M são maiores e estáveis; ii7, iii7 e vi7 são menores; e o viiø é o meio-diminuto.`,
+O padrão de qualidades, igual em todos os tons: **7M, m7, m7, 7M, 7, m7, ø**. Repare que **só o V7 é dominante** (3ª maior e 7ª menor). O trítono Si–Fá aparece no V7 e no ø, por isso os dois puxam para o I: o ø funciona como um dominante sem a fundamental. O I7M e o IV7M são maiores e estáveis; ii7, iii7 e vi7 são menores; e o viiø é o meio-diminuto.`,
     },
     {
       kind: 'example',
@@ -240,10 +240,10 @@ const l60: Lesson = {
       title: 'A 3ª e a 7ª dizem tudo',
       body: `Numa tétrade, nem todas as notas pesam igual:
 
-- A **fundamental** diz o nome, mas quem toca ela num grupo é o baixo.
+- A **fundamental** diz o nome, mas num grupo, quem a toca é o baixista.
 - A **5ª** quase não muda nada (é justa em 7M, 7 e m7).
 - A **3ª** diz se é maior ou menor.
-- A **7ª** diz se é 7M, 7 ou m7.
+- A **7ª** diz se a 7ª é maior (7M) ou menor (7 e m7). Junto com a 3ª, ela separa 7M, 7 e m7.
 
 Por isso **3ª e 7ª** se chamam **notas-guia** (*guide tones*): sozinhas, elas já fazem o ouvido "entender" o acorde. Pianistas de jazz e de bossa tocam acordes enxutos assim:
 
@@ -282,7 +282,7 @@ Conduzindo: **Fá–Dó → Fá–Si → Mi–Si**. A cada troca, **uma nota fic
 
 (Repare no **E7**: no campo de Dó seria Em7, mas aqui ele vira dominante para puxar o Am7. É uma "dominante secundária", assunto da Unidade 10.)
 
-Com notas-guia, o ciclo vira uma **escada descendente** de meios-tons e tons, sempre com uma nota parada. Tocar o ciclo devagar, ouvindo cada resolução, é um dos melhores exercícios de harmonia que existem.`,
+Com notas-guia, o ciclo vira uma **escada descendente** de meios-tons e tons: em geral uma nota fica e a outra desce. Na chegada de um dominante num acorde menor (E7 → Am7, A7 → Dm7), as duas descem. Tocar o ciclo devagar, ouvindo cada resolução, é um dos melhores exercícios de harmonia que existem.`,
     },
     {
       kind: 'callout',
@@ -400,7 +400,7 @@ const IMPROV_Q: ChoiceQuestion[] = [
 
 const BLUES_FORM = ['C7', 'C7', 'C7', 'C7', 'F7', 'F7', 'C7', 'C7', 'G7', 'F7', 'C7', 'G7'];
 const SHELL_L: Record<string, string> = { C7: 'C3+E3+Bb3', F7: 'F2+Eb3+A3', G7: 'G2+F3+B3' };
-const COMP_R: Record<string, string> = { C7: 'Bb3+E4+G4', F7: 'A3+C4+Eb4', G7: 'B3+D4+F4' };
+const COMP_R: Record<string, string> = { C7: 'E4+G4+Bb4', F7: 'Eb4+A4+C5', G7: 'F4+B4+D5' };
 const SHELL_MIDI: Record<string, Midi[]> = { C7: [48, 52, 58], F7: [41, 51, 57], G7: [43, 53, 59] };
 const bluesShells = BLUES_FORM.map((c) => `${SHELL_L[c]}:4`).join(' | ');
 const bluesComp = BLUES_FORM.map((c) => `r ${COMP_R[c]} r:0.5 ${COMP_R[c]}:0.5 r`).join(' | ');
@@ -446,7 +446,7 @@ Na mão esquerda, use os **shells** da lição 60, que soam cheios e quase não 
 
 A partitura escreve as colcheias **retas**, iguais, e avisa no começo: "swing". Quem toca sabe que deve balançar.
 
-A proporção exata varia com o estilo e o andamento (de uns 1,5:1 até 3:1). O app espera o contratempo no último terço do tempo (2:1) e aceita uma janela em volta: se você tocar reto, o contratempo chega cedo demais e conta como fora do tempo.
+A proporção exata varia com o estilo e o andamento (de uns 1,5:1 a 2,5:1; o pontuado, 3:1, já soa como marcha). O app espera o contratempo no último terço do tempo (2:1) e aceita uma janela em volta: se você tocar reto, o contratempo chega cedo demais e conta como fora do tempo.
 
 Duas dicas: acentue levemente o **contratempo** (a colcheia curta), e mantenha o pulso nos tempos 2 e 4, onde o blues "bate palma".`,
     },
@@ -470,12 +470,19 @@ Duas dicas: acentue levemente o **contratempo** (a colcheia curta), e mantenha o
       title: 'Shell e comping',
       body: `**Comping** (de *accompanying*) é o jeito de acompanhar do jazz: a mão direita toca acordes curtos em pontos rítmicos variados, conversando com o solista, em vez de segurar notas longas.
 
-O padrão mais simples para começar: a esquerda segura o **shell** o compasso inteiro, e a direita toca o acorde **no tempo 2** e **no contratempo do 3** (com swing). Na direita, use as notas que faltam no shell (a 5ª, por exemplo) e as notas-guia numa oitava acima.
+O padrão mais simples para começar: a esquerda segura o **shell** o compasso inteiro, e a direita toca o acorde **no tempo 2** e **no contratempo do 3** (com swing). Na direita, use as notas-guia uma oitava acima e a 5ª que falta no shell, sem repetir nenhuma tecla que a esquerda está segurando: em C7, Mi–Sol–Si♭; em F7, Mi♭–Lá–Dó; em G7, Fá–Si–Ré.
 
 Comece a 72 BPM e só suba quando os dois ataques da direita estiverem seguros no lugar.`,
     },
     { kind: 'exercise', id: 'l62-comping', exercise: quickTimed('Blues com shell e comping', 'Shell em semibreve na esquerda; acorde no 2 e no "e" do 3 na direita, com swing. Os 12 compassos a 72 BPM.', () => swingTwoHands(bluesComp, bluesShells, { bpm: 72, caption: 'C7 C7 C7 C7 · F7 F7 C7 C7 · G7 F7 C7 G7. A pauta mostra os acordes da direita.' }), { window: 70 }) },
-    { kind: 'song', songId: 'u08-blues', why: 'Um blues em Fá com melodia: o riff na direita e shells na esquerda. Toque com swing (a partitura escreve reto, como no jazz).' },
+    { kind: 'song', songId: 'u08-blues', why: 'Um blues em Fá com melodia: o riff na direita e shells na esquerda. No "Tocar a música" toque reto, porque o app compara com a partitura; o swing você já treinou nos riffs acima e pode pôr quando tocar livre.' },
+    {
+      kind: 'text',
+      title: 'Preparando The Entertainer',
+      body: `A música final da unidade é **The Entertainer**, de Scott Joplin (1902), um ragtime. Vale começar agora, devagar, em duas partes:\n\n- **A direita** tem o desenho Mi–Dó–Mi–Dó com saltos de 6ª e a **síncope**: o Dó cai no contratempo e fica. Toque o começo (até o compasso 5) só com a direita.\n- **A esquerda** faz o **oom-pah** do ragtime: baixo no tempo forte, acorde no fraco. O baixo é grave e o acorde fica no meio do teclado: olhe para o próximo destino antes de saltar.\n\nNa lição 65 você junta as duas mãos.`,
+    },
+    { kind: 'exercise', id: 'l62-ent-md', exercise: quickTimed('The Entertainer, começo, direita', 'Os 5 primeiros compassos, só a direita, de 50 a 66 BPM.', () => melodyTask(ENT_R5, { bpm: 50 }), { ladder: { from: 50, to: 66, step: 8 }, window: 80 }) },
+    { kind: 'exercise', id: 'l62-ent-me', exercise: quickTimed('The Entertainer, oom-pah na esquerda', 'Quatro compassos de baixo e acorde, de 56 a 72 BPM.', () => melodyTask(ENT_L4, { bpm: 56, clef: 'bass' }), { ladder: { from: 56, to: 72, step: 8 }, window: 80 }) },
     { kind: 'exercise', id: 'l62-quiz', exercise: quiz('Blues e swing', 'Cinco perguntas rápidas.', BLUES_Q) },
   ],
   review: [shellsBlues, choice(BLUES_Q, 'blues-swing')],
@@ -549,9 +556,11 @@ O Fá♯ é nota de passagem: use-o entre Fá e Sol, subindo ou descendo, e não
 
 No blues em Dó:
 
-- Na chegada do **F7** (compasso 5): mire o **Lá** (3ª) ou o **Mi♭** (7ª). Do Mi do C7, o Mi♭ fica a meio tom: escorregue para baixo.
-- Na chegada do **G7** (compasso 9): mire o **Si** (3ª) ou o **Fá** (7ª).
-- De volta ao **C7**: **Mi** (3ª) ou **Si♭** (7ª), ou o próprio **Dó**.
+- Na chegada do **F7** (compasso 5): mire o **Mi♭** (7ª) ou o próprio **Fá**. Do Mi do C7, o Mi♭ fica a meio tom: escorregue para baixo.
+- Na chegada do **G7** (compasso 9): mire o **Fá** (7ª) ou o próprio **Sol**.
+- De volta ao **C7**: **Si♭** (7ª) ou o próprio **Dó**.
+
+Essas notas estão dentro da escala blues e contam como chegada certa. As 3ªs dos acordes (Lá no F7, Si no G7, Mi no C7) também soam ótimas, mas ficam fora da escala blues: use como cor, sabendo que o app as conta como notas fora da escala.
 
 O app confere a primeira nota que você toca perto do tempo 1 de cada troca: ela é do acorde? A meta é acertar **pelo menos metade** das chegadas. O resto do compasso continua livre na escala.`,
     },
@@ -722,7 +731,7 @@ Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de c
       'Ouça e compare com o Marco 1: o que mudou no pulso, no som e na segurança?',
     ],
     rubric: [
-      'As músicas escritas passaram com 90% das notas.',
+      'As músicas escritas passaram com 85% das notas.',
       'No improviso, 90% das notas na escala e as chegadas mirando o acorde.',
       'O blues manteve a forma e o swing.',
       'O pedal ficou limpo no Prelúdio.',
@@ -739,15 +748,15 @@ Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de c
 const ENT_R = [
   'r:3 D4:0.5 D#4:0.5',
   'E4:0.5 C5 E4:0.5 C5 E4:0.5 C5:0.5',
-  'C5:2 r:0.5 C5:0.5 D5:0.5 D#5:0.5',
+  'r:2 r:0.5 C5:0.5 D5:0.5 D#5:0.5',
   'E5:0.5 C5:0.5 D5:0.5 E5 B4:0.5 D5',
   'C5:3 D4:0.5 D#4:0.5',
   'E4:0.5 C5 E4:0.5 C5 E4:0.5 C5:0.5',
-  'C5 r:0.5 A4:0.5 G4:0.5 F#4:0.5 A4:0.5 C5:0.5',
+  'r r:0.5 A4:0.5 G4:0.5 F#4:0.5 A4:0.5 C5:0.5',
   'E5:0.5 D5:0.5 C5:0.5 A4:0.5 D5:2',
   'r:3 D4:0.5 D#4:0.5',
   'E4:0.5 C5 E4:0.5 C5 E4:0.5 C5:0.5',
-  'C5:2 r:0.5 C5:0.5 D5:0.5 D#5:0.5',
+  'r:2 r:0.5 C5:0.5 D5:0.5 D#5:0.5',
   'E5:0.5 C5:0.5 D5:0.5 E5 B4:0.5 D5',
   'C5:4',
 ].join(' | ');
@@ -759,11 +768,14 @@ const ENT_L = [
   `${OOM.C} ${OOM.C}`, `${OOM.C} ${OOM.C}`, `${OOM.C} ${OOM.G7}`, 'C2+C3:4',
 ].join(' | ');
 
+const ENT_R5 = ENT_R.split(' | ').slice(0, 5).join(' | ');
+const ENT_L4 = ENT_L.split(' | ').slice(1, 5).join(' | ');
+
 const entertainer: SongSpec = {
   id: 'u08-entertainer',
   title: 'The Entertainer, tema A',
   composer: 'Scott Joplin',
-  arrangement: 'arranjo do Fermata: uma oitava abaixo do original, colcheias retas no lugar das semicolcheias sincopadas, 12 compassos e anacruse; mão esquerda em baixo e acorde ("oom-pah")',
+  arrangement: 'arranjo do Fermata: valores dobrados (semicolcheia vira colcheia), síncope mantida; um compasso de pausa e 12 compassos; o Dó longo do original vira pausa depois do ataque; mão esquerda em baixo e acorde ("oom-pah")',
   bpm: 72,
   beatsPerBar: 4,
   fifths: 0,
@@ -786,7 +798,7 @@ const bluesF: SongSpec = {
   id: 'u08-blues',
   title: 'Blues em Fá',
   composer: 'melodia original do Fermata, forma tradicional de 12 compassos',
-  arrangement: 'riff na direita, shells (1-7-3 e 1-3-7) na esquerda; toque as colcheias com swing',
+  arrangement: 'riff na direita, shells (1-7-3 e 1-3-7) na esquerda; escrito reto, como no jazz (o swing fica para quando você toca livre)',
   bpm: 84,
   beatsPerBar: 4,
   fifths: -1,
