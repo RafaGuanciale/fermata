@@ -245,3 +245,20 @@ export function BookIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function StarIcon({ className }: IconProps) {
+  return (
+    <svg {...base} strokeWidth={1.6} className={className}>
+      <path d="M12 3.8l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z" />
+    </svg>
+  );
+}
+
+export function FlameIcon({ className }: IconProps) {
+  return (
+    <svg {...base} strokeWidth={1.6} className={className}>
+      <path d="M12 21c-3.6 0-6-2.5-6-5.8 0-3.4 2.6-5.3 3.6-8.7.9 1.5 1.5 2.6 1.4 4.2 1.6-1.3 2.6-3.4 2.6-6.2 2.9 2.1 4.4 5.6 4.4 9.6 0 4.2-2.4 6.9-6 6.9z" />
+      <path d="M12 21c-1.5 0-2.6-1.1-2.6-2.6 0-1.6 1.3-2.5 1.8-4 .9 1 1.6 1.7 1.8 2.9.6-.6 1-1.3 1.1-2.2 1 1 1.6 2.1 1.6 3.4 0 1.5-1.2 2.5-3.7 2.5z" />
+    </svg>
+  );
+}

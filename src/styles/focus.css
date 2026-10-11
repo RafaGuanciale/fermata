@@ -1,0 +1,341 @@
+/* Modo foco da lição: barra de progresso no topo, um passo por tela, navegação embaixo e a tela de conclusão. */
+
+.focus {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto !important;
+}
+
+.focus__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--line);
+}
+
+.focus__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.focus__icon:hover {
+  background: var(--surface-sunk);
+}
+
+.focus__icon-off {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.focus__glyph {
+  width: 20px;
+  height: 20px;
+}
+
+.focus__progress {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+
+.focus__seg {
+  flex: 1;
+  height: 8px;
+  min-width: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  cursor: pointer;
+  transition: background var(--dur-slow, 300ms) ease;
+}
+
+.focus__seg-done {
+  background: var(--hit);
+}
+
+.focus__seg-current {
+  background: var(--color-champagne);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-champagne) 35%, transparent);
+}
+
+.focus__body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.focus__step {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-12);
+  animation: focusIn 360ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes focusIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+.focus__head {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.focus__h2 {
+  margin: 0;
+  font: 500 28px/34px var(--font-display);
+}
+
+.focus__title {
+  margin: 0;
+  font: 500 clamp(30px, 4vw, 42px) / 1.15 var(--font-display);
+}
+
+.focus__intro {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-8);
+}
+
+.focus__lead {
+  margin: 0;
+  font: 500 17px/26px var(--font-body);
+  color: var(--text-muted);
+}
+
+.focus__goals {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.focus__goals li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font: 500 16px/24px var(--font-body);
+}
+
+.focus__goalIcon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-top: 2px;
+  color: var(--hit);
+}
+
+
+.focus__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.focus__count {
+  font: 500 13px/18px var(--font-body);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Conclusão */
+.focusDone {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding-top: var(--space-8);
+  text-align: center;
+}
+
+.focusDone__hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+}
+
+.focusDone__badge {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--hit);
+  color: var(--on-primary, var(--bg));
+  animation: badgeIn 600ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+.focusDone__badgeIcon {
+  width: 44px;
+  height: 44px;
+}
+
+@keyframes badgeIn {
+  0% { transform: scale(0.2); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.focusDone__stats {
+  display: grid;
+  gap: var(--space-2);
+  width: min(420px, 100%);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.focusDone__stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font: 500 15px/22px var(--font-body);
+  text-align: left;
+  animation: statIn 420ms ease-out both;
+}
+
+.focusDone__stat:nth-child(2) { animation-delay: 120ms; }
+.focusDone__stat:nth-child(3) { animation-delay: 240ms; }
+
+@keyframes statIn {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+.focusDone__stat-milestone {
+  border-color: color-mix(in srgb, var(--color-champagne) 60%, var(--line));
+  background: color-mix(in srgb, var(--color-champagne) 12%, var(--surface));
+}
+
+.focusDone__icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: var(--hit);
+}
+
+.focusDone__icon-star {
+  color: var(--color-champagne);
+}
+
+:root[data-theme="light"] .focusDone__icon-star {
+  color: color-mix(in srgb, var(--color-khaki) 80%, var(--color-ebony));
+}
+
+.focusDone__unit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.focusDone__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface-sunk);
+  border: 1px solid var(--line);
+}
+
+.focusDone__dot-on {
+  background: var(--hit);
+  border-color: var(--hit);
+}
+
+.focusDone__dot-now {
+  animation: dotNow 900ms ease-out 300ms both;
+}
+
+@keyframes dotNow {
+  0% { transform: scale(0.4); }
+  60% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+.focusDone__unitText {
+  width: 100%;
+  font: 500 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.focusDone__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* Na página da lição: o convite para o modo foco */
+.lesson__focusCta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 719px) {
+  .focus__top,
+  .focus__nav {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .focus__step {
+    padding: var(--space-6) var(--space-4) var(--space-8);
+  }
+
+  .focus__seg {
+    height: 6px;
+  }
+
+  .focus__count {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus__step,
+  .focusDone__badge,
+  .focusDone__stat,
+  .focusDone__dot-now {
+    animation: none;
+  }
+}
+
+:root[data-theme="light"] .focus__seg-current {
+  background: color-mix(in srgb, var(--color-khaki) 85%, var(--color-ebony));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-khaki) 30%, transparent);
+}

@@ -1,83 +1,24 @@
 // Uma lição do curso: aquecimento de revisão, objetivos, teoria com exemplos e prática guiada,
 // checkpoint (portão de 85%), mini-projeto e ticket de saída. Tudo respondido no teclado.
 
-import { useCallback, useMemo, useState } from 'react';
-import { useCourseRows } from '../course/useCourseRows';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
-import { db, type LessonProgress } from '../db/db';
-import PianoKeyboard from '../components/PianoKeyboard';
 import { BackIcon, CheckIcon, PlayIcon } from '../components/Icons';
-import { useRuns } from '../training/runs';
-import { UNITS, findSong } from '../course';
-import {
-  LESSON_STATE_LABEL, afterCheckpoint, afterReview, canMaster, findLesson, lessonKey, lessonState, markDone, unitUnlocked, warmupItems,
-} from '../course/progress';
-import type { Block, Exercise, Item } from '../course/types';
+import { LESSON_STATE_LABEL, markDone } from '../course/progress';
 import { RichText, Verdict, pct } from '../course/ui/shared';
 import ItemsRunner from '../course/ui/ItemsRunner';
-import { CheckpointRunner, ExerciseRunner, drawItems } from '../course/ui/ExerciseRunner';
-import { ExamplePlayer } from '../course/ui/OtherRunners';
-
-const CALLOUT_LABEL = { erro: 'Erro comum', porque: 'Por que soa assim', dica: 'Dica', saude: 'Saúde' } as const;
+import { CheckpointRunner } from '../course/ui/ExerciseRunner';
+import { BlockView, ExerciseCard, ExitTicket } from '../course/ui/LessonParts';
+import { useLesson } from '../course/useLesson';
 
 export default function CourseLessonPage() {
   const { n = '', lessonId = '' } = useParams();
   const location = useLocation();
-  const rows = useCourseRows();
-  const runs = useRuns();
-  const pos = findLesson(UNITS, Number(n), lessonId);
-  const [warmKey, setWarmKey] = useState(0);
-  const [checkpointMsg, setCheckpointMsg] = useState<string | null>(null);
-
-  const key = pos ? lessonKey(pos.unit, pos.lesson) : '';
-  const row = rows?.get(key);
-
-  const save = useCallback(async (update: (r: LessonProgress | undefined) => LessonProgress) => {
-    const current = await db.lessons.get(key);
-    await db.lessons.put(update(current));
-  }, [key]);
-
-  const done = useCallback((blockId: string) => void save((r) => markDone(r, key, blockId, Date.now())), [save, key]);
-
-  const warmup = useMemo(() => {
-    if (!pos || !rows) return [];
-    return warmupItems(UNITS, rows, pos, Math.random, Date.now());
-    // Sorteia de novo só quando pedir outra rodada.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pos?.lesson.id, rows === undefined, warmKey]);
-
-  if (!pos) return <Navigate to="/estudo" replace />;
-  if (!rows || !runs) return null;
-
-  const { unit, lesson, lessonIndex } = pos;
-  const unlocked = unitUnlocked(UNITS, pos.unitIndex, rows, runs);
-  const state = lessonState(unit, lessonIndex, rows, unlocked);
-  const locked = state === 'bloqueada';
-  const isDone = (id: string) => !!row?.done?.includes(id);
-  const nextLesson = unit.lessons[lessonIndex + 1];
-  const mastering = canMaster(row, Date.now());
-
-  const finishWarmup = (results: { ok: boolean }[]) => {
-    // Conta acerto e erro na lição de origem de cada item (revisão espaçada).
-    const bySource = new Map<string, { ok: boolean }[]>();
-    warmup.forEach((w, i) => bySource.set(w.key, [...(bySource.get(w.key) ?? []), results[i] ?? { ok: false }]));
-    void db.transaction('rw', db.lessons, async () => {
-      for (const [k, rs] of bySource) {
-        const r = await db.lessons.get(k);
-        if (r) await db.lessons.put(afterReview(r, rs, Date.now()));
-      }
-    });
-    done('aquecimento');
-  };
-
-  const finishCheckpoint = (score: number, passed: boolean) => {
-    const before = row;
-    void save((r) => afterCheckpoint(r, key, score, Date.now()));
-    if (passed && !before?.passedAt) setCheckpointMsg('Lição concluída. Ela volta no aquecimento das próximas lições para não esquecer.');
-    else if (passed && mastering) setCheckpointMsg('Selo de domínio: você passou de novo depois de uma semana.');
-    else if (passed) setCheckpointMsg('Passou de novo. O selo de domínio libera 7 dias depois da conclusão.');
-    else setCheckpointMsg(null);
-  };
+  const L = useLesson(n, lessonId);
+  if (L.status === 'missing') return <Navigate to="/estudo" replace />;
+  if (L.status === 'loading') return null;
+  const { unit, lesson, lessonIndex, row, key, state, locked, unlocked, isDone, nextLesson, mastering, save, done, warmup, warmKey, finishWarmup, checkpointMsg } = L;
+  const finishCheckpoint = (score: number, passed: boolean) => void L.finishCheckpoint(score, passed);
+  const setWarmKey = () => L.rerollWarmup();
 
   const parts = [
     ...(warmup.length ? [{ id: 'aquecimento', label: 'Aquecimento', ok: isDone('aquecimento') }] : []),
@@ -99,6 +40,14 @@ export default function CourseLessonPage() {
         </span>
         <h1 className="page__title">{lesson.title}</h1>
       </header>
+
+      <div className="lesson__focusCta">
+        <Link className="button button-primary" to={`/curso/foco/${unit.n}/${lesson.id}`} state={{ background: location }}>
+          <PlayIcon className="button__icon" />
+          {row?.passedAt ? 'Rever em modo foco' : row?.done?.length ? 'Continuar em modo foco' : 'Começar em modo foco'}
+        </Link>
+        <span className="page__link">Um passo por vez, em tela cheia. Ou role a página para ver tudo.</span>
+      </div>
 
       <nav className="courseParts" aria-label="Partes da lição">
         {parts.map((p) => (
@@ -133,7 +82,7 @@ export default function CourseLessonPage() {
                 onFinish={(r) => finishWarmup(r.perItem)}
               />
             )}
-            {isDone('aquecimento') && <button className="linkButton" type="button" onClick={() => setWarmKey(warmKey + 1)}>Outra rodada</button>}
+            {isDone('aquecimento') && <button className="linkButton" type="button" onClick={setWarmKey}>Outra rodada</button>}
           </section>
         )}
 
@@ -199,121 +148,6 @@ export default function CourseLessonPage() {
           <span className="page__link">A próxima lição abre quando você passar no checkpoint.</span>
         )}
       </footer>
-    </>
-  );
-}
-
-function ExerciseCard({ id, exercise, isDone, onDone }: { id: string; exercise: Exercise; isDone: (id: string) => boolean; onDone: (id: string) => void }) {
-  const [last, setLast] = useState<{ accuracy: number; passed: boolean } | null>(null);
-  const ok = isDone(id);
-  return (
-    <div className={'exerciseCard' + (ok ? ' exerciseCard-done' : '')}>
-      <div className="exerciseCard__head">
-        <h3 className="exerciseCard__title">{exercise.title}</h3>
-        {ok && <span className="exerciseCard__badge"><CheckIcon className="courseParts__icon" /> Feito</span>}
-      </div>
-      <p className="exerciseCard__how">{exercise.how}</p>
-      <ExerciseRunner
-        ex={exercise}
-        hints
-        onFinish={(o) => {
-          setLast(o);
-          if (o.passed) onDone(id);
-        }}
-      />
-      {last && !last.passed && <p className="runner__note">Ainda abaixo do mínimo. Repita: na prática guiada as dicas aparecem depois de cada erro.</p>}
-    </div>
-  );
-}
-
-function BlockView({ block, locked, isDone, onDone, background }: { block: Block; locked: boolean; isDone: (id: string) => boolean; onDone: (id: string) => void; background: unknown }) {
-  switch (block.kind) {
-    case 'text':
-      return (
-        <div className="course__text">
-          {block.title && <h2 className="course__h2">{block.title}</h2>}
-          <RichText body={block.body} />
-        </div>
-      );
-    case 'callout':
-      return (
-        <aside className={`callout callout-${block.tone}`}>
-          <p className="callout__label">{CALLOUT_LABEL[block.tone]}: {block.title}</p>
-          <RichText body={block.body} />
-        </aside>
-      );
-    case 'keys':
-      return (
-        <figure className="lesson__figure">
-          <PianoKeyboard low={block.low} high={block.high} marks={Object.fromEntries((block.lit ?? []).map((m) => [m, 'lit']))} labels={block.labels} label={block.caption} size="small" />
-          <figcaption className="lesson__caption">{block.caption}</figcaption>
-        </figure>
-      );
-    case 'example':
-      return (
-        <div className="course__example">
-          <h3 className="exerciseCard__title">Exemplo: {block.title}</h3>
-          <ExamplePlayer block={block} />
-        </div>
-      );
-    case 'exercise':
-      return locked ? (
-        <div className="exerciseCard exerciseCard-locked">
-          <h3 className="exerciseCard__title">{block.exercise.title}</h3>
-          <p className="exerciseCard__how">{block.exercise.how}</p>
-        </div>
-      ) : (
-        <ExerciseCard id={block.id} exercise={block.exercise} isDone={isDone} onDone={onDone} />
-      );
-    case 'song': {
-      const song = findSong(block.songId);
-      if (!song) return null;
-      return (
-        <div className="exerciseCard">
-          <h3 className="exerciseCard__title">{song.title}</h3>
-          <p className="exerciseCard__how">{block.why}</p>
-          <Link className="button button-secondary" to={`/curso/musica/${song.id}`} state={{ background }}>
-            <PlayIcon className="button__icon" />
-            Abrir no "Tocar a música"
-          </Link>
-        </div>
-      );
-    }
-  }
-}
-
-function ExitTicket({ items, locked, doneAlready, onDone }: { items: ((r: () => number) => Item)[]; locked: boolean; doneAlready: boolean; onDone: (tension: boolean) => void }) {
-  const [answered, setAnswered] = useState(false);
-  const [tension, setTension] = useState<boolean | null>(null);
-  if (locked) return <p className="lesson__p">Três perguntas rápidas e uma checagem do corpo, no fim da lição.</p>;
-  return (
-    <>
-      <p className="lesson__p">Três perguntas de memória sobre esta lição e uma checagem do corpo. Leva dois minutos.</p>
-      {items.length > 0 && !answered && (
-        <ItemsRunner
-          makeItems={() => drawItems((r) => items[Math.floor(r() * items.length)](r), 3)}
-          low={48}
-          high={84}
-          labels="off"
-          hints={false}
-          pass={{ accuracy: 0 }}
-          startLabel="Responder"
-          onFinish={() => setAnswered(true)}
-        />
-      )}
-      {(answered || items.length === 0 || doneAlready) && (
-        <div className="exitCheck">
-          <p className="runner__question">Sentiu dor ou tensão no punho, antebraço, ombro ou pescoço?</p>
-          <div className="choiceRow">
-            <button type="button" className={'choice__option' + (tension === false ? ' choice__option-active' : '')} onClick={() => setTension(false)}>Não</button>
-            <button type="button" className={'choice__option' + (tension === true ? ' choice__option-active' : '')} onClick={() => setTension(true)}>Sim</button>
-          </div>
-          {tension && <p className="runner__note">Pare por hoje e não suba o andamento amanhã. Solte os ombros, deixe o punho na altura do teclado e o peso vir do braço, não dos dedos. Se a dor continuar, procure um fisioterapeuta.</p>}
-          <button className="button button-secondary" type="button" disabled={tension === null} onClick={() => onDone(tension === true)}>
-            {doneAlready ? 'Atualizar' : 'Fechar a lição de hoje'}
-          </button>
-        </div>
-      )}
     </>
   );
 }

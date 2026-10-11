@@ -24,6 +24,7 @@ const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
 const PracticeHubPage = lazy(() => import('./pages/PracticeHubPage'));
 const CourseLessonPage = lazy(() => import('./pages/CourseLessonPage'));
 const CourseUnitPage = lazy(() => import('./pages/CourseUnitPage'));
+const CourseFocusPage = lazy(() => import('./pages/CourseFocusPage'));
 const ReferencePage = lazy(() => import('./pages/ReferencePage'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage'));
 // A partitura interativa (OpenSheetMusicDisplay) também só carrega quando você estuda uma peça.
@@ -82,14 +83,30 @@ function TreinoPopup({ label, render }: { label: string; render: (close: () => v
   );
 }
 
-const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId'];
+function FocusPopup() {
+  const { n = '', lessonId = '' } = useParams();
+  const close = useCloseImmersive(`/estudo/unidade/${n}/${lessonId}`);
+  return (
+    <ImmersiveFrame onClose={close} label="Lição em modo foco">
+      <Suspense fallback={<div className="focus" />}>
+        <CourseFocusPage onClose={close} />
+      </Suspense>
+    </ImmersiveFrame>
+  );
+}
+
+const IMMERSIVE = ['/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
 
 export default function App() {
   const location = useLocation();
   const immersive = IMMERSIVE.some((p) => matchPath(p, location.pathname));
   // O popup abre por cima da página de onde você veio. Aberto direto pelo link, mostra Treino ou Repertório atrás.
+  const focus = matchPath('/curso/foco/:n/:lessonId', location.pathname);
+  const fallbackPath = focus
+    ? `/estudo/unidade/${focus.params.n}/${focus.params.lessonId}`
+    : location.pathname.startsWith('/partitura') || location.pathname.startsWith('/peca') ? '/repertorio' : '/treino';
   const background: Location = (location.state as ImmersiveState | null)?.background ??
-    (immersive ? { ...location, pathname: location.pathname.startsWith('/partitura') || location.pathname.startsWith('/peca') ? '/repertorio' : '/treino', search: '', state: null } : location);
+    (immersive ? { ...location, pathname: fallbackPath, search: '', state: null } : location);
 
   return (
     <ThemeProvider>
@@ -125,6 +142,7 @@ export default function App() {
             <Route path="/partitura/:id" element={<SheetPopup />} />
             <Route path="/peca/:id/estudar" element={<ScorePopup />} />
             <Route path="/curso/musica/:songId" element={<CourseSongPopup />} />
+            <Route path="/curso/foco/:n/:lessonId" element={<FocusPopup />} />
           </Routes>
         )}
         </MetronomeProvider>

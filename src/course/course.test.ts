@@ -593,3 +593,25 @@ describe('paralelas', () => {
     expect(hasParallels([41, 65, 69, 72], [43, 62, 67, 71])).toBe(false);
   });
 });
+
+describe('modo foco', () => {
+  it('quebra a lição em passos e retoma no primeiro exercício pendente', async () => {
+    const { focusSteps, resumeStep } = await import('./focus');
+    const lesson = UNITS[0].lessons[0];
+    const steps = focusSteps(lesson, true);
+    expect(steps[0].kind).toBe('warmup');
+    expect(steps[1].kind).toBe('intro');
+    expect(steps[steps.length - 1].kind).toBe('done');
+    const exercises = lesson.blocks.filter((b) => b.kind === 'exercise').length;
+    expect(steps.filter((s) => s.kind === 'exercise')).toHaveLength(exercises);
+    // Todo bloco aparece uma vez.
+    const counted = steps.reduce((n, s) => n + (s.kind === 'read' ? s.blocks.length : s.kind === 'exercise' || s.kind === 'song' ? 1 : 0), 0);
+    expect(counted).toBe(lesson.blocks.length);
+    expect(resumeStep(steps, () => false, false)).toBe(0);
+    const firstEx = steps.findIndex((s) => s.kind === 'exercise');
+    const firstId = (steps[firstEx] as { block: { id: string } }).block.id;
+    const r = resumeStep(steps, (id) => id === firstId, false);
+    expect(r).toBeGreaterThan(firstEx - 1);
+    expect(resumeStep(steps, () => true, false)).toBe(steps.findIndex((s) => s.kind === 'checkpoint'));
+  });
+});

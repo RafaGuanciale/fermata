@@ -12,6 +12,8 @@ import { labelsVisible, pressItem, scoreItems, startItem, type ItemProgress } fr
 import { nameOf } from '../music';
 import type { Item } from '../types';
 import { Verdict, pct, playListen, useStopOnUnmount } from './shared';
+import { Combo, PassReward } from '../../celebrate/Celebrate';
+import { starsFor, streakOf } from '../../celebrate/rewards';
 
 export interface ItemsResult {
   accuracy: number;
@@ -146,6 +148,8 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
   if (prog.lastWrong !== null && phase === 'answer') marks[prog.lastWrong] = 'miss';
 
   const score = scoreItems(results);
+  const summaryPassed = score.accuracy >= pass.accuracy && (pass.avgMs === undefined || (score.avgMs ?? Infinity) <= pass.avgMs);
+  const streak = streakOf(recent);
   const last = results[results.length - 1];
   const remaining = item?.timeLimitMs && phase === 'answer' ? Math.max(0, item.timeLimitMs - (now - startedAt.current)) : null;
 
@@ -157,9 +161,12 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
         </div>
       ) : phase === 'done' ? (
         <div className="runner__summary">
-          <Verdict tone={score.accuracy >= pass.accuracy ? 'hit' : 'miss'} detail={score.avgMs !== null ? `média ${formatSeconds(score.avgMs)}` : undefined}>
-            {pct(score.accuracy)} certas de primeira {score.accuracy >= pass.accuracy ? '' : `(precisa de ${pct(pass.accuracy)})`}
-          </Verdict>
+          <PassReward stars={summaryPassed ? starsFor(score.accuracy, pass.accuracy) : 0}>
+            <p className="passReward__text">
+              {pct(score.accuracy)} certas de primeira{score.avgMs !== null ? ` · média ${formatSeconds(score.avgMs)}` : ''}
+              {score.accuracy >= pass.accuracy ? '' : ` (precisa de ${pct(pass.accuracy)})`}
+            </p>
+          </PassReward>
           {pass.avgMs !== undefined && score.avgMs !== null && score.avgMs > pass.avgMs && (
             <p className="runner__note">Acertou, mas a média passou de {formatSeconds(pass.avgMs)}. Velocidade vem com repetição: faça de novo.</p>
           )}
@@ -169,6 +176,7 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
         <>
           <div className="runner__head">
             <span className="runner__count">{index + 1} de {items.length}</span>
+            <Combo streak={streak} />
             {remaining !== null && <span className="runner__timer">{Math.ceil(remaining / 1000)} s</span>}
           </div>
           <div className="runner__prompt">

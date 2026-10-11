@@ -1,0 +1,162 @@
+/* Recompensas: estrelas, faíscas, sequência de acertos. Sempre com palavra junto (nunca só cor ou ícone). */
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.stars__star {
+  width: 28px;
+  height: 28px;
+  color: var(--line-strong);
+}
+
+.stars__star-on {
+  color: var(--color-champagne);
+  fill: color-mix(in srgb, var(--color-champagne) 70%, transparent);
+  animation: starPop 420ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+.stars__star-on:nth-child(2) {
+  animation-delay: 140ms;
+}
+
+.stars__star-on:nth-child(3) {
+  animation-delay: 280ms;
+}
+
+.stars__label {
+  margin-left: var(--space-2);
+  font: 600 15px/20px var(--font-body);
+  color: var(--text);
+}
+
+:root[data-theme="light"] .stars__star-on {
+  color: color-mix(in srgb, var(--color-khaki) 80%, var(--color-ebony));
+  fill: color-mix(in srgb, var(--color-champagne) 90%, var(--color-khaki));
+}
+
+@keyframes starPop {
+  0% { transform: scale(0.3) rotate(-30deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Faíscas */
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.burst__spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  border-radius: 50%;
+  background: var(--hit);
+  transform: rotate(var(--a)) translateY(0);
+  animation: spark 700ms ease-out var(--d) both;
+}
+
+.burst__spark-alt {
+  background: var(--color-champagne);
+}
+
+.burst-big .burst__spark {
+  width: 8px;
+  height: 8px;
+  animation-duration: 950ms;
+  --dist: -110px;
+}
+
+@keyframes spark {
+  0% { transform: rotate(var(--a)) translateY(0) scale(1); opacity: 1; }
+  100% { transform: rotate(var(--a)) translateY(var(--dist, -64px)) scale(0.2); opacity: 0; }
+}
+
+/* Sequência de acertos */
+.combo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--hit-soft);
+  color: var(--hit);
+  font: 600 13px/18px var(--font-body);
+  font-variant-numeric: tabular-nums;
+  animation: comboPop 260ms cubic-bezier(0.2, 1.8, 0.4, 1);
+}
+
+.combo-milestone {
+  animation: comboPop 420ms cubic-bezier(0.2, 2.2, 0.4, 1);
+}
+
+.combo__icon {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes comboPop {
+  0% { transform: scale(0.8); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* Acerto no feedback: um pulso curto */
+.drillFeedback-hit {
+  animation: hitPulse 320ms ease-out;
+}
+
+@keyframes hitPulse {
+  0% { transform: scale(0.97); box-shadow: 0 0 0 0 color-mix(in srgb, var(--hit) 45%, transparent); }
+  100% { transform: scale(1); box-shadow: 0 0 0 10px transparent; }
+}
+
+/* Faixa de resultado */
+.passReward {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-m);
+  background: color-mix(in srgb, var(--hit) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--hit) 35%, var(--line));
+  text-align: center;
+  overflow: visible;
+}
+
+.passReward-miss {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst {
+    display: none;
+  }
+
+  .stars__star-on,
+  .combo,
+  .drillFeedback-hit {
+    animation: none;
+  }
+}
+
+.passReward__text {
+  margin: 0;
+  font: 500 14px/20px var(--font-body);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.runner__summary .passReward {
+  flex: 1 1 100%;
+}

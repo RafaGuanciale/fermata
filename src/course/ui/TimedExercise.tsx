@@ -15,6 +15,8 @@ import { swingBeat } from '../tasks';
 import { articulationScore, balanceScore, dynamicsScore, ioiSd, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
+import { Combo, PassReward } from '../../celebrate/Celebrate';
+import { starsFor } from '../../celebrate/rewards';
 
 type TimedEx = Extract<Exercise, { kind: 'timed' }>;
 
@@ -88,6 +90,11 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
           </button>
         )}
       </div>
+      {finished && (
+        <PassReward stars={starsFor(best, ex.pass.accuracy) || 1}>
+          <p className="passReward__text">Concluído: {pct(best)} no tempo na melhor passada.</p>
+        </PassReward>
+      )}
       <TimedTake task={task} bpm={bpm} ex={ex} hints={hints} onTake={onTake} />
     </div>
   );
@@ -197,6 +204,16 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
   const track = trackRef.current;
   const elapsed = track ? now - track.firstBeat : -Infinity;
   const live = phase === 'playing' ? judgeTask(task, bpm, eventsRef.current, ex.window, elapsed) : score?.r ?? null;
+  // Notas no tempo em sequência (perfeita ou boa), na ordem da música: o contador aparece durante a passada.
+  let onTime = 0;
+  if (phase === 'playing' && live) {
+    const order = task.events.map((e, i) => ({ beat: e.beat, i })).sort((a, b) => a.beat - b.beat);
+    for (const { i } of order) {
+      const j = live.notes[i];
+      if (!j) continue;
+      onTime = j.grade === 'perfect' || j.grade === 'good' ? onTime + 1 : 0;
+    }
+  }
 
   // A pauta mostra a linha `display`; o estado de cada nota vem do evento esperado no mesmo tempo.
   const beatMs = 60000 / bpm;
@@ -273,6 +290,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           {phase === 'countin' && 'Prepare a mão, começa no próximo 1'}
           {phase === 'playing' && `${bpm} BPM`}
         </span>
+        {phase === 'playing' && <Combo streak={onTime} label="no tempo" />}
       </div>
       {phase === 'done' && score && (
         <div className="runner__feedback">

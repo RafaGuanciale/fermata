@@ -13,6 +13,8 @@ import { calibrate, chordTargets, levelOf, scoreImprov, type CourseEvent, type I
 import { PC_NAMES, nameOf } from '../music';
 import type { Block, Exercise, Listen, Rng } from '../types';
 import { LEVEL_LABEL, RichText, Verdict, getVelocityCal, pct, playListen, setVelocityCal, useStopOnUnmount } from './shared';
+import { PassReward } from '../../celebrate/Celebrate';
+import { starsFor } from '../../celebrate/rewards';
 
 export interface Outcome {
   accuracy: number;
@@ -317,7 +319,9 @@ export function QuizRunner({ ex: raw, onFinish }: { ex: QuizEx; onFinish: (o: Ou
     const acc = right / ex.questions.length;
     return (
       <div className="runner__summary">
-        <Verdict tone={acc >= ex.pass.accuracy ? 'hit' : 'miss'}>{right} de {ex.questions.length} certas</Verdict>
+        <PassReward stars={acc >= ex.pass.accuracy ? starsFor(acc, ex.pass.accuracy) : 0}>
+          <p className="passReward__text">{right} de {ex.questions.length} certas</p>
+        </PassReward>
         <button className="button button-secondary" type="button" onClick={() => { setI(0); setRight(0); setChosen(null); }}>De novo</button>
       </div>
     );

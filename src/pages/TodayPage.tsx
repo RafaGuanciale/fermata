@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Attempt, type Session } from '../db/db';
 import { DAY, avgFindMs, dailyAvgFindMs, firstTryRate, weakestNote } from '../db/stats';
@@ -12,6 +12,7 @@ import { PlayIcon } from '../components/Icons';
 import { useTrainingToday } from '../course/useTrainingToday';
 
 export default function TodayPage() {
+  const location = useLocation();
   const now = Date.now();
   const since = now - 28 * DAY;
   const data = useLiveQuery(async () => {
@@ -49,7 +50,7 @@ export default function TodayPage() {
             Treinar
           </Link>
           {training?.next && (
-            <Link className="button button-secondary" to={`/estudo/unidade/${training.next.unit.n}/${training.next.lesson.id}`}>
+            <Link className="button button-secondary" to={`/curso/foco/${training.next.unit.n}/${training.next.lesson.id}`} state={{ background: location }}>
               Lição: {training.next.lesson.title}
             </Link>
           )}
