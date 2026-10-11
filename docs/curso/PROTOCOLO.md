@@ -54,9 +54,26 @@ Regras das músicas:
 
 ## Limites do motor (adapte, não invente feature sem testar)
 
-O motor mede: notas e acordes (com baixo/inversão), sequências, tempo (janelas em ms), legato/staccato pelo soltar das teclas, força (velocity, com calibração), improviso (notas no conjunto, pausas, nota final), perguntas de escolha.
-O motor **não** mede ainda: pedal (CC64), dedilhado, postura, condução de vozes ótima (B1), simultaneidade fina de acordes no tempo (E4), voicing (topo mais forte que o resto), swing. Para esses, use o exercício mais próximo (por exemplo, um acorde por vez com `playChord`, ou `items` com sequência de acordes exigindo o baixo) e explique a parte não medida no texto ou na rubrica do projeto.
+O motor mede: notas e acordes (com baixo/inversão), sequências, tempo (janelas em ms), legato/staccato pelo soltar das teclas, força (velocity, com calibração), improviso (notas no conjunto, pausas, nota final, notas-alvo), perguntas de escolha, pedal (CC64: direto e legato; com duas mãos, a troca conta só nos ataques da esquerda), condução de vozes (`lead`), 5ª e 8ª paralelas com o baixo no estilo coral, equilíbrio entre as mãos (`balance`), uniformidade (`evenness`), swing (`swingTask`).
+O motor **não** mede ainda: dedilhado, postura, simultaneidade fina de acordes no tempo (E4), voicing (topo mais forte que o resto). Para esses, use o exercício mais próximo (por exemplo, um acorde por vez com `playChord`, ou `items` com sequência de acordes exigindo o baixo) e explique a parte não medida no texto ou na rubrica do projeto.
 Se precisar de um tipo de exercício novo, só crie se couber em poucas horas, com função pura em `src/course/judge.ts` ou `gens.ts` **e teste** em `src/course/course.test.ts`. O pedal (CC64) é o primeiro candidato (Unidade 3): exige ler `0xB0 64` em `parseMidiMessage`/`NoteInputProvider` sem quebrar o resto.
+
+## Lições da revisão das unidades 2 a 9 (obrigatório)
+
+Uma revisão independente achou estes erros repetidos. Não os repita:
+
+- **Quiz:** as opções são embaralhadas pelo motor; escreva a certa em `answer` sem se preocupar com a posição. **Nunca cobre num quiz o que só a lição seguinte ensina.**
+- **Pauta:** desenha acordes empilhados (melodias com "C4+E4+G4"), ligaduras (`~` em `tiedMelodyTask`), armadura e acidentes. Em tarefas de duas mãos, a pauta mostra só a direita: **escreva na legenda (`caption`) o que a esquerda toca**, compasso a compasso, quando não for óbvio.
+- **Tons com bemol:** passe `fifths: -1` (Fá), `-2` (Si♭) etc. em toda tarefa e música no tom, senão a pauta escreve Lá♯ no lugar de Si♭.
+- **Duas mãos nunca na mesma tecla ao mesmo tempo** (comping, cânone, acompanhamento): uma tecla presa não pode ser atacada de novo.
+- **Músicas (`SongSpec`):** não há ligadura entre compassos; uma nota longa que atravessa a barra vira nota + pausa, não duas notas iguais.
+- **Escalas:** sobem 8 notas e descem sem repetir a de cima; a tônica final fecha o compasso.
+- **Checkpoints de itens** contam o item inteiro: 1 erro numa escala zera o item. Com 6 a 10 itens, deixe a meta perdoar um (por exemplo, 10 itens a 0,9).
+- **Números do texto = números do exercício:** BPM, passadas (`reps`), janelas, metas. Se o texto diz "60 BPM", a tarefa roda a 60 BPM.
+- **Dedilhados e fatos:** confira duas vezes (dedilhado de cromática, de tríades quebradas, de escalas de 2 oitavas; inversões; nomes de cadência). Um erro aqui ensina errado.
+- **Projeto final:** prepare as dificuldades da música numa lição antes (um texto curto e um ou dois exercícios de trechos).
+- **Pelo menos um callout de erro comum por lição.**
+- O robô (`src/course/playthrough.test.ts`) toca a resposta certa de todo exercício: se ele falhar, o exercício é impossível. Rode `npm test` e conserte o conteúdo, não o robô.
 
 ## Estilo do texto (obrigatório)
 
