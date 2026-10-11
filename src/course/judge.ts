@@ -56,8 +56,10 @@ export function optimalMove(from: Midi[], pcs: Pc[]): number {
 function fits(accept: Accept, midi: Midi): boolean {
   switch (accept.kind) {
     case 'pc':
-    case 'chord':
       return accept.pcs.includes(pcOf(midi));
+    case 'chord':
+      // O baixo de uma cifra com barra pode ser nota de fora do acorde (Em/D).
+      return accept.pcs.includes(pcOf(midi)) || accept.bass === pcOf(midi);
     case 'exact':
     case 'all':
       return accept.midis.includes(midi);
@@ -71,7 +73,8 @@ export function chordMatches(accept: Extract<Accept, { kind: 'chord' }>, held: M
   if (!held.length) return false;
   const pcs = new Set(held.map(pcOf));
   const required = accept.pcs.filter((p) => !accept.optional?.includes(p));
-  if (![...pcs].every((p) => accept.pcs.includes(p)) || !required.every((p) => pcs.has(p))) return false;
+  const allowed = accept.bass === undefined ? accept.pcs : [...accept.pcs, accept.bass];
+  if (![...pcs].every((p) => allowed.includes(p)) || !required.every((p) => pcs.has(p))) return false;
   if (accept.bass !== undefined && pcOf(Math.min(...held)) !== accept.bass) return false;
   return true;
 }
@@ -90,6 +93,9 @@ export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[])
   const accept = item.steps[p.step];
   if (!fits(accept, midi)) return { ...p, misses: p.misses + 1, lastWrong: midi, why: undefined };
   if (accept.kind === 'chord') {
+    // Condução com baixo: espera o baixo e as vozes de cima (uma por classe) antes de julgar,
+    // senão um acorde com a fundamental dobrada seria julgado na terceira nota.
+    if (accept.lead !== undefined && accept.bass !== undefined && held.length < accept.pcs.length + 1) return { ...p, lastWrong: null, why: undefined };
     if (chordMatches(accept, held)) {
       const chord = [...held].sort((a, b) => a - b);
       if (accept.lead !== undefined && p.lastChord?.length) {

@@ -1013,7 +1013,7 @@ export function chordSequence(opts: { sequences: { name?: string; symbols: strin
     return {
       prompt: opts.lead !== undefined ? 'Toque a progressão conduzindo as vozes' : 'Toque os acordes, em ordem',
       symbol: seq.symbols.map(chordLabel).join(' – '),
-      detail: [seq.name, opts.lead !== undefined ? 'Três notas por acorde. Notas comuns ficam; as outras andam o mínimo.' : 'Qualquer posição; o baixo é exigido nas cifras com barra.'].filter(Boolean).join(' '),
+      detail: [seq.name, opts.lead !== undefined ? (opts.bass ? 'O baixo (a fundamental) na mão esquerda e três notas na direita, uma de cada. Notas comuns ficam; as outras andam o mínimo.' : 'Três notas por acorde. Notas comuns ficam; as outras andam o mínimo.') : 'Qualquer posição; o baixo é exigido nas cifras com barra.'].filter(Boolean).join(' '),
       hintKeys: chain[0],
       hint: chain.map((v, i) => `${chordLabel(seq.symbols[i])} (${v.map((m) => PC_NAMES[pcOf(m)]).join('–')})`).join(' → '),
       steps: seq.symbols.map((s) => {
