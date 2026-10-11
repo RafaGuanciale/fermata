@@ -19,6 +19,7 @@ import StudyPage from './pages/StudyPage';
 import ModulePage from './pages/ModulePage';
 import LessonPage from './pages/LessonPage';
 import ProgressPage from './pages/ProgressPage';
+import ReferencePage from './pages/ReferencePage';
 import CourseUnitPage from './pages/CourseUnitPage';
 import CourseLessonPage from './pages/CourseLessonPage';
 import { findSong } from './course';
@@ -114,6 +115,8 @@ export default function App() {
             <Route path="/estudo/:moduleId" element={<ModulePage />} />
             <Route path="/estudo/:moduleId/:lessonId" element={<LessonPage />} />
             <Route path="/progresso" element={<ProgressPage />} />
+            <Route path="/consulta" element={<ReferencePage />} />
+            <Route path="/consulta/:secao" element={<ReferencePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

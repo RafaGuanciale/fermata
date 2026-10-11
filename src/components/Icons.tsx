@@ -236,3 +236,12 @@ export function MetronomeIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function BookIcon({ className }: IconProps) {
+  return (
+    <svg {...base} strokeWidth={1.6} className={className}>
+      <path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5v13c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z" />
+      <path d="M12 6v13" />
+    </svg>
+  );
+}

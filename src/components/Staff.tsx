@@ -124,7 +124,8 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           const near = (x: number) => Math.abs(beats - x) < 1e-6;
           const dotted = near(3) || near(1.5) || near(0.75);
           const triplet = isTriplet(beats);
-          const eighth = near(0.5) || near(0.75) || triplet;
+          const sixteenth = near(0.25) || near(0.375);
+          const eighth = near(0.5) || near(0.75) || triplet || sixteenth;
           return (
             <g key={start + i}>
               {ledgerSteps(step).map((ls) => (
@@ -141,6 +142,12 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
                 <path
                   className={`staff__flag${mod ? ` staff__stem${mod}` : ''}`}
                   d={stemUp ? `M${stemX} ${stemEnd} c 4 10, 18 14, 12 32` : `M${stemX} ${stemEnd} c 4 -10, 18 -14, 12 -32`}
+                />
+              )}
+              {sixteenth && (
+                <path
+                  className={`staff__flag${mod ? ` staff__stem${mod}` : ''}`}
+                  d={stemUp ? `M${stemX} ${stemEnd + 11} c 4 10, 18 14, 12 32` : `M${stemX} ${stemEnd - 11} c 4 -10, 18 -14, 12 -32`}
                 />
               )}
               <ellipse

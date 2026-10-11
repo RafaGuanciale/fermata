@@ -1,7 +1,4 @@
 import { Link } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/db';
-import { MODULES, lessonKey as moduleLessonKey } from '../study/modules';
 import PhotoCard from '../components/PhotoCard';
 import type { PhotoKey } from '../media/photos';
 import { useRuns } from '../training/runs';
@@ -15,8 +12,6 @@ export const UNIT_PHOTOS: PhotoKey[] = ['teclado', 'leitura', 'acordes', 'escala
 export default function StudyPage() {
   const rows = useCourseRows();
   const runs = useRuns();
-  const progress = useLiveQuery(() => db.lessons.toArray(), []) ?? [];
-  const learned = new Set(progress.filter((p) => p.status === 'learned' || p.status === 'repertoire').map((p) => p.id));
 
   const next = rows && runs ? nextLesson(UNITS, rows, runs) : null;
   const summary = rows && runs ? courseSummary(UNITS, rows, runs) : null;
@@ -68,24 +63,9 @@ export default function StudyPage() {
       </section>
 
       <section className="page__section">
-        <h2 className="page__sectionTitle">Consulta rápida</h2>
-        <p className="page__lead">Resumos interativos para tirar dúvida a qualquer hora, fora da ordem do curso.</p>
-        <div className="photoGrid photoGrid-modules">
-          {MODULES.map((m, i) => {
-            const ready = m.lessons.filter((l) => l.ready);
-            const done = m.lessons.filter((l) => learned.has(moduleLessonKey(m.id, l.id))).length;
-            return (
-              <PhotoCard
-                key={m.id}
-                photo={m.photo}
-                to={`/estudo/${m.id}`}
-                eyebrow={`Módulo ${i + 1} · ${m.eyebrow}`}
-                title={m.title}
-                badge={ready.length ? `${done} de ${m.lessons.length} aprendidas` : 'Em breve'}
-              />
-            );
-          })}
-        </div>
+        <h2 className="page__sectionTitle">Consulta</h2>
+        <p className="page__lead">Acordes, escalas, campo harmônico, intervalos, claves, ritmo e termos, para olhar e tentar no piano a qualquer hora.</p>
+        <Link className="button button-secondary" to="/consulta">Abrir a Consulta</Link>
       </section>
     </>
   );

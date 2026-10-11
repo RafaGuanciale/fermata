@@ -1,0 +1,408 @@
+/* Consulta: busca, abas, cartões de acorde e escala, campo harmônico, círculo de quintas e termos. */
+
+.refSearch {
+  position: relative;
+  max-width: 720px;
+}
+
+.refSearch__box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  min-height: 48px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.refSearch__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.refSearch__box input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font: 400 15px/1 var(--font-body);
+  outline: none;
+}
+
+.refSearch__results {
+  display: grid;
+  gap: 2px;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2);
+  list-style: none;
+  border-radius: var(--radius-m);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-raised);
+}
+
+.refSearch__results a {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-s);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.refSearch__results a:hover {
+  background: var(--surface);
+}
+
+.refSearch__kind {
+  min-width: 112px;
+  font: 600 11px/16px var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.refTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.refTabs .chip {
+  text-decoration: none;
+}
+
+.ref,
+.refSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.refChips {
+  gap: 6px;
+}
+
+.refInline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.refInput {
+  min-height: 40px;
+  min-width: 240px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-sunk);
+  color: var(--text);
+  font: 400 15px/1 var(--font-body);
+}
+
+.refCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.refCard__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.refCard__symbol {
+  font: 500 48px/1 var(--font-display);
+  min-width: 96px;
+}
+
+.refCard__name {
+  font: 600 17px/24px var(--font-body);
+}
+
+.refNotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.refNotes__item {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 56px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-m);
+  background: var(--surface-sunk);
+}
+
+.refNotes__note {
+  font: 600 16px/22px var(--font-body);
+}
+
+.refNotes__deg {
+  font: 500 12px/16px var(--font-body);
+  color: var(--hit);
+  min-height: 16px;
+}
+
+.refKeys {
+  overflow-x: auto;
+}
+
+.refLive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-m);
+  border: 1px dashed var(--line-strong);
+}
+
+.refTwo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.refEmpty {
+  padding: var(--space-6);
+  text-align: center;
+}
+
+/* Campo harmônico */
+.refField {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.refField__chord {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  border-top-width: 4px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.refField__chord:hover {
+  background: var(--surface-raised);
+}
+
+.refField__chord-tônica { border-top-color: var(--hit); }
+.refField__chord-subdominante { border-top-color: var(--color-khaki); }
+.refField__chord-dominante { border-top-color: var(--miss); }
+
+.refField__chord-on {
+  border-color: var(--line-strong);
+  background: var(--surface-raised);
+}
+
+.refField__roman {
+  font: 600 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.refField__symbol {
+  font: 500 22px/28px var(--font-display);
+}
+
+.refField__fn {
+  font: 500 11px/14px var(--font-body);
+  color: var(--text-muted);
+}
+
+.refProgressions,
+.refFigures {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.refProgressions__item,
+.refFigures__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.refFigures__item {
+  justify-content: flex-start;
+  background: var(--surface-sunk);
+}
+
+.refFigures__item > span {
+  flex: 1;
+}
+
+.refFigures__glyph {
+  width: 120px;
+  flex: none;
+  overflow: hidden;
+}
+
+/* Intervalos */
+.refIntervals {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.refIntervals__item {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.refIntervals__item:hover,
+.refIntervals__item-on {
+  background: var(--surface-raised);
+  border-color: var(--line-strong);
+}
+
+.refIntervals__name {
+  font: 500 14px/20px var(--font-body);
+}
+
+.refIntervals__semis {
+  font: 400 12px/16px var(--font-body);
+  color: var(--text-muted);
+}
+
+/* Círculo de quintas */
+.refCircle {
+  width: 100%;
+  max-width: 380px;
+  justify-self: center;
+}
+
+.refCircle__ring {
+  fill: var(--surface);
+  stroke: var(--line);
+}
+
+.refCircle__inner {
+  fill: var(--surface-sunk);
+}
+
+.refCircle__key {
+  cursor: pointer;
+}
+
+.refCircle__key circle {
+  fill: var(--surface-raised);
+  stroke: var(--line-strong);
+  transition: fill 160ms ease;
+}
+
+.refCircle__key text {
+  fill: var(--text);
+  font: 600 14px var(--font-body);
+}
+
+.refCircle__key .refCircle__minor {
+  fill: var(--text-muted);
+  font: 500 11px var(--font-body);
+}
+
+.refCircle__key:hover circle,
+.refCircle__key-on circle {
+  fill: var(--color-petrol);
+}
+
+.refCircle__key-on text:first-of-type {
+  fill: var(--color-off-white);
+}
+
+/* Termos */
+.refTerms {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.refTerms__row {
+  display: grid;
+  grid-template-columns: minmax(160px, 260px) 1fr;
+  gap: var(--space-4);
+}
+
+.refTerms dt {
+  font-weight: 600;
+}
+
+.refTerms dd {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .refField {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .refField {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .refTerms__row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .refCard {
+    padding: var(--space-4);
+  }
+
+  .refInput {
+    min-width: 0;
+    width: 100%;
+  }
+}
