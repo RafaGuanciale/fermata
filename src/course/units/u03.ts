@@ -88,13 +88,13 @@ const HARM_C = harmonize({
 /** Acorde arpejado e em bloco, em compassos de 4/4. */
 const BROKEN = [
   'C4 E4 G4 E4 | F4 A4 C5 A4 | G4 B4 D5 B4 | C4 E4 G4:2',
-  'C4 E4 G4 C5 | G4 E4 C4:2 | G3 B3 D4 G4 | C4 E4 G4:2',
+  'C4 E4 G4 C5 | G4 E4 C4:2 | G4 B4 D5 B4 | C4 E4 G4:2',
   'F4 A4 C5 A4 | C4 E4 G4 E4 | G4 B4 D5 B4 | C4:4',
 ];
 const SWITCH_CG = [
-  'C4+E4+G4:2 G3+B3+D4:2 | C4+E4+G4:2 G3+B3+D4:2 | C4+E4+G4:2 G3+B3+D4:2 | C4+E4+G4:4',
-  'C4+E4+G4:2 F3+A3+C4:2 | C4+E4+G4:2 G3+B3+D4:2 | C4+E4+G4:2 F3+A3+C4:2 | C4+E4+G4:4',
-  'G3+B3+D4:2 C4+E4+G4:2 | F3+A3+C4:2 C4+E4+G4:2 | G3+B3+D4:2 C4+E4+G4:2 | C4+E4+G4:4',
+  'C4+E4+G4:2 G4+B4+D5:2 | C4+E4+G4:2 G4+B4+D5:2 | C4+E4+G4:2 G4+B4+D5:2 | C4+E4+G4:4',
+  'C4+E4+G4:2 F4+A4+C5:2 | C4+E4+G4:2 G4+B4+D5:2 | C4+E4+G4:2 F4+A4+C5:2 | C4+E4+G4:4',
+  'G4+B4+D5:2 C4+E4+G4:2 | F4+A4+C5:2 C4+E4+G4:2 | G4+B4+D5:2 C4+E4+G4:2 | C4+E4+G4:4',
 ];
 
 // ---------- músicas ----------
@@ -145,7 +145,7 @@ const amazing: SongSpec = {
   id: 'u03-amazing',
   title: 'Amazing Grace',
   composer: 'melodia tradicional "New Britain"',
-  arrangement: 'arranjo do Fermata em Dó: melodia uma oitava acima do Dó central, um acorde por compasso (I, IV, V e V7 em posição próxima) na mão esquerda; anacruse escrita com duas pausas',
+  arrangement: 'arranjo do Fermata em Dó: melodia uma oitava acima do Dó central, um acorde por compasso (I, IV, V e V7 em posição próxima) na mão esquerda; anacruse escrita com uma pausa de mínima',
   bpm: 84,
   beatsPerBar: 3,
   fifths: 0,
@@ -174,7 +174,7 @@ const l17: Lesson = {
       body: `Um **acorde** é um grupo de notas tocadas juntas que soa como uma unidade. O acorde mais comum da música ocidental, a **tríade**, é feito de **terças empilhadas**: uma nota de base, a 3ª acima dela e a 5ª acima dela.
 
 - A nota de base se chama **fundamental** (ou 1). Ela dá o nome ao acorde.
-- A **3ª** dá a cor: alegre (maior) ou triste (menor).
+- A **3ª** dá a cor: mais clara (maior) ou mais escura (menor).
 - A **5ª** dá corpo e estabilidade.
 
 No teclado, a tríade em **estado fundamental** (com a fundamental embaixo) tem um desenho fácil nas teclas brancas: **toca uma, pula uma, toca uma, pula uma, toca uma**. Dó maior = **Dó, Mi, Sol**. Fá maior = **Fá, Lá, Dó**. Sol maior = **Sol, Si, Ré**.
@@ -316,15 +316,15 @@ Parta de **Dó3, Mi3, Sol3** (dedos 5, 3, 1). Para o G7:
       title: 'Melodia e acompanhamento',
       body: `Agora as duas coisas juntas: a mão direita na melodia, a esquerda nos acordes. A regra de ouro da lição 14 continua valendo: a esquerda precisa ficar **automática**. Toque a progressão da esquerda sozinha até ela sair sem pensar, e só então junte.
 
-Em "Mary Had a Little Lamb", uma canção tradicional americana do século XIX, a melodia avisa quando trocar: nos compassos que passam pelo **Ré**, a harmonia vai para G7; nos outros, fica em Dó. O Ré está no G7 (é a 5ª), mas não no Dó.`,
+Em "Mary Had a Little Lamb", uma canção tradicional americana do século XIX, a melodia avisa quando trocar: nos compassos em que o **Ré** é a nota principal (3 e 7), a harmonia vai para G7. Quando o Ré só passa entre Mi e Dó, fica em Dó. O Ré está no G7 (é a 5ª), mas não no Dó.`,
     },
-    { kind: 'exercise', id: 'l18-mary', exercise: quickTimed('Mary Had a Little Lamb, duas mãos', 'Melodia na direita, Dó e G7 na esquerda. Começa a 60 BPM e sobe até 72.', () => twoHandTask(MARY_R, MARY_L, { bpm: 60, caption: 'Esquerda: Dó nos compassos 1, 2, 4, 5, 6 e 8; G7 nos compassos 3 e 7.' }), { ladder: { from: 60, to: 72, step: 4 } }) },
+    { kind: 'exercise', id: 'l18-mary', exercise: quickTimed('Mary Had a Little Lamb, duas mãos', 'Melodia na direita, Dó e G7 na esquerda. Começa a 60 BPM e sobe até 72 BPM.', () => twoHandTask(MARY_R, MARY_L, { bpm: 60, caption: 'Esquerda: Dó nos compassos 1, 2, 4, 5, 6 e 8; G7 nos compassos 3 e 7.' }), { ladder: { from: 60, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-mary', why: 'A mesma música na pauta dupla, com os acordes escritos na clave de Fá.' },
     { kind: 'exercise', id: 'l18-quiz', exercise: quiz('A dominante', 'Cinco perguntas rápidas.', DOMINANT) },
   ],
   review: [chordsCG7, cadenceC, choice(DOMINANT, 'dominante')],
   checkpoint: [
-    quickTimed('Mary Had a Little Lamb a 72 BPM', '8 compassos, duas mãos, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(MARY_R, MARY_L, { bpm: 72 }), { window: 80, pass: { accuracy: 0.9 } }),
+    quickTimed('Mary Had a Little Lamb a 72 BPM', '8 compassos, duas mãos, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(MARY_R, MARY_L, { bpm: 72, caption: 'Esquerda: Dó nos compassos 1, 2, 4, 5, 6 e 8; G7 nos compassos 3 e 7.' }), { window: 80, pass: { accuracy: 0.9 } }),
     { kind: 'items', title: 'Acordes e cadências', how: 'Dó, G7 e cadências para completar, misturados com acordes da lição 17.', gen: mix([chordsCG7, cadenceC, chordsCFG]), count: 12, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
   ],
   exit: [chordsCG7, choice(DOMINANT, 'dominante')],
@@ -352,7 +352,7 @@ Os três têm funções diferentes, como personagens de uma história:
 - **IV (subdominante)**: sair de casa. Um afastamento suave, sem urgência.
 - **V7 (dominante)**: a tensão. Quer voltar para casa.
 
-A progressão **I – IV – V7 – I** conta a história inteira: casa, passeio, tensão, volta. Ela é a espinha de milhares de canções folclóricas, do blues ao forró.`,
+A progressão **I – IV – V7 – I** conta a história inteira: casa, passeio, tensão, volta. Ela é a espinha de milhares de canções folclóricas, do blues e do forró.`,
     },
     {
       kind: 'text',
@@ -410,7 +410,13 @@ Uma segunda regra: termine no **I**. E antes dele, o V7 soa melhor do que o IV.`
     },
     { kind: 'exercise', id: 'l19-harmonizar', exercise: { kind: 'items', title: 'Que acorde cabe aqui?', how: 'A pauta mostra um trecho de melodia em Dó. Toque o acorde (C, F ou G7) que contém essas notas.', gen: HARM_C, count: 12, low: 36, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
     { kind: 'exercise', id: 'l19-brilha-me', exercise: quickTimed('Brilha, brilha: só a esquerda', 'Os 4 primeiros compassos da progressão: C, F–C, F–C, G7–C, a 66 BPM. Duas passadas boas.', () => melodyTask(TW_A, { bpm: 66, clef: 'bass' }), { reps: 2 }) },
-    { kind: 'exercise', id: 'l19-brilha', exercise: quickTimed('Brilha, brilha, estrelinha', 'Melodia folclórica francesa, 12 compassos, duas mãos. Começa a 56 BPM e sobe até 72.', () => twoHandTask(TWINKLE_R, TWINKLE_L, { bpm: 56, caption: 'Um acorde a cada 2 tempos. Veja a partitura completa no "Tocar a música".' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'dedilhado de Brilha, brilha',
+      body: 'A melodia vai do Dó ao Lá: seis notas para cinco dedos. Comece com o polegar no Dó e abra a mão para o 4 cair no Sol e o 5 no Lá: 1 1 4 4 5 5 4. Na frase seguinte a mão escorrega de volta para a posição de Dó: 4 4 3 3 2 2 1 (Fá, Mi, Ré, Dó). Na parte do meio (Sol, Sol, Fá, Fá, Mi, Mi, Ré), fica nessa posição: 5 5 4 4 3 3 2.',
+    },
+    { kind: 'exercise', id: 'l19-brilha', exercise: quickTimed('Brilha, brilha, estrelinha', 'Melodia folclórica francesa, 12 compassos, duas mãos. Começa a 56 BPM e sobe até 72 BPM.', () => twoHandTask(TWINKLE_R, TWINKLE_L, { bpm: 56, caption: 'Esquerda: C, F e G7 em posição próxima, um acorde a cada 2 tempos, como no exercício anterior.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-brilha-c', why: 'A partitura completa com os acordes: confira na clave de Fá onde cada um entra.' },
     { kind: 'exercise', id: 'l19-quiz', exercise: quiz('Funções e cifra', 'Seis perguntas rápidas.', FUNCTIONS) },
   ],
@@ -425,7 +431,7 @@ Uma segunda regra: termine no **I**. E antes dele, o V7 soa melhor do que o IV.`
 const EIGHTHS: ChoiceQuestion[] = [
   { q: 'Quantas colcheias cabem numa semínima?', options: ['1', '2', '4'], answer: 1, why: 'Colcheia = meio tempo.' },
   { q: 'Como se conta "1 e 2 e"?', options: ['Números nos tempos, "e" no meio de cada tempo', 'Um número por colcheia', 'Só os tempos fortes'], answer: 0, why: 'Os números caem no tempo; o "e" divide o tempo ao meio.' },
-  { q: 'Duas colcheias seguidas costumam ser escritas…', options: ['Unidas por uma barra (bandeirola)', 'Separadas por pausa', 'Com ponto'], answer: 0, why: 'A barra junta colcheias do mesmo tempo, para ficar fácil ver onde está cada tempo.' },
+  { q: 'Duas colcheias seguidas costumam ser escritas…', options: ['Unidas por uma barra, no lugar da bandeirola', 'Separadas por pausa', 'Com ponto'], answer: 0, why: 'A barra junta colcheias do mesmo tempo, para ficar fácil ver onde está cada tempo.' },
   { q: 'O padrão "raiz e 5ª" na mão esquerda em Dó toca…', options: ['Dó e Sol alternados', 'Dó e Mi alternados', 'O acorde inteiro'], answer: 0, why: 'Fundamental e 5ª do acorde: no Dó, Dó e Sol; no Fá, Fá e Dó; no Sol, Sol e Ré.' },
   { q: 'Num padrão de mão esquerda, a mão direita…', options: ['Toca a melodia por cima', 'Toca o mesmo padrão', 'Fica parada'], answer: 0, why: 'A esquerda dá a harmonia e o ritmo; a direita canta a melodia.' },
 ];
@@ -530,9 +536,9 @@ Toque cada padrão sobre **I–IV–V–I** até ele sair sem olhar. Os três tr
         { say: '**Raiz e 5ª**: Dó–Sol, Fá–Dó, Sol–Ré, Dó–Sol.', play: { bpm: 80, steps: [48, 55, 48, 55, 41, 48, 41, 48, 43, 50, 43, 50, 48, 55, 48].map((m, i) => ({ midis: [m], beats: i === 14 ? 2 : 1 })) } },
       ],
     },
-    { kind: 'exercise', id: 'l20-bloco', exercise: quickTimed('Padrão 1: bloco', 'I–IV–V–I em posição próxima, a 72 BPM. Dois ciclos sem erro.', () => melodyTask(PAT_BLOCK, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
-    { kind: 'exercise', id: 'l20-oitava', exercise: quickTimed('Padrão 2: raiz com oitava', 'Dó, Fá, Sol, Dó, com a oitava, a 72 BPM. Dois ciclos sem erro.', () => melodyTask(PAT_OCTAVE, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
-    { kind: 'exercise', id: 'l20-quinta', exercise: quickTimed('Padrão 3: raiz e 5ª', 'Fundamental e 5ª em semínimas, a 72 BPM. Dois ciclos sem erro.', () => melodyTask(PAT_FIFTH, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
+    { kind: 'exercise', id: 'l20-bloco', exercise: quickTimed('Padrão 1: bloco', 'I–IV–V–I em posição próxima, a 72 BPM. Dois ciclos limpos.', () => melodyTask(PAT_BLOCK, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
+    { kind: 'exercise', id: 'l20-oitava', exercise: quickTimed('Padrão 2: raiz com oitava', 'Dó, Fá, Sol, Dó, com a oitava, a 72 BPM. Dois ciclos limpos.', () => melodyTask(PAT_OCTAVE, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
+    { kind: 'exercise', id: 'l20-quinta', exercise: quickTimed('Padrão 3: raiz e 5ª', 'Fundamental e 5ª em semínimas, a 72 BPM. Dois ciclos limpos.', () => melodyTask(PAT_FIFTH, { bpm: 72, clef: 'bass' }), { reps: 2, pass: { accuracy: 0.9 } }) },
     {
       kind: 'callout',
       tone: 'dica',
@@ -583,7 +589,7 @@ Repare: o acorde de **Dó** era o I em Dó maior e agora é o IV em Sol maior. O
 - **C**: Sol2, Dó3, Mi3. O Sol fica; Si e Ré sobem.
 - **D7**: Fá♯2, Dó3, Ré3. O Sol desce meio tom para Fá♯; Si sobe para Dó; Ré fica. A 5ª (Lá) fica de fora.
 
-É exatamente o mesmo desenho de Dó maior, cinco teclas brancas mais grave: o Fá♯ faz em Sol o que o Si fazia em Dó.`,
+É exatamente o mesmo desenho de Dó maior, uma 4ª mais grave (5 semitons): o Fá♯ faz em Sol o que o Si fazia em Dó.`,
     },
     {
       kind: 'keys',
@@ -619,8 +625,8 @@ C – F – G7 – C em Dó é **I – IV – V7 – I**. Em Sol, I – IV – V
       body: 'O D7 com Fá natural é outro acorde (Ré menor com sétima) e soa sem direção. Em Sol maior, todo Fá é Fá♯. Se o acorde de tensão soar triste, confira o Fá.',
     },
     { kind: 'exercise', id: 'l21-transpor', exercise: { kind: 'items', title: 'Transponha para Sol', how: 'A cifra vem em Dó. Pense nos graus e toque os acordes de Sol maior, em ordem.', gen: toG, count: 8, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l21-brilha', exercise: quickTimed('Brilha, brilha em Sol', '12 compassos, duas mãos: melodia a partir do Sol4, G, C e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_G_R, TWINKLE_G_L, { bpm: 56 }), { ladder: { from: 56, to: 72, step: 4 } }) },
-    { kind: 'song', songId: 'u03-brilha-g', why: 'A versão em Sol na pauta dupla. Repare no sustenido da armadura: todo Fá é Fá♯.' },
+    { kind: 'exercise', id: 'l21-brilha', exercise: quickTimed('Brilha, brilha em Sol', '12 compassos, duas mãos: melodia a partir do Sol4, G, C e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_G_R, TWINKLE_G_L, { bpm: 56, fifths: 1, caption: 'Um acorde a cada 2 tempos: G, C e D7 na esquerda, como na partitura do "Tocar a música".' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-brilha-g', why: 'A versão em Sol na pauta dupla. O sustenido no começo de cada linha é a armadura: vale para todos os Fá da música. Você estuda armaduras a fundo na Unidade 4.' },
     { kind: 'exercise', id: 'l21-quiz', exercise: quiz('Sol maior', 'Cinco perguntas rápidas.', KEY_G) },
   ],
   review: [gChords, toG, choice(KEY_G, 'tom-sol')],
@@ -708,7 +714,7 @@ Na Unidade 4 você aprende o **pedal legato** (sincopado), em que o pedal troca 
   ],
   review: [choice(PEDAL, 'pedal'), cgChords],
   checkpoint: [
-    quickTimed('Pedal direto', 'Acordes com pausas, ordem nova, a 66 BPM. Meta: 85% das trocas sem lama e nenhuma pausa com pedal preso.', (rng) => melodyTask(pick(rng, PEDAL_RESTS), { bpm: 66 }), { pedal: 'direto' }),
+    quickTimed('Pedal direto', 'Acordes com pausas, ordem nova, a 66 BPM. Meta: 85% das trocas sem lama, soltando o pedal nas pausas.', (rng) => melodyTask(pick(rng, PEDAL_RESTS), { bpm: 66 }), { pedal: 'direto' }),
     quickTimed('Pedal com acordes colados', 'A 66 BPM.', (rng) => melodyTask(pick(rng, PEDAL_FLOW), { bpm: 66 }), { pedal: 'direto' }),
   ],
   exit: [choice(PEDAL, 'pedal'), gChords],
@@ -773,7 +779,7 @@ const l23: Lesson = {
       title: 'Primeiro passo: achar a casa',
       body: `Tocar de ouvido segue sempre a mesma ordem: **tônica**, depois **baixo**, depois **acordes**. O primeiro passo é o mais importante: sem saber onde é a casa, nenhum grau faz sentido.
 
-Para achar a tônica, ouça o trecho e **cante a nota em que ele quer parar**. Depois procure essa nota no teclado. Em geral é a nota com que as frases terminam e a nota mais grave do último acorde.
+Para achar a tônica, ouça o trecho e **cante a nota em que ele quer parar**. Depois procure essa nota no teclado. Em geral é a nota com que as frases terminam. Quando a música termina em repouso, é também a nota mais grave do último acorde. No exercício abaixo o app para no V7, sem resolver: cante a resolução, ou lembre que o primeiro acorde é a casa.
 
 Uma dica que ajuda muito: progressões que acabam no V7 deixam a casa "no ar". O ouvido completa sozinho a resolução. Cante essa resolução: é a tônica.`,
     },
@@ -836,6 +842,7 @@ const l24: Lesson = {
     'Consigo passar no checkpoint misto da unidade 3, sem dicas.',
     'Consigo tocar I, IV e V7 em Dó, Sol e Fá.',
     'Consigo acompanhar uma canção folclórica em três tons, com dois padrões de mão esquerda.',
+    'Consigo tocar Amazing Grace com acordes, em 3/4 e com anacruse.',
   ],
   blocks: [
     {
@@ -862,9 +869,19 @@ Em posição próxima na mão esquerda: **F** = Fá2, Lá2, Dó3; **B♭** = Fá
       steps: [{ say: 'F – B♭ – C7 – F na mão esquerda.', play: { bpm: 72, steps: [[41, 45, 48], [41, 46, 50], [40, 46, 48], [41, 45, 48]].map((m, i) => ({ midis: m, beats: i === 3 ? 4 : 2 })) } }],
     },
     { kind: 'exercise', id: 'l24-fa', exercise: { kind: 'items', title: 'Graus em Fá', how: 'I, IV ou V7 de Fá maior. Lembre do Si♭.', gen: fChords, count: 12, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l24-brilha-fa', exercise: quickTimed('Brilha, brilha em Fá', 'Duas mãos, F, B♭ e C7 em bloco. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_F_R, TWINKLE_F_L, { bpm: 56 }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'exercise', id: 'l24-brilha-fa', exercise: quickTimed('Brilha, brilha em Fá', 'Duas mãos, F, B♭ e C7 em bloco. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_F_R, TWINKLE_F_L, { bpm: 56, fifths: -1, caption: 'Um acorde a cada 2 tempos: F, B♭ e C7 na esquerda. Todo Si é Si♭.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-brilha-f', why: 'A versão em Fá na pauta dupla, com o bemol na armadura.' },
     { kind: 'exercise', id: 'l24-quiz', exercise: quiz('Fá maior', 'Quatro perguntas rápidas.', KEY_F, 0.75) },
+    {
+      kind: 'text',
+      title: 'Antes do projeto final: Amazing Grace',
+      body: `A última música da unidade junta três coisas novas numa só: o **3/4**, a **anacruse** (a melodia entra no 3º tempo, antes do primeiro compasso cheio) e o **acorde de mínima pontuada**, que a esquerda toca no 1 e segura o compasso inteiro.
+
+A mão direita vai do Sol4 ao Sol5, então ela muda de posição no meio da frase: no salto para o Sol5 ("me"), leve a mão inteira, não estique os dedos. A esquerda usa os acordes que você já conhece: C, F, G e G7, em posição próxima. Num compasso ela toca G e, no seguinte, G7: só um dedo se move.
+
+Estude primeiro a esquerda sozinha, no exercício abaixo. Depois a direita, e só então as duas juntas.`,
+    },
+    { kind: 'exercise', id: 'l24-amazing-me', exercise: quickTimed('Amazing Grace: só a esquerda', 'Um acorde por compasso, em mínima pontuada, a 72 BPM. O primeiro compasso é a espera da anacruse. Duas passadas boas.', () => melodyTask(AMAZING_L, { bpm: 72, beatsPerBar: 3, clef: 'bass' }), { reps: 2 }) },
     { kind: 'song', songId: 'u03-amazing', why: 'O projeto final da unidade: Amazing Grace com acordes, em 3/4 e com anacruse.' },
   ],
   review: [allKeys, HARM_C, bassC, choice([...CHORDS, ...DOMINANT, ...FUNCTIONS, ...EIGHTHS, ...KEY_G, ...PEDAL, ...EAR2, ...KEY_F])],
@@ -881,7 +898,7 @@ Em posição próxima na mão esquerda: **F** = Fá2, Lá2, Dó3; **B♭** = Fá
       pass: { accuracy: 0.85 },
     },
     quickTimed('Colcheias', '4 compassos sorteados a 80 BPM, ±60 ms.', randomRhythm(RHY_8, 4, 80), { window: 60 }),
-    quickTimed('Raiz e 5ª com a melodia', 'Brilha, brilha em Dó, 12 compassos, a 72 BPM. Meta: 90%.', () => twoHandTask(TWINKLE_R, TWINKLE_FIFTH, { bpm: 72 }), { pass: { accuracy: 0.9 } }),
+    quickTimed('Raiz e 5ª com a melodia', 'Brilha, brilha em Dó, 12 compassos, a 72 BPM. Meta: 90%.', () => twoHandTask(TWINKLE_R, TWINKLE_FIFTH, { bpm: 72, caption: 'Esquerda, raiz e 5ª: Dó–Sol no C, Fá–Dó no F, Sol–Ré no G7. Um par a cada 2 tempos.' }), { pass: { accuracy: 0.9 } }),
   ],
   project: {
     title: 'Folclore em três tons',
@@ -899,7 +916,7 @@ Em posição próxima na mão esquerda: **F** = Fá2, Lá2, Dó3; **B♭** = Fá
       'A mão esquerda ficou mais leve que a melodia.',
       'Os dois padrões foram usados.',
     ],
-    exercise: { kind: 'timed', title: 'Em Fá, raiz e 5ª', how: 'Melodia em Fá na direita; raiz e 5ª (Fá–Dó, Si♭–Fá, Dó–Sol) na esquerda, a 72 BPM.', gen: () => twoHandTask(TWINKLE_F_R, TWINKLE_F_FIFTH, { bpm: 72, caption: 'Esquerda: raiz e 5ª de F, B♭ e C7.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
+    exercise: { kind: 'timed', title: 'Em Fá, raiz e 5ª', how: 'Melodia em Fá na direita; raiz e 5ª (Fá–Dó, Si♭–Fá, Dó–Sol) na esquerda, a 72 BPM.', gen: () => twoHandTask(TWINKLE_F_R, TWINKLE_F_FIFTH, { bpm: 72, fifths: -1, caption: 'Esquerda: raiz e 5ª de F, B♭ e C7.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
   },
   exit: [allKeys, bassC, choice(KEY_F, 'tom-fa')],
 };

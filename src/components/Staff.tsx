@@ -24,6 +24,10 @@ interface StaffProps {
   fifths?: number;
   /** Quantas semínimas vale um tempo de `durations` (1,5 no compasso composto, em que o tempo é a semínima pontuada). */
   beatScale?: number;
+  /** Ligadura de prolongamento: true liga a nota à seguinte. */
+  ties?: boolean[];
+  /** Acordes: todas as notas da figura (a de `notes` é uma delas). Desenhadas na mesma haste. */
+  chords?: (Midi[] | undefined)[];
 }
 
 // Medidas em "staff-space" (S): distância entre duas linhas da pauta. Tamanho natural: S = 20px.
@@ -40,7 +44,7 @@ const y = (step: number) => BOTTOM - (step * S) / 2;
 const KEY_X = 72;
 const KEY_GAP = 13;
 
-export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1 }: StaffProps) {
+export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1, ties, chords }: StaffProps) {
   if (width <= 0) return <div className="staff" style={{ height: HEIGHT * 0.62 }} />;
   const keyW = fifths ? Math.abs(fifths) * KEY_GAP + 6 : 0;
   const { scale, visible } = staffLayout(width, notes.length, keyW);
@@ -100,6 +104,17 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           </text>
         ))}
         {slice.map((midi, i) => {
+          if (!ties?.[start + i] || midi === null || i + 1 >= slice.length) return null;
+          // Curva do lado oposto à haste: embaixo da cabeça com haste para cima, em cima com haste para baixo.
+          const cy = y(spellOnStaff(midi, clef, fifths).step);
+          const below = spellOnStaff(midi, clef, fifths).step < 4;
+          const x1 = xOf(i) + HEAD_RX - 2;
+          const x2 = xOf(i + 1) - HEAD_RX + 2;
+          const yy = below ? cy + HEAD_RY + 3 : cy - HEAD_RY - 3;
+          const bend = below ? 12 : -12;
+          return <path key={`tie${start + i}`} className="staff__tie" d={`M${x1} ${yy} Q${(x1 + x2) / 2} ${yy + bend} ${x2} ${yy}`} />;
+        })}
+        {slice.map((midi, i) => {
           const x = xOf(i);
           const state = sliceStates[i];
           const mod = state === 'current' || state === 'plain' ? '' : `-${state}`;
@@ -109,17 +124,27 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
               <g key={start + i}>
                 {state === 'current' && <circle className="staff__halo" cx={x} cy={TOP + 2 * S} r={25} />}
                 <text className={`staff__rest${mod ? ` staff__rest${mod}` : ''}`} x={x} y={TOP + 2.9 * S} fontSize={3.4 * S} aria-hidden>
-                  {beats >= 4 ? '𝄻' : beats >= 2 ? '𝄼' : beats >= 1 ? '𝄽' : '𝄾'}
+                  {beats >= 4 || (beatsPerBar && Math.abs(beats - beatsPerBar * beatScale) < 1e-6) ? '𝄻' : beats >= 2 ? '𝄼' : beats >= 1 ? '𝄽' : '𝄾'}
                 </text>
               </g>
             );
           }
-          const { step, accidental, name } = spellOnStaff(midi, clef, fifths);
-          const cy = y(step);
-          const stemUp = step < 4;
+          const { step, name } = spellOnStaff(midi, clef, fifths);
+          // Acorde: as cabeças empilhadas numa haste só; a direção vem da média em relação à linha do meio.
+          const chord = chords?.[start + i];
+          const heads = (chord && chord.length > 1 ? [...chord].sort((a, b) => a - b) : [midi]).map((m) => spellOnStaff(m, clef, fifths));
+          const lowStep = heads[0].step;
+          const highStep = heads[heads.length - 1].step;
+          const stemUp = heads.length > 1 ? (lowStep + highStep) / 2 < 4 : step < 4;
           const mark = state === 'hit' ? ' ✓' : state === 'miss' ? ' ✕' : state === 'late' ? ' ~' : '';
           const stemX = stemUp ? x + HEAD_RX - 1.5 : x - HEAD_RX + 1.5;
-          const stemEnd = stemUp ? cy - STEM : cy + STEM;
+          const stemStart = stemUp ? y(lowStep) : y(highStep);
+          const stemEnd = stemUp ? y(highStep) - STEM : y(lowStep) + STEM;
+          // Segunda no acorde: a cabeça de cima (haste para cima) ou de baixo (haste para baixo) vai para o outro lado.
+          const headX = heads.map((h, k) => {
+            const clash = stemUp ? k > 0 && h.step - heads[k - 1].step === 1 : k < heads.length - 1 && heads[k + 1].step - h.step === 1;
+            return clash ? x + (stemUp ? 2 * HEAD_RX - 3 : -(2 * HEAD_RX - 3)) : x;
+          });
           const hollow = beats >= 2 - 1e-6;
           const near = (x: number) => Math.abs(beats - x) < 1e-6;
           const dotted = near(3) || near(1.5) || near(0.75);
@@ -128,16 +153,18 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           const eighth = near(0.5) || near(0.75) || triplet || sixteenth;
           return (
             <g key={start + i}>
-              {ledgerSteps(step).map((ls) => (
+              {ledgerSteps(Math.min(lowStep, step)).concat(ledgerSteps(Math.max(highStep, step))).filter((v, k, a) => a.indexOf(v) === k).map((ls) => (
                 <line key={ls} className="staff__ledger" x1={x - 22} x2={x + 22} y1={y(ls)} y2={y(ls)} />
               ))}
-              {state === 'current' && <circle className="staff__halo" cx={x} cy={cy} r={25} />}
-              {accidental && (
-                <text className={`staff__accidental${mod ? ` staff__head${mod}` : ''}`} x={x - HEAD_RX - 6} y={cy + 7} fontSize={1.4 * S} aria-hidden>
-                  {accidental}
-                </text>
+              {state === 'current' && <ellipse className="staff__halo" cx={x} cy={(y(lowStep) + y(highStep)) / 2} rx={25} ry={25 + (y(lowStep) - y(highStep)) / 2} />}
+              {heads.map((h, k) =>
+                h.accidental ? (
+                  <text key={`acc${k}`} className={`staff__accidental${mod ? ` staff__head${mod}` : ''}`} x={Math.min(...headX) - HEAD_RX - 6 - (heads.length > 1 && k % 2 ? 12 : 0)} y={y(h.step) + 7} fontSize={1.4 * S} aria-hidden>
+                    {h.accidental}
+                  </text>
+                ) : null,
               )}
-              {beats < 4 && <line className={`staff__stem${mod ? ` staff__stem${mod}` : ''}`} x1={stemX} x2={stemX} y1={cy} y2={stemEnd} />}
+              {beats < 4 && <line className={`staff__stem${mod ? ` staff__stem${mod}` : ''}`} x1={stemX} x2={stemX} y1={stemStart} y2={stemEnd} />}
               {eighth && (
                 <path
                   className={`staff__flag${mod ? ` staff__stem${mod}` : ''}`}
@@ -150,23 +177,29 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
                   d={stemUp ? `M${stemX} ${stemEnd + 11} c 4 10, 18 14, 12 32` : `M${stemX} ${stemEnd - 11} c 4 -10, 18 -14, 12 -32`}
                 />
               )}
-              <ellipse
-                className={`staff__head${mod ? ` staff__head${mod}` : ''}${hollow ? ' staff__head-hollow' : ''}`}
-                cx={x}
-                cy={cy}
-                rx={HEAD_RX}
-                ry={HEAD_RY}
-                transform={`rotate(-20 ${x} ${cy})`}
-              />
+              {heads.map((h, k) => (
+                <ellipse
+                  key={`h${k}`}
+                  className={`staff__head${mod ? ` staff__head${mod}` : ''}${hollow ? ' staff__head-hollow' : ''}`}
+                  cx={headX[k]}
+                  cy={y(h.step)}
+                  rx={HEAD_RX}
+                  ry={HEAD_RY}
+                  transform={`rotate(-20 ${headX[k]} ${y(h.step)})`}
+                />
+              ))}
               {tuplets.has(start + i) && (
                 <text className="staff__tuplet" x={stemUp ? stemX + 6 : x} y={stemUp ? stemEnd - 8 : stemEnd + 20} aria-hidden>
                   3
                 </text>
               )}
-              {dotted && <circle className={`staff__dot${mod ? ` staff__head${mod}` : ''}`} cx={x + HEAD_RX + 8} cy={step % 2 === 0 ? cy - S / 2 : cy} r={3.2} />}
+              {dotted &&
+                heads.map((h, k) => (
+                  <circle key={`d${k}`} className={`staff__dot${mod ? ` staff__head${mod}` : ''}`} cx={Math.max(...headX) + HEAD_RX + 8} cy={h.step % 2 === 0 ? y(h.step) - S / 2 : y(h.step)} r={3.2} />
+                ))}
               {(showNames || mark) && (
-                <text className={'staff__name' + (state === 'current' ? ' staff__name-current' : '')} x={x} y={nameY}>
-                  {showNames ? name + mark : mark.trim()}
+                <text className={'staff__name' + (state === 'current' ? ' staff__name-current' : '') + (heads.length > 1 ? ' staff__name-chord' : '')} x={x} y={nameY}>
+                  {showNames ? (heads.length > 1 ? heads.map((h) => h.name).join(' ') : name) + mark : mark.trim()}
                 </text>
               )}
             </g>

@@ -26,7 +26,7 @@ export function melodyTask(text: string, opts: { bpm: number; beatsPerBar?: numb
   const midis = notes.flatMap((x) => x.midis);
   const [low, high] = rangeOf(midis, [60, 72]);
   return {
-    display: notes.map((x) => ({ midi: x.midis[0] ?? null, beats: x.beats })),
+    display: notes.map((x) => ({ midi: x.midis.length ? Math.min(...x.midis) : null, beats: x.beats, ...(x.midis.length > 1 ? { chord: x.midis } : {}) })),
     clef: opts.clef ?? (midis.length && Math.max(...midis) < 60 ? 'bass' : 'treble'),
     events: notes.flatMap((x) => x.midis.map((m) => ({ midi: m, beat: x.beat, beats: x.beats }))),
     beatsPerBar: bpb,
@@ -67,7 +67,7 @@ export function twoHandTask(right: string, left: string, opts: { bpm: number; be
   const midis = [...r, ...l].flatMap((x) => x.midis);
   const [low, high] = rangeOf(midis, [48, 72]);
   return {
-    display: r.map((x) => ({ midi: x.midis[0] ?? null, beats: x.beats })),
+    display: r.map((x) => ({ midi: x.midis.length ? Math.min(...x.midis) : null, beats: x.beats, ...(x.midis.length > 1 ? { chord: x.midis } : {}) })),
     clef: 'treble',
     events: [
       ...r.flatMap((x) => x.midis.map((m) => ({ midi: m, beat: x.beat, beats: x.beats, hand: 'r' as const }))),
@@ -96,7 +96,7 @@ export function tiedMelodyTask(text: string, opts: { bpm: number; beatsPerBar?: 
     if (i > 0 && tied[i - 1] && prev && prev.midi === e.midi) prev.beats += e.beats;
     else events.push({ ...e });
   });
-  return { ...base, events };
+  return { ...base, events, display: base.display.map((d, i) => (tied[i] ? { ...d, tie: true } : d)) };
 }
 
 /** Transposição: a pauta mostra a melodia escrita em `text`; o que conta é tocá-la `semitones` acima (ou abaixo). */

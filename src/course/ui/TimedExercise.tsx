@@ -214,7 +214,12 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
   displayStarts.forEach((b, i) => {
     if (phase === 'playing' && b * beatMs - 120 <= elapsed) current = i;
   });
-  const states: NoteState[] = task.display.map((d, i) => {
+  const states: NoteState[] = [];
+  task.display.forEach((d, i) => {
+    // A figura que continua uma ligadura não é tocada: herda o estado da nota de onde vem.
+    states.push(i > 0 && task.display[i - 1].tie ? states[i - 1] : stateOf(d, i));
+  });
+  function stateOf(d: TimedTask['display'][number], i: number): NoteState {
     if (d.midi === null && !anyKey) return 'plain';
     const ei = task.events.findIndex((e) => Math.abs(e.beat - displayStarts[i]) < 1e-6 && (e.midi === null || (d.midi !== null && e.midi === d.midi + shift)));
     const j = ei >= 0 ? live?.notes[ei] : null;
@@ -222,7 +227,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     if (phase === 'done') return 'plain';
     if (i === current) return 'current';
     return phase === 'idle' ? 'plain' : 'upcoming';
-  });
+  }
 
   const marks: Partial<Record<number, KeyMark>> = {};
   const next = task.display[current]?.midi;
@@ -242,6 +247,8 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           width={staffWidth}
           clef={task.clef}
           durations={task.display.map((d) => d.beats)}
+          ties={task.display.map((d) => !!d.tie)}
+          chords={task.display.map((d) => d.chord)}
           beatsPerBar={task.beatsPerBar}
           beatScale={task.compound ? 1.5 : 1}
           fifths={task.fifths}

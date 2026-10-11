@@ -274,7 +274,7 @@ export function primaryChord(opts: { keys: string[]; degrees: Degree[]; low: Mid
       prompt: `Em ${keyName(key)} maior, toque o ${degree}`,
       detail: 'Qualquer posição. No V7, a 5ª pode ficar de fora.',
       hintKeys: voiced(symbol, Math.round((opts.low + opts.high) / 2)).slice(1),
-      hint: `${chordLabel(symbol)}: ${c.pcs.map((p) => PC_NAMES[p]).join(', ')}`,
+      hint: `${chordLabel(symbol)}: ${c.pcs.map((p) => ptInKey(p, key)).join(', ')}`,
       steps: [chordAccept(symbol)],
       skill: opts.skill ?? 'grau-acorde',
     };

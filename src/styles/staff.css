@@ -72,6 +72,10 @@
   text-anchor: middle;
 }
 
+.staff__name-chord {
+  font-size: 10.5px;
+}
+
 .staff__name-current {
   fill: var(--text);
   font-weight: 600;
@@ -94,6 +98,13 @@
 
 .staff__head-hollow.staff__head-late {
   stroke: var(--color-khaki);
+}
+
+.staff__tie {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
 .staff__flag {

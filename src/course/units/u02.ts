@@ -219,7 +219,7 @@ As âncoras da clave de Fá neste curso: **Sol2** (linha de baixo), **Dó3** (2�
       steps: [
         { say: 'O **Fá3**, na linha entre os dois pontos da clave.', keys: [53], play: { bpm: 72, steps: [{ midis: [53], beats: 2 }] } },
         { say: 'O **Dó3**, no 2º espaço: casa do dedo 5 da mão esquerda na posição de Dó.', keys: [48], play: { bpm: 72, steps: [{ midis: [48], beats: 2 }] } },
-        { say: 'O **Sol2**, na linha de baixo. Do Sol2 ao Dó3: 4 passos de pauta.', keys: [43], play: { bpm: 72, steps: [{ midis: [43], beats: 1 }, { midis: [48], beats: 2 }] } },
+        { say: 'O **Sol2**, na linha de baixo. Do Sol2 ao Dó3: 3 passos de pauta (uma 4ª: Sol, Lá, Si, Dó).', keys: [43], play: { bpm: 72, steps: [{ midis: [43], beats: 1 }, { midis: [48], beats: 2 }] } },
         { say: 'Subindo de Dó3 até Dó4, degrau por degrau: Dó, Ré, Mi, Fá, Sol, Lá, Si, Dó.', keys: [48, 60], play: { bpm: 100, steps: [48, 50, 52, 53, 55, 57, 59, 60].map((m) => ({ midis: [m], beats: 1 })) } },
       ],
     },
@@ -345,7 +345,7 @@ No exercício o app diz a nota de partida e toca o intervalo. Você toca as duas
   review: [intervalUp, intervalStaff, intervalEar25, choice(INTERVALS, 'intervalos')],
   checkpoint: [
     { kind: 'items', title: '20 intervalos construídos', how: '2ª a 5ª acima de notas brancas, sem dicas. Meta: 85%.', gen: intervalUp, count: 20, low: 55, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
-    { kind: 'items', title: '20 intervalos de ouvido', how: '2ª ou 5ª, misturados com leitura na pauta. Meta: 85%.', gen: mix([intervalEar25, intervalEar25, intervalStaff, readBoth]), count: 20, low: 36, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
+    { kind: 'items', title: 'Ouvido e pauta misturados', how: '20 itens: metade são 2ª ou 5ª de ouvido, o resto intervalos e notas na pauta. Meta: 85%.', gen: mix([intervalEar25, intervalEar25, intervalStaff, readBoth]), count: 20, low: 36, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
   ],
   exit: [intervalUp, intervalEar25, choice(INTERVALS, 'intervalos')],
 };
@@ -463,7 +463,7 @@ A ligadura de prolongamento existe porque uma nota não pode atravessar a barra 
     {
       kind: 'exercise',
       id: 'l12-ligadura',
-      exercise: quickTimed('Ligaduras em 3/4', 'Posição de Dó, a 66 BPM. Nas notas ligadas, segure: não toque de novo. Duas passadas boas.', (rng) => tiedMelodyTask(pick(rng, TIES_3), { bpm: 66, beatsPerBar: 3, caption: 'A pauta mostra as duas figuras da ligadura; toque só a primeira e segure.' }), { reps: 2, noExtras: true }),
+      exercise: quickTimed('Ligaduras em 3/4', 'Posição de Dó, a 66 BPM. Nas notas ligadas, segure: não toque de novo. Duas passadas boas.', (rng) => tiedMelodyTask(pick(rng, TIES_3), { bpm: 66, beatsPerBar: 3, caption: 'A curva liga duas figuras da mesma nota: toque a primeira e segure pelas duas.' }), { reps: 2, noExtras: true }),
     },
     {
       kind: 'text',
@@ -526,12 +526,12 @@ O **tom** é a soma de dois semitons: pule uma tecla. De Dó para Ré é um tom 
 
 Uma tecla preta tem dois nomes: a preta entre Fá e Sol é **Fá♯** e também **Sol♭**. Mesmo som, grafias diferentes: isso se chama **enarmonia**. Qual nome usar depende da tonalidade, assunto da Unidade 4.
 
-Na pauta, o acidente vem **antes** da nota, na mesma linha ou espaço. E ele **vale até a barra de compasso**, para todas as notas iguais naquele compasso. No compasso seguinte, se ninguém escrever de novo, a nota volta a ser natural.`,
+Na pauta, o acidente vem **antes** da nota, na mesma linha ou espaço. E ele **vale até a barra de compasso**, para a mesma nota, na mesma linha ou espaço, naquele compasso. No compasso seguinte, se ninguém escrever de novo, a nota volta a ser natural.`,
     },
     {
       kind: 'callout',
       tone: 'erro',
-      title: 'achar que todo sustenido é uma tecla preta',
+      title: 'achar que todo acidente cai numa tecla preta',
       body: 'Quase sempre é, mas não sempre. Mi♯ é a tecla do Fá, e Si♯ é a tecla do Dó; Fá♭ é a tecla do Mi. Pense sempre em "tecla vizinha", não em "tecla preta".',
     },
     {
@@ -553,7 +553,9 @@ Na pauta, o acidente vem **antes** da nota, na mesma linha ou espaço. E ele **v
 
 Nas melodias em Sol maior, o Fá é sempre **Fá♯**. O motivo vem na Unidade 4 (a escala maior); por enquanto, a regra prática basta: nesta posição, o polegar desce um pouquinho para alcançar o Fá♯4, a preta logo abaixo do Sol, e volta.
 
-Nas melodias abaixo o ♯ aparece escrito em cada Fá. Mesmo assim, o erro mais comum é a mão "lembrar" da posição de Dó e tocar o Fá natural. Antes de começar, toque Sol, Fá♯, Sol algumas vezes, para a mão gravar o caminho.`,
+Nas melodias abaixo o ♯ aparece escrito em cada Fá. Mesmo assim, o erro mais comum é a mão "lembrar" da posição de Dó e tocar o Fá natural. Antes de começar, toque Sol, Fá♯, Sol algumas vezes, para a mão gravar o caminho.
+
+Como o polegar faz as duas notas, do Fá♯ para o Sol ele escorrega da preta para a branca, e ali o legato quebra um pouco. Tudo bem: nesta fase vale a nota certa no tempo certo. Quando a melodia vai até o Ré5, o dedo 5 estica para alcançá-lo.`,
     },
     {
       kind: 'keys',
@@ -569,7 +571,7 @@ Nas melodias abaixo o ♯ aparece escrito em cada Fá. Mesmo assim, o erro mais 
   review: [toneSemi, readSharps, choice(ACCIDENTALS, 'acidentes')],
   checkpoint: [
     { kind: 'items', title: 'Tom e semitom', how: '16 pedidos, sem dicas, misturados com notas com sustenido na pauta. Meta: 85%.', gen: mix([toneSemi, toneSemi, readSharps]), count: 16, low: 55, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
-    quickTimed('Posição de Sol no tempo', 'Melodia nova a 66 BPM. Nenhum Fá natural.', (rng) => melodyTask(pick(rng, G_POS), { bpm: 66 })),
+    quickTimed('Posição de Sol no tempo', 'Melodia nova a 66 BPM. Todo Fá é Fá♯.', (rng) => melodyTask(pick(rng, G_POS), { bpm: 66 })),
   ],
   exit: [toneSemi, choice(ACCIDENTALS, 'acidentes')],
 };
@@ -596,7 +598,7 @@ const l14: Lesson = {
   objectives: [
     'Consigo tocar um bordão na mão esquerda enquanto a direita lê uma melodia.',
     'Consigo trocar o bordão de Dó para Sol no tempo certo.',
-    'Consigo tocar a Ode à Alegria com as duas mãos a 80 BPM.',
+    'Consigo tocar os 8 primeiros compassos da Ode à Alegria com as duas mãos a 80 BPM.',
   ],
   blocks: [
     {
@@ -615,9 +617,9 @@ A mão que fica automática é quase sempre a esquerda, porque ela faz a parte m
     {
       kind: 'text',
       title: 'O bordão e onde as mãos se encontram',
-      body: `Nesta lição a mão esquerda fica na posição de Dó (dedo 5 no Dó3, dedo 1 no Sol3) e toca **semibreves**: uma nota no tempo 1 de cada compasso, segurada até o próximo.
+      body: `Nesta lição a mão esquerda fica na posição de Dó (dedo 5 no Dó3, dedo 1 no Sol3) e toca quase sempre **semibreves**: uma nota no tempo 1 de cada compasso, segurada até o próximo. No fim da frase (compasso 8) o bordão troca no tempo 3: Sol no 1, Dó no 3.
 
-O momento crítico é o **tempo 1**: as duas mãos descem **juntas**. Nos tempos 2, 3 e 4 só a direita trabalha. Por isso, na leitura, olhe primeiro o 1 de cada compasso, nas duas pautas: é ali que mora a coordenação.
+O momento crítico é o **tempo 1**: as duas mãos descem **juntas**. Nos outros tempos, quase sempre só a direita trabalha. Por isso, na leitura, olhe primeiro o 1 de cada compasso, nas duas pautas: é ali que mora a coordenação.
 
 **Conte antes de tocar.** Diga "1, 2, 3, 4" em voz alta uma vez antes de começar e continue contando baixinho enquanto toca. Quem conta não corre.`,
     },
@@ -653,13 +655,13 @@ Na posição de Dó da mão esquerda isso não exige movimento nenhum: o Dó3 é
     {
       kind: 'exercise',
       id: 'l14-ode-escada',
-      exercise: quickTimed('Ode à Alegria, 8 compassos, duas mãos', 'Bordão de Dó e Sol na esquerda. Começa a 60 BPM e sobe 5 BPM a cada passada boa, até 80.', () => twoHandTask(ODE_8_R, ODE_8_L, { bpm: 60, caption: 'Mão esquerda: Dó3 ou Sol3 no 1 de cada compasso (veja a partitura no "Tocar a música").' }), { ladder: { from: 60, to: 80, step: 5 } }),
+      exercise: quickTimed('Ode à Alegria, 8 compassos, duas mãos', 'Bordão de Dó e Sol na esquerda. Começa a 60 BPM e sobe 5 BPM a cada passada boa, até 80 BPM.', () => twoHandTask(ODE_8_R, ODE_8_L, { bpm: 60, caption: 'Mão esquerda: Dó3, Sol3, Dó3, Sol3, uma semibreve por compasso; depois Dó3, Sol3, Dó3 e, no compasso 8, Sol3 no 1 e Dó3 no 3.' }), { ladder: { from: 60, to: 80, step: 5 } }),
     },
     { kind: 'song', songId: 'u02-ode-me-8', why: 'Os mesmos 8 compassos com a pauta dupla de verdade: aqui você vê as duas claves juntas. O modo Estudar espera cada nota das duas mãos.' },
   ],
   review: [readBoth, intervalUp],
   checkpoint: [
-    quickTimed('Ode à Alegria completa, duas mãos', '16 compassos a 80 BPM, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(odeRight, odeLeftLine, { bpm: 80 }), { window: 80, pass: { accuracy: 0.9 } }),
+    quickTimed('Ode à Alegria, 8 compassos, duas mãos', 'A 80 BPM, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(ODE_8_R, ODE_8_L, { bpm: 80 }), { window: 80, pass: { accuracy: 0.9 } }),
   ],
   exit: [readBoth, choice([...METER_3, ...ACCIDENTALS])],
 };
@@ -813,7 +815,7 @@ Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de S
     {
       kind: 'items',
       title: 'Leitura, intervalos e ouvido',
-      how: '20 perguntas misturadas das lições 9 a 15, com algumas da Unidade 1. Meta: 85%.',
+      how: '20 perguntas misturadas das lições 9 a 15. Meta: 85%.',
       gen: mix([readTreble, readBass, intervalUp, intervalStaff, toneSemi, intervalEar25, readSharps, choice([...PAUTA, ...CLAVE_FA, ...INTERVALS, ...METER_3, ...ACCIDENTALS, ...TRANSPOSE])]),
       count: 20,
       low: 36,
@@ -822,6 +824,7 @@ Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de S
       pass: { accuracy: 0.85 },
     },
     quickTimed('Ritmo em 3/4', '4 compassos sorteados a 76 BPM.', rhythm3(4, 76)),
+    quickTimed('Ode à Alegria completa, duas mãos', '16 compassos a 80 BPM. Meta: 85% das notas, ±80 ms.', () => twoHandTask(odeRight, odeLeftLine, { bpm: 80, caption: 'Mão esquerda na parte do meio (compassos 9 a 12): Sol, Dó | Sol, Dó | Sol | Dó, Sol, em mínimas. No resto, como nos 8 primeiros compassos.' }), { window: 80, pass: { accuracy: 0.85 } }),
     quickTimed('Transposição', 'Ode à Alegria, primeira frase, escrita em Dó. Toque em Sol, a 72 BPM. Meta: 90%.', () => transposedTask(ODE_4, 7, { bpm: 72 }), { pass: { accuracy: 0.9 } }),
   ],
   project: {
@@ -880,7 +883,7 @@ const valsa: SongSpec = {
   id: 'u02-valsa',
   title: 'Valsinha em Dó',
   composer: 'Fermata (melodia original)',
-  arrangement: 'melodia na posição de Dó; mão esquerda em mínimas pontuadas de Dó3 e Sol3. A anacruse aparece com duas pausas antes',
+  arrangement: 'melodia na posição de Dó; mão esquerda em mínimas pontuadas de Dó3 e Sol3. A anacruse aparece com uma pausa de mínima antes',
   bpm: 84,
   beatsPerBar: 3,
   fifths: 0,
