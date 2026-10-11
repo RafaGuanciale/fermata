@@ -300,7 +300,15 @@ export function ChecklistRunner({ items, onFinish }: { items: string[]; onFinish
 
 type QuizEx = Extract<Exercise, { kind: 'quiz' }>;
 
-export function QuizRunner({ ex, onFinish }: { ex: QuizEx; onFinish: (o: Outcome) => void }) {
+export function QuizRunner({ ex: raw, onFinish }: { ex: QuizEx; onFinish: (o: Outcome) => void }) {
+  // Opções embaralhadas a cada vez: a resposta certa não fica sempre no mesmo lugar.
+  const [ex] = useState<QuizEx>(() => ({
+    ...raw,
+    questions: raw.questions.map((q) => {
+      const order = q.options.map((_, k) => k).sort(() => Math.random() - 0.5);
+      return { ...q, options: order.map((k) => q.options[k]), answer: order.indexOf(q.answer) };
+    }),
+  }));
   const [i, setI] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [right, setRight] = useState(0);

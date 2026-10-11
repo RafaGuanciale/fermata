@@ -14,6 +14,7 @@
 
 /* Páginas */
 @import url("./styles/today.css");
+@import url("./styles/weeklyGoal.css");
 @import url("./styles/session.css");
 @import url("./styles/repertoire.css");
 @import url("./styles/study.css");

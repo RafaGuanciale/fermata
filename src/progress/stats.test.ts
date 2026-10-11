@@ -50,3 +50,13 @@ describe('progresso', () => {
     expect(milestones([], long, []).find((x) => x.title.startsWith('10 horas'))?.at).toBe(at('2026-09-02'));
   });
 });
+
+describe('meta semanal', () => {
+  it('soma minutos e dias da semana atual', async () => {
+    const { goalProgress } = await import('./goals');
+    const now = new Date('2026-10-08T12:00').getTime();
+    const byDay = minutesByDay([pd('2026-10-06', 30), pd('2026-10-07', 40), pd('2026-10-08', 25), pd('2026-10-04', 60)], []);
+    expect(goalProgress(byDay, now, { minutes: 90, days: 3 })).toEqual({ minutes: 95, days: 3, met: true });
+    expect(goalProgress(byDay, now, { minutes: 120, days: 3 }).met).toBe(false);
+  });
+});

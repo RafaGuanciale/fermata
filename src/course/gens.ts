@@ -533,7 +533,9 @@ export interface ChoiceQuestion {
 export function choice(questions: ChoiceQuestion[], skill = 'conceito'): ItemGen {
   return (rng) => {
     const c = pick(rng, questions);
-    return { prompt: c.q, choices: c.options, answer: c.answer, hint: c.why, steps: [], skill };
+    // Embaralha as opções: a resposta não pode ficar sempre no mesmo lugar.
+    const order = shuffle(rng, c.options.map((_, i) => i));
+    return { prompt: c.q, choices: order.map((i) => c.options[i]), answer: order.indexOf(c.answer), hint: c.why, steps: [], skill };
   };
 }
 

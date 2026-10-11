@@ -61,8 +61,10 @@ function fits(accept: Accept, midi: Midi): boolean {
       // O baixo de uma cifra com barra pode ser nota de fora do acorde (Em/D).
       return accept.pcs.includes(pcOf(midi)) || accept.bass === pcOf(midi);
     case 'exact':
-    case 'all':
       return accept.midis.includes(midi);
+    case 'all':
+      // "Todos os Dó": vale qualquer Dó do piano, não só os do trecho mostrado na tela.
+      return accept.midis.some((m) => pcOf(m) === pcOf(midi));
     case 'anyChord':
       return accept.options.some((o) => o.pcs.includes(pcOf(midi)));
   }
@@ -125,6 +127,7 @@ export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[])
     return { ...p, lastWrong: null, why: undefined };
   }
   if (accept.kind === 'all') {
+    // Conta teclas diferentes; as da tela acendem, as de outras oitavas (piano de 88 teclas) contam igual.
     const found = p.found.includes(midi) ? p.found : [...p.found, midi];
     if (found.length >= accept.midis.length) return advance({ ...p, found }, item);
     return { ...p, found, lastWrong: null };

@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Attempt, type Session } from '../db/db';
-import { DAY, avgFindMs, dailyAvgFindMs, firstTryRate, practiceMinutes, startOfWeek, weakestNote } from '../db/stats';
+import { DAY, avgFindMs, dailyAvgFindMs, firstTryRate, weakestNote } from '../db/stats';
 import { noteLabel } from '../music/notes';
 import { formatPercent, formatSeconds, formatToday } from '../format';
 import PhotoCard from '../components/PhotoCard';
 import PieceList from '../components/PieceList';
 import StatTile from '../components/StatTile';
+import WeeklyGoal from '../progress/WeeklyGoal';
 import { PlayIcon } from '../components/Icons';
 import { useTrainingToday } from '../course/useTrainingToday';
 
@@ -78,9 +79,6 @@ export default function TodayPage() {
 }
 
 function Evolution({ sessions, attempts, now }: { sessions: Session[]; attempts: Attempt[]; now: number }) {
-  const week = startOfWeek(now);
-  const minutes = practiceMinutes(sessions, week, week + 7 * DAY);
-  const minutesBefore = practiceMinutes(sessions, week - 7 * DAY, week);
   const last7 = now - 7 * DAY;
   const find = avgFindMs(attempts, last7, Infinity);
   const findBefore = avgFindMs(attempts, last7 - 7 * DAY, last7);
@@ -98,18 +96,11 @@ function Evolution({ sessions, attempts, now }: { sessions: Session[]; attempts:
     const pts = Math.round((rate - rateBefore) * 100);
     rateDelta = `${pts >= 0 ? '+' : '−'}${Math.abs(pts)} pontos sobre a semana anterior`;
   }
-  const minuteDiff = minutes - minutesBefore;
 
   return (
     <>
       <div className="today__stats">
-        <StatTile
-          label="Prática esta semana"
-          value={minutes < 1 && sessions.some((s) => s.startedAt >= week) ? '< 1' : String(minutes)}
-          unit="min"
-          delta={minutesBefore ? `${minuteDiff >= 0 ? '+' : '−'}${Math.abs(minuteDiff)} min sobre a semana passada` : undefined}
-          deltaGood={minuteDiff > 0}
-        />
+        <WeeklyGoal />
         <StatTile
           label="Tempo para achar a nota"
           value={find !== null ? formatSeconds(find).replace(' s', '') : '—'}

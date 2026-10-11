@@ -8,6 +8,7 @@ import { DAY } from '../db/stats';
 import { noteLabel } from '../music/notes';
 import { formatPercent, formatSeconds } from '../format';
 import StatTile from '../components/StatTile';
+import WeeklyGoal from '../progress/WeeklyGoal';
 import { dayKey } from '../training/progress';
 import { PLAN, UNITS } from '../course';
 import { finalPassedAt, isPassed, lessonKey, unitComplete, unitUnlocked } from '../course/progress';
@@ -43,8 +44,6 @@ export default function ProgressPage() {
 
   const byDay = minutesByDay(data.practice, data.sessions);
   const weeks = weeklyTotals(byDay, now, 8);
-  const thisWeek = weeks[weeks.length - 1];
-  const lastWeek = weeks[weeks.length - 2];
   const days = streak(byDay, now);
   const playedToday = (byDay.get(dayKey(now)) ?? 0) > 0;
   const totalMinutes = [...byDay.values()].reduce((a, b) => a + b, 0);
@@ -103,7 +102,7 @@ export default function ProgressPage() {
           <section className="page__section" aria-labelledby="pg-const">
             <h2 className="page__sectionTitle" id="pg-const">Constância</h2>
             <div className="progress__tiles">
-              <StatTile label="Esta semana" value={minutesText(thisWeek.minutes)} delta={lastWeek.minutes ? `semana passada: ${minutesText(lastWeek.minutes)}` : undefined} deltaGood={thisWeek.minutes >= lastWeek.minutes && lastWeek.minutes > 0} />
+              <WeeklyGoal />
               <StatTile label="Dias seguidos" value={String(days)} unit={days === 1 ? 'dia' : 'dias'} delta={playedToday ? 'você já tocou hoje' : days ? 'toque hoje para manter' : 'comece hoje'} />
               <StatTile label="Total no piano" value={minutesText(totalMinutes)} delta={`${[...byDay.values()].filter((m) => m > 0).length} dias com prática`} />
             </div>

@@ -249,7 +249,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 1,
     goal: 'Pentacordes da posição de Dó em semínimas, legato, de 60 rumo a 100 BPM.',
-    warmup: [warm('Pentacorde, mão direita', () => lineTask(pentachord(60), 1, { bpm: 60, hands: 'direita' })), warm('Pentacorde, mão esquerda', () => lineTask(pentachord(48), 1, { bpm: 60, hands: 'direita' }))],
+    warmup: [warm('Pentacorde, mão direita', () => lineTask(pentachord(60), 1, { bpm: 60, hands: 'direita' })), warm('Pentacorde, mão esquerda', () => lineTask(pentachord(60), 1, { bpm: 60, hands: 'esquerda' }))],
     technique: [pentaItem('penta-do-md', [C], 'direita', 1, 60, 100, 'legato'), pentaItem('penta-do-me', [{ ...C, tonic: 48 }], 'esquerda', 1, 60, 100, 'legato'), touchesItem],
     reading: readingEx((rng) => sightReadingTask(rng, { tonic: 60, bars: 4, bpm: 60 }), '4 compassos novos na posição de Dó, clave de sol. Não pare: errou, siga no tempo.'),
     ear: earEx(degreeByEar({ tonic: 60, degrees: [1, 3, 5] }), 'Depois da cadência, toque a nota: 1, 3 ou 5.'),
@@ -350,7 +350,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 10,
     goal: 'Arpejos de tônica, V7 e diminuta, mãos separadas, rumo a 92 BPM.',
-    warmup: [warm('Escala de Dó, 2 oitavas, mãos juntas', () => lineTask(scaleUpDown(48, MAJOR, 2), 0.5, { bpm: 72, hands: 'duas' })), warm('Alberti', () => ({ ...lineTask(alberti([[48, 52, 55], [47, 50, 55]]), 0.5, { bpm: 72, hands: 'direita' }), clef: 'bass' as Clef }))],
+    warmup: [warm('Escala de Dó, 2 oitavas, mãos juntas', () => lineTask(scaleUpDown(60, MAJOR, 2), 0.5, { bpm: 72, hands: 'duas' })), warm('Alberti', () => ({ ...lineTask(alberti([[48, 52, 55], [47, 50, 55]]), 0.5, { bpm: 72, hands: 'direita' }), clef: 'bass' as Clef }))],
     technique: [arpItem('arpejo-v7', [{ ...G, tonic: 55 }, { ...C, tonic: 48 }, { ...F, tonic: 53 }], 'direita', 60, 92, { name: 'dominante com sétima', steps: [0, 4, 7, 10] }), arpItem('arpejo-dim7', [{ ...C, tonic: 59 }, { ...C, tonic: 61 }, { ...C, tonic: 62 }], 'direita', 60, 92, { name: 'diminuta com sétima', steps: [0, 3, 6, 9] }), arpItem('arpejo-mj', [C, G, F], 'duas', 50, 72)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -361,7 +361,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 11,
     goal: 'Escalas de 2 oitavas mãos juntas em semicolcheias, rumo a 60 BPM.',
-    warmup: [warm('Arpejo de V7 em Dó', () => lineTask(arpeggio(55, [0, 4, 7, 10], 1), 0.5, { bpm: 66, hands: 'direita' })), warm('Escala de Sol, mãos juntas', () => lineTask(scaleUpDown(55, MAJOR, 2), 0.5, { bpm: 80, hands: 'duas', fifths: 1 }))],
+    warmup: [warm('Arpejo de V7 em Dó', () => lineTask(arpeggio(55, [0, 4, 7, 10], 1), 0.5, { bpm: 66, hands: 'direita' })), warm('Escala de Sol, mãos juntas', () => lineTask(scaleUpDown(67, MAJOR, 2), 0.5, { bpm: 80, hands: 'duas', fifths: 1 }))],
     technique: [scaleItem('escala-semicolcheias', [C, G, D, F, BB].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.25, hands: 'duas', from: 44, target: 60, evenness: 25 }), arpItem('arpejo-mj-b', [C, G, F, A_MIN], 'duas', 56, 80)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -372,7 +372,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 12,
     goal: 'Escalas em semicolcheias mãos juntas rumo a 76 BPM e arpejos com as duas mãos.',
-    warmup: [warm('Escala de Ré, 2 oitavas, mãos juntas', () => lineTask(scaleUpDown(50, MAJOR, 2), 0.5, { bpm: 88, hands: 'duas', fifths: 2 })), warm('Arpejo diminuto', () => lineTask(arpeggio(59, [0, 3, 6, 9], 1), 0.5, { bpm: 72, hands: 'direita' }))],
+    warmup: [warm('Escala de Ré, 2 oitavas, mãos juntas', () => lineTask(scaleUpDown(62, MAJOR, 2), 0.5, { bpm: 88, hands: 'duas', fifths: 2 })), warm('Arpejo diminuto', () => lineTask(arpeggio(59, [0, 3, 6, 9], 1), 0.5, { bpm: 72, hands: 'direita' }))],
     technique: [scaleItem('escala-semicolcheias-b', [C, G, D, F, BB, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.25, hands: 'duas', from: 56, target: 76, evenness: 22 }), arpItem('arpejo-mj-c', [C, G, D, F, A_MIN], 'duas', 64, 88)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
