@@ -61,7 +61,7 @@ const FUNCTIONS: ChoiceQuestion[] = [
   { q: 'A cifra G7 significa…', options: ['Sol com sétima (dominante)', 'Sol, 7 vezes', 'Sétimo grau'], answer: 0, why: 'O 7 acrescenta a 7ª menor ao acorde maior: G, B, D, F.' },
 ];
 
-// ---------- peças reaproveitadas ----------
+// ---------- músicas reaproveitadas ----------
 
 const chordsCFG = playChord({ symbols: ['C', 'F', 'G'], low: 48, high: 72, requireBass: true });
 const chordsDAE = playChord({ symbols: ['D', 'A', 'E'], low: 48, high: 72, requireBass: true });

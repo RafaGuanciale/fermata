@@ -272,6 +272,12 @@ export interface PedalScore {
   early: number;
 }
 
+/** Onde o pedal troca: a cada ataque, ou, com duas mãos, só nos ataques da esquerda (a harmonia), não a cada nota da melodia. */
+export function pedalOnsets(task: TimedTask): number[] {
+  const left = task.events.filter((e) => e.hand === 'l');
+  return [...new Set((left.length ? left : task.events).map((e) => e.beat))].sort((a, b) => a - b);
+}
+
 /**
  * Pedal direto: desce junto com cada acorde (de 100 ms antes a 400 ms depois do ataque) e sobe antes do próximo
  * (até 30 ms depois do ataque seguinte). Nas pausas de pelo menos 1 tempo, o pedal tem de estar em cima no meio da pausa.
@@ -290,7 +296,7 @@ export function pedalScore(task: TimedTask, bpm: number, pedal: PedalEvent[], ki
     }
     return d;
   };
-  const onsets = [...new Set(task.events.map((e) => e.beat))].sort((a, b) => a - b).map((b) => b * beatMs);
+  const onsets = pedalOnsets(task).map((b) => b * beatMs);
   let ok = 0;
   let muddy = 0;
   let missed = 0;
@@ -328,7 +334,7 @@ export function pedalScore(task: TimedTask, bpm: number, pedal: PedalEvent[], ki
 function legatoPedal(task: TimedTask, bpm: number, pedal: PedalEvent[]): PedalScore {
   const beatMs = 60000 / bpm;
   const ev = [...pedal].sort((a, b) => a.t - b.t);
-  const onsets = [...new Set(task.events.map((e) => e.beat))].sort((a, b) => a - b).map((b) => b * beatMs);
+  const onsets = pedalOnsets(task).map((b) => b * beatMs);
   let ok = 0;
   let muddy = 0;
   let missed = 0;

@@ -6,7 +6,7 @@ import { pick } from '../music';
 import { melodyTask, rhythmTask, tiedMelodyTask, transposedTask, twoHandTask } from '../tasks';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
-// ---------- notas e peças reaproveitadas ----------
+// ---------- notas e músicas reaproveitadas ----------
 
 const TREBLE_ANCHORS = [60, 67, 72, 79]; // Dó4, Sol4, Dó5, Sol5
 const TREBLE_WHITE = [60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79]; // Dó4 a Sol5

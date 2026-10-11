@@ -68,7 +68,7 @@ const ARP_Q: ChoiceQuestion[] = [
   { q: 'No arpejo, quem leva a mão de uma posição para a outra é…', options: ['O braço, num movimento de onda', 'O polegar esticado', 'O punho subindo'], answer: 0, why: 'Os dedos não esticam: o braço desloca a mão, que chega já na posição.' },
 ];
 
-// ---------- peças reaproveitadas ----------
+// ---------- músicas reaproveitadas ----------
 
 const seventhsAll = playChord({ symbols: [...SEVENTHS, ...HALF_DIM, ...DIM7], low: 48, high: 72, requireBass: true });
 const seventhsMain = playChord({ symbols: SEVENTHS, low: 48, high: 72, requireBass: true });
@@ -668,7 +668,7 @@ const l65: Lesson = {
   objectives: [
     'Consigo passar no checkpoint cumulativo das unidades 5 a 8, sem dicas.',
     'Consigo improvisar dois chorus de blues com 90% das notas na escala.',
-    'Consigo apresentar um recital de 4 peças com análise harmônica escrita.',
+    'Consigo apresentar um recital de 4 músicas com análise harmônica escrita.',
   ],
   blocks: [
     {
@@ -684,14 +684,14 @@ O Marco 2 tem as mesmas duas partes do primeiro:
     {
       kind: 'text',
       title: 'O recital',
-      body: `Quatro peças, em sequência, como numa apresentação:
+      body: `Quatro músicas, em sequência, como numa apresentação:
 
 1. **Blues de 12 compassos**: shells na esquerda, **dois chorus** (duas voltas) de improviso na direita com a escala blues e notas-alvo. Exercício abaixo.
 2. **Canção pop pela cifra**: a **Canção em quatro acordes** (Unidade 6), com o seu arranjo.
-3. **Peça clássica**: o **Prelúdio em Dó** de Bach (Unidade 7), com pedal a cada compasso.
+3. **Música clássica**: o **Prelúdio em Dó** de Bach (Unidade 7), com pedal a cada compasso.
 4. **Ragtime**: **The Entertainer**, o projeto final desta unidade.
 
-Depois, a **análise escrita**: escolha uma das peças e escreva os graus de cada compasso, as cadências e as funções (T, S, D). Para o Prelúdio, por exemplo: I – ii7 – V7 – I – vi – ... Compare a gravação com a do Marco 1.`,
+Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de cada compasso, as cadências e as funções (T, S, D). Para o Prelúdio, por exemplo: I – ii7 – V7 – I – vi – ... Compare a gravação com a do Marco 1.`,
     },
     { kind: 'song', songId: 'u08-entertainer', why: 'O ragtime do recital e o projeto final da unidade. Comece em 56 BPM no modo Estudar.' },
     { kind: 'song', songId: 'u08-blues', why: 'Um blues escrito, para aquecer a forma antes do improviso.' },
@@ -713,16 +713,16 @@ Depois, a **análise escrita**: escolha uma das peças e escreva os graus de cad
   ],
   project: {
     title: 'Recital nº 2: blues e canção',
-    brief: `Toque em sequência, sem recomeçar: o **blues** com dois chorus improvisados (exercício abaixo), a **Canção em quatro acordes** pelo seu arranjo, o **Prelúdio em Dó** e **The Entertainer**. Grave tudo e escreva a análise harmônica de uma das peças.`,
+    brief: `Toque em sequência, sem recomeçar: o **blues** com dois chorus improvisados (exercício abaixo), a **Canção em quatro acordes** pelo seu arranjo, o **Prelúdio em Dó** e **The Entertainer**. Grave tudo e escreva a análise harmônica de uma das músicas.`,
     steps: [
       'Passe The Entertainer e o Prelúdio no "Tocar a música" com 85% ou mais no andamento.',
       'Ensaie o blues: dois ciclos de shells sem errar a forma, depois com o improviso.',
-      'Faça 5 minutos de aquecimento (escala e arpejo do dia) e grave as quatro peças seguidas.',
-      'Escreva a análise de uma peça: graus, funções e cadências.',
+      'Faça 5 minutos de aquecimento (escala e arpejo do dia) e grave as quatro músicas seguidas.',
+      'Escreva a análise de uma música: graus, funções e cadências.',
       'Ouça e compare com o Marco 1: o que mudou no pulso, no som e na segurança?',
     ],
     rubric: [
-      'As peças escritas passaram com 90% das notas.',
+      'As músicas escritas passaram com 90% das notas.',
       'No improviso, 90% das notas na escala e as chegadas mirando o acorde.',
       'O blues manteve a forma e o swing.',
       'O pedal ficou limpo no Prelúdio.',

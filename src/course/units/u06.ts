@@ -64,7 +64,7 @@ const VOICE: ChoiceQuestion[] = [
   { q: 'Por que conduzir as vozes?', options: ['A troca soa lisa e a mão quase não se move', 'Para tocar mais forte', 'Para mudar a cifra'], answer: 0, why: 'Pianistas de pop e de igreja tocam assim: a mão fica numa região.' },
 ];
 
-// ---------- peças reaproveitadas ----------
+// ---------- músicas reaproveitadas ----------
 
 const chords12 = playChord({ symbols: [...MAJ, ...MIN], low: 48, high: 72, requireBass: true });
 const chordsDimAug = playChord({ symbols: [...DIM, ...AUG], low: 48, high: 72, requireBass: true });

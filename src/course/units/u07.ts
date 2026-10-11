@@ -53,7 +53,7 @@ const FUNCTION_Q: ChoiceQuestion[] = [
   { q: 'Para harmonizar um compasso de melodia, o acorde precisa…', options: ['Conter a nota do tempo forte', 'Conter todas as notas do compasso', 'Ser sempre o I'], answer: 0, why: 'As outras notas podem ser de passagem, nos tempos fracos.' },
 ];
 
-// ---------- peças reaproveitadas ----------
+// ---------- músicas reaproveitadas ----------
 
 const fieldRandom = diatonicChord({ keys: KEYS5, romans: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'], low: 48, high: 72 });
 const fieldC = diatonicChord({ keys: ['C'], romans: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'], low: 48, high: 72 });
@@ -423,13 +423,12 @@ O exercício mede a condução como na lição 44: no máximo 2 semitons além d
   exit: [popEarBass, choice(PROG_Q, 'progressoes')],
 };
 
-/** Escala de 2 oitavas em colcheias: sobe 2 compassos (15 notas e uma pausa), desce 2, termina na tônica. */
+/** Escala de 2 oitavas em colcheias: sobe 15 notas, desce 13 sem repetir a de cima e termina na tônica em mínima. */
 function twoOctaves(tonic: Midi, steps: number[]): string {
   const up = [...steps.slice(0, 7), ...steps.slice(0, 7).map((x) => x + 12), 24];
-  const down = [...up].reverse();
-  const u = up.map((x) => `${sci(tonic + x)}:0.5`);
-  const d = down.map((x) => `${sci(tonic + x)}:0.5`);
-  return `${u.slice(0, 8).join(' ')} | ${u.slice(8).join(' ')} r:0.5 | ${d.slice(0, 8).join(' ')} | ${d.slice(8).join(' ')} r:0.5 | ${sci(tonic)}:4`;
+  const down = [...up].reverse().slice(1, 14);
+  const all = [...up, ...down].map((x) => `${sci(tonic + x)}:0.5`);
+  return `${all.slice(0, 8).join(' ')} | ${all.slice(8, 16).join(' ')} | ${all.slice(16, 24).join(' ')} | ${all.slice(24).join(' ')} ${sci(tonic)}:2`;
 }
 const MAJ_ST = [0, 2, 4, 5, 7, 9, 11];
 const HMIN_ST = [0, 2, 3, 5, 7, 8, 11];
@@ -636,7 +635,7 @@ Depois de pronta, **analise**: escreva os graus embaixo de cada compasso e as ca
       title: 'comece pelo ritmo',
       body: 'Se a página em branco travar, escolha primeiro um ritmo de 2 compassos (por exemplo, semínima, semínima, mínima | quatro semínimas) e use o mesmo ritmo em todas as frases. Com o ritmo fixo, escolher as notas fica muito mais fácil.',
     },
-    { kind: 'song', songId: 'u07-preludio', why: 'O projeto final da unidade: Bach construiu uma peça inteira só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },
+    { kind: 'song', songId: 'u07-preludio', why: 'O projeto final da unidade: Bach construiu uma música inteira só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },
   ],
   review: [fieldRandom, transpose, harmC, cadenceEar, royalLead, complete],
   checkpoint: [
@@ -716,7 +715,7 @@ const unit: Unit = {
   songs: [prelude],
   final: {
     songId: 'u07-preludio',
-    brief: 'Os 8 primeiros compassos do Prelúdio em Dó de Bach: cada compasso é um acorde quebrado, e a harmonia anda pelo campo de Dó (I – ii7 – V7 – I – vi – Ré com Fá♯ – V – I7M) com o baixo quase parado. O Ré com Fá♯ é uma "dominante da dominante", que a Unidade 10 explica. É a peça perfeita para ouvir funções e cadências, e para treinar o pedal a cada compasso.',
+    brief: 'Os 8 primeiros compassos do Prelúdio em Dó de Bach: cada compasso é um acorde quebrado, e a harmonia anda pelo campo de Dó (I – ii7 – V7 – I – vi – Ré com Fá♯ – V – I7M) com o baixo quase parado. O Ré com Fá♯ é uma "dominante da dominante", que a Unidade 10 explica. É a música perfeita para ouvir funções e cadências, e para treinar o pedal a cada compasso.',
   },
 };
 

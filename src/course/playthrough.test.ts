@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Midi } from '../music/notes';
 import { UNITS } from '.';
-import { articulationScore, judgeTask, pressItem, scoreImprov, startItem, voiceMove, type CourseEvent, type ItemProgress } from './judge';
+import { articulationScore, judgeTask, pedalOnsets, pedalScore, pressItem, scoreImprov, startItem, voiceMove, type CourseEvent, type ItemProgress } from './judge';
 import { pcOf, seeded } from './music';
 import type { Accept, Exercise, Item, Pc, TimedTask, Unit } from './types';
 
@@ -105,6 +105,20 @@ function check(ex: Exercise, where: string) {
       const events = perform(task, bpm, ex.articulation);
       const r = judgeTask(task, bpm, events, ex.window);
       expect(r.accuracy, `${at}: passada perfeita deu ${Math.round(r.accuracy * 100)}%`).toBeGreaterThanOrEqual(ex.pass.accuracy);
+      if (ex.pedal) {
+        // Pedal certo: legato sobe logo depois de cada troca e desce em seguida; direto desce com o acorde e sobe no fim dele.
+        const beatMs = 60000 / bpm;
+        const ons = pedalOnsets(task).map((b) => b * beatMs);
+        const pedal =
+          ex.pedal === 'legato'
+            ? ons.flatMap((t, i) => (i === 0 ? [{ t: t + 50, down: true }] : [{ t: t + 60, down: false }, { t: t + 150, down: true }]))
+            : ons.flatMap((t) => {
+                const ends = task.events.filter((e) => Math.abs(e.beat * beatMs - t) < 1).map((e) => (e.beat + e.beats) * beatMs);
+                return [{ t: t + 50, down: true }, { t: Math.max(...ends) - 20, down: false }];
+              });
+        const ps = pedalScore(task, bpm, pedal, ex.pedal);
+        expect(ps?.score, `${at}: pedal ${ex.pedal} perfeito deu ${JSON.stringify(ps)}`).toBeGreaterThanOrEqual(0.85);
+      }
       if (ex.articulation) {
         const a = articulationScore(task, bpm, events, ex.articulation);
         if (a !== null) expect(a, `${at}: ${ex.articulation} perfeito deu ${a}`).toBeGreaterThanOrEqual(0.9);

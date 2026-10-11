@@ -460,11 +460,11 @@ Comece devagar, em semicolcheias medidas, e só acelere quando ficar igual. O ex
     {
       kind: 'text',
       title: 'O Minueto em Sol',
-      body: `O **Minueto em Sol** é provavelmente a peça mais tocada por estudantes de piano no mundo. Ele está no **Caderno de Anna Magdalena Bach** (1725), uma coleção doméstica da família Bach, e por muito tempo foi atribuído a Johann Sebastian. Hoje se sabe que é de **Christian Petzold**, organista de Dresden.
+      body: `O **Minueto em Sol** é provavelmente a música mais tocada por estudantes de piano no mundo. Ele está no **Caderno de Anna Magdalena Bach** (1725), uma coleção doméstica da família Bach, e por muito tempo foi atribuído a Johann Sebastian. Hoje se sabe que é de **Christian Petzold**, organista de Dresden.
 
 O minueto é uma **dança em 3/4**, elegante, com o primeiro tempo apoiado. A forma é de período: o compasso 8 termina no **V** (Ré, meia cadência) e o 16 no **I** (Sol, cadência perfeita). Repare nas notas estranhas da lição 66: passagens em quase todo compasso, e as bordaduras do compasso 6.
 
-O arranjo do curso tem só a primeira parte, com a esquerda em notas longas. No original, a peça pede alguns ornamentos (como um trinado no compasso 15): acrescente-os quando a peça estiver segura.`,
+O arranjo do curso tem só a primeira parte, com a esquerda em notas longas. No original, a música pede alguns ornamentos (como um trinado no compasso 15): acrescente-os quando a música estiver segura.`,
     },
     { kind: 'exercise', id: 'l70-minueto-md', exercise: quickTimed('Minueto, mão direita', 'Os 16 compassos da direita, de 72 a 96 BPM.', () => melodyTask(MINUET_R, { bpm: 72, beatsPerBar: 3, fifths: 1 }), { ladder: { from: 72, to: 96, step: 8 }, pass: { accuracy: 0.9 } }) },
     { kind: 'song', songId: 'u09-minueto', why: 'O projeto final da unidade: o minueto com as duas mãos.' },
@@ -611,7 +611,7 @@ Comece devagar, a ponto de não errar nenhum salto; a velocidade vem da seguran�
 const l73: Lesson = {
   n: 73,
   id: 'l73',
-  title: 'Checkpoint da unidade 9 e projeto: peça clássica com análise',
+  title: 'Checkpoint da unidade 9 e projeto: música clássica com análise',
   minutes: 60,
   objectives: [
     'Consigo passar no checkpoint misto da unidade 9, sem dicas.',
@@ -623,7 +623,7 @@ const l73: Lesson = {
       title: 'Tocar e entender',
       body: `Esta unidade foi sobre ler e tocar como um pianista clássico: as notas estranhas que dão vida à melodia, o equilíbrio entre melodia e acompanhamento, a condução a quatro vozes, a primeira vista com as duas mãos, os ornamentos, o contraponto e as polirritmias.
 
-O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma peça é responder:
+O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma música é responder:
 
 - **Forma**: quantas frases? Onde estão as cadências e de que tipo são? Há repetição?
 - **Harmonia**: que acorde está embaixo de cada compasso (em graus)?
@@ -650,7 +650,7 @@ O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma peça é
     quickTimed('Primeira vista', '8 compassos novos a 56 BPM, duas mãos.', sight2(56)),
   ],
   project: {
-    title: 'Peça clássica com análise',
+    title: 'Música clássica com análise',
     brief: `Toque o **Minueto em Sol** inteiro (16 compassos, duas mãos) com 95% das notas, no andamento que você escolher (a referência é 96 BPM). Grave, e escreva a análise: forma, graus, cadências e notas estranhas.`,
     steps: [
       'Estude mãos separadas no modo Estudar até não errar.',

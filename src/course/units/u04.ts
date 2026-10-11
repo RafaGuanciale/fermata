@@ -12,11 +12,11 @@ import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
 const MAJOR = [0, 2, 4, 5, 7, 9, 11, 12];
 
-/** Escala maior de uma oitava em colcheias, subindo e descendo, terminando numa semibreve. */
+/** Escala maior de uma oitava em colcheias: sobe 8 notas e desce sem repetir a de cima, terminando na tônica em semínima. */
 function scaleLine(tonic: Midi): string {
   const up = MAJOR.map((x) => `${sci(tonic + x)}:0.5`).join(' ');
-  const down = [...MAJOR].reverse().map((x) => `${sci(tonic + x)}:0.5`).join(' ');
-  return `${up} | ${down} | ${sci(tonic)}:4`;
+  const down = [...MAJOR].reverse().slice(1, 7).map((x) => `${sci(tonic + x)}:0.5`).join(' ');
+  return `${up} | ${down} ${sci(tonic)}:1`;
 }
 
 const quickTimed = (title: string, how: string, gen: (rng: Rng) => ReturnType<typeof melodyTask>, extra: Partial<Extract<Exercise, { kind: 'timed' }>> = {}): Exercise => ({
@@ -52,7 +52,7 @@ const SIGNATURES: ChoiceQuestion[] = [
   { q: 'Qual tonalidade maior tem 1 sustenido?', options: ['Sol maior', 'Ré maior', 'Fá maior'], answer: 0, why: 'Sol maior: Fá♯.' },
 ];
 
-// ---------- peças reaproveitadas ----------
+// ---------- músicas reaproveitadas ----------
 
 const tetra = buildScale({ keys: ['C', 'G', 'D', 'A', 'E', 'F', 'Bb', 'Eb'], notes: 4 });
 const scalesWhite = buildScale({ keys: ['C', 'G', 'F', 'D'], notes: 8 });
@@ -146,7 +146,7 @@ O mesmo raciocínio, a partir do Fá: Fá, Sol, Lá e... de Lá para Si seria um
   ],
   review: [tetra, scalesWhite, choice(SCALE, 'escala-maior')],
   checkpoint: [
-    { kind: 'items', title: '8 escalas', how: 'Escalas maiores sorteadas, inclusive com pretas, sem dicas. Meta: 85%.', gen: scalesAll, count: 8, low: 55, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
+    { kind: 'items', title: '8 escalas', how: 'Escalas de Dó, Sol, Fá e Ré maior sorteadas, sem dicas. Meta: 85%.', gen: scalesWhite, count: 8, low: 55, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
   ],
   exit: [tetra, choice(SCALE, 'escala-maior')],
 };
@@ -240,7 +240,7 @@ const l27: Lesson = {
     {
       kind: 'text',
       title: 'Armadura: os acidentes escritos uma vez só',
-      body: `Numa música em Sol maior, todo Fá é Fá♯. Escrever um ♯ em cada Fá seria cansativo, então os acidentes da tonalidade vão para o começo de cada linha da pauta, logo depois da clave: a **armadura**.
+      body: `Numa música em Sol maior, todo Fá é Fá♯. Escrever um ♯ em cada Fá seria cansativo, então os acidentes da tonalidade vão para o começo de cada pauta, logo depois da clave: a **armadura**.
 
 A regra da armadura é diferente da regra do acidente avulso (lição 13):
 
@@ -457,7 +457,7 @@ const l29: Lesson = {
   objectives: [
     'Consigo tocar a semínima pontuada seguida de colcheia no tempo.',
     'Consigo tocar síncopes e contratempos simples com 85% das notas em ±60 ms.',
-    'Consigo tocar uma peça curta com síncope.',
+    'Consigo tocar uma música curta com síncope.',
   ],
   blocks: [
     {
@@ -474,7 +474,7 @@ Você já ouviu esse ritmo: no fim da primeira frase da Ode à Alegria, Beethove
       title: 'Pontuada e colcheia',
       steps: [
         { say: 'Semínima pontuada e colcheia, duas vezes: longo, curto.', play: { bpm: 72, steps: [1.5, 0.5, 1.5, 0.5].map((b) => ({ midis: [60], beats: b })) } },
-        { say: 'Na Ode à Alegria, o fim da frase com o ritmo original.', play: { bpm: 80, steps: [[64, 1], [64, 1], [62, 1], [60, 1], [64, 1.5], [62, 0.5], [62, 2]].map(([m, b]) => ({ midis: [m], beats: b })) } },
+        { say: 'Na Ode à Alegria, o fim da frase com o ritmo original.', play: { bpm: 80, steps: [[60, 1], [60, 1], [62, 1], [64, 1], [64, 1.5], [62, 0.5], [62, 2]].map(([m, b]) => ({ midis: [m], beats: b })) } },
       ],
     },
     { kind: 'exercise', id: 'l29-pontuada', exercise: quickTimed('Ritmo pontuado', 'Dois compassos sorteados a 66 BPM, em qualquer tecla. Conte as colcheias. Duas passadas boas.', randomRhythm(RHY_DOT, 2, 66), { reps: 2, window: 80 }) },
@@ -503,14 +503,14 @@ Síncope é o tempero de quase toda música popular brasileira, do choro ao samb
     },
     { kind: 'exercise', id: 'l29-sincope', exercise: quickTimed('Síncope e contratempo', 'Dois compassos sorteados a 66 BPM. Duas passadas boas.', randomRhythm(RHY_SYNC, 2, 66), { reps: 2, window: 80 }) },
     { kind: 'exercise', id: 'l29-ode', exercise: quickTimed('Ode à Alegria com o ritmo original', '8 compassos, duas mãos, a 66 BPM. Atenção aos compassos 4 e 8.', () => twoHandTask(ODE_DOT_R, ODE_DOT_L, { bpm: 66 }), { reps: 2 }) },
-    { kind: 'song', songId: 'u04-sincopado', why: 'Uma peça curta com síncope em todo compasso, para tocar no estúdio com a partitura e o modo Estudar.' },
+    { kind: 'song', songId: 'u04-sincopado', why: 'Uma música curta com síncope em quase todo compasso, para tocar no estúdio com a partitura e o modo Estudar.' },
     { kind: 'song', songId: 'u04-ode-pontuada', why: 'A Ode à Alegria inteira, com o ritmo original e a mão esquerda em intervalos: a versão completa, depois das simplificadas das unidades 1 e 2.' },
     { kind: 'exercise', id: 'l29-quiz', exercise: quiz('Pontuada e síncope', 'Quatro perguntas rápidas.', RHYTHM_DOT, 0.75) },
   ],
   review: [choice(RHYTHM_DOT, 'sincope'), degreeNames],
   checkpoint: [
     quickTimed('Pontuada e síncope', '4 compassos sorteados a 72 BPM, ±60 ms, sem dicas.', randomRhythm([...RHY_DOT, ...RHY_SYNC], 4, 72), { window: 60 }),
-    quickTimed('Sincopado', 'A peça com síncope, mão direita, a 66 BPM.', () => melodyTask(SYNC_R, { bpm: 66 }), { window: 80 }),
+    quickTimed('Sincopado', 'A música com síncope, mão direita, a 66 BPM.', () => melodyTask(SYNC_R, { bpm: 66 }), { window: 80 }),
   ],
   exit: [choice(RHYTHM_DOT, 'sincope'), chordsRandom],
 };
@@ -559,15 +559,15 @@ O drill clássico usa um encadeamento em que só algumas notas mudam: **I – IV
       kind: 'callout',
       tone: 'dica',
       title: 'conte "toca, pé"',
-      body: 'Diga em voz alta "toca" no ataque e "pé" logo depois. Comece bem devagar, a 50 BPM. Se o app acusar troca antecipada, você está trocando no "toca": espere o som do acorde novo antes de mexer o pé.',
+      body: 'Diga em voz alta "toca" no ataque e "pé" logo depois. Comece bem devagar: o drill começa a 50 BPM. Se o app acusar troca antecipada, você está trocando no "toca": espere o som do acorde novo antes de mexer o pé.',
     },
-    { kind: 'exercise', id: 'l30-drill', exercise: quickTimed('Drill do pedal legato', 'I–IV–I–V7–I na mão direita, mínimas a 56 BPM, pedal legato. Três passadas boas seguidas.', () => melodyTask(PEDAL_DRILL, { bpm: 56 }), { reps: 3, pedal: 'legato' }) },
+    { kind: 'exercise', id: 'l30-drill', exercise: quickTimed('Drill do pedal legato', 'I–IV–I–V7–I na mão direita, mínimas de 50 a 56 BPM, pedal legato. Sobe 3 BPM a cada passada boa.', () => melodyTask(PEDAL_DRILL, { bpm: 50 }), { ladder: { from: 50, to: 56, step: 3 }, pedal: 'legato' }) },
     { kind: 'exercise', id: 'l30-canone', exercise: quickTimed('O baixo do Cânone com pedal', 'Mão esquerda: Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá em mínimas, a 60 BPM, trocando o pedal a cada nota. Duas passadas boas.', () => melodyTask(`${CANON_BASS} | D3:4`, { bpm: 60, clef: 'bass', fifths: 2 }), { reps: 2, pedal: 'legato' }) },
     { kind: 'exercise', id: 'l30-quiz', exercise: quiz('Pedal legato', 'Quatro perguntas rápidas.', PEDAL_L, 0.75) },
   ],
   review: [choice(PEDAL_L, 'pedal-legato'), chordsRandom],
   checkpoint: [
-    quickTimed('Pedal legato', 'O drill a 60 BPM, sem dicas. Meta: 85% das trocas depois do ataque e nenhuma antecipada.', () => melodyTask(PEDAL_DRILL, { bpm: 60 }), { pedal: 'legato' }),
+    quickTimed('Pedal legato', 'O drill a 60 BPM, sem dicas, três passadas boas. Meta: 85% das trocas depois do ataque.', () => melodyTask(PEDAL_DRILL, { bpm: 60 }), { reps: 3, pedal: 'legato' }),
   ],
   exit: [choice(PEDAL_L, 'pedal-legato'), degreeNamesD],
 };
@@ -589,11 +589,12 @@ const CIRCLE: ChoiceQuestion[] = [
   { q: 'Si♭ maior tem…', options: ['2 bemóis: Si♭ e Mi♭', '1 bemol', '3 bemóis'], answer: 0, why: 'Si♭, Dó, Ré, Mi♭, Fá, Sol, Lá, Si♭.' },
 ];
 
-const contraryC = twoHandTask(
-  `${scaleLine(60).split(' | ')[0]} | ${scaleLine(60).split(' | ')[1]} | C4:4`,
-  'C3:0.5 B2:0.5 A2:0.5 G2:0.5 F2:0.5 E2:0.5 D2:0.5 C2:0.5 | C2:0.5 D2:0.5 E2:0.5 F2:0.5 G2:0.5 A2:0.5 B2:0.5 C3:0.5 | C3:4',
-  { bpm: 50, caption: 'Movimento contrário: a direita sobe a partir do Dó4, a esquerda desce a partir do Dó3, com os mesmos dedos.' },
-);
+const contrary = (bpm: number) =>
+  twoHandTask(
+    scaleLine(60),
+    'C3:0.5 B2:0.5 A2:0.5 G2:0.5 F2:0.5 E2:0.5 D2:0.5 C2:0.5 | D2:0.5 E2:0.5 F2:0.5 G2:0.5 A2:0.5 B2:0.5 C3:1',
+    { bpm, caption: 'Movimento contrário: a direita sobe a partir do Dó4, a esquerda desce a partir do Dó3, com os mesmos dedos.' },
+  );
 const parallelC = twoHandTask(scaleLine(60), scaleLine(48), { bpm: 50, caption: 'Movimento paralelo: as duas mãos sobem juntas, uma oitava de distância. Os polegares não passam ao mesmo tempo.' });
 
 const BL_C = { l: 'C3 G3 C3 G3', r: 'r C4+E4+G4 r C4+E4+G4' };
@@ -646,7 +647,7 @@ Comece devagar, mais devagar do que nas mãos separadas. A meta é a mesma: nota
         { say: 'Dó maior, mãos em espelho: a direita sobe, a esquerda desce, e voltam.', play: { bpm: 60, steps: [...MAJOR, ...[...MAJOR].reverse().slice(1)].map((x, i, a) => ({ midis: [60 + x, 48 - x], beats: i === a.length - 1 ? 2 : 0.5 })) } },
       ],
     },
-    { kind: 'exercise', id: 'l31-contrario', exercise: quickTimed('Dó maior em movimento contrário', 'Colcheias, de 50 a 66 BPM. Os polegares passam juntos. Variação até 40 ms.', () => contraryC, { ladder: { from: 50, to: 66, step: 4 }, window: 80, evenness: 40 }) },
+    { kind: 'exercise', id: 'l31-contrario', exercise: quickTimed('Dó maior em movimento contrário', 'Colcheias, de 50 a 66 BPM. Os polegares passam juntos. Variação até 40 ms.', () => contrary(50), { ladder: { from: 50, to: 66, step: 4 }, window: 80, evenness: 40 }) },
     { kind: 'exercise', id: 'l31-paralelo', exercise: quickTimed('Desafio: movimento paralelo', 'As duas mãos sobem juntas, uma oitava de distância, a 50 BPM. Duas passadas boas.', () => parallelC, { reps: 2, window: 80 }) },
     {
       kind: 'text',
@@ -665,7 +666,7 @@ No acompanhamento desta lição, a mão esquerda faz **raiz e 5ª** em semínima
       kind: 'callout',
       tone: 'erro',
       title: 'perder a forma',
-      body: 'Errar uma nota no blues é normal; perder o lugar na forma não. Conte os compassos em voz alta ("um, dois, três, quatro, QUATRO…") e saiba sempre em qual das três frases você está. Se se perder, espere o próximo compasso 1 da forma e entre de novo.',
+      body: 'Errar uma nota no blues é normal; perder o lugar na forma não. Conte os compassos em voz alta dizendo o acorde: "Dó, Dó, Dó, Dó", "Fá, Fá, Dó, Dó", "Sol, Fá, Dó, Sol", e saiba sempre em qual das três frases você está. Se se perder, espere o próximo compasso 1 da forma e entre de novo.',
     },
     { kind: 'exercise', id: 'l31-forma', exercise: quickTimed('A forma na mão esquerda', 'Só raiz e 5ª, os 12 compassos, a 76 BPM. Duas passadas boas.', () => melodyTask(BLUES_L, { bpm: 76, clef: 'bass' }), { reps: 2 }) },
     { kind: 'exercise', id: 'l31-blues', exercise: quickTimed('Blues em Dó, duas mãos', 'Raiz e 5ª na esquerda, acordes no 2 e no 4 na direita. Dois ciclos sem erro de forma, a 72 BPM.', () => twoHandTask(BLUES_R, BLUES_L, { bpm: 72, caption: 'Forma: C C C C · F F C C · G F C G.' }), { reps: 2 }) },
@@ -674,8 +675,8 @@ No acompanhamento desta lição, a mão esquerda faz **raiz e 5ª** em semínima
   ],
   review: [choice(BLUES, 'blues'), scalesWhite],
   checkpoint: [
-    quickTimed('Movimento contrário a 60 BPM', 'Dó maior, mãos juntas, sem dicas. Variação até 40 ms.', () => contraryC, { window: 60, evenness: 40 }),
-    quickTimed('Blues em Dó', 'Um ciclo inteiro a 76 BPM, duas mãos.', () => twoHandTask(BLUES_R, BLUES_L, { bpm: 76 })),
+    quickTimed('Movimento contrário a 60 BPM', 'Dó maior, mãos juntas, sem dicas. Variação até 40 ms.', () => contrary(60), { window: 60, evenness: 40 }),
+    quickTimed('Blues em Dó', 'Dois ciclos a 76 BPM, duas mãos, sem perder a forma.', () => twoHandTask(BLUES_R, BLUES_L, { bpm: 76 }), { reps: 2 }),
   ],
   exit: [choice(BLUES, 'blues'), chordsRandom],
 };
@@ -718,7 +719,7 @@ No exercício a seguir, a resposta é **tocada**: você vê a armadura e toca a 
 
 De novo a regra: o polegar evita as pretas, e o dedilhado se organiza em torno disso.`,
     },
-    { kind: 'exercise', id: 'l32-construir', exercise: { kind: 'items', title: 'Construa Ré e Si♭', how: 'Escala de Ré ou Si♭ maior, subindo a partir da oitava 4.', gen: scalesDBb, count: 6, low: 55, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
+    { kind: 'exercise', id: 'l32-construir', exercise: { kind: 'items', title: 'Construa Ré e Si♭', how: 'Escala de Ré ou Si♭ maior, subindo a partir da oitava 4.', gen: scalesDBb, count: 7, low: 55, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
     { kind: 'exercise', id: 'l32-re', exercise: quickTimed('Ré maior, mão direita', 'Colcheias de 45 a 60 BPM, com a armadura. Variação até 40 ms.', () => melodyTask(scaleLine(62), { bpm: 45, fifths: 2 }), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
     { kind: 'exercise', id: 'l32-sib', exercise: quickTimed('Si♭ maior, mão direita', 'Dedilhado 2 1 2 3 · 1 2 3 4, de 45 a 60 BPM.', () => melodyTask(scaleLine(58), { bpm: 45, fifths: -2 }), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
     { kind: 'exercise', id: 'l32-me', exercise: quickTimed('Ré ou Si♭, mão esquerda', 'Uma das duas, sorteada, a 55 BPM.', (rng) => (rng() < 0.5 ? melodyTask(scaleLine(50), { bpm: 55, fifths: 2, clef: 'bass' }) : melodyTask(scaleLine(46), { bpm: 55, fifths: -2, clef: 'bass' })), { reps: 2, evenness: 40 }) },
@@ -755,7 +756,7 @@ const l33: Lesson = {
   objectives: [
     'Consigo passar no checkpoint cumulativo das unidades 1 a 4, sem dicas.',
     'Consigo ler à primeira vista uma melodia nova de 4 compassos, com armadura.',
-    'Consigo apresentar um mini-recital de 4 peças e comparar com a lição 1.',
+    'Consigo apresentar um mini-recital de 4 músicas e comparar com a lição 1.',
   ],
   blocks: [
     {
@@ -766,12 +767,12 @@ const l33: Lesson = {
 O Marco 1 tem duas partes:
 
 - Um **checkpoint cumulativo**: perguntas das quatro unidades misturadas, sem dicas. É mais longo que os outros, e é normal errar coisas antigas: é exatamente para isso que ele existe.
-- Um **mini-recital**: quatro peças tocadas em sequência, como numa apresentação, gravadas para você comparar com o que tocava na lição 1.`,
+- Um **mini-recital**: quatro músicas tocadas em sequência, como numa apresentação, gravadas para você comparar com o que tocava na lição 1.`,
     },
     {
       kind: 'text',
       title: 'Primeira vista',
-      body: `Uma das peças do recital é **leitura à primeira vista**: uma melodia que você nunca viu, gerada na hora. O que se avalia não é tocar perfeito, é **não parar**.
+      body: `Uma das músicas do recital é **leitura à primeira vista**: uma melodia que você nunca viu, gerada na hora. O que se avalia não é tocar perfeito, é **não parar**.
 
 Antes de tocar, use 10 segundos para olhar:
 
@@ -785,7 +786,7 @@ Depois toque no andamento, lendo o desenho (sobe, desce, passo, salto) e não no
     {
       kind: 'text',
       title: 'O recital',
-      body: `Monte o seu recital com estas quatro peças, nesta ordem:
+      body: `Monte o seu recital com estas quatro músicas, nesta ordem:
 
 1. **Clássica**: o **Cânone em Ré** de Pachelbel (o projeto final desta unidade).
 2. **Popular fácil**: **Amazing Grace** com acordes (Unidade 3).
@@ -794,7 +795,7 @@ Depois toque no andamento, lendo o desenho (sobe, desce, passo, salto) e não no
 
 Toque tudo seguido, sem recomeçar: apresentação é isso. Grave com o celular e compare com a gravação (ou a lembrança) da lição 1. Depois escreva três frases: o que melhorou, o que ainda trava, o que você quer tocar a seguir.`,
     },
-    { kind: 'song', songId: 'u04-canone', why: 'A peça clássica do recital e o projeto final da unidade.' },
+    { kind: 'song', songId: 'u04-canone', why: 'A música clássica do recital e o projeto final da unidade.' },
   ],
   review: [findAny, readTreble, readBass, intervals, chordsCFG, chordsRandom, scalesAll, sigs22, ear135],
   checkpoint: [
@@ -816,14 +817,14 @@ Toque tudo seguido, sem recomeçar: apresentação é isso. Grave com o celular 
     title: 'Mini-recital nº 1',
     brief: `Toque em sequência, sem recomeçar: o **Cânone em Ré**, **Amazing Grace** com acordes, **Brilha, brilha** em Dó e em Sol pela cifra, e uma **leitura à primeira vista** (exercício abaixo). Grave tudo e compare com a lição 1. Termine com uma autoavaliação escrita de três frases.`,
     steps: [
-      'Passe cada peça no "Tocar a música" até ela sair com 90% das notas no andamento.',
+      'Passe cada música no "Tocar a música" até ela sair com 90% das notas no andamento.',
       'Escolha um horário sem pressa, ajuste o banco e faça um aquecimento de 5 minutos.',
-      'Grave as quatro peças em sequência, sem parar entre elas.',
+      'Grave as quatro músicas em sequência, sem parar entre elas.',
       'Faça a primeira vista no exercício abaixo, na primeira tentativa.',
       'Ouça a gravação e escreva: o que melhorou desde a lição 1, o que ainda trava, o que quer tocar a seguir.',
     ],
     rubric: [
-      'As peças passaram com 90% ou mais das notas.',
+      'As músicas passaram com 90% ou mais das notas.',
       'O pulso ficou estável, sem acelerar nos trechos fáceis nem frear nos difíceis.',
       'Dá para ouvir dinâmica: frases que crescem e terminam leves.',
       'O pedal ficou limpo no Cânone (sem lama nas trocas).',
@@ -839,7 +840,7 @@ const unit: Unit = {
   id: 'u04',
   title: 'Escala maior e armaduras',
   goal: 'Construir e tocar escalas maiores com passagem do polegar, ler armaduras, usar o pedal legato e tocar a forma do blues.',
-  technique: 'Escalas maiores de Dó, Sol, Ré, Fá e Si♭, uma oitava, mãos separadas e depois juntas em movimento contrário, em colcheias de 45 rumo a 80 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
+  technique: 'Escalas maiores de Dó, Sol, Ré, Fá e Si♭, uma oitava, mãos separadas e depois juntas em movimento contrário, em colcheias de 45 rumo a 60 BPM, com variação abaixo de 40 ms (referência: RCM Preparatory B, ABRSM Grau 1). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l25, l26, l27, l28, l29, l30, l31, l32, l33],
   songs: [canon, odeDotted, syncopated, blues],
   final: {

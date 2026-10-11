@@ -140,10 +140,12 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           const stemX = stemUp ? x + HEAD_RX - 1.5 : x - HEAD_RX + 1.5;
           const stemStart = stemUp ? y(lowStep) : y(highStep);
           const stemEnd = stemUp ? y(highStep) - STEM : y(lowStep) + STEM;
-          // Segunda no acorde: a cabeça de cima (haste para cima) ou de baixo (haste para baixo) vai para o outro lado.
+          // Segunda no acorde: a cabeça de cima vai para a direita (haste para cima ou semibreve);
+          // com haste para baixo, a de baixo vai para a esquerda da haste.
+          const right = stemUp || beats >= 4 - 1e-6;
           const headX = heads.map((h, k) => {
-            const clash = stemUp ? k > 0 && h.step - heads[k - 1].step === 1 : k < heads.length - 1 && heads[k + 1].step - h.step === 1;
-            return clash ? x + (stemUp ? 2 * HEAD_RX - 3 : -(2 * HEAD_RX - 3)) : x;
+            const clash = right ? k > 0 && h.step - heads[k - 1].step === 1 && !(k > 1 && heads[k - 1].step - heads[k - 2].step === 1) : k < heads.length - 1 && heads[k + 1].step - h.step === 1;
+            return clash ? x + (right ? 2 * HEAD_RX - 3 : -(2 * HEAD_RX - 3)) : x;
           });
           const hollow = beats >= 2 - 1e-6;
           const near = (x: number) => Math.abs(beats - x) < 1e-6;

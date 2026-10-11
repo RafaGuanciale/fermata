@@ -790,10 +790,16 @@ export function qualityInterval(opts: { from: string[]; intervals: string[]; dir
 
 /** Soletrar: "Qual é a 3ª menor acima de Ré?" com a grafia certa, a enarmônica (letra errada) e uma de qualidade errada. */
 export function spellIntervalChoice(opts: { from: string[]; intervals: string[]; dir?: 'acima' | 'abaixo'; skill?: string }): ItemGen {
+  // Só grafias ensinadas: nada de dobrado sustenido/bemol, nem Mi♯, Si♯, Fá♭ ou Dó♭, na resposta ou nas opções.
+  const plain = (x: string | null | undefined): x is string => typeof x === 'string' && !/##|bb|E#|B#|Fb|Cb/.test(x);
   return (rng) => {
-    const from = pick(rng, opts.from);
-    const iv = pick(rng, opts.intervals);
+    let from = pick(rng, opts.from);
+    let iv = pick(rng, opts.intervals);
     const d = opts.dir === 'abaixo' ? -1 : 1;
+    for (let guard = 0; guard < 50 && !plain(spellInterval(from, iv, d)); guard++) {
+      from = pick(rng, opts.from);
+      iv = pick(rng, opts.intervals);
+    }
     const right = spellInterval(from, iv, d);
     const tm = /^([A-G])(#{1,2}|b{1,2})?(-?\d)$/.exec(right)!;
     const li = LETTERS.indexOf(tm[1]);
@@ -803,12 +809,19 @@ export function spellIntervalChoice(opts: { from: string[]; intervals: string[];
         const j = li + k;
         return spellWith(n(right), LETTERS[((j % 7) + 7) % 7], Number(tm[3]) + Math.floor(j / 7));
       })
-      .find((x) => x !== null && !/##|bb/.test(x));
+      .find(plain);
     const dk = rng() < 0.5 ? 1 : -1;
-    const off = (d: number) => spellWith(n(right) + d, tm[1], Number(tm[3]));
-    const offQuality = off(dk) ?? off(-dk)!;
-    const third = enh ?? off(-dk) ?? offQuality;
-    const opts3 = shuffle(rng, [right, third, offQuality].filter((x, i, a) => a.indexOf(x) === i));
+    const off = (d: number) => {
+      const x = spellWith(n(right) + d, tm[1], Number(tm[3]));
+      return plain(x) ? x : null;
+    };
+    // Letra vizinha numa tecla vizinha: intervalo errado (uma 4ª no lugar da 3ª, por exemplo).
+    const wrongLetter = [1, -1].flatMap((k) => {
+      const j = li + k;
+      return [k, 0, -k].map((dm) => spellWith(n(right) + dm, LETTERS[((j % 7) + 7) % 7], Number(tm[3]) + Math.floor(j / 7)));
+    });
+    const wrong = [...new Set([off(dk), enh, off(-dk), ...wrongLetter].filter(plain).filter((x) => x !== right))].slice(0, 2);
+    const opts3 = shuffle(rng, [right, ...wrong]);
     const names = opts3.map((x) => ptName(x));
     return {
       prompt: `Qual é a ${ivLabel(iv)} ${d > 0 ? 'acima' : 'abaixo'} de ${ptName(from)}?`,

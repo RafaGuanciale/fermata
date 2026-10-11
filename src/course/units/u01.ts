@@ -9,7 +9,7 @@ import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 const LOW = 48; // Dó3
 const HIGH = 84; // Dó6
 
-// ---------- peças reaproveitadas ----------
+// ---------- músicas reaproveitadas ----------
 
 const findWhite = findNote({ pcs: WHITE_PCS, low: LOW, high: HIGH });
 const findAllWhite = findAll({ pcs: [0, 5, 4, 11, 7], low: LOW, high: HIGH, seconds: 15 });
@@ -538,7 +538,7 @@ const l08: Lesson = {
   minutes: 60,
   objectives: [
     'Consigo passar no checkpoint misto da unidade 1, sem dicas.',
-    'Consigo tocar uma peça própria de 8 compassos nas pretas, com ostinato na mão esquerda.',
+    'Consigo tocar uma música própria de 8 compassos nas pretas, com ostinato na mão esquerda.',
   ],
   blocks: [
     {
@@ -571,16 +571,16 @@ Comece só com a esquerda até ela ficar automática. Depois entre com a direita
   ],
   project: {
     title: 'Pergunta e resposta nas pretas',
-    brief: `Crie e toque uma peça de **8 compassos** a 72 BPM: ostinato de Fá♯2 e Dó♯3 na mão esquerda o tempo todo, e quatro frases de 2 compassos na mão direita, só nas pretas, alternando pergunta e resposta. A última frase termina no Fá♯.`,
+    brief: `Crie e toque uma música de **8 compassos** a 72 BPM: ostinato de Fá♯2 e Dó♯3 na mão esquerda o tempo todo, e quatro frases de 2 compassos na mão direita, só nas pretas, alternando pergunta e resposta. A última frase termina no Fá♯.`,
     steps: [
       'Toque o ostinato sozinho até ele ficar automático.',
       'Invente a primeira pergunta (2 compassos) e a resposta, só com a mão direita.',
       'Junte as mãos devagar, a 60 BPM, e suba para 72 BPM.',
-      'Toque a peça inteira no exercício abaixo: a base marca o compasso, você toca as duas mãos.',
+      'Toque a música inteira no exercício abaixo: a base marca o compasso, você toca as duas mãos.',
       'Se quiser guardar, grave com o celular.',
     ],
-    rubric: ['O pulso ficou estável do começo ao fim.', 'Dá para ouvir as perguntas e as respostas.', 'A peça termina no Fá♯, com sensação de fim.', 'Os ombros e os punhos ficaram soltos.'],
-    exercise: { kind: 'improv', title: 'Sua peça, 8 compassos', how: 'Duas mãos, só nas pretas. A base toca o Fá♯ grave por baixo.', pcs: BLACK_PCS, bars: 8, bpm: 72, beatsPerBar: 4, backing: ostinato.map(() => [n('F#1')]), low: 36, high: 84, pass: { inSet: 0.95, restsPer4: 0, endOn: [6] } },
+    rubric: ['O pulso ficou estável do começo ao fim.', 'Dá para ouvir as perguntas e as respostas.', 'A música termina no Fá♯, com sensação de fim.', 'Os ombros e os punhos ficaram soltos.'],
+    exercise: { kind: 'improv', title: 'Sua música, 8 compassos', how: 'Duas mãos, só nas pretas. A base toca o Fá♯ grave por baixo.', pcs: BLACK_PCS, bars: 8, bpm: 72, beatsPerBar: 4, backing: ostinato.map(() => [n('F#1')]), low: 36, high: 84, pass: { inSet: 0.95, restsPer4: 0, endOn: [6] } },
   },
   exit: [findWhite, degreeByEar({ tonic: 60, degrees: [1, 3, 5] }), choice([...FIGURES, ...RESTS, ...METER, ...DYNAMICS])],
 };
