@@ -188,10 +188,25 @@ function Keys({ lit, labels, live = true }: { lit: Midi[]; labels?: Partial<Reco
   );
 }
 
+// Mudanças feitas no mesmo clique (fundamental e inversão, por exemplo) se acumulam aqui: cada setSearchParams parte
+// do endereço atual, então a segunda chamada apagava a primeira e só a inversão mudava.
+let pendingParams: URLSearchParams | null = null;
+
 function useParam(name: string, fallback: string): [string, (v: string) => void] {
   const [params, setParams] = useSearchParams();
   const value = params.get(name) ?? fallback;
-  return [value, (v) => setParams((p) => { const next = new URLSearchParams(p); next.set(name, v); return next; }, { replace: true })];
+  return [
+    value,
+    (v) => {
+      const next = new URLSearchParams(pendingParams ?? window.location.search);
+      next.set(name, v);
+      pendingParams = next;
+      queueMicrotask(() => {
+        pendingParams = null;
+      });
+      setParams(new URLSearchParams(next), { replace: true });
+    },
+  ];
 }
 
 // ---------- acordes ----------
