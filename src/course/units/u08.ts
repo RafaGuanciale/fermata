@@ -474,7 +474,7 @@ O padrão mais simples para começar: a esquerda segura o **shell** o compasso i
 
 Comece a 72 BPM e só suba quando os dois ataques da direita estiverem seguros no lugar.`,
     },
-    { kind: 'exercise', id: 'l62-comping', exercise: quickTimed('Blues com shell e comping', 'Shell em semibreve na esquerda; acorde no 2 e no "e" do 3 na direita, com swing. Os 12 compassos a 72 BPM.', () => swingTwoHands(bluesComp, bluesShells, { bpm: 72, caption: 'C7 C7 C7 C7 · F7 F7 C7 C7 · G7 F7 C7 G7. A pauta mostra a nota mais grave da direita.' }), { window: 70 }) },
+    { kind: 'exercise', id: 'l62-comping', exercise: quickTimed('Blues com shell e comping', 'Shell em semibreve na esquerda; acorde no 2 e no "e" do 3 na direita, com swing. Os 12 compassos a 72 BPM.', () => swingTwoHands(bluesComp, bluesShells, { bpm: 72, caption: 'C7 C7 C7 C7 · F7 F7 C7 C7 · G7 F7 C7 G7. A pauta mostra os acordes da direita.' }), { window: 70 }) },
     { kind: 'song', songId: 'u08-blues', why: 'Um blues em Fá com melodia: o riff na direita e shells na esquerda. Toque com swing (a partitura escreve reto, como no jazz).' },
     { kind: 'exercise', id: 'l62-quiz', exercise: quiz('Blues e swing', 'Cinco perguntas rápidas.', BLUES_Q) },
   ],

@@ -531,14 +531,14 @@ const MINOR_CLOSE: Record<'A' | 'D' | 'E', { r: string; l: string; fifths: numbe
   E: { r: 'E4+G4+B4:2 E4+A4+C5:2 | E4+G4+B4:2 D#4+A4+B4:2 | E4+G4+B4:4', l: 'E3:2 A2:2 | E3:2 B2:2 | E3:4', fifths: 1 },
 };
 const minorCadTask = (key: 'A' | 'D' | 'E', bpm: number) =>
-  twoHandTask(MINOR_CLOSE[key].r, MINOR_CLOSE[key].l, { bpm, fifths: MINOR_CLOSE[key].fifths, caption: `${key === 'A' ? 'Lá' : key === 'D' ? 'Ré' : 'Mi'} menor: i – iv – i – V7 – i em posição próxima, fundamental na esquerda. A pauta mostra a nota mais grave de cada acorde da direita.` });
+  twoHandTask(MINOR_CLOSE[key].r, MINOR_CLOSE[key].l, { bpm, fifths: MINOR_CLOSE[key].fifths, caption: `${key === 'A' ? 'Lá' : key === 'D' ? 'Ré' : 'Mi'} menor: i – iv – i – V7 – i em posição próxima, fundamental na esquerda. A pauta mostra os acordes da direita.` });
 
 // Meio-arpejo na mão esquerda sobre vi–IV–I–V em Dó (Am F C G); acordes em semibreve na direita.
 const HALF_ARP_158 = 'A2 E3 A3 E3 | F2 C3 F3 C3 | C2 G2 C3 G2 | G2 D3 G3 D3';
 const HALF_ARP_1358 = 'A2 C3 E3 A3 | F2 A2 C3 F3 | C2 E2 G2 C3 | G2 B2 D3 G3';
 const HALF_ARP_R = 'C4+E4+A4:4 | C4+F4+A4:4 | C4+E4+G4:4 | B3+D4+G4:4';
 const halfArp = (left: string, cycles: number, bpm: number) =>
-  twoHandTask(Array(cycles).fill(HALF_ARP_R).join(' | '), Array(cycles).fill(left).join(' | '), { bpm, caption: 'Am – F – C – G (vi – IV – I – V em Dó). A pauta mostra a nota mais grave do acorde da direita; a esquerda faz o meio-arpejo em semínimas.' });
+  twoHandTask(Array(cycles).fill(HALF_ARP_R).join(' | '), Array(cycles).fill(left).join(' | '), { bpm, caption: 'Am – F – C – G (vi – IV – I – V em Dó). A pauta mostra os acordes da direita; a esquerda faz o meio-arpejo em semínimas.' });
 
 const triadsAll = playChord({ symbols: ['Am', 'Dm', 'Em', 'Bm', 'F#m', 'C#m', 'Cm', 'Fm', 'Gm', 'A', 'E', 'D', 'Bb', 'Eb'], low: 48, high: 72, requireBass: true });
 const minorDegrees = minorChord({ keys: ['A', 'D', 'E'], degrees: ['i', 'iv', 'V7'], low: 48, high: 72 });

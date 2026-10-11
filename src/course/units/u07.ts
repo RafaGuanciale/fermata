@@ -122,7 +122,7 @@ Em **Fá maior** (com Si♭): **F – Gm – Am – B♭ – C – Dm – E°**.
 
 Por isso basta saber duas coisas para montar o campo de qualquer tom: a **escala** (com a armadura) e o **padrão de qualidades**. O resto é consequência.
 
-Um atalho de teclado: monte o I e "suba a mão" pela escala, sempre em posição fundamental, respeitando a armadura. Os dedos 1-3-5 ficam fixos; só o Fá♯ ou o Si♭ mudam a cor dos acordes que passam por eles.`,
+Um atalho de teclado: monte o I e "suba a mão" pela escala, sempre em posição fundamental, respeitando a armadura. Os dedos 1-3-5 ficam fixos; os acidentes da armadura mudam a cor dos acordes que passam por eles.`,
     },
     {
       kind: 'callout',
@@ -236,9 +236,9 @@ A grande consequência: **acordes da mesma função podem se substituir**. Onde 
       kind: 'example',
       title: 'A mesma frase, trocando dentro da função',
       steps: [
-        { say: 'I – IV – V7 – I em Dó.', play: { bpm: 72, steps: [[48, 60, 64, 67], [41, 60, 65, 69], [43, 59, 62, 65], [48, 60, 64, 67]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
-        { say: 'I – ii – V7 – I: o ii no lugar do IV. Mesma função, cor mais suave.', play: { bpm: 72, steps: [[48, 60, 64, 67], [50, 62, 65, 69], [43, 59, 62, 65], [48, 60, 64, 67]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
-        { say: 'I – IV – V7 – vi: o vi no lugar do I final. A volta "engana": é tônica, mas não é casa.', play: { bpm: 72, steps: [[48, 60, 64, 67], [41, 60, 65, 69], [43, 59, 62, 65], [45, 60, 64, 69]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
+        { say: 'I – IV – V7 – I em Dó.', play: { bpm: 72, steps: [[48, 64, 67, 72], [41, 65, 69, 72], [43, 65, 67, 71], [48, 64, 67, 72]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
+        { say: 'I – ii – V7 – I: o ii no lugar do IV. Mesma função, cor mais suave.', play: { bpm: 72, steps: [[48, 64, 67, 72], [50, 65, 69, 74], [43, 65, 67, 71], [48, 64, 67, 72]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
+        { say: 'I – IV – V7 – vi: o vi no lugar do I final. A volta "engana": é tônica, mas não é casa.', play: { bpm: 72, steps: [[48, 64, 67, 72], [41, 65, 69, 72], [43, 65, 67, 71], [45, 64, 69, 72]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
       ],
     },
     { kind: 'exercise', id: 'l52-iv-ii', exercise: items('IV ou ii?', 'O app toca I – ? – V7 – I. Diga qual foi o acorde do meio.', subIVii, 8, 48, 72, 0.75, 'off') },
@@ -308,7 +308,7 @@ const l53: Lesson = {
       body: `Uma frase musical termina como uma frase falada: com ponto final, vírgula, ponto de interrogação ou reticências. Quem faz essa pontuação são os **dois últimos acordes** da frase, a **cadência**.
 
 - **Perfeita** (V ou V7 → I, ambos na posição fundamental, de preferência com a tônica na melodia): **ponto final**. Em Dó: G7 → C.
-- **Imperfeita** (V → I, mas com um dos acordes invertido ou a melodia na 3ª ou na 5ª): conclui, mas menos. **Ponto e vírgula**.
+- **Imperfeita** (V → I, mas com um dos acordes invertido ou a melodia na 3ª ou na 5ª): conclui, mas menos. **Ponto e vírgula**. (Cuidado nos vídeos em inglês: lá, *imperfect cadence* é o nome da meia cadência.)
 - **Plagal** (IV → I): o "**amém**" do fim dos hinos. Conclui sem a tensão da sensível, com um repouso suave. Em Dó: F → C.
 - **Meia cadência**, ou semicadência (qualquer acorde → **V**): a frase para na dominante. **Vírgula**, ou **pergunta**. Em Dó: F → G, ou Dm → G.
 - **Deceptiva**, ou interrompida (V → **vi**): a dominante promete o I e entrega o vi. **Reticências**: a música engana o ouvido e segue. Em Dó: G7 → Am.`,
@@ -317,10 +317,10 @@ const l53: Lesson = {
       kind: 'example',
       title: 'Quatro finais para a mesma frase',
       steps: [
-        { say: 'Perfeita: I – IV – V7 – I.', play: { bpm: 72, steps: [[48, 60, 64, 67], [41, 60, 65, 69], [43, 59, 62, 65], [48, 60, 64, 67]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
+        { say: 'Perfeita: I – IV – V7 – I.', play: { bpm: 72, steps: [[48, 64, 67, 72], [41, 65, 69, 72], [43, 65, 67, 71], [48, 64, 67, 72]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
         { say: 'Plagal: I – vi – IV – I.', play: { bpm: 72, steps: [[48, 60, 64, 67], [45, 60, 64, 69], [41, 60, 65, 69], [48, 60, 64, 67]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
         { say: 'Meia cadência: I – vi – ii – V. Fica no ar.', play: { bpm: 72, steps: [[48, 60, 64, 67], [45, 60, 64, 69], [50, 62, 65, 69], [43, 59, 62, 67]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
-        { say: 'Deceptiva: I – IV – V7 – vi. Repare no baixo subindo Sol → Lá em vez de cair no Dó.', play: { bpm: 72, steps: [[48, 60, 64, 67], [41, 60, 65, 69], [43, 59, 62, 65], [45, 60, 64, 69]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
+        { say: 'Deceptiva: I – IV – V7 – vi. Repare no baixo subindo Sol → Lá em vez de cair no Dó.', play: { bpm: 72, steps: [[48, 64, 67, 72], [41, 65, 69, 72], [43, 65, 67, 71], [45, 64, 69, 72]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
       ],
     },
     { kind: 'exercise', id: 'l53-tocar', exercise: items('Toque a cadência pedida', 'Os dois acordes da cadência, em ordem, no tom pedido.', cadencePlay, 12, 48, 72, 0.85) },
@@ -332,7 +332,7 @@ const l53: Lesson = {
 1. **O último acorde soa como casa?** Se não: é **meia cadência** (parou no V, tenso) ou **deceptiva** (parou num acorde menor, "triste", que não é a casa).
 2. Se soa como casa: o penúltimo tinha **tensão** puxando (a sensível subindo, o trítono resolvendo)? Então é **perfeita**. Se a chegada foi suave, sem puxão, é **plagal**.
 
-Entre meia e deceptiva, ouça o baixo: na meia, ele termina **uma 5ª acima** da tônica (o V); na deceptiva, ele **sobe um passo** a partir do V (Sol → Lá, em Dó).`,
+Entre meia e deceptiva, ouça o baixo: na meia, ele termina no **5º grau** (Sol, em Dó: o V); na deceptiva, ele **sobe um passo** a partir do V (Sol → Lá, em Dó).`,
     },
     {
       kind: 'callout',
@@ -355,6 +355,11 @@ const ANDALUZA: Record<string, string[]> = { Am: ['Am', 'G', 'F', 'E'], Dm: ['Dm
 const KEY_NAME: Record<string, string> = { C: 'Dó maior', G: 'Sol maior', D: 'Ré maior', F: 'Fá maior', Am: 'Lá menor', Dm: 'Ré menor', Em: 'Mi menor' };
 const royalLead = chordSequence({ sequences: Object.entries(ROYAL).map(([k, s]) => ({ name: `Royal Road em ${KEY_NAME[k]}.`, symbols: s })), lead: 2 });
 const royalTwice = chordSequence({ sequences: Object.entries(ROYAL).map(([k, s]) => ({ name: `Royal Road em ${KEY_NAME[k]}, duas vezes.`, symbols: [...s, ...s] })), lead: 2 });
+/** Royal Road num tom e logo depois em outro (sempre dois tons diferentes). */
+const royalTwoKeys = chordSequence({
+  sequences: [['C', 'G'], ['G', 'D'], ['F', 'C'], ['D', 'G']].map(([a, b]) => ({ name: `Royal Road em ${KEY_NAME[a]} e depois em ${KEY_NAME[b]}.`, symbols: [...ROYAL[a], ...ROYAL[b]] })),
+  lead: 2,
+});
 const andaluzaLead = chordSequence({ sequences: Object.entries(ANDALUZA).map(([k, s]) => ({ name: `Andaluza em ${KEY_NAME[k]}.`, symbols: s })), lead: 2 });
 const popEar = diatonicByEar({ keys: ['C', 'G'], progressions: [['I', 'V', 'vi', 'IV'], ['I', 'vi', 'IV', 'V'], ['vi', 'IV', 'I', 'V'], ['IV', 'V', 'iii', 'vi']], answer: 'chords' });
 const popEarBass = diatonicByEar({ keys: ['C', 'G', 'F'], progressions: [['I', 'V', 'vi', 'IV'], ['I', 'vi', 'IV', 'V'], ['vi', 'IV', 'I', 'V'], ['IV', 'V', 'iii', 'vi']], answer: 'bass' });
@@ -418,7 +423,7 @@ O exercício mede a condução como na lição 44: no máximo 2 semitons além d
   review: [popEar, royalLead, choice(PROG_Q, 'progressoes')],
   checkpoint: [
     items('Ditado', '8 progressões, sem dicas. Meta: 85%.', mix([popEar, popEarBass]), 8, 36, 72, 0.85, 'off'),
-    items('Royal Road em 2 tons', 'Dois ciclos seguidos, tom sorteado, conduzidos. Duas progressões.', royalTwice, 2, 48, 84, 1, 'off'),
+    items('Royal Road em 2 tons', 'Um ciclo em um tom e logo outro em outro tom, conduzidos. Três sequências; vale passar em duas.', royalTwoKeys, 3, 48, 84, 0.66, 'off'),
   ],
   exit: [popEarBass, choice(PROG_Q, 'progressoes')],
 };
@@ -445,7 +450,7 @@ const parallel = (key: string, bpm: number) => {
 
 const SCALE2_Q: ChoiceQuestion[] = [
   { q: 'Dó maior, 2 oitavas, mão direita, subindo:', options: ['1 2 3 1 2 3 4 1 2 3 1 2 3 4 5', '1 2 3 4 5 1 2 3 4 5 1 2 3 4 5', '1 2 3 1 2 3 1 2 3 1 2 3 4 5'], answer: 0, why: 'Polegar no Dó, Fá, Dó, Fá; o 4 no Si do meio.' },
-  { q: 'Dó maior, 2 oitavas, mão esquerda, subindo:', options: ['5 4 3 2 1 3 2 1 4 3 2 1 3 2 1', '5 4 3 2 1 4 3 2 1 3 2 1 3 2 1', '1 2 3 1 2 3 4 1 2 3 1 2 3 4 5'], answer: 0, why: 'O 3 cruza no Lá, o 4 cruza no Sol do meio, o 3 cruza no Lá de cima.' },
+  { q: 'Dó maior, 2 oitavas, mão esquerda, subindo:', options: ['5 4 3 2 1 3 2 1 4 3 2 1 3 2 1', '5 4 3 2 1 4 3 2 1 3 2 1 3 2 1', '1 2 3 1 2 3 4 1 2 3 1 2 3 4 5'], answer: 0, why: 'O 3 cruza no Lá, o 4 cruza no Ré do meio, o 3 cruza no Lá de cima.' },
   { q: 'Fá maior, mão direita, subindo:', options: ['1 2 3 4 1 2 3 1 2 3 4 1 2 3 4', '1 2 3 1 2 3 4 1 2 3 1 2 3 4 5', '2 1 2 3 1 2 3 4'], answer: 0, why: 'O 4 fica no Si♭ (preta) e o polegar passa no Dó.' },
   { q: 'Em movimento paralelo, os polegares…', options: ['Passam em momentos diferentes nas duas mãos', 'Passam juntos', 'Não passam'], answer: 0, why: 'Por isso o paralelo é mais difícil que o contrário: cada mão tem seu momento.' },
 ];
@@ -465,13 +470,13 @@ const l55: Lesson = {
       title: 'Duas oitavas, duas mãos',
       body: `Até aqui as escalas foram de uma oitava, e mãos juntas só em movimento contrário (lição 31). Agora: **2 oitavas**, **movimento paralelo**, as duas mãos subindo e descendo juntas, uma oitava de distância.
 
-Os dedilhados de 2 oitavas repetem o de uma oitava, com o 4 no lugar do 5 no meio (para o polegar poder continuar):
+Os dedilhados de 2 oitavas repetem o de uma oitava. Na direita, onde a escala de uma oitava terminava no 5, entra o polegar e a escala continua; o 5 só aparece no fim:
 
 - **Dó, Sol e Lá menor**, direita: **1 2 3 · 1 2 3 4 · 1 2 3 · 1 2 3 4 5**.
 - **Dó, Sol e Lá menor**, esquerda: **5 4 3 2 1 · 3 2 1 · 4 3 2 1 · 3 2 1**.
 - **Fá maior**, direita: **1 2 3 4 · 1 2 3 · 1 2 3 4 · 1 2 3 4** (o 4 no Si♭). Esquerda: igual a Dó.
 
-O desafio do paralelo é que **os polegares não passam ao mesmo tempo**. Subindo em Dó, a direita passa o polegar no Fá enquanto a esquerda cruza o 3 no Lá. Cada mão tem seu momento, e as duas precisam continuar soando como uma só.`,
+O desafio do paralelo é que **os polegares não passam ao mesmo tempo**. Subindo em Dó, a direita passa o polegar no Fá (4ª nota); a esquerda cruza o 3 no Lá (6ª nota). Cada mão tem seu momento, e as duas precisam continuar soando como uma só.`,
     },
     {
       kind: 'callout',
@@ -481,7 +486,9 @@ O desafio do paralelo é que **os polegares não passam ao mesmo tempo**. Subind
     },
     { kind: 'exercise', id: 'l55-quiz', exercise: quiz('Dedilhados de 2 oitavas', 'Quatro perguntas, antes de tocar.', SCALE2_Q, 0.75) },
     { kind: 'exercise', id: 'l55-do-md', exercise: quickTimed('Dó maior, 2 oitavas, direita', 'Só a direita, colcheias, de 56 a 72 BPM. Variação até 35 ms.', () => melodyTask(twoOctaves(60, MAJ_ST), { bpm: 56 }), { ladder: { from: 56, to: 72, step: 4 }, evenness: 35 }) },
+    { kind: 'exercise', id: 'l55-do-me', exercise: quickTimed('Dó maior, 2 oitavas, esquerda', 'Só a esquerda, de 50 a 66 BPM. Atenção ao 4 cruzando no Ré do meio. Variação até 35 ms.', () => melodyTask(twoOctaves(SCALES2.C.l, MAJ_ST), { bpm: 50, clef: 'bass' }), { ladder: { from: 50, to: 66, step: 4 }, evenness: 35 }) },
     { kind: 'exercise', id: 'l55-do-mj', exercise: quickTimed('Dó maior, mãos juntas', 'Paralelo, de 50 a 66 BPM. Mãos juntas em ±40 ms, variação até 35 ms.', () => parallel('C', 50), { ladder: { from: 50, to: 66, step: 4 }, window: 40, evenness: 35 }) },
+    { kind: 'exercise', id: 'l55-separadas', exercise: quickTimed('Sol, Fá ou Lá menor, só a direita', 'Tom sorteado, de 50 a 60 BPM. Toque também a esquerda sozinha antes do próximo exercício.', (rng) => { const k = pick(rng, ['G', 'F', 'Am']); const sc = SCALES2[k]; return melodyTask(twoOctaves(sc.r, sc.st), { bpm: 50, fifths: sc.fifths }); }, { ladder: { from: 50, to: 60, step: 5 }, evenness: 35 }) },
     { kind: 'exercise', id: 'l55-sorteada', exercise: quickTimed('Sol, Fá ou Lá menor, mãos juntas', 'Tom sorteado, de 50 a 60 BPM.', (rng) => parallel(pick(rng, ['G', 'F', 'Am']), 50), { ladder: { from: 50, to: 60, step: 5 }, window: 40, evenness: 35 }) },
     {
       kind: 'text',
@@ -490,7 +497,7 @@ O desafio do paralelo é que **os polegares não passam ao mesmo tempo**. Subind
 
 Um roteiro que funciona: 5 minutos por dia, uma escala por dia (Dó, Sol, Fá, Lá menor em rodízio), começando 8 BPM abaixo do último andamento limpo e subindo 4 BPM a cada 3 passadas limpas. Quando travar, use **ritmos variados**: pontuado (longa-curta) e o contrário (curta-longa). Depois de alguns dias, a escala reta volta mais igual.
 
-Lembre do limite de saúde: se o polegar ou o antebraço doer, o andamento não sobe.`,
+Lembre-se do limite de saúde: se o polegar ou o antebraço doer, o andamento não sobe.`,
     },
   ],
   review: [choice(SCALE2_Q, 'escalas-2-oitavas'), cadencePlay],
@@ -505,21 +512,21 @@ const PERIOD_Q: ChoiceQuestion[] = [
   { q: 'O antecedente costuma terminar…', options: ['No V (meia cadência)', 'No I (cadência perfeita)', 'No vi'], answer: 0, why: 'Ele pergunta: para na dominante, em suspenso.' },
   { q: 'O consequente costuma terminar…', options: ['No I (cadência perfeita)', 'No V', 'No IV'], answer: 0, why: 'Ele responde: volta para casa.' },
   { q: 'Nota de passagem é…', options: ['Nota fora do acorde, em tempo fraco, entre duas notas por grau conjunto', 'Qualquer nota errada', 'A nota do tempo forte'], answer: 0, why: 'Mi–Fá–Sol sobre C: o Fá passa entre duas notas do acorde.' },
-  { q: 'Período duplo é…', options: ['Dois períodos seguidos: 16 compassos', 'Um período tocado duas vezes mais rápido', 'Duas mãos'], answer: 0, why: 'Quatro frases: as três primeiras abertas ou parciais, a última fecha.' },
+  { q: 'Período duplo é…', options: ['Dois períodos seguidos: 16 compassos', 'Um período tocado duas vezes mais rápido', 'Duas mãos'], answer: 0, why: 'Quatro frases: as três primeiras terminam abertas ou com uma cadência mais fraca; só a última fecha de vez.' },
 ];
 
 // Período de 8 compassos em Dó: antecedente termina no V, consequente no I.
-const PERIOD_R = 'E4 G4 C5 G4 | A4 F4 A4 C5 | G4 E4 C4 E4 | F4 E4 D4:2 | E4 G4 C5 G4 | A4 F4 A4 C5 | D5 B4 G4 F4 | E4 D4 C4:2';
+const PERIOD_R = 'E4 G4 C5 G4 | A4 F4 A4 C5 | G4 E4 C4 E4 | B3 C4 D4:2 | E4 G4 C5 G4 | A4 F4 A4 C5 | D5 B4 G4 F4 | E4 D4 C4:2';
 const PERIOD_L = 'C3+E3+G3:4 | C3+F3+A3:4 | C3+E3+G3:4 | B2+D3+G3:4 | C3+E3+G3:4 | C3+F3+A3:4 | B2+F3+G3:4 | C3+E3+G3:4';
 const PERIOD_BARS: { notes: Midi[]; cadence?: Roman }[] = [
-  { notes: [64, 67, 72, 67] }, { notes: [69, 65, 69, 72] }, { notes: [67, 64, 60, 64] }, { notes: [65, 64, 62], cadence: 'V' },
+  { notes: [64, 67, 72, 67] }, { notes: [69, 65, 69, 72] }, { notes: [67, 64, 60, 64] }, { notes: [59, 60, 62], cadence: 'V' },
   { notes: [74, 71, 67, 65] }, { notes: [64, 62, 60], cadence: 'I' },
 ];
 const harmPeriod = harmonizeAny({ key: 'C', bars: PERIOD_BARS });
 const complete = completePhrase({
   phrases: [
-    { notes: [64, 67, 72, 67, 69, 65, 69, 72, 67, 64, 60, 64, 65, 64], accept: [7, 11, 2], say: 'Antecedente em Dó: a frase pede uma vírgula.', why: 'Termine numa nota do V (Sol, Si ou Ré): meia cadência, a frase fica em suspenso.' },
-    { notes: [64, 67, 72, 67, 69, 65, 69, 72, 74, 71, 67, 65, 64, 62], accept: [0, 4], say: 'Consequente em Dó: ponto final.', why: 'Termine na tônica (Dó) ou no Mi: cadência perfeita.' },
+    { notes: [64, 67, 72, 67, 69, 65, 69, 72, 67, 64, 60, 64, 59, 60], accept: [7, 11, 2], say: 'Antecedente em Dó: a frase pede uma vírgula.', why: 'Termine numa nota do V (Sol, Si ou Ré): meia cadência, a frase fica em suspenso.' },
+    { notes: [64, 67, 72, 67, 69, 65, 69, 72, 74, 71, 67, 65, 64, 62], accept: [0, 4], say: 'Consequente em Dó: ponto final.', why: 'Dó fecha com cadência perfeita; Mi também conclui, mas menos (imperfeita).' },
     { notes: [67, 71, 74, 71, 72, 69, 66], accept: [2, 6, 9], say: 'Antecedente em Sol maior.', why: 'Uma nota do V (Ré, Fá♯ ou Lá): a frase para na dominante.' },
     { notes: [74, 72, 71, 69, 67, 69, 71, 69], accept: [7, 11], say: 'Consequente em Sol maior.', why: 'Sol (a tônica) ou Si: a frase volta para casa.' },
   ],
@@ -563,7 +570,7 @@ Dois períodos seguidos formam um **período duplo** (16 compassos), a forma do 
       title: 'Notas de passagem',
       body: `Ao harmonizar, a regra da lição 52 continua: o acorde precisa conter a nota do **tempo forte**. E as outras?
 
-Elas podem ser **notas de passagem**: notas fora do acorde, nos **tempos fracos**, que **passam por grau conjunto** de uma nota do acorde para outra. No compasso 4 do exemplo (Fá–Mi–Ré sobre G), o Fá é a 7ª do acorde e o Mi passa entre o Fá e o Ré. No compasso 2 (Lá–Fá–Lá–Dó sobre F), todas são do acorde.
+Elas podem ser **notas de passagem**: notas fora do acorde, nos **tempos fracos**, que **passam por grau conjunto** de uma nota do acorde para outra. No compasso 4 do exemplo (Si–Dó–Ré sobre G), o Dó passa por grau conjunto entre o Si e o Ré, que são do acorde. No compasso 2 (Lá–Fá–Lá–Dó sobre F), todas são do acorde.
 
 O que não pode: nota fora do acorde no **tempo forte** sem resolver logo depois. Isso soa como erro, não como passagem.`,
     },
@@ -615,7 +622,7 @@ O projeto junta tudo numa coisa nova: a sua primeira canção.`,
       body: `A base é um **período duplo** em Dó, um acorde por compasso:
 
 - Frase 1: **I – IV – I – V** (termina aberta)
-- Frase 2: **I – IV – V – I** (fecha)
+- Frase 2: **I – IV – V – I** (fecha, mas com a melodia no Mi: cadência imperfeita, um ponto e vírgula)
 - Frase 3: **vi – IV – I – V** (contraste: começa no vi, termina aberta)
 - Frase 4: **I – ii – V – I** (fecha de vez)
 
@@ -623,7 +630,7 @@ Um método simples para a melodia:
 
 1. Em cada compasso, ponha no **tempo 1** uma nota do acorde.
 2. Ligue essas notas por **grau conjunto**, com notas de passagem nos tempos fracos.
-3. Termine as frases 1 e 3 numa nota do **V** (Sol, Si, Ré) e as frases 2 e 4 no **Dó**.
+3. Termine as frases 1 e 3 numa nota do **V** (Sol, Si, Ré), a frase 2 no **Mi** e só a frase 4 no **Dó**: o ponto final fica guardado para o fim.
 4. Deixe **respirar**: uma pausa ou nota longa no fim de cada frase.
 5. Repita ideias: a frase 2 pode começar igual à 1; a 4 pode lembrar a 2.
 
@@ -635,7 +642,15 @@ Depois de pronta, **analise**: escreva os graus embaixo de cada compasso e as ca
       title: 'comece pelo ritmo',
       body: 'Se a página em branco travar, escolha primeiro um ritmo de 2 compassos (por exemplo, semínima, semínima, mínima | quatro semínimas) e use o mesmo ritmo em todas as frases. Com o ritmo fixo, escolher as notas fica muito mais fácil.',
     },
-    { kind: 'song', songId: 'u07-preludio', why: 'O projeto final da unidade: Bach construiu uma música inteira só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },
+    {
+      kind: 'text',
+      title: 'A música final: o Prelúdio em Dó de Bach',
+      body: `Além do projeto, a unidade termina com uma música: os 8 primeiros compassos do **Prelúdio em Dó**, BWV 846, de Johann Sebastian Bach (1722). Cada compasso é **um acorde quebrado**, sempre com o mesmo desenho: a esquerda toca o baixo e a nota seguinte e segura; a direita repete três notas de cima, duas vezes.
+
+Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7/B, C, Am/C, D7/C, G/B e C7M/B. Repare no baixo descendo por grau conjunto (Dó, Dó, Si, Dó, Dó, Dó, Si, Si) enquanto os acordes passeiam pelo campo de Dó. Troque o **pedal** a cada compasso, logo depois do baixo.`,
+    },
+    { kind: 'exercise', id: 'l57-preludio', exercise: quickTimed('Prelúdio, compassos 1 a 2', 'Os dois primeiros compassos com as duas mãos, a 50 BPM. Duas passadas boas.', () => twoHandTask(PRELUDE_R2, PRELUDE_L2, { bpm: 50, caption: 'C | Dm7/C. A esquerda toca o baixo e a nota seguinte e segura; a direita repete as três notas de cima.' }), { reps: 2 }) },
+    { kind: 'song', songId: 'u07-preludio', why: 'A música final da unidade: Bach construiu uma música inteira só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },
   ],
   review: [fieldRandom, transpose, harmC, cadenceEar, royalLead, complete],
   checkpoint: [
@@ -689,7 +704,9 @@ const PRELUDE: [string, string, string[]][] = [
   ['B3', 'C4', ['E4', 'G4', 'C5']],
 ];
 const PRELUDE_R = PRELUDE.map(([, , up]) => `r:1 ${[...up, ...up].map((x) => `${x}:0.5`).join(' ')}`).join(' | ') + ' | C4+E4+G4+C5:4';
-const PRELUDE_L = PRELUDE.map(([a, b]) => `${a}:0.5 ${b}:0.5 r:3`).join(' | ') + ' | C3:4';
+const PRELUDE_L = PRELUDE.map(([a, b]) => `${a}:0.5 ${b}:3.5`).join(' | ') + ' | C3:4';
+const PRELUDE_R2 = PRELUDE_R.split(' | ').slice(0, 2).join(' | ');
+const PRELUDE_L2 = PRELUDE_L.split(' | ').slice(0, 2).join(' | ');
 
 const prelude: SongSpec = {
   id: 'u07-preludio',
@@ -710,7 +727,7 @@ const unit: Unit = {
   id: 'u07',
   title: 'Campo harmônico e funções',
   goal: 'Montar o campo harmônico de qualquer tom maior, analisar e transpor em graus, harmonizar por funções, reconhecer cadências e as progressões mais usadas.',
-  technique: 'Escalas maiores em 2 oitavas, mãos juntas em movimento paralelo (Dó, Sol, Fá e Lá menor), em colcheias de 56 rumo a 80 BPM, variação abaixo de 35 ms (referência: RCM Level 2). Use a escada de andamento do treino nos dias sem lição nova.',
+  technique: 'Escalas maiores e Lá menor harmônica em 2 oitavas, mãos juntas em movimento paralelo (Dó, Sol, Fá e Lá menor), em colcheias de 56 rumo a 80 BPM, variação abaixo de 35 ms (referência: RCM Level 2). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l50, l51, l52, l53, l54, l55, l56, l57],
   songs: [prelude],
   final: {

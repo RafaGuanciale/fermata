@@ -218,12 +218,21 @@ export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requ
     // Dica: posição fechada a partir da fundamental mais perto do meio do trecho.
     const mid = Math.round((opts.low + opts.high) / 2) - 6;
     const base = mid + ((c.root - pcOf(mid) + 12) % 12);
-    const hintKeys = c.pcs.map((p) => base + ((p - c.root + 12) % 12));
+    let hintKeys = c.pcs.map((p) => base + ((p - c.root + 12) % 12));
+    const bassPc = accept.kind === 'chord' ? accept.bass : undefined;
+    if (bassPc !== undefined && bassPc !== c.root) {
+      // Inversão ou baixo de fora: a dica acende o baixo pedido embaixo de tudo.
+      const inChord = hintKeys.find((m) => pcOf(m) === bassPc);
+      if (inChord !== undefined) hintKeys = hintKeys.map((m) => (m < inChord ? m + 12 : m));
+      else hintKeys = [Math.min(...hintKeys) - 1 - ((pcOf(Math.min(...hintKeys) - 1) - bassPc + 12) % 12), ...hintKeys];
+      hintKeys.sort((a, b) => a - b);
+    }
+    const notes = spelledHint(symbol) ?? c.pcs.map((p) => PC_NAMES[p]).join(', ');
     return {
       prompt: 'Toque o acorde',
       symbol: chordLabel(symbol),
       hintKeys,
-      hint: spelledHint(symbol) ?? c.pcs.map((p) => PC_NAMES[p]).join(', '),
+      hint: bassPc !== undefined && bassPc !== c.root ? `${notes}, com ${PC_NAMES[bassPc]} no baixo` : notes,
       steps: [accept],
       skill: opts.skill ?? 'acorde',
     };
@@ -325,8 +334,8 @@ export function progressionByEar(opts: { keys: string[]; progressions: Degree[][
     const symbols = prog.map((d) => degreeSymbol(key, d));
     return {
       prompt: opts.answer === 'bass' ? 'Ouça e toque o baixo de cada acorde, em ordem' : 'Ouça e toque os acordes, em ordem',
-      detail: `Tom de ${keyName(key)} maior, ${prog.length} acordes. O primeiro é o I.`,
-      listen: { bpm: 72, steps: symbols.map((x) => ({ midis: voiced(x, 64), beats: 2 })) },
+      detail: `Tom de ${keyName(key)} maior, ${prog.length} acordes. ${prog[0] === 'I' ? 'O primeiro é o I.' : 'O primeiro pode não ser o I.'}`,
+      listen: { bpm: 72, steps: ledVoicings(symbols).map((v) => ({ midis: v, beats: 2 })) },
       hint: prog.join(' – ') + ': ' + symbols.map(chordLabel).join(' – '),
       steps: opts.answer === 'bass' ? symbols.map((x) => ({ kind: 'pc', pcs: [parseChord(x).root] }) as Accept) : symbols.map((x) => chordAccept(x)),
       skill: opts.skill ?? (opts.answer === 'bass' ? 'ditado-baixo' : 'ditado-progressao'),
@@ -929,27 +938,30 @@ export function spellTriadChoice(opts: { chords: string[]; skill?: string }): It
     const q = m[2];
     const right = triadSpelling(symbol);
     const otherQ = q === '' ? 'm' : q === 'm' ? '' : q === 'dim' ? 'm' : '';
-    const other = triadSpelling(m[1] + otherQ);
-    // Letra trocada: a mesma tecla da 3ª escrita com a letra vizinha (Fá♯–Si♭–Dó♯ no lugar de Fá♯–Lá♯–Dó♯).
-    const third = n(`${right[1]}4`);
+    const other = [...triadSpelling(m[1] + otherQ)];
+    // Terceira opção: a mesma tecla escrita com a letra vizinha (Fá♯–Si♭–Dó♯ no lugar de Fá♯–Lá♯–Dó♯), primeiro na 3ª,
+    // depois na 5ª; se nada disso der uma grafia ensinada, a 5ª meio tom acima (outra qualidade).
     const letters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    const li = letters.indexOf(right[1][0]);
-    let wrong: string[] | null = null;
-    for (const k of [1, -1]) {
-      const L = letters[(li + k + 7) % 7];
-      const base = LETTER_PC[L];
-      const d = ((pcOf(third) - base + 18) % 12) - 6;
-      if (Math.abs(d) <= 1) {
-        wrong = [right[0], L + (d > 0 ? '#' : d < 0 ? 'b' : ''), right[2]];
-        break;
+    const taught = (x: string) => !/##|bb|E#|B#|Fb|Cb/.test(x);
+    const respell = (note: string): string | null => {
+      const pc = pcOf(n(`${note}4`));
+      const li = letters.indexOf(note[0]);
+      for (const k of [1, -1]) {
+        const L = letters[(li + k + 7) % 7];
+        const d = ((pc - LETTER_PC[L] + 18) % 12) - 6;
+        const x = L + (d > 0 ? '#' : d < 0 ? 'b' : '');
+        if (Math.abs(d) <= 1 && taught(x)) return x;
       }
-    }
-    if (!wrong) {
-      // Sem enarmônica simples para a 3ª: a terceira opção muda a 5ª (vira diminuta ou aumentada).
-      const fifth = n(`${right[2]}4`);
-      const alt = spellWith(fifth + (q === 'dim' || q === '°' ? 1 : -1), right[2][0], 4);
-      if (alt) wrong = [right[0], right[1], alt.replace(/-?\d+$/, '')];
-    }
+      return null;
+    };
+    // A outra qualidade com grafia ensinada (Lá♭ menor viraria Lá♭–Dó♭–Mi♭: aqui sai Lá♭–Si–Mi♭).
+    for (let k = 0; k < other.length; k++) if (!taught(other[k])) other[k] = respell(other[k]) ?? other[k];
+    const r3 = respell(right[1]);
+    const r5 = respell(right[2]);
+    const r1 = respell(right[0]);
+    const shifted = [1, -1].map((d) => spellWith(n(`${right[2]}4`) + d, right[2][0], 4)).filter((x): x is string => x !== null && taught(x)).map((x) => [right[0], right[1], x.replace(/-?\d+$/, '')]);
+    const candidates = [r3 && [right[0], r3, right[2]], r5 && [right[0], right[1], r5], r1 && [r1, right[1], right[2]], ...shifted].filter((x): x is string[] => !!x);
+    const wrong = candidates.find((x) => x.join() !== other.join() && x.join() !== right.join()) ?? null;
     const fmt = (xs: string[]) => xs.map((x) => ptName(`${x}4`)).join(', ');
     const options = [fmt(right), fmt(other), ...(wrong ? [fmt(wrong)] : [])].filter((x, i, a) => a.indexOf(x) === i);
     const shuffled = shuffle(rng, options);
@@ -1011,6 +1023,27 @@ export function nearestVoicing(from: Midi[], pcs: Pc[]): Midi[] {
   return best;
 }
 
+/**
+ * Para o app tocar uma progressão como um pianista: baixo na fundamental e três vozes em cima, conduzidas
+ * pelo caminho mais curto a partir do primeiro acorde com a fundamental na voz de cima. Nas tétrades sai a 5ª,
+ * então a 7ª desce e a sensível sobe sozinhas.
+ */
+export function ledVoicings(symbols: string[]): Midi[][] {
+  const upperPcs = (x: string) => {
+    const c = parseChord(x);
+    return c.pcs.length >= 4 ? c.pcs.filter((_, i) => i !== 2) : c.pcs;
+  };
+  const first = parseChord(symbols[0]);
+  const top = 67 + ((first.root - pcOf(67) + 12) % 12);
+  let cur = [top, ...upperPcs(symbols[0]).filter((p) => p !== first.root).map((p) => top - ((first.root - p + 12) % 12))].sort((a, b) => a - b);
+  return symbols.map((x, i) => {
+    if (i > 0) cur = nearestVoicing(cur, upperPcs(x));
+    const c = parseChord(x);
+    const bassPc = c.bass ?? c.root;
+    return [43 + ((bassPc - pcOf(43) + 12) % 12), ...cur];
+  });
+}
+
 /** Progressão em sequência (cifras dadas): com `lead`, cada troca precisa andar no máximo o caminho mais curto + `lead` semitons. */
 export function chordSequence(opts: { sequences: { name?: string; symbols: string[] }[]; lead?: number; center?: Midi; voicing?: 'full' | 'guide'; /** Exige a fundamental no baixo (quatro vozes: baixo na esquerda, três na direita). */ bass?: boolean; skill?: string }): ItemGen {
   if (opts.voicing === 'guide') return guideSequence(opts);
@@ -1030,7 +1063,12 @@ export function chordSequence(opts: { sequences: { name?: string; symbols: strin
       symbol: seq.symbols.map(chordLabel).join(' – '),
       detail: [seq.name, opts.lead !== undefined ? (opts.bass ? 'O baixo (a fundamental) na mão esquerda e três notas na direita, uma de cada. Notas comuns ficam; as outras andam o mínimo.' : 'Três notas por acorde. Notas comuns ficam; as outras andam o mínimo.') : 'Qualquer posição; o baixo é exigido nas cifras com barra.'].filter(Boolean).join(' '),
       hintKeys: chain[0],
-      hint: chain.map((v, i) => `${chordLabel(seq.symbols[i])} (${v.map((m) => PC_NAMES[pcOf(m)]).join('–')})`).join(' → '),
+      hint: chain
+        .map((v, i) => {
+          const b = parseChord(seq.symbols[i]).bass;
+          return `${chordLabel(seq.symbols[i])} (${b !== undefined ? `${PC_NAMES[b]} no baixo; ` : ''}${v.map((m) => PC_NAMES[pcOf(m)]).join('–')})`;
+        })
+        .join(' → '),
       steps: seq.symbols.map((s) => {
         const c = parseChord(s);
         const a: Accept = { kind: 'chord', pcs: c.pcs, bass: c.bass ?? (opts.bass ? c.root : undefined) };
@@ -1106,8 +1144,8 @@ export function diatonicByEar(opts: { keys: string[]; progressions: Roman[][]; a
     const symbols = prog.map((d) => diatonicSymbol(key, d));
     return {
       prompt: opts.answer === 'bass' ? 'Ouça e toque o baixo de cada acorde, em ordem' : 'Ouça e toque os acordes, em ordem',
-      detail: `Tom de ${keyName(key)} maior, ${prog.length} acordes. O primeiro é o I.`,
-      listen: { bpm: 72, steps: symbols.map((x) => ({ midis: voiced(x, 64), beats: 2 })) },
+      detail: `Tom de ${keyName(key)} maior, ${prog.length} acordes. ${prog[0] === 'I' ? 'O primeiro é o I.' : 'O primeiro pode não ser o I.'}`,
+      listen: { bpm: 72, steps: ledVoicings(symbols).map((v) => ({ midis: v, beats: 2 })) },
       hint: `${prog.join(' – ')}: ${symbols.map(chordLabel).join(' – ')}`,
       steps: opts.answer === 'bass' ? symbols.map((x) => ({ kind: 'pc', pcs: [parseChord(x).root] }) as Accept) : symbols.map((x) => chordAccept(x)),
       skill: opts.skill ?? (opts.answer === 'bass' ? 'ditado-baixo' : 'ditado-progressao'),
@@ -1146,7 +1184,7 @@ export function cadenceChoice(opts: { keys: string[]; kinds: CadenceKind[]; skil
     return {
       prompt: 'Que cadência fecha a frase?',
       detail: `Tom de ${keyName(key)} maior. Preste atenção nos dois últimos acordes.`,
-      listen: { bpm: 72, steps: symbols.map((x, i) => ({ midis: voiced(x, 64), beats: i === symbols.length - 1 ? 3 : 2 })) },
+      listen: { bpm: 72, steps: ledVoicings(symbols).map((v, i) => ({ midis: v, beats: i === symbols.length - 1 ? 3 : 2 })) },
       choices: opts.kinds.map((k) => CADENCE_PT[k]),
       answer: opts.kinds.indexOf(kind),
       hint: `${CADENCE_LEAD[kind].join(' – ')}: ${CADENCE_PT[kind]}.`,
@@ -1165,9 +1203,9 @@ export function playCadence(opts: { keys: string[]; kinds: CadenceKind[]; skill?
     const symbols = romans.map((r) => diatonicSymbol(key, r));
     return {
       prompt: `Toque uma cadência ${kind === 'meia' ? 'meia (semicadência)' : kind} em ${keyName(key)} maior`,
-      detail: 'Os dois acordes, em ordem, qualquer posição.',
+      detail: kind === 'perfeita' ? 'Os dois acordes, em ordem, com a fundamental no baixo (é o que faz a perfeita).' : 'Os dois acordes, em ordem, qualquer posição.',
       hint: `${romans.join(' – ')}: ${symbols.map(chordLabel).join(' – ')}`,
-      steps: symbols.map((x) => chordAccept(x)),
+      steps: symbols.map((x) => chordAccept(x, kind === 'perfeita')),
       skill: opts.skill ?? 'cadencia-tocar',
     };
   };
@@ -1181,7 +1219,7 @@ export function harmonizeAny(opts: { key: string; bars: { notes: Midi[]; cadence
     const romans: Roman[] = bar.cadence ? [bar.cadence] : (['I', 'ii', 'iii', 'IV', 'V', 'vi'] as Roman[]).filter((r) => parseChord(diatonicSymbol(opts.key, r)).pcs.includes(strong));
     const symbols = romans.map((r) => diatonicSymbol(opts.key, r));
     return {
-      prompt: bar.cadence ? 'Último compasso: toque o acorde da cadência' : 'Que acorde cabe embaixo deste compasso? Toque um',
+      prompt: bar.cadence ? 'Fim de frase: toque o acorde da cadência' : 'Que acorde cabe embaixo deste compasso? Toque um',
       detail: bar.cadence ? `Tom de ${keyName(opts.key)} maior. ${bar.cadence === 'I' ? 'A frase termina em casa: cadência perfeita.' : bar.cadence === 'V' ? 'A frase para na dominante: meia cadência.' : 'Fim de frase.'}` : `Tom de ${keyName(opts.key)} maior. Qualquer acorde do campo que contenha a 1ª nota (o tempo forte) serve.`,
       staff: { notes: bar.notes, clef: 'treble' },
       listen: { bpm: 80, steps: bar.notes.map((m) => ({ midis: [m], beats: 1 })) },

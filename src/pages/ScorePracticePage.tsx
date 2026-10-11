@@ -62,6 +62,7 @@ interface Loaded {
   steps: ScoreStep[];
   staffCount: number;
   beatsPerBar: number;
+  clickEvery: number;
   low: Midi;
   high: Midi;
   scoreTempo: number | null;
@@ -226,6 +227,8 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       const high = Math.max(108, maxNote);
       const ts = osmd.Sheet.SourceMeasures[0]?.ActiveTimeSignature;
       const beatsPerBar = ts ? Math.round((ts.Numerator * 4) / ts.Denominator) || 4 : 4;
+      // Compasso composto (6/8, 9/8, 12/8): o clique marca a semínima pontuada, 2 por compasso no 6/8.
+      const clickEvery = ts && ts.Denominator === 8 && ts.Numerator % 3 === 0 ? 1.5 : 1;
       const tempo = osmd.Sheet.DefaultStartTempoInBpm;
       const scoreTempo = tempo > 0 ? Math.round(tempo) : null;
       const total = measureCount(steps);
@@ -233,7 +236,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       else setRange({ from: 1, to: total });
       setBpm(meta.song ? Math.round(meta.song.bpm * 0.8) : (meta.ideal ?? scoreTempo ?? 80));
       setHand('direita');
-      setLoaded({ ...meta, steps, staffCount, beatsPerBar, low, high, scoreTempo });
+      setLoaded({ ...meta, steps, staffCount, beatsPerBar, clickEvery, low, high, scoreTempo });
       if (meta.song) setHand(meta.song.hands);
     })();
     return () => {
@@ -320,7 +323,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
     const plan = timedPlan(loaded.steps, hand, loaded.staffCount, range, bpm);
     if (!plan.stepTimes.length) return;
     // Sem clique, nem a contagem soa: a tela mostra 4, 3, 2, 1 e a cascata mostra quando entrar.
-    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar, volume: listenOnly ? 0.35 : 0.6, pulse: click, countInSound: click });
+    const track = scheduleTrack({ bpm, countIn: loaded.beatsPerBar, beats: plan.beats, beatsPerBar: loaded.beatsPerBar, clickEvery: loaded.clickEvery, volume: listenOnly ? 0.35 : 0.6, pulse: click, countInSound: click });
     if (!track) return;
     // O app toca: tudo (ouvir) ou só a outra mão (acompanhamento).
     const sounding = allNotes.filter((n) => listenOnly || (otherHand && hand !== 'duas' && n.hand !== hand));

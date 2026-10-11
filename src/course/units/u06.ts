@@ -151,7 +151,7 @@ Outro: **E♭m** (Mi♭ menor): Mi♭, **Sol♭** (3ª menor), Si♭. Mais um: *
       title: 'pensar só em teclas',
       body: 'Quem monta acorde só contando semitons acerta as teclas e erra os nomes, e depois não consegue ler a cifra com acidente. Treine o caminho completo: letras primeiro, acidentes depois, teclas por último.',
     },
-    { kind: 'exercise', id: 'l42-soletrar', exercise: items('Soletre a tríade', 'Escolha a grafia correta. Duas opções soam diferente; uma soa igual, mas tem a letra errada.', spellAll, 10, 48, 84, 0.8, 'off') },
+    { kind: 'exercise', id: 'l42-soletrar', exercise: items('Soletre a tríade', 'Escolha a grafia correta. As outras mudam a qualidade do acorde ou trocam a letra de uma nota.', spellAll, 10, 48, 84, 0.8, 'off') },
     { kind: 'exercise', id: 'l42-maiores-menores', exercise: items('Maiores e menores nas 12 tônicas', 'Toque o acorde da cifra com a fundamental embaixo. Inclui as tônicas pretas.', chords12, 16, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l42-dim-aum', exercise: items('Diminutas e aumentadas', 'Duas 3ªs menores ou duas 3ªs maiores sobre a fundamental.', chordsDimAug, 10, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l42-quiz', exercise: quiz('Os quatro tipos', 'Seis perguntas rápidas.', TRIADS) },
@@ -220,7 +220,7 @@ O acorde continua sendo **Dó maior** nos três casos: inversão não muda o nom
       title: 'achar a fundamental de um acorde invertido',
       body: 'Procure o vão de 4ª. Num acorde invertido em posição fechada, a nota logo acima da 4ª é a fundamental: em Mi–Sol–Dó, a 4ª é Sol–Dó, então Dó é a fundamental. Se não houver 4ª (só terças), o acorde está na posição fundamental.',
     },
-    { kind: 'exercise', id: 'l43-inversoes', exercise: items('Inversão pedida', 'Toque o acorde na posição pedida. A nota mais grave é o que conta.', inv1, 14, 48, 84, 0.85) },
+    { kind: 'exercise', id: 'l43-inversoes', exercise: items('Inversão pedida', 'Toque o acorde na posição pedida: todas as notas, com a mais grave conforme a inversão.', inv1, 14, 48, 84, 0.85) },
     {
       kind: 'text',
       title: 'Cifra com barra',
@@ -233,7 +233,7 @@ O acorde continua sendo **Dó maior** nos três casos: inversão não muda o nom
 
 No acompanhamento, quem toca o baixo é a mão esquerda. Então C/E pode ser: **Mi** na esquerda e Dó–Mi–Sol (em qualquer posição) na direita. O que importa é que a nota mais grave de todas seja o Mi.
 
-A barra também aparece com notas que não são do acorde (C/D, por exemplo), mas isso fica para unidades adiante.`,
+A barra também aparece com notas que não são do acorde (C/D, por exemplo), mas isso aparece na lição 48.`,
     },
     { kind: 'exercise', id: 'l43-barra', exercise: items('Cifra com barra', 'Toque o acorde com a nota depois da barra no baixo. Pode usar as duas mãos.', slashChords, 12, 36, 72, 0.85) },
     { kind: 'exercise', id: 'l43-nome', exercise: items('Pelo nome, sem cifra', 'Agora só o nome: "Ré menor na 2ª inversão". Pense em qual nota vai no baixo.', invNamed, 10, 48, 84, 0.85, 'off') },
@@ -244,12 +244,13 @@ A barra também aparece com notas que não são do acorde (C/D, por exemplo), ma
 
 Dó–Mi–Sol · Mi–Sol–Dó · Sol–Dó–Mi · Dó–Mi–Sol (oitava acima), e desce pelo mesmo caminho.
 
-O dedilhado da direita é **1-2-3** na posição fundamental e na 1ª inversão (1-2-5 se a mão for grande) e **1-2-4** ou 1-3-5 na 2ª inversão. A mão salta inteira de uma posição para a outra entre os tempos, sem passagem do polegar: o desafio é o salto chegar **no tempo**, sem quebrar a tercina.`,
+O dedilhado da direita é **1-3-5** na posição fundamental, **1-2-5** na 1ª inversão e **1-3-5** na 2ª inversão. Na esquerda: 5-3-1, 5-3-1 e 5-2-1. A mão salta inteira de uma posição para a outra entre os tempos, sem passagem do polegar: o desafio é o salto chegar **no tempo**, sem quebrar a tercina.`,
     },
     { kind: 'exercise', id: 'l43-quebradas', exercise: quickTimed('Tríades quebradas em tercinas', 'Dó, Fá ou Sol maior, ou Lá menor, sorteado. Mão direita, de 40 a 50 BPM. Duas passadas boas.', (rng) => {
       const c = pick(rng, [{ r: 60, t: 4 }, { r: 65, t: 4 }, { r: 55, t: 4 }, { r: 57, t: 3 }]);
       return melodyTask(brokenInversions(c.r, c.t), { bpm: 40 });
     }, { ladder: { from: 40, to: 50, step: 5 }, window: 80 }) },
+    { kind: 'exercise', id: 'l43-quebradas-me', exercise: quickTimed('Tríades quebradas, mão esquerda', 'Dó maior a partir do Dó2, dedilhado 5-3-1, 5-3-1, 5-2-1, de 40 a 50 BPM.', () => melodyTask(brokenInversions(36, 4), { bpm: 40, clef: 'bass' }), { ladder: { from: 40, to: 50, step: 5 }, window: 80 }) },
     { kind: 'exercise', id: 'l43-quiz', exercise: quiz('Inversões', 'Cinco perguntas rápidas.', INVERSIONS) },
   ],
   review: [inv1, slashChords, choice(INVERSIONS, 'inversoes')],
@@ -271,7 +272,7 @@ const popTimed = (key: string, cycles: number, bpm: number) =>
   twoHandTask(Array(cycles).fill(POP_CLOSE[key].r).join(' | '), Array(cycles).fill(POP_CLOSE[key].l).join(' | '), {
     bpm,
     fifths: POP_CLOSE[key].fifths,
-    caption: `${POP[key].join(' – ')} em ${KEY_PT[key]} maior, posição próxima. A pauta mostra a nota mais grave da direita.`,
+    caption: `${POP[key].join(' – ')} em ${KEY_PT[key]} maior, posição próxima. A pauta mostra os acordes da direita.`,
   });
 
 const l44: Lesson = {
@@ -288,14 +289,14 @@ const l44: Lesson = {
     {
       kind: 'text',
       title: 'A mão que não pula',
-      body: `Toque C, G, Am e F, todos na posição fundamental: a mão pula para cima e para baixo a cada troca, e o som fica "quadrado", com as quatro vozes saltando juntas.
+      body: `Toque C, G, Am e F, todos na posição fundamental: a mão pula para cima e para baixo a cada troca, e o som fica "quadrado", com as três vozes saltando juntas.
 
 Agora pense em cada nota do acorde como uma **voz**, como num coral de três cantores. Cada cantor quer andar **o mínimo possível**. Duas regras resolvem quase tudo:
 
 1. **Notas comuns ficam paradas.** De C (Dó–Mi–Sol) para Am (Lá–Dó–Mi), Dó e Mi estão nos dois acordes: ficam.
-2. **As outras andam por grau conjunto**, para a nota mais perto. O Sol sobe um tom para o Lá. Resultado: **Dó–Mi–Lá**, que é Am na 2ª inversão... e a mão nem se mexeu.
+2. **As outras andam por grau conjunto**, para a nota mais perto. O Sol sobe um tom para o Lá. Resultado: **Dó–Mi–Lá**, que é Am na 1ª inversão (Am/C)... e a mão nem se mexeu.
 
-É assim que pianistas de pop, de igreja e de jazz tocam: as inversões existem justamente para a mão ficar numa região só. Quem dá o "chão" do acorde é o baixo, na mão esquerda.`,
+É assim que pianistas de pop, de igreja e de jazz tocam: as inversões permitem que a mão fique numa região só. Quem dá o "chão" do acorde é o baixo, na mão esquerda.`,
     },
     {
       kind: 'example',
@@ -393,7 +394,7 @@ const COMPOUND: ChoiceQuestion[] = [
   { q: 'No 6/8, o tempo vale…', options: ['Uma semínima pontuada (3 colcheias)', 'Uma semínima', 'Uma colcheia'], answer: 0, why: 'O número de baixo (8) diz colcheia, mas o pulso junta três delas.' },
   { q: 'Os acentos do 6/8 caem…', options: ['Na 1ª e na 4ª colcheia', 'Em todas as colcheias', 'Na 2ª e na 5ª'], answer: 0, why: 'UM-dois-três-QUA-tro-cin... os inícios dos dois grupos.' },
   { q: '9/8 tem…', options: ['3 tempos de semínima pontuada', '9 tempos', '4 tempos e meio'], answer: 0, why: 'Compostos: 6/8 (2), 9/8 (3), 12/8 (4) tempos.' },
-  { q: 'Diferença entre 3/4 e 6/8:', options: ['3/4 tem 3 tempos de semínima; 6/8 tem 2 tempos de semínima pontuada', 'São iguais', '6/8 é mais rápido'], answer: 0, why: 'As duas cabem 6 colcheias, mas agrupadas 2+2+2 (3/4) ou 3+3 (6/8).' },
+  { q: 'Diferença entre 3/4 e 6/8:', options: ['3/4 tem 3 tempos de semínima; 6/8 tem 2 tempos de semínima pontuada', 'São iguais', '6/8 é mais rápido'], answer: 0, why: 'Nos dois cabem 6 colcheias, mas agrupadas 2+2+2 (3/4) ou 3+3 (6/8).' },
 ];
 
 const PATTERNS: ChoiceQuestion[] = [
@@ -435,7 +436,7 @@ const l45: Lesson = {
 
 "Sus" vem de **suspenso**: sem a 3ª, o acorde não é maior nem menor, fica no ar. O ouvido espera a 3ª voltar, e quando ela volta, isso se chama **resolução**: Csus4 → C (o Fá desce meio tom para o Mi).
 
-A suspensão vem da música barroca, em que uma voz "atrasava" a chegada na nota do acorde. No pop, no rock e nas trilhas de cinema e de anime, sus2 e sus4 viraram cor própria, às vezes sem resolver: o som aberto, moderno, de violão e de teclado de trilha.`,
+A suspensão vem do contraponto da Renascença, e o barroco a consagrou: em que uma voz "atrasava" a chegada na nota do acorde. No pop, no rock e nas trilhas de cinema e de anime, sus2 e sus4 viraram cor própria, às vezes sem resolver: o som aberto, moderno, de violão e de teclado de trilha.`,
     },
     {
       kind: 'example',
@@ -453,7 +454,7 @@ A suspensão vem da música barroca, em que uma voz "atrasava" a chegada na nota
 
 **Cadd9** = Dó–Mi–Sol–**Ré**. A 3ª continua lá, então o acorde segue maior, só que com um brilho a mais. Em posição fechada, dá para tocar Dó–Ré–Mi–Sol (o Ré colado no Dó), mas soa melhor com o Ré em cima: Dó–Mi–Sol–Ré, ou com a esquerda no Dó e a direita Mi–Sol–Ré.
 
-Com isso, a **cifra completa das tríades** fica assim, sobre Dó:
+Com isso, a **cifra completa dos acordes desta unidade** fica assim, sobre Dó:
 
 - **C** maior · **Cm** menor · **C°** diminuta · **C+** aumentada
 - **Csus2** · **Csus4** · **Cadd9**
@@ -465,7 +466,7 @@ Com isso, a **cifra completa das tríades** fica assim, sobre Dó:
       title: 'sus com 3ª',
       body: 'Tocar Dó–Mi–Fá–Sol no Csus4 é o erro mais comum: a 3ª e a 4ª juntas viram um choque, não uma suspensão. No sus, a 3ª sai. No add9, ela fica.',
     },
-    { kind: 'exercise', id: 'l45-cifras', exercise: items('Leia a cifra', 'Toque o acorde: sus2, sus4, add9 e alguns com barra. Meta: menos de 2 s por acorde.', colorChords, 14, 48, 84, 0.85, 'fade') },
+    { kind: 'exercise', id: 'l45-cifras', exercise: items('Leia a cifra', 'Toque o acorde: sus2, sus4, add9 e alguns com barra.', colorChords, 14, 48, 84, 0.85, 'fade') },
     { kind: 'exercise', id: 'l45-resolver', exercise: items('Suspenda e resolva', 'Toque o sus e depois a resolução, movendo uma nota só (as outras ficam).', resolveSus, 10, 48, 84, 0.85) },
     {
       kind: 'text',
@@ -476,9 +477,9 @@ Um exemplo de 4 compassos, com a fundamental na esquerda:
 
 - **Csus4 → C** · **Fadd9 → F** · **Gsus4 → G** · **C**
 
-Repare que o Fadd9 não é suspensão (ele tem a 3ª, o Lá), então não precisa resolver; aqui ele "resolve" por gosto, tirando a 9ª. Toque o exemplo no exercício a seguir e depois escreva o seu: escolha 4 acordes de Dó maior (C, Dm, Em, F, G, Am), ponha sus2, sus4 ou add9 em pelo menos dois e resolva cada sus movendo uma nota só.`,
+Repare que o Fadd9 não é suspensão (ele tem a 3ª, o Lá), então não precisa resolver; aqui ele "resolve" por gosto, tirando a 9ª. Toque o exemplo no exercício a seguir e depois escreva o seu: escolha 4 acordes de Dó maior e ponha cor em pelo menos dois, usando só as versões que ficam no tom: Csus2, Csus4, Dsus2, Dsus4, Esus4, Fsus2, Gsus2, Gsus4, Asus2, Asus4, Cadd9, Fadd9 ou Gadd9 e resolva cada sus movendo uma nota só.`,
     },
-    { kind: 'exercise', id: 'l45-exemplo', exercise: quickTimed('O exemplo, no tempo', 'Mínimas na direita, fundamental em semibreve na esquerda, a 66 BPM. Duas passadas boas.', () => twoHandTask(SUS_R, SUS_L, { bpm: 66, caption: 'Csus4 C | Fadd9 F | Gsus4 G | C. A pauta mostra a nota mais grave da direita.' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l45-exemplo', exercise: quickTimed('O exemplo, no tempo', 'Mínimas na direita, fundamental em semibreve na esquerda, a 66 BPM. Duas passadas boas.', () => twoHandTask(SUS_R, SUS_L, { bpm: 66, caption: 'Csus4 C | Fadd9 F | Gsus4 G | C. A pauta mostra os acordes da direita.' }), { reps: 2 }) },
     {
       kind: 'exercise',
       id: 'l45-compor',
@@ -541,7 +542,7 @@ Da mesma família: **9/8** (3 tempos de semínima pontuada) e **12/8** (4 tempos
       title: '6/8 contado em 2',
       steps: [
         { say: 'Seis colcheias, com o acento na 1ª e na 4ª: UM-dois-três, DOIS-dois-três.', play: { bpm: 60, steps: [0.95, 0.45, 0.45, 0.8, 0.45, 0.45, 0.95, 0.45, 0.45, 0.8, 0.45, 0.45].map((v) => ({ midis: [64], beats: 1 / 3, velocity: v })) } },
-        { say: 'O padrão mais típico: semínima + colcheia, duas vezes. Soa como um balanço.', play: { bpm: 60, steps: [{ midis: [64], beats: 2 / 3, velocity: 0.9 }, { midis: [64], beats: 1 / 3, velocity: 0.5 }, { midis: [64], beats: 2 / 3, velocity: 0.8 }, { midis: [64], beats: 1 / 3, velocity: 0.5 }, { midis: [64], beats: 2 / 3, velocity: 0.9 }, { midis: [64], beats: 1 / 3, velocity: 0.5 }, { midis: [64], beats: 1, velocity: 0.8 }] } },
+        { say: 'O padrão mais típico: semínima + colcheia, três vezes, e uma semínima pontuada. Soa como um balanço.', play: { bpm: 60, steps: [{ midis: [64], beats: 2 / 3, velocity: 0.9 }, { midis: [64], beats: 1 / 3, velocity: 0.5 }, { midis: [64], beats: 2 / 3, velocity: 0.8 }, { midis: [64], beats: 1 / 3, velocity: 0.5 }, { midis: [64], beats: 2 / 3, velocity: 0.9 }, { midis: [64], beats: 1 / 3, velocity: 0.5 }, { midis: [64], beats: 1, velocity: 0.8 }] } },
         { say: 'Compare com 3/4, as mesmas seis colcheias agrupadas de duas em duas: UM-e, DOIS-e, TRÊS-e.', play: { bpm: 90, steps: [0.95, 0.45, 0.7, 0.45, 0.7, 0.45, 0.95, 0.45, 0.7, 0.45, 0.7, 0.45].map((v) => ({ midis: [64], beats: 0.5, velocity: v })) } },
       ],
     },
@@ -552,13 +553,13 @@ Da mesma família: **9/8** (3 tempos de semínima pontuada) e **12/8** (4 tempos
       body: 'A colcheia do 6/8 soa como a tercina da lição 39: três notas por tempo. A diferença é só de escrita. Quando a música inteira divide o tempo em três, ela é escrita num compasso composto, em vez de encher a partitura de tercinas.',
     },
     { kind: 'exercise', id: 'l46-ritmo', exercise: quickTimed('Ritmo em 6/8', 'Dois compassos sorteados, tempo de semínima pontuada a 50 BPM. Uma tecla qualquer. Janela de ±60 ms, duas passadas boas.', compoundRhythm(R68, 2, 50), { reps: 2, window: 60 }) },
-    { kind: 'exercise', id: 'l46-pausas', exercise: quickTimed('6/8 com pausas', 'Quatro compassos com pausas, de 50 a 60 BPM.', compoundRhythm([...R68, ...R68_REST], 4, 50), { window: 60, ladder: { from: 50, to: 60, step: 5 } }) },
+    { kind: 'exercise', id: 'l46-pausas', exercise: quickTimed('6/8 com pausas', 'Quatro compassos que podem ter pausas, de 50 a 60 BPM.', compoundRhythm([...R68, ...R68_REST], 4, 50), { window: 60, ladder: { from: 50, to: 60, step: 5 } }) },
     {
       kind: 'text',
       title: 'Acento e balanço',
       body: `O que faz o 6/8 soar como 6/8 é o **acento**: a **1ª colcheia** do compasso é a mais forte e a **4ª** vem logo depois em força. As outras são leves.
 
-Não é tocar "forte e fraco" aos solavancos: é deixar o peso do braço cair no começo de cada grupo e as outras duas notas "rolarem" leves, como as patas de um cavalo a passo.
+Não é tocar "forte e fraco" aos solavancos: é deixar o peso do braço cair no começo de cada grupo e as outras duas notas "rolarem" leves, como um balanço que vai e volta.
 
 O app ainda não mede o acento pela força; ouça você mesmo, gravando-se, e confira na lista do exercício abaixo.
 
@@ -566,7 +567,7 @@ A balada desta lição é **Greensleeves**, uma melodia inglesa do século 16, e
     },
     { kind: 'exercise', id: 'l46-melodias', exercise: quickTimed('Melodias curtas em 6/8', 'Melodia sorteada em Dó, 4 compassos, tempo a 50 BPM. Conte em 2.', (rng) => compoundTask(pick(rng, ROW_68), { bpm: 50 }), { reps: 2, window: 60 }) },
     { kind: 'exercise', id: 'l46-green', exercise: quickTimed('Greensleeves, 4 compassos', 'Mão direita, de 44 a 54 BPM (semínima pontuada).', () => compoundTask(GREEN_4, { bpm: 44 }), { window: 60, ladder: { from: 44, to: 54, step: 5 } }) },
-    { kind: 'song', songId: 'u06-greensleeves', why: 'A balada inteira, com raiz e 5ª na esquerda. No "Tocar a música" o metrônomo bate semínimas (3 por compasso); conte em 2 por dentro.' },
+    { kind: 'song', songId: 'u06-greensleeves', why: 'A primeira parte da balada (8 compassos), com raiz e 5ª na esquerda. No "Tocar a música" o clique marca os 2 tempos de cada compasso, na semínima pontuada.' },
     {
       kind: 'exercise',
       id: 'l46-acento',
@@ -593,7 +594,7 @@ A balada desta lição é **Greensleeves**, uma melodia inglesa do século 16, e
 };
 
 // Padrões da mão esquerda sobre C – G – Am – F.
-const ALT = 'C2 E3+G3 G2 E3+G3 | G2 B2+D3 D2 B2+D3 | A2 C3+E3 E2 C3+E3 | F2 A2+C3 C2 A2+C3';
+const ALT = 'C3 E3+G3 G2 E3+G3 | G2 B2+D3 D2 B2+D3 | A2 C3+E3 E2 C3+E3 | F2 A2+C3 C2 A2+C3';
 const CONT = 'C3:0.5 G3:0.5 C4:0.5 G3:0.5 C3:0.5 G3:0.5 C4:0.5 G3:0.5 | G2:0.5 D3:0.5 G3:0.5 D3:0.5 G2:0.5 D3:0.5 G3:0.5 D3:0.5 | A2:0.5 E3:0.5 A3:0.5 E3:0.5 A2:0.5 E3:0.5 A3:0.5 E3:0.5 | F2:0.5 C3:0.5 F3:0.5 C3:0.5 F2:0.5 C3:0.5 F3:0.5 C3:0.5';
 const BALLAD = 'C2 G2 C3 E3 | G2 D3 G3 B3 | A2 E3 A3 C4 | F2 C3 F3 A3';
 const PAT_R = 'E4+G4+C5:4 | D4+G4+B4:4 | E4+A4+C5:4 | F4+A4+C5:4';
@@ -653,15 +654,15 @@ O exercício a seguir é a canção do projeto desta unidade: 16 compassos com i
       kind: 'callout',
       tone: 'erro',
       title: 'a esquerda mais alta que a melodia',
-      body: 'Padrões de esquerda têm muitas notas, e muitas notas somam volume. Se a melodia some, deixe a esquerda leve (quase p) e a direita cantando (mf). O app ainda não mede esse equilíbrio: confira gravando.',
+      body: 'Padrões de esquerda têm muitas notas, e muitas notas somam volume. Se a melodia some, deixe a esquerda leve (quase p) e a direita cantando (mf). O app mede esse equilíbrio no projeto da unidade (a melodia precisa soar acima da esquerda). Aqui, confira gravando.',
     },
-    { kind: 'exercise', id: 'l47-cancao', exercise: quickTimed('A canção, 16 compassos', 'Melodia na direita, padrões na esquerda, de 60 a 72 BPM. Meta: 90% das notas, mãos juntas em ±50 ms.', () => twoHandTask(SONG_R, SONG_L, { bpm: 60, caption: 'Intro C G · A: C G Am F C G Am F (meio-arpejo) · B: C G Am F (balada) · G C.' }), { window: 50, pass: { accuracy: 0.9 }, ladder: { from: 60, to: 72, step: 6 } }) },
+    { kind: 'exercise', id: 'l47-cancao', exercise: quickTimed('A canção, 16 compassos', 'Melodia na direita, padrões na esquerda, de 60 a 72 BPM. Meta: 90% das notas, cada uma em ±50 ms do tempo.', () => twoHandTask(SONG_R, SONG_L, { bpm: 60, caption: 'Intro C G · A: C G Am F C G Am F (meio-arpejo) · B: C G Am F (balada) · G C.' }), { window: 50, pass: { accuracy: 0.9 }, ladder: { from: 60, to: 72, step: 6 } }) },
     { kind: 'song', songId: 'u06-cancao', why: 'A mesma canção com a partitura completa, a cascata e o modo Estudar.' },
     { kind: 'exercise', id: 'l47-quiz', exercise: quiz('Padrões e lead sheet', 'Quatro perguntas rápidas.', PATTERNS, 0.75) },
   ],
   review: [choice(PATTERNS, 'padroes'), leadAny],
   checkpoint: [
-    quickTimed('16 compassos a 72 BPM', 'A canção inteira, duas mãos, sem dicas. Meta: 90% das notas em ±50 ms.', () => twoHandTask(SONG_R, SONG_L, { bpm: 72 }), { window: 50, pass: { accuracy: 0.9 } }),
+    quickTimed('16 compassos a 72 BPM', 'A canção inteira, duas mãos, sem dicas. Meta: 90% das notas, cada uma em ±80 ms do tempo.', () => twoHandTask(SONG_R, SONG_L, { bpm: 72 }), { window: 80, pass: { accuracy: 0.9 } }),
   ],
   exit: [choice(PATTERNS, 'padroes'), colorChords],
 };
@@ -670,14 +671,14 @@ const BASS_CHROMA: ChoiceQuestion[] = [
   { q: 'Em C – G/B – Am – Am/G, o baixo faz…', options: ['Dó, Si, Lá, Sol: desce por grau conjunto', 'Dó, Sol, Lá, Lá', 'Sobe de Dó a Sol'], answer: 0, why: 'As inversões põem a nota certa no baixo para ele andar em escada.' },
   { q: 'A escala cromática tem…', options: ['Todas as 12 notas, de semitom em semitom', '7 notas', 'Só as pretas'], answer: 0, why: 'Dó, Dó♯, Ré, Ré♯… cada tecla, branca ou preta.' },
   { q: 'Por convenção, a cromática se escreve…', options: ['Com sustenidos subindo e bemóis descendo', 'Só com bemóis', 'Só com sustenidos'], answer: 0, why: 'O acidente aponta a direção: ♯ puxa para cima, ♭ para baixo.' },
-  { q: 'Dedilhado da cromática na direita:', options: ['3 nas pretas, 1 nas brancas, 2 na segunda branca de um par (Mi–Fá, Si–Dó)', '1 2 3 4 5 em sequência', 'Só 2 e 3'], answer: 0, why: 'A mão quase não se move: o 3 fica sobre as pretas e o polegar nas brancas.' },
+  { q: 'Dedilhado da cromática na direita:', options: ['3 nas pretas, 1 nas brancas, 2 em Fá e Dó (subindo e descendo)', '1 2 3 4 5 em sequência', 'Só 2 e 3'], answer: 0, why: 'A mão quase não se move: o 3 fica sobre as pretas e o polegar nas brancas.' },
   { q: 'D/F♯ é…', options: ['Ré maior com Fá♯ no baixo', 'Ré e Fá♯ juntos', 'Fá♯ menor'], answer: 0, why: 'Muito usado entre G e Em: Sol, Fá♯, Mi no baixo.' },
 ];
 
 const DESC_R = 'C4+E4+G4:2 B3+D4+G4:2 | C4+E4+A4:2 C4+E4+A4:2 | C4+F4+A4:2 C4+E4+G4:2 | D4+F4+A4:2 B3+D4+G4:2 | C4+E4+G4:4';
 const DESC_L = 'C3:2 B2:2 | A2:2 G2:2 | F2:2 E2:2 | D2:2 G2:2 | C2:4';
 const DESC_G_R = 'B3+D4+G4:2 A3+D4+F#4:2 | B3+E4+G4:2 B3+E4+G4:2 | C4+E4+G4:2 B3+D4+G4:2 | C4+E4+A4:2 A3+D4+F#4:2 | B3+D4+G4:4';
-const DESC_G_L = 'G2:2 F#2:2 | E2:2 D2:2 | C2:2 B1:2 | A1:2 D2:2 | G1:4';
+const DESC_G_L = 'G3:2 F#3:2 | E3:2 D3:2 | C3:2 B2:2 | A2:2 D3:2 | G2:4';
 const descending = chordSequence({
   sequences: [
     { name: 'Baixo descendo em Dó.', symbols: ['C', 'G/B', 'Am', 'Am/G'] },
@@ -739,9 +740,9 @@ Na escrita, a convenção é **sustenido subindo e bemol descendo**: Dó, Dó♯
 O **dedilhado** é o que torna a cromática fácil:
 
 - **3 em todas as pretas**, **1 em todas as brancas**...
-- ...menos onde há **duas brancas vizinhas** (Mi–Fá e Si–Dó): a segunda delas, na direção em que você vai, leva o **2**.
+- ...menos em **Fá e Dó**, que levam o **2** na direita, subindo e descendo. Na esquerda, o 2 fica em **Mi e Si**.
 
-Na direita, subindo de Dó: 1 3 1 3 1 **2** 3 1 3 1 3 1 **2**. Descendo, a mesma regra: Dó 1, **Si 2**, Si♭ 3, Lá 1... A mão desliza quase sem se abrir; o polegar passa a cada duas notas, então o antebraço precisa acompanhar de lado, bem solto. A esquerda usa a mesma regra, espelhada.`,
+Na direita, subindo de Dó: 1 3 1 3 1 **2** 3 1 3 1 3 1 **2**. Descendo, as mesmas teclas: Dó **2**, Si 1, Si♭ 3, Lá 1, Lá♭ 3, Sol 1, Fá♯ 3, Fá **2**, Mi 1... A mão desliza quase sem se abrir; o polegar passa a cada duas notas, então o antebraço precisa acompanhar de lado, bem solto. A esquerda segue a mesma ideia (3 nas pretas, 1 nas brancas), com o 2 em Mi e Si.`,
     },
     {
       kind: 'callout',
@@ -828,12 +829,12 @@ Dois toques que fazem diferença: troque o pedal a cada acorde (pedal legato) e 
     ],
     rubric: [
       'A canção escrita passou com 90% das notas a 72 BPM.',
-      'No seu arranjo, todos os acordes saíram certos (pelo menos 95%).',
+      'No seu arranjo, pelo menos 95% dos acordes saíram certos.',
       'A direita conduziu as vozes na introdução e no final (sem pular de posição fundamental em posição fundamental).',
       'Dá para ouvir a parte B crescer em relação à parte A.',
       'A melodia ficou mais forte que a esquerda, e o pedal limpo.',
     ],
-    exercise: { kind: 'timed', title: 'A canção, a 72 BPM', how: 'Os 16 compassos com as duas mãos.', gen: () => twoHandTask(SONG_R, SONG_L, { bpm: 72 }), reps: 1, window: 80, pass: { accuracy: 0.9 } },
+    exercise: { kind: 'timed', title: 'A canção, a 72 BPM', how: 'Os 16 compassos com as duas mãos, cada nota em ±50 ms do tempo e a melodia soando acima da esquerda.', gen: () => twoHandTask(SONG_R, SONG_L, { bpm: 72 }), reps: 1, window: 50, pass: { accuracy: 0.9 }, balance: 8 },
   },
   exit: [leadAny, spellAll, choice([...TRIADS, ...INVERSIONS, ...VOICE, ...COLORS])],
 };
@@ -843,7 +844,7 @@ const greensleeves: SongSpec = {
   id: 'u06-greensleeves',
   title: 'Greensleeves',
   composer: 'melodia tradicional inglesa',
-  arrangement: 'arranjo do Fermata: em 6/8, colcheias iguais no lugar das figuras pontuadas, só a primeira frase dupla; raiz e 5ª na esquerda',
+  arrangement: 'arranjo do Fermata: em 6/8, colcheias iguais no lugar das figuras pontuadas, só a primeira parte (8 compassos); raiz e 5ª na esquerda',
   bpm: 81,
   beatsPerBar: 3,
   time: { beats: 6, beatType: 8 },

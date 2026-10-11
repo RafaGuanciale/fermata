@@ -6,25 +6,26 @@ import type { SongSpec } from './types';
 
 const DIV = 12; // divisões por semínima: semicolcheia (3) e colcheia de tercina (4)
 
-const TYPES: [number, string, boolean][] = [
-  [4, 'whole', false],
-  [3, 'half', true],
-  [2, 'half', false],
-  [1.5, 'quarter', true],
-  [1, 'quarter', false],
-  [0.75, 'eighth', true],
-  [0.5, 'eighth', false],
-  [0.25, '16th', false],
+const TYPES: [number, string, number][] = [
+  [4, 'whole', 0],
+  [3.5, 'half', 2],
+  [3, 'half', 1],
+  [2, 'half', 0],
+  [1.5, 'quarter', 1],
+  [1, 'quarter', 0],
+  [0.75, 'eighth', 1],
+  [0.5, 'eighth', 0],
+  [0.25, '16th', 0],
 ];
 
 /** Colcheia de tercina (1/3) ou semínima de tercina (2/3): três no lugar de duas. */
 const isTriplet = (beats: number) => Math.abs(beats * 3 - Math.round(beats * 3)) < 1e-6 && Math.abs(beats * 2 - Math.round(beats * 2)) > 1e-6;
 
-function typeOf(beats: number): { type: string; dot: boolean; triplet: boolean } {
+function typeOf(beats: number): { type: string; dot: number; triplet: boolean } {
   if (isTriplet(beats)) {
     const t = Math.round(beats * 3) === 1 ? 'eighth' : Math.round(beats * 3) === 2 ? 'quarter' : '';
     if (!t) throw new Error(`Duração sem figura: ${beats} tempos`);
-    return { type: t, dot: false, triplet: true };
+    return { type: t, dot: 0, triplet: true };
   }
   const t = TYPES.find(([b]) => Math.abs(b - beats) < 1e-6);
   if (!t) throw new Error(`Duração sem figura: ${beats} tempos`);
@@ -61,13 +62,13 @@ function noteXml(p: ParsedNote, staff: number, voice: number, wholeBar: boolean,
     if (wholeBar) return `<note><rest measure="yes"/><duration>${duration}</duration><voice>${voice}</voice><staff>${staff}</staff></note>`;
     const { type, dot, triplet } = typeOf(p.beats);
     const tup = tuplet ? `<notations><tuplet type="${tuplet}" bracket="yes"/></notations>` : '';
-    return `<note><rest/><duration>${duration}</duration><voice>${voice}</voice><type>${type}</type>${dot ? '<dot/>' : ''}${triplet ? TIME_MOD : ''}<staff>${staff}</staff>${tup}</note>`;
+    return `<note><rest/><duration>${duration}</duration><voice>${voice}</voice><type>${type}</type>${'<dot/>'.repeat(dot)}${triplet ? TIME_MOD : ''}<staff>${staff}</staff>${tup}</note>`;
   }
   const { type, dot, triplet } = typeOf(p.beats);
   return p.spelled
     .map((s, i) => {
       const tup = tuplet && i === 0 ? `<notations><tuplet type="${tuplet}" bracket="yes"/></notations>` : '';
-      return `<note>${i > 0 ? '<chord/>' : ''}${pitchXml(s)}<duration>${duration}</duration><voice>${voice}</voice><type>${type}</type>${dot ? '<dot/>' : ''}${triplet ? TIME_MOD : ''}<staff>${staff}</staff>${tup}</note>`;
+      return `<note>${i > 0 ? '<chord/>' : ''}${pitchXml(s)}<duration>${duration}</duration><voice>${voice}</voice><type>${type}</type>${'<dot/>'.repeat(dot)}${triplet ? TIME_MOD : ''}<staff>${staff}</staff>${tup}</note>`;
     })
     .join('');
 }

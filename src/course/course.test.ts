@@ -572,3 +572,14 @@ describe('progresso do curso', () => {
     expect(warmupItems(UNITS, rowsById([]), pos, seeded(1), 0)).toEqual([]);
   });
 });
+
+describe('vozes conduzidas para o app tocar', () => {
+  it('na perfeita a 7ª desce, a sensível sobe e a tônica fica em cima', async () => {
+    const { ledVoicings } = await import('./gens');
+    const [i, iv, v7, i2] = ledVoicings(['C', 'F', 'G7', 'C']);
+    expect(i).toEqual([48, 64, 67, 72]);
+    expect(iv).toEqual([53, 65, 69, 72]);
+    expect(v7).toEqual([43, 65, 67, 71]);
+    expect(i2).toEqual([48, 64, 67, 72]);
+  });
+});
