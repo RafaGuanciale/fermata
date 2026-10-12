@@ -16,7 +16,7 @@ Uma unidade "em construção" há mais de 3 horas foi abandonada (limite de uso)
 | 9 Leitura clássica e textura | pronta | 2026-10-09 06:13 | rodada agendada; projeto final Minueto em Sol, BWV Anh. 114 |
 | 10 Harmonia cromática | pronta | 2026-10-11 23:35 | rodada agendada; projeto final When the Saints rearmonizada (Clementi ficou de fora) |
 | 11 Brasil ao piano | pronta | 2026-10-12 00:32 | rodada agendada; projeto final Tanguinho (original no estilo de Nazareth; Odeon pendente) |
-| 12 Arranjo, forma e repertório | em construção | 2026-10-12 00:36 | rodada agendada |
+| 12 Arranjo, forma e repertório | em construção | 2026-10-12 03:37 | rodada agendada (retomada: lições 99 e 100) |
 
 ## Diário
 
