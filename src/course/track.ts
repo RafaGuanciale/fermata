@@ -165,7 +165,8 @@ function pentaItem(id: string, keys: Key[], hands: Hands, dur: number, from: num
     gen: (rng) => {
       const k = pick(rng, keys);
       const minor = k.name.includes('menor');
-      const tonic = hands === 'esquerda' ? k.tonic : k.tonic < 60 ? k.tonic + 12 : k.tonic;
+      // lineTask desce uma oitava para a esquerda: a tônica escrita fica na região da direita (Dó4 → toca Dó3).
+      const tonic = hands === 'esquerda' ? (k.tonic < 55 ? k.tonic + 12 : k.tonic) : k.tonic < 60 ? k.tonic + 12 : k.tonic;
       return lineTask(pentachord(tonic, minor ? HARMONIC_MINOR : MAJOR), dur, { bpm: from, hands, fifths: k.fifths, caption: k.name });
     },
     from,
@@ -195,7 +196,7 @@ function arpItem(id: string, keys: Key[], hands: Hands, from: number, target: nu
 const chromaticItem = (from: number, target: number): TechItem => ({
   id: 'cromatica-md',
   title: 'Escala cromática, 1 oitava, mão direita',
-  how: 'Todas as teclas, brancas e pretas, em colcheias. Dedilhado: 3 nas pretas, 1 nas brancas (2 em Mi–Fá e Si–Dó).',
+  how: 'Todas as teclas, brancas e pretas, em colcheias. Dedilhado: 3 nas pretas, 1 nas brancas e 2 em Fá e Dó, subindo e descendo.',
   gen: () => lineTask(scaleUpDown(60, CHROMATIC, 1), 0.5, { bpm: from, hands: 'direita' }),
   from,
   target,

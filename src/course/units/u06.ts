@@ -220,6 +220,12 @@ O acorde continua sendo **Dó maior** nos três casos: inversão não muda o nom
       title: 'achar a fundamental de um acorde invertido',
       body: 'Procure o vão de 4ª. Num acorde invertido em posição fechada, a nota logo acima da 4ª é a fundamental: em Mi–Sol–Dó, a 4ª é Sol–Dó, então Dó é a fundamental. Se não houver 4ª (só terças), o acorde está na posição fundamental.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'baixo errado na inversão',
+      body: 'Na cifra com barra, a nota depois da barra precisa ser a mais grave. C/E com o Dó embaixo não é C/E: é C.',
+    },
     { kind: 'exercise', id: 'l43-inversoes', exercise: items('Inversão pedida', 'Toque o acorde na posição pedida: todas as notas, com a mais grave conforme a inversão.', inv1, 14, 48, 84, 0.85) },
     {
       kind: 'text',
@@ -552,6 +558,12 @@ Da mesma família: **9/8** (3 tempos de semínima pontuada) e **12/8** (4 tempos
       title: 'tercina e 6/8',
       body: 'A colcheia do 6/8 soa como a tercina da lição 39: três notas por tempo. A diferença é só de escrita. Quando a música inteira divide o tempo em três, ela é escrita num compasso composto, em vez de encher a partitura de tercinas.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'contar o 6/8 em seis',
+      body: 'Contar as seis colcheias com o mesmo peso transforma o 6/8 em dois compassos de 3/8. Sinta dois tempos por compasso, com apoio na 1ª e na 4ª colcheia.',
+    },
     { kind: 'exercise', id: 'l46-ritmo', exercise: quickTimed('Ritmo em 6/8', 'Dois compassos sorteados, tempo de semínima pontuada a 50 BPM. Uma tecla qualquer. Janela de ±60 ms, duas passadas boas.', compoundRhythm(R68, 2, 50), { reps: 2, window: 60 }) },
     { kind: 'exercise', id: 'l46-pausas', exercise: quickTimed('6/8 com pausas', 'Quatro compassos que podem ter pausas, de 50 a 60 BPM.', compoundRhythm([...R68, ...R68_REST], 4, 50), { window: 60, ladder: { from: 50, to: 60, step: 5 } }) },
     {
@@ -728,6 +740,12 @@ Essa linha aparece em muita música, do barroco ao pop. Em Sol maior: **G – D/
         { say: 'Com os acordes conduzidos na direita: a mão direita quase não sai do lugar.', play: { bpm: 72, steps: [[48, 60, 64, 67], [47, 59, 62, 67], [45, 60, 64, 69], [43, 60, 64, 69], [41, 60, 65, 69], [40, 60, 64, 67], [38, 62, 65, 69], [43, 59, 62, 67], [36, 60, 64, 67]].map((midis, i) => ({ midis, beats: i === 8 ? 4 : 2 })) } },
       ],
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'o 3 cruzando na cromática',
+      body: 'Na cromática, trocar o 2 de lugar faz o 3 cruzar sobre outro dedo. Fixe: na direita, 2 em Fá e Dó; na esquerda, 2 em Mi e Si.',
+    },
     { kind: 'exercise', id: 'l48-cifras', exercise: items('Cifras com baixo andando', 'Toque cada acorde com a nota da barra no baixo (a esquerda pode tocar o baixo).', descending, 8, 36, 72, 0.85) },
     { kind: 'exercise', id: 'l48-tempo', exercise: quickTimed('Baixo descendente no tempo', 'Mínimas, a direita conduzida e a esquerda descendo, de 60 a 72 BPM. Dó ou Sol maior, sorteado.', (rng) => (rng() < 0.5 ? twoHandTask(DESC_R, DESC_L, { bpm: 60, caption: 'C G/B | Am Am/G | F C/E | Dm G | C' }) : twoHandTask(DESC_G_R, DESC_G_L, { bpm: 60, fifths: 1, caption: 'G D/F♯ | Em Em/D | C G/B | Am D | G' })), { window: 80, ladder: { from: 60, to: 72, step: 6 } }) },
     {
@@ -797,6 +815,12 @@ Dois toques que fazem diferença: troque o pedal a cada acorde (pedal legato) e 
       tone: 'dica',
       title: 'a condução vale para a direita também',
       body: 'Na introdução e no final, quando a direita toca acordes, use as posições conduzidas da lição 44 (Dó–Mi–Sol, Si–Ré–Sol, Dó–Mi–Lá, Dó–Fá–Lá). O exercício abaixo mede isso.',
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'acorde certo, baixo errado',
+      body: 'No lead sheet, a cifra com barra pede o baixo indicado. Tocar o acorde sem ele muda o caminho do baixo que a música desenhou.',
     },
     { kind: 'exercise', id: 'l49-conducao', exercise: items('Condução em 4 tons', 'I–V–vi–IV conduzido em tom sorteado. Meta: 7 de 8.', leadAny, 8, 48, 84, 0.875, 'off') },
     { kind: 'song', songId: 'u06-cancao', why: 'O projeto final: a canção com o arranjo escrito. Depois de passar, toque pelo lead sheet com o seu próprio arranjo.' },

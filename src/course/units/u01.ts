@@ -116,6 +116,12 @@ A distância de um Dó até o próximo Dó se chama **oitava**: são 12 teclas, 
       ],
     },
     {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'tocar com os dedos esticados',
+      body: 'Dedos retos, como pauzinhos, deixam o som duro e cansam o antebraço. Mantenha a mão arredondada, como se segurasse uma laranja pequena, e toque com a ponta do dedo.',
+    },
+    {
       kind: 'exercise',
       id: 'l01-achar',
       exercise: { kind: 'items', title: 'Toque a nota chamada', how: 'O app pede uma nota branca; toque ela em qualquer oitava. Os nomes nas teclas somem quando você acerta 5 seguidas.', gen: findWhite, count: 20, low: LOW, high: HIGH, labels: 'fade', pass: { accuracy: 0.85 } },
@@ -295,6 +301,12 @@ O app mede os dois pelo momento em que você **solta** cada tecla.`,
       title: 'peso, não força',
       body: 'Deixe o braço "pendurado" na ponta do dedo que está tocando, e passe esse peso para o próximo dedo como quem anda: um pé só sai do chão quando o outro já apoiou. É assim que o legato fica natural.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'staccato com o braço inteiro',
+      body: 'No staccato, quem solta a tecla é o dedo e o punho, num gesto curto. Pular com o braço inteiro deixa o tempo irregular e cansa.',
+    },
     { kind: 'exercise', id: 'l03-dedos', exercise: { kind: 'items', title: 'Dedo e nota', how: 'O app diz a mão e o dedo; toque a nota que fica sob ele na posição de Dó.', gen: fingerNote({ hands: ['direita', 'esquerda'] }), count: 12, low: 48, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
     { kind: 'exercise', id: 'l03-legato-md', exercise: quickTimed('Pentacorde legato, mão direita', 'Sobe e desce a 60 BPM, sem buraco entre as notas. Duas passadas boas.', () => melodyTask(PENTA_R, { bpm: 60 }), { reps: 2, articulation: 'legato' }) },
     { kind: 'exercise', id: 'l03-staccato-md', exercise: quickTimed('Pentacorde staccato, mão direita', 'O mesmo trecho, cada nota curta.', () => melodyTask(PENTA_R, { bpm: 60 }), { reps: 2, articulation: 'staccato' }) },
@@ -328,6 +340,12 @@ const l04: Lesson = {
       body: `Toda figura tem uma **pausa** com o mesmo valor: pausa de semínima (1 tempo), de mínima (2 tempos) e de semibreve (4 tempos, ou o compasso inteiro). Na pausa você **solta a tecla e continua contando**. O pulso não para porque o som parou.
 
 Na partitura, a pausa de mínima fica "sentada" sobre a 3ª linha e a de semibreve fica "pendurada" na 4ª. A de semínima parece um raio vertical.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'encurtar a pausa',
+      body: 'A pausa também é tempo contado. O erro comum é encurtá-la e entrar adiantado: conte a pausa baixinho, como se fosse uma nota.',
     },
     { kind: 'exercise', id: 'l04-pausas', exercise: quickTimed('Ritmo com pausas', 'Dois compassos sorteados a 66 BPM. Nas pausas, mão para cima e conte.', randomRhythm(RHYTHMS_REST, 2, 66), { reps: 2 }) },
     {
@@ -385,6 +403,12 @@ const l05: Lesson = {
       body: `Ouvir bem começa pelo mais simples: a melodia **subiu** (ficou mais aguda, para a direita do teclado) ou **desceu** (mais grave, para a esquerda)?
 
 Depois, o tamanho do passo. **Grau conjunto** é ir para a nota vizinha (Dó → Ré). **Salto** é pular pelo menos uma (Dó → Mi). Melodias cantáveis andam quase sempre por grau conjunto, com saltos de vez em quando para dar energia.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'achar que a casa é a última nota',
+      body: 'A casa nem sempre é a última nota que o app toca. Cante a melodia até ela querer parar: a nota de repouso é a casa.',
     },
     { kind: 'exercise', id: 'l05-direcao', exercise: { kind: 'items', title: 'Subiu ou desceu', how: 'Ouça as duas notas e escolha.', gen: direction({ low: 55, high: 79 }), count: 10, low: 55, high: 79, labels: 'off', pass: { accuracy: 0.85 } } },
     { kind: 'exercise', id: 'l05-passo', exercise: { kind: 'items', title: 'Grau conjunto ou salto', how: 'Ouça e escolha.', gen: stepOrLeap({ from: [60, 62, 64, 65, 67, 69] }), count: 10, low: 55, high: 79, labels: 'off', pass: { accuracy: 0.85 } } },
@@ -459,6 +483,12 @@ No **4/4**, o mais comum de todos, são 4 tempos por compasso e a semínima vale
 
 O truque é **contar antes de tocar**: diga "1, 2, 3, 4" uma vez em voz alta e só entre no próximo 1. As duas mãos descem juntas no tempo 1; depois a esquerda só segura.`,
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'adiantar na troca de mão',
+      body: 'Na passagem de uma mão para a outra, a tendência é adiantar. Deixe a mão seguinte já sobre a tecla antes da vez dela.',
+    },
     { kind: 'exercise', id: 'l06-duas', exercise: quickTimed('Semibreve na esquerda, semínimas na direita', 'A pauta mostra a mão direita. A esquerda toca Dó3 no tempo 1 de cada compasso e segura.', (rng) => twoHandTask(pick(rng, PENTA_PATTERNS_R), 'C3:4 | C3:4 | C3:4', { bpm: 66, caption: 'Mão esquerda: Dó3 de semibreve em cada compasso.' }), { reps: 2 }) },
     {
       kind: 'example',
@@ -516,6 +546,12 @@ No piano, o volume nasce da **velocidade com que a tecla desce**, não de quanto
       ],
     },
     { kind: 'callout', tone: 'saude', title: 'forte sem dor', body: 'Se o forte machuca o punho ou o antebraço, a força está vindo dos dedos. Solte o ombro, deixe o braço cair e o dedo só transmitir o peso. Pare se doer.' },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'confundir forte com rápido',
+      body: 'Ao tocar forte, a mão quer correr; ao tocar piano, quer frear. Mude só o volume: o pulso fica igual.',
+    },
     { kind: 'exercise', id: 'l07-faixas', exercise: { kind: 'dynamics', title: 'Na faixa pedida', how: 'O app pede uma nota e um volume. Precisa do piano conectado e calibrado (lição 1).', gen: dynamicsAsks(9), low: 48, high: 72, pass: { accuracy: 0.75 } } },
     { kind: 'exercise', id: 'l07-cresc', exercise: quickTimed('Crescendo no pentacorde', 'Suba o pentacorde da mão direita de p até f, cada nota um pouco mais forte.', () => melodyTask('C4 D4 E4 F4 | G4:4', { bpm: 66 }), { reps: 2, dynamics: 'crescendo' }) },
     { kind: 'exercise', id: 'l07-dim', exercise: quickTimed('Diminuendo na descida', 'Desça de f até p.', () => melodyTask('G4 F4 E4 D4 | C4:4', { bpm: 66 }), { reps: 2, dynamics: 'diminuendo' }) },
@@ -556,6 +592,12 @@ Hoje é dia de juntar tudo. O checkpoint mistura as habilidades das lições 1 a
 No projeto, a mão esquerda toca um ostinato de duas notas nas pretas, **Fá♯2 e Dó♯3**, alternando em semínimas ou mínimas. Por cima, a mão direita faz pergunta e resposta nas pretas, como na lição 4, e termina no Fá♯.
 
 Comece só com a esquerda até ela ficar automática. Depois entre com a direita, devagar.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'parar para corrigir',
+      body: 'No projeto, uma nota errada não é motivo para parar. Siga o pulso do ostinato e entre na próxima frase.',
     },
     {
       kind: 'exercise',

@@ -78,3 +78,21 @@ describe('o dia de treino', () => {
     expect(trainingUnit(null, 9, false)).toBe(1);
   });
 });
+
+describe('registro da mão esquerda no treino', () => {
+  it('pentacordes e escalas da esquerda ficam entre Lá1 e Dó4, na clave de fá', async () => {
+    const { ALL_TRACKS } = await import('./track');
+    const { seeded } = await import('./music');
+    for (const t of ALL_TRACKS) {
+      for (const item of t.technique.filter((x) => /mão esquerda/.test(x.title))) {
+        for (let s = 1; s < 6; s++) {
+          const task = item.gen(seeded(s));
+          const midis = task.events.map((e) => e.midi).filter((m): m is number => m !== null);
+          expect(Math.min(...midis), `${item.title}`).toBeGreaterThanOrEqual(33);
+          expect(Math.min(...midis), `${item.title}`).toBeGreaterThanOrEqual(38);
+          expect(task.clef, item.title).toBe('bass');
+        }
+      }
+    }
+  });
+});

@@ -111,6 +111,12 @@ E uma especial:
         { say: 'Antecipação: sobre G, o Dó chega antes do acorde de Dó.', keys: [72], play: { bpm: 80, steps: [{ midis: [43, 59, 71], beats: 1.5 }, { midis: [72], beats: 0.5 }, { midis: [48, 55, 64, 72], beats: 2 }] } },
       ],
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'chamar toda nota estranha de passagem',
+      body: 'Passagem anda por grau conjunto, em tempo fraco, entre duas notas do acorde. No tempo forte é apojatura; presa do acorde anterior, é retardo.',
+    },
     { kind: 'exercise', id: 'l66-tocar', exercise: items('Toque só as estranhas', 'A pauta mostra a melodia e a cifra mostra o acorde. Toque, em ordem, só as notas que ficam fora do acorde.', strangePlay, 10, 55, 84, 0.85) },
     { kind: 'exercise', id: 'l66-nomear', exercise: items('Que nota estranha é essa?', 'Veja como a nota estranha chega e sai, e escolha o nome.', strangeName, 10, 55, 84, 0.8, 'off') },
     {
@@ -268,6 +274,12 @@ O remédio é o **movimento contrário**: quando o baixo sobe, a direita desce, 
         { say: 'G: Sol no baixo; Ré–Sol–Si. Repare: o baixo sobe (Fá→Sol) e as vozes de cima descem. Movimento contrário, sem paralelas.', keys: [43, 62, 67, 71], play: { bpm: 66, steps: [{ midis: [43, 62, 67, 71], beats: 2 }] } },
         { say: 'C: o Si (sensível) sobe para Dó. A cadência inteira.', play: { bpm: 72, steps: [{ midis: [48, 64, 67, 72], beats: 2 }, { midis: [41, 65, 69, 72], beats: 2 }, { midis: [43, 62, 67, 71], beats: 2 }, { midis: [48, 64, 67, 72], beats: 3 }] } },
       ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'IV → V com a direita subindo',
+      body: 'No IV → V o baixo sobe; se a direita subir junto, aparecem 5ªs e oitavas paralelas. Leve as vozes de cima para baixo.',
     },
     { kind: 'exercise', id: 'l68-consertar', exercise: quiz('Conserte a condução', 'Quatro situações: ache o problema.', PARALLELS, 0.75) },
     { kind: 'exercise', id: 'l68-quatro', exercise: items('I–IV–V–I a quatro vozes', 'Tom sorteado. Baixo na esquerda (a fundamental); três notas na direita, conduzidas (até 2 semitons além do caminho mais curto).', fourVoices, 8, 36, 84, 0.85) },
@@ -455,6 +467,12 @@ Comece devagar, em semicolcheias medidas, e só acelere quando ficar igual. O ex
       title: 'trinado sem aperto',
       body: 'Trinado tenso cansa o antebraço em segundos. Se a mão travar, pare, sacuda o braço e recomece mais devagar. Velocidade no trinado vem de relaxamento, não de força.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'trinado rápido e tenso',
+      body: 'Velocidade no trinado vem da soltura, não da força. Se o antebraço endurecer, vá mais devagar: um trinado lento e igual soa melhor que um rápido e torto.',
+    },
     { kind: 'exercise', id: 'l70-trinado', exercise: quickTimed('Trinado medido', 'Ré–Dó em semicolcheias com giro final, de 48 a 66 BPM. Variação até 30 ms.', () => melodyTask(TRILL, { bpm: 48 }), { ladder: { from: 48, to: 66, step: 6 }, evenness: 30, window: 70 }) },
     { kind: 'exercise', id: 'l70-mordentes', exercise: quickTimed('Mordentes e grupeto', 'Escritos por extenso, a 60 BPM. Os enfeites rápidos e leves, a nota principal cantando.', () => melodyTask(MORDENT, { bpm: 60 }), { reps: 2, window: 80 }) },
     {
@@ -539,6 +557,12 @@ No cânone desta lição, a esquerda entra **2 compassos depois**, duas oitavas 
         { say: 'Primeiro a direita sozinha, depois a esquerda entrando no compasso 3, duas oitavas abaixo.', play: { bpm: 100, steps: [[72], [74], [76], [72], [72], [74], [76], [72], [76, 48], [77, 50], [79, 52], [48], [76, 48], [77, 50], [79, 52], [48]].map((midis) => ({ midis, beats: 1 })) } },
       ],
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'uma voz engolindo a outra',
+      body: 'No cânone, a voz que entra depois tende a sumir. Estude cada mão sozinha cantando a outra, e depois junte prestando atenção nas duas.',
+    },
     { kind: 'exercise', id: 'l71-me', exercise: quickTimed('A esquerda sozinha', 'A melodia uma oitava abaixo, de 72 a 88 BPM.', () => melodyTask(FJ.map(down).join(' | '), { bpm: 72, clef: 'bass' }), { ladder: { from: 72, to: 88, step: 8 } }) },
     { kind: 'exercise', id: 'l71-canone', exercise: quickTimed('O cânone, duas mãos', '10 compassos, de 66 a 84 BPM. Ouça as duas melodias.', () => twoHandTask(CANON_R, CANON_L, { bpm: 66, caption: 'A pauta mostra a direita. A esquerda entra no compasso 3 com a mesma melodia, duas oitavas abaixo.' }), { ladder: { from: 66, to: 84, step: 6 }, window: 80 }) },
     { kind: 'song', songId: 'u09-canone', why: 'O cânone na pauta dupla: dá para ver a imitação.' },
@@ -593,6 +617,12 @@ Juntando as duas mãos, o desenho é: **1** (as duas juntas), **3** (direita), *
       tone: 'dica',
       title: 'pense na mão de três',
       body: 'Pianistas costumam pensar na mão das tercinas como a "melodia" e deixar a de colcheias cair sozinha entre a 2ª e a 3ª nota da tercina. Se tentar contar as duas mãos ao mesmo tempo, o cérebro trava; deixe uma conduzir.',
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'contar o 2 contra 3 com sílabas iguais',
+      body: 'Na grade de 6, as notas caem nas posições 1, 3, 4 e 5, com espaços diferentes entre elas. Conte de 1 a 6 bem devagar, tocando só nessas posições, antes de acelerar.',
     },
     { kind: 'exercise', id: 'l72-poli', exercise: quickTimed('2 contra 3', 'Tercinas na direita, colcheias na esquerda, 8 tempos, de 40 a 56 BPM. Janela de ±50 ms.', () => polyTask(2, 40), { window: 50, ladder: { from: 40, to: 56, step: 4 } }) },
     {
@@ -651,6 +681,12 @@ O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma música 
 - **Compassos 13 a 16**: IV – I – V – I. Termina em **cadência perfeita**: a resposta.
 
 É um **período** (lição 56) de 16 compassos, com antecedente e consequente de 8. Escreva os graus embaixo de cada compasso, circule as notas de passagem e as bordaduras, e marque as duas cadências. Na parte técnica, mantenha o trilho de escalas: a meta da unidade é **92 BPM** em colcheias, mãos juntas.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'regravar até sair perfeito',
+      body: 'Gravar e regravar ensina menos do que gravar, ouvir e anotar onde travou. Use "Estudar os compassos" no trecho fraco e grave de novo depois.',
     },
     { kind: 'song', songId: 'u09-minueto', why: 'O projeto final: toque com as duas mãos até 95% das notas no andamento que escolher (a referência é 96 BPM).' },
   ],

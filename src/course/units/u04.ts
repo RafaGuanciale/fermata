@@ -200,6 +200,12 @@ Um bom teste: a escala deve soar **igual**, sem um "tropeço" no Fá. Os pianist
       title: 'estudar com e sem passagem',
       body: 'Graham Fitch recomenda separar os dois problemas: primeiro toque os grupos de dedos como **blocos** (Dó–Ré–Mi juntos, depois Fá–Sol–Lá–Si–Dó juntos), para a mão aprender as duas posições; depois ligue as notas com a passagem. É o exercício a seguir.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'polegar que chega atrasado',
+      body: 'O polegar não espera a vez dele: já vai passando por baixo enquanto o 3 toca. Se ele só se move na hora, a escala dá um solavanco.',
+    },
     { kind: 'exercise', id: 'l26-blocos', exercise: quickTimed('As duas posições em bloco', 'Mão direita: Dó–Ré–Mi (1 2 3) juntos, depois Fá–Sol–Lá–Si–Dó (1 2 3 4 5) juntos, a 60 BPM. Duas passadas boas.', () => melodyTask(blocksC, { bpm: 60 }), { reps: 2 }) },
     {
       kind: 'example',
@@ -418,6 +424,12 @@ Os nomes não mudam de tonalidade para tonalidade. Em Dó, a dominante é Sol; e
       title: 'por que a sensível puxa',
       body: 'A sensível fica a um semitom da tônica, a menor distância possível. O ouvido, acostumado a ouvir essa nota resolver para cima, sente a falta da tônica quando ela fica parada. É por isso que o V7, que contém a sensível, pede tanto o I.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'confundir mediante e subdominante',
+      body: 'Mediante é o 3º grau (Mi, em Dó); subdominante é o 4º (Fá). Para lembrar: a subdominante fica logo abaixo da dominante.',
+    },
     { kind: 'exercise', id: 'l28-nomes', exercise: { kind: 'items', title: 'O grau pelo nome', how: 'O app diz o nome do grau e a tonalidade; toque a nota, em qualquer oitava.', gen: degreeNames, count: 14, low: 48, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
     {
       kind: 'text',
@@ -560,6 +572,12 @@ O drill clássico usa um encadeamento em que só algumas notas mudam: **I – IV
       tone: 'dica',
       title: 'conte "toca, pé"',
       body: 'Diga em voz alta "toca" no ataque e "pé" logo depois. Comece bem devagar: o drill começa a 50 BPM. Se o app acusar troca antecipada, você está trocando no "toca": espere o som do acorde novo antes de mexer o pé.',
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'trocar o pedal junto com o acorde',
+      body: 'No pedal legato o pé sobe e desce logo depois do acorde novo, não junto com ele. Trocar ao mesmo tempo deixa um buraco no som.',
     },
     { kind: 'exercise', id: 'l30-drill', exercise: quickTimed('Drill do pedal legato', 'I–IV–I–V7–I na mão direita, mínimas de 50 a 56 BPM, pedal legato. Sobe 3 BPM a cada passada boa.', () => melodyTask(PEDAL_DRILL, { bpm: 50 }), { ladder: { from: 50, to: 56, step: 3 }, pedal: 'legato' }) },
     { kind: 'exercise', id: 'l30-canone', exercise: quickTimed('O baixo do Cânone com pedal', 'Mão esquerda: Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá em mínimas, a 60 BPM, trocando o pedal a cada nota. Duas passadas boas.', () => melodyTask(`${CANON_BASS} | D3:4`, { bpm: 60, clef: 'bass', fifths: 2 }), { reps: 2, pedal: 'legato' }) },
@@ -710,6 +728,12 @@ Desenhadas num círculo, como as horas de um relógio, essas tonalidades formam 
 
 No exercício a seguir, a resposta é **tocada**: você vê a armadura e toca a tônica.`,
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'polegar no Si♭',
+      body: 'Na escala de Si♭ maior, o polegar não toca as pretas: ele fica no Dó e no Fá. Começar com o polegar no Si♭ desmonta todo o dedilhado.',
+    },
     { kind: 'exercise', id: 'l32-armaduras', exercise: { kind: 'items', title: 'Armadura → tônica', how: 'O app mostra a armadura; toque a tônica da tonalidade maior, em qualquer oitava.', gen: sigs22, count: 12, low: 48, high: 84, labels: 'off', pass: { accuracy: 0.9 } } },
     {
       kind: 'text',
@@ -781,6 +805,12 @@ Antes de tocar, use 10 segundos para olhar:
 - O **ritmo**: onde estão as mínimas, onde está a semibreve final?
 
 Depois toque no andamento, lendo o desenho (sobe, desce, passo, salto) e não nota por nota. Se errar, siga em frente: o pulso vale mais que a nota.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'gravar sem aquecer',
+      body: 'Começar o recital de mão fria faz a primeira música sair tensa. Toque uma escala lenta e um acorde de cada tom antes de gravar.',
     },
     { kind: 'exercise', id: 'l33-vista', exercise: quickTimed('Primeira vista', 'Melodia nova a cada passada, em Dó, Sol, Fá ou Ré, a 60 BPM. Três passadas boas.', sightGen(60), { reps: 3 }) },
     {

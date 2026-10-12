@@ -630,6 +630,12 @@ O momento crítico é o **tempo 1**: as duas mãos descem **juntas**. Nos outros
       body: 'Se as mãos se perdem, o andamento está alto demais para agora. Baixe 10 BPM e faça duas passadas limpas. Repetir errado grava o erro; repetir certo, mesmo devagar, grava o certo.',
     },
     {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'olhar só para a melodia',
+      body: 'Com as mãos juntas, a esquerda costuma atrasar no tempo 1 porque os olhos estão na direita. Antes de cada compasso, leia o primeiro tempo das duas pautas.',
+    },
+    {
       kind: 'exercise',
       id: 'l14-bordao',
       exercise: quickTimed('Bordão de Dó e leitura na direita', 'A esquerda toca Dó3 no 1 de cada compasso e segura. A direita lê a melodia sorteada, a 60 BPM. Duas passadas boas.', (rng) => twoHandTask(pick(rng, READ_R), 'C3:4 | C3:4 | C3:4 | C3:4', { bpm: 60, caption: 'Mão esquerda: Dó3 de semibreve em cada compasso.' }), { reps: 2 }),
@@ -713,6 +719,12 @@ O outro erro comum: **acelerar** no crescendo e **atrasar** no diminuendo. Volum
         { say: 'Sem direção: todas as notas no mesmo volume.', play: { bpm: 72, steps: [60, 62, 64, 65, 67, 65, 64, 62, 60].map((m, i) => ({ midis: [m], beats: i === 8 ? 2 : 1, velocity: 0.6 })) } },
         { say: 'Com direção: cresce até o Sol e se acomoda no Dó, que sai leve.', play: { bpm: 72, steps: [60, 62, 64, 65, 67, 65, 64, 62, 60].map((m, i) => ({ midis: [m], beats: i === 8 ? 2 : 1, velocity: [0.3, 0.42, 0.54, 0.66, 0.85, 0.68, 0.52, 0.4, 0.28][i] })) } },
       ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'crescendo que acelera',
+      body: 'Crescendo não é acelerar: o volume sobe e o pulso continua o mesmo. Conte junto com o clique enquanto aumenta o som.',
     },
     { kind: 'exercise', id: 'l15-cresc', exercise: quickTimed('Crescendo em 5 notas', 'Suba o pentacorde de p até f, cada nota um pouco mais forte, a 66 BPM. Precisa do piano conectado e calibrado. Quatro passadas boas seguidas.', (rng) => melodyTask(pick(rng, ['C4 D4 E4 F4 | G4:4', 'G4 A4 B4 C5 | D5:4']), { bpm: 66 }), { reps: 4, dynamics: 'crescendo' }) },
     { kind: 'exercise', id: 'l15-dim', exercise: quickTimed('Diminuendo em 5 notas', 'Desça de f até p, sem atrasar. Quatro passadas boas seguidas.', (rng) => melodyTask(pick(rng, ['G4 F4 E4 D4 | C4:4', 'D5 C5 B4 A4 | G4:4']), { bpm: 66 }), { reps: 4, dynamics: 'diminuendo' }) },
@@ -801,6 +813,12 @@ Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de S
         { say: 'Em Dó: polegar no Dó4. Começa no dedo 3 (Mi).', keys: [60, 64], play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62].map((m, i) => ({ midis: [m], beats: i === 14 ? 2 : 1 })) } },
         { say: 'Em Sol: polegar no Sol4, mesmos dedos. Começa no dedo 3 (Si).', keys: [67, 71], play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62].map((m, i) => ({ midis: [m + 7], beats: i === 14 ? 2 : 1 })) } },
       ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'transpor nota por nota',
+      body: 'Traduzir cada nota de Dó para Sol na cabeça trava a leitura. Pense em dedos e desenho: o mesmo dedo, a mesma forma, uma 5ª acima.',
     },
     {
       kind: 'exercise',

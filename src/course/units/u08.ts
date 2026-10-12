@@ -204,6 +204,12 @@ O padrão de qualidades, igual em todos os tons: **7M, m7, m7, 7M, 7, m7, ø**. 
       title: 'tétrades na mão: posição fechada e 5ª opcional',
       body: 'Quatro notas em posição fundamental cabem na mão (1-2-3-5). Nos exercícios de campo, a 5ª pode ficar de fora (ela é a nota que menos muda o som), como no G7 em posição próxima da Unidade 3. Nos meio-diminutos, porém, a 5ª diminuta é o que define o acorde: toque-a.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'confundir 7M e 7',
+      body: 'C7M tem Si; C7 tem Si♭. Na cifra brasileira, o M do 7M é o que separa o acorde do I do acorde de dominante.',
+    },
     { kind: 'exercise', id: 'l59-do', exercise: items('O campo de Dó em tétrades', 'Grau pedido em Dó maior.', field7C, 12, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l59-tons', exercise: items('Seis tons', 'Dó, Sol, Ré, Fá, Si♭ ou Mi♭ maior, grau sorteado.', field7, 16, 48, 72, 0.85) },
     {
@@ -384,6 +390,12 @@ Um teste: grave-se tocando devagar. Se a mão estiver aberta como um leque no mo
       steps: [
         { say: 'Duas oitavas, subindo e descendo, um grupo Dó–Mi–Sol por tempo (tercina).', play: { bpm: 60, steps: [60, 64, 67, 72, 76, 79, 84, 79, 76, 72, 67, 64].map((m) => ({ midis: [m], beats: 1 / 3 })).concat([{ midis: [60], beats: 2 }]) } },
       ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'esticar os dedos no arpejo',
+      body: 'Esticar a mão para alcançar a próxima oitava gera tensão. Deixe o polegar passar e o braço levar a mão para a nova posição.',
     },
     { kind: 'exercise', id: 'l61-quiz', exercise: quiz('Arpejos', 'Três perguntas antes de tocar.', ARP_Q, 0.66) },
     { kind: 'exercise', id: 'l61-do-md', exercise: quickTimed('Dó maior, direita', 'Tercinas, de 44 a 60 BPM. Variação até 35 ms.', () => melodyTask(arpeggio(60, 4), { bpm: 44 }), { ladder: { from: 44, to: 60, step: 4 }, evenness: 35, window: 80 }) },
@@ -571,6 +583,12 @@ O Fá♯ é nota de passagem: use-o entre Fá e Sol, subindo ou descendo, e não
         { say: 'O escorregão Mi♭ → Mi sobre o C7.', keys: [63, 64], play: { bpm: 90, steps: [{ midis: [48, 52, 58, 63], beats: 0.25 }, { midis: [48, 52, 58, 64], beats: 1.75 }, { midis: [48, 52, 58, 60], beats: 2 }] } },
       ],
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'subir e descer a escala inteira',
+      body: 'Improvisar percorrendo a escala de ponta a ponta soa como exercício, não como música. Use três ou quatro notas, repita a ideia e deixe espaço.',
+    },
     { kind: 'exercise', id: 'l63-menor', exercise: { kind: 'improv', title: 'Pentatônica menor sobre o blues', how: '12 compassos a 80 BPM, só Dó, Mi♭, Fá, Sol e Si♭, sobre a base de blues. Frases curtas, final no Dó.', pcs: C_MIN_PENTA, bars: 12, bpm: 80, beatsPerBar: 4, backing: bluesBacking, low: 55, high: 84, pass: { inSet: 0.9, restsPer4: 1, endOn: [0] } } },
     { kind: 'exercise', id: 'l63-escala', exercise: quickTimed('Escala blues de Dó', 'Sobe e desce uma oitava em colcheias, de 60 a 80 BPM.', () => melodyTask('C4:0.5 Eb4:0.5 F4:0.5 F#4:0.5 G4:0.5 Bb4:0.5 C5:0.5 Bb4:0.5 | G4:0.5 F#4:0.5 F4:0.5 Eb4:0.5 C4:2 | C4:4', { bpm: 60 }), { ladder: { from: 60, to: 80, step: 5 } }) },
     { kind: 'exercise', id: 'l63-eco', exercise: items('Licks de blues de ouvido', 'O app toca uma frase curta da escala blues; repita.', echoBlues, 8, 55, 79, 0.8, 'off') },
@@ -641,6 +659,12 @@ const l64: Lesson = {
 4. **Baixo**: ouça a nota mais grave de cada acorde. Com o baixo e o campo, o acorde quase sempre se resolve sozinho.
 
 A melodia vem depois: com a tônica e os graus na cabeça (lição 40), cada nota é um grau.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'tentar tirar tudo de uma vez',
+      body: 'Começar pela melodia inteira trava. Primeiro a casa, depois maior ou menor, depois o baixo; a melodia vem por último, frase por frase.',
     },
     { kind: 'exercise', id: 'l64-tonica', exercise: items('1. Ache a casa', 'O app toca I – IV – V7 em tom sorteado. Toque a tônica.', tonic, 8, 48, 84, 0.85, 'off') },
     { kind: 'exercise', id: 'l64-baixo', exercise: items('4. O baixo', 'O app toca 4 notas graves. Repita nas mesmas teclas.', earBass, 8, 36, 60, 0.8, 'off') },
@@ -727,6 +751,12 @@ O Marco 2 tem as mesmas duas partes do primeiro:
 4. **Ragtime**: **The Entertainer**, o projeto final desta unidade.
 
 Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de cada compasso, as cadências e as funções (T, S, D). Para o Prelúdio, por exemplo: I – ii7 – V7 – I – vi – ... Compare a gravação com a do Marco 1.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'deixar a análise de lado',
+      body: 'A análise escrita é metade do Marco: escrever os graus e as funções é o que transforma a música tocada em conhecimento que serve para a próxima.',
     },
     { kind: 'song', songId: 'u08-entertainer', why: 'O ragtime do recital e o projeto final da unidade. Comece em 56 BPM no modo Estudar.' },
     { kind: 'song', songId: 'u08-blues', why: 'Um blues escrito, para aquecer a forma antes do improviso.' },

@@ -186,6 +186,12 @@ Para **transpor**, faça o caminho de volta no tom novo: vi em Fá maior → 6º
         { say: 'E em Sol: G – Em – Am – D7.', play: { bpm: 80, steps: [[43, 59, 62, 67], [40, 59, 64, 67], [45, 60, 64, 69], [50, 60, 62, 66]].map((midis) => ({ midis, beats: 2 })) } },
       ],
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'maiúscula e minúscula',
+      body: 'Nos graus romanos, maiúscula é acorde maior (IV) e minúscula é menor (ii). Escrever II no lugar de ii troca a qualidade do acorde.',
+    },
     { kind: 'exercise', id: 'l51-transpor', exercise: items('Transponha pelos graus', 'A cifra está em Dó. Analise em graus e toque os mesmos graus no tom pedido.', transpose, 8, 48, 72, 0.85) },
     {
       kind: 'text',
@@ -240,6 +246,12 @@ A grande consequência: **acordes da mesma função podem se substituir**. Onde 
         { say: 'I – ii – V7 – I: o ii no lugar do IV. Mesma função, cor mais suave.', play: { bpm: 72, steps: [[48, 64, 67, 72], [50, 65, 69, 74], [43, 65, 67, 71], [48, 64, 67, 72]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
         { say: 'I – IV – V7 – vi: o vi no lugar do I final. A volta "engana": é tônica, mas não é casa.', play: { bpm: 72, steps: [[48, 64, 67, 72], [41, 65, 69, 72], [43, 65, 67, 71], [45, 64, 69, 72]].map((midis, i) => ({ midis, beats: i === 3 ? 3 : 2 })) } },
       ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'achar que V e V7 têm funções diferentes',
+      body: 'V e V7 têm a mesma função, dominante. O V7 só puxa com mais força para o I por causa do trítono.',
     },
     { kind: 'exercise', id: 'l52-iv-ii', exercise: items('IV ou ii?', 'O app toca I – ? – V7 – I. Diga qual foi o acorde do meio.', subIVii, 8, 48, 72, 0.75, 'off') },
     { kind: 'exercise', id: 'l52-i-vi', exercise: items('I ou vi?', 'Agora a troca na tônica.', subIvi, 8, 48, 72, 0.75, 'off') },
@@ -401,6 +413,12 @@ const l54: Lesson = {
       title: 'por que a Royal Road não cansa',
       body: 'Ela evita o I. O IV e o V preparam uma chegada em casa, mas o iii (que divide duas notas com o I) desvia para o vi. O ouvido fica sempre esperando a resolução, e o loop recomeça antes dela vir. É a mesma ideia da cadência deceptiva, estendida a uma progressão inteira.',
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'não reconhecer uma rotação',
+      body: 'vi–IV–I–V é a mesma progressão de I–V–vi–IV começando em outro ponto. No ouvido, ache primeiro o acorde menor: ele mostra onde a volta começa.',
+    },
     { kind: 'exercise', id: 'l54-baixo', exercise: items('Ditado do baixo', 'Ouça e toque a fundamental de cada acorde. O primeiro acorde pode não ser o I.', popEarBass, 8, 36, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l54-acordes', exercise: items('Ditado dos acordes', 'Ouça e toque os 4 acordes, em ordem.', popEar, 8, 48, 72, 0.85, 'off') },
     {
@@ -483,6 +501,12 @@ O desafio do paralelo é que **os polegares não passam ao mesmo tempo**. Subind
       tone: 'dica',
       title: 'onde as mãos se encontram',
       body: 'Ache os pontos em que as duas usam o mesmo dedo: em Dó maior subindo, os dois polegares coincidem no Dó do meio e o 3 das duas no Mi. Use esses pontos como "âncoras": toque devagar parando neles, depois ligue.',
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'passar os dois polegares juntos',
+      body: 'No movimento paralelo, as mãos não passam o polegar ao mesmo tempo. Tentar sincronizar os polegares faz as duas mãos tropeçarem.',
     },
     { kind: 'exercise', id: 'l55-quiz', exercise: quiz('Dedilhados de 2 oitavas', 'Quatro perguntas, antes de tocar.', SCALE2_Q, 0.75) },
     { kind: 'exercise', id: 'l55-do-md', exercise: quickTimed('Dó maior, 2 oitavas, direita', 'Só a direita, colcheias, de 56 a 72 BPM. Variação até 35 ms.', () => melodyTask(twoOctaves(60, MAJ_ST), { bpm: 56 }), { ladder: { from: 56, to: 72, step: 4 }, evenness: 35 }) },
@@ -648,6 +672,12 @@ Depois de pronta, **analise**: escreva os graus embaixo de cada compasso e as ca
       body: `Além do projeto, a unidade termina com uma música: os 8 primeiros compassos do **Prelúdio em Dó**, BWV 846, de Johann Sebastian Bach (1722). Cada compasso é **um acorde quebrado**, sempre com o mesmo desenho: a esquerda toca o baixo e a nota seguinte e segura; a direita repete três notas de cima, duas vezes.
 
 Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7/B, C, Am/C, D7/C, G/B e C7M/B. Repare no baixo descendo por grau conjunto (Dó, Dó, Si, Dó, Dó, Dó, Si, Si) enquanto os acordes passeiam pelo campo de Dó. Troque o **pedal** a cada compasso, logo depois do baixo.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'nota estranha no tempo forte',
+      body: 'Uma nota fora do acorde no tempo 1 faz a melodia brigar com a harmonia. No tempo forte, uma nota do acorde; as outras ficam nos tempos fracos.',
     },
     { kind: 'exercise', id: 'l57-preludio', exercise: quickTimed('Prelúdio, compassos 1 a 2', 'Os dois primeiros compassos com as duas mãos, a 50 BPM. Duas passadas boas.', () => twoHandTask(PRELUDE_R2, PRELUDE_L2, { bpm: 50, caption: 'C | Dm7/C. A esquerda toca o baixo e a nota seguinte e segura; a direita repete as três notas de cima.' }), { reps: 2 }) },
     { kind: 'song', songId: 'u07-preludio', why: 'A música final da unidade: Bach construiu uma música inteira só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },

@@ -567,6 +567,12 @@ O **acorde menor** é o contrário: **3ª menor embaixo, 3ª maior em cima** (3 
 
 Nos dois casos, da fundamental até a 5ª é uma **5ª justa** (7 semitons). Só a nota do meio muda de lugar. Para conferir uma tríade menor, olhe as pontas (5ª justa) e depois o meio (3 semitons acima da fundamental).`,
     },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'olhar para a tecla atual',
+      body: 'No meio-arpejo, o olho vai para a próxima fundamental enquanto a mão termina o compasso. Olhar para a tecla que está tocando atrasa a troca.',
+    },
     { kind: 'exercise', id: 'l38-triades', exercise: items('Tríades maiores e menores', 'Toque o acorde da cifra com a fundamental embaixo. Inclui tônicas pretas.', triadsAll, 14, 48, 72) },
     {
       kind: 'text',
@@ -853,6 +859,12 @@ O segredo de ouvir graus não é decorar alturas: é sentir **para onde cada not
 - **7**: em maior, a **sensível**: tensão máxima, quer subir meio tom para o 1.
 
 Quando ouvir uma nota, cante por dentro o caminho até a casa. Se ela desce um passo e chega, era o 2. Se sobe meio tom e chega, era o 7.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'responder pela altura',
+      body: 'Em graus de ouvido, não adivinhe a nota pela altura. Ouça a relação com a casa: a nota puxa para cima, como a sensível, ou descansa, como a tônica?',
     },
     { kind: 'exercise', id: 'l40-maior', exercise: items('Os 7 graus em Dó maior', 'Depois da cadência, toque a nota que ouviu, em qualquer oitava.', earMajor7, 14, 55, 79, 0.85, 'off') },
     {
