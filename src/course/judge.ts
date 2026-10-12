@@ -260,6 +260,9 @@ export function ioiSd(task: TimedTask, bpm: number, events: CourseEvent[]): numb
  */
 export const LEGATO_GAP_MS = 80;
 
+/** Fração mínima de passagens certas no legato/staccato. Num pentacorde (8 passagens), aceita um escorregão. */
+export const ARTIC_PASS = 0.85;
+
 function articPairs(task: TimedTask, bpm: number, events: CourseEvent[]): [CourseEvent, CourseEvent][] {
   const matched = matchEvents(task, bpm, events);
   const pairs: [CourseEvent, CourseEvent][] = [];
@@ -574,7 +577,7 @@ export interface TakeChecks {
 /** O que faltou, além do tempo, para a passada valer. Vazio = só o tempo decide. */
 export function takeShortfalls(c: TakeChecks): string[] {
   const out: string[] = [];
-  if (c.artic !== null && c.artic < 0.9) out.push(c.articulation === 'staccato' ? 'o staccato' : 'o legato');
+  if (c.artic !== null && c.artic < ARTIC_PASS) out.push(c.articulation === 'staccato' ? 'o staccato' : 'o legato');
   if (c.dyn !== null && c.dyn < c.need) out.push('a dinâmica');
   if (c.noExtras && c.extras > 0) out.push('tocar sem notas a mais');
   if (c.ped !== null && c.ped < 0.85) out.push('o pedal');

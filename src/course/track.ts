@@ -157,11 +157,16 @@ function scaleItem(id: string, keys: Key[], opts: { octaves: number; dur: number
   };
 }
 
+const ARTIC_HOW = {
+  legato: 'Legato (ligado): solte cada tecla só quando a próxima já estiver descendo, sem silêncio entre as notas.',
+  staccato: 'Staccato (solto): solte cada tecla logo depois de tocar, deixando um silêncio curto antes da próxima.',
+} as const;
+
 function pentaItem(id: string, keys: Key[], hands: Hands, dur: number, from: number, target: number, articulation?: 'legato' | 'staccato'): TechItem {
   return {
     id,
     title: `Pentacorde, ${HAND_LABEL[hands]}${articulation ? `, ${articulation}` : ''}`,
-    how: `Cinco notas subindo e descendo em ${DUR_LABEL[String(dur)]}, em ${keys.map((k) => k.name).join(', ')}. Mão parada, um dedo por tecla.`,
+    how: `Cinco notas subindo e descendo em ${DUR_LABEL[String(dur)]}, em ${keys.map((k) => k.name).join(', ')}. Mão parada, um dedo por tecla.${articulation ? ` ${ARTIC_HOW[articulation]}` : ''}`,
     gen: (rng) => {
       const k = pick(rng, keys);
       const minor = k.name.includes('menor');

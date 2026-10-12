@@ -12,7 +12,7 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
 import { swingBeat } from '../tasks';
-import { articulationScore, balanceScore, takeAftermath, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
+import { ARTIC_PASS, articulationScore, balanceScore, takeAftermath, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
 import { Burst, Combo, PassReward } from '../../celebrate/Celebrate';
@@ -357,7 +357,8 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
           {score.artic !== null && (
             <p className="runner__note">
               {ex.articulation === 'legato' ? 'Legato' : 'Staccato'}: {pct(score.artic)} das passagens certas
-              {score.artic < 0.9 && (ex.articulation === 'legato'
+              {score.artic < ARTIC_PASS && ` (precisa de ${pct(ARTIC_PASS)})`}
+              {score.artic < ARTIC_PASS && (ex.articulation === 'legato'
                 ? `${score.gap !== null && score.gap > LEGATO_GAP_MS ? `. Entre uma nota e outra ficou em média ${Math.round(score.gap)} ms de silêncio` : ''}. Só solte a tecla quando a próxima já estiver descendo.`
                 : '. Solte cada nota logo depois de tocar, como se a tecla estivesse quente.')}
             </p>

@@ -316,7 +316,7 @@ O app mede os dois pelo momento em que você **solta** cada tecla.`,
   ],
   review: [fingerNote({ hands: ['direita', 'esquerda'] }), choice(ARTIC, 'articulacao')],
   checkpoint: [
-    quickTimed('Legato a 72 BPM', 'Pentacorde da mão direita, sem dicas. 85% no tempo e 90% das passagens ligadas.', () => melodyTask(PENTA_R, { bpm: 72 }), { articulation: 'legato' }),
+    quickTimed('Legato a 72 BPM', 'Pentacorde da mão direita, sem dicas. 85% no tempo e 85% das passagens ligadas.', () => melodyTask(PENTA_R, { bpm: 72 }), { articulation: 'legato' }),
     quickTimed('Staccato a 72 BPM', 'O mesmo, com notas curtas.', () => melodyTask(PENTA_R, { bpm: 72 }), { articulation: 'staccato' }),
     quickTimed('Mão esquerda a 66 BPM', 'Pentacorde da mão esquerda, legato.', () => melodyTask(PENTA_L, { bpm: 66, clef: 'bass' }), { articulation: 'legato' }),
   ],
