@@ -466,6 +466,281 @@ Desacelerar no fim (*ritardando*) vale para os três. O app não mede o ritardan
   exit: [turnaround, choice(ARR_Q.slice(3), 'arranjo')],
 };
 
+const TECH_Q: ChoiceQuestion[] = [
+  { q: 'Quantas semicolcheias cabem num tempo de semínima?', options: ['4', '2', '3'], answer: 0, why: 'Semicolcheia = 1/4 de tempo. Conte "1 e a e".' },
+  { q: 'O dedilhado de Dó maior em 2 oitavas na direita é…', options: ['1-2-3-1-2-3-4-1-2-3-1-2-3-4-5', '1-2-3-4-1-2-3-1-2-3-4-1-2-3-4', '1-2-3-1-2-3-1-2-3-1-2-3-1-2-3'], answer: 0, why: 'Duas vezes 1-2-3 + 1-2-3-4, e o 5 só na última nota.' },
+  { q: 'Em Fá maior, na direita, o 4º dedo cai…', options: ['No Si♭', 'No Fá', 'No Dó'], answer: 0, why: 'Fá maior: 1-2-3-4 (Fá, Sol, Lá, Si♭), depois o polegar no Dó.' },
+  { q: 'A meta de uniformidade da lição (IOI-SD) é…', options: ['Abaixo de 25 ms', 'Abaixo de 100 ms', 'Exatamente 0 ms'], answer: 0, why: 'É o nível intermediário do PLANO: perto do limite em que o ouvido percebe a nota fora do lugar.' },
+  { q: 'No platô (o andamento não sobe), o que ajuda?', options: ['Variantes rítmicas: pontuado longo-curto e curto-longo, rajadas de 4 notas', 'Tocar mais forte', 'Estudar só no andamento máximo'], answer: 0, why: 'Mudar o ritmo obriga a mão a organizar os movimentos; depois, o reto sai mais igual.' },
+];
+
+const PEDAL_Q: ChoiceQuestion[] = [
+  { q: 'O meio pedal é…', options: ['Abaixar o pedal só em parte, para segurar menos ressonância', 'Usar o pedal da esquerda', 'Trocar o pedal duas vezes'], answer: 0, why: 'Os abafadores encostam de leve nas cordas. Só funciona se o piano mandar o pedal em valores contínuos.' },
+  { q: 'O "flutter" (pedal tremido) serve para…', options: ['Limpar um pouco o som sem cortar tudo', 'Tocar mais alto', 'Afinar o piano'], answer: 0, why: 'Trocas rápidas e curtas tiram parte da lama e deixam o baixo soando.' },
+  { q: 'Una corda é…', options: ['O pedal da esquerda: som mais suave e velado', 'O pedal do meio', 'Tocar uma nota só'], answer: 0, why: 'No piano acústico, os martelos se deslocam e batem em menos cordas.' },
+  { q: 'No pedal legato, o pedal sobe…', options: ['Logo depois do ataque do acorde novo, e desce em seguida', 'Antes do acorde novo', 'Só no fim da música'], answer: 0, why: 'Subir antes deixa um buraco; subir muito depois mistura as harmonias.' },
+  { q: 'Num arpejo com o baixo na esquerda, o pedal troca…', options: ['Quando muda a harmonia (no baixo novo)', 'A cada nota do arpejo', 'Nunca'], answer: 0, why: 'O pedal segura o acorde inteiro; ele troca com a harmonia, não com cada nota.' },
+];
+
+const ROMANTIC_Q: ChoiceQuestion[] = [
+  { q: 'Rubato é…', options: ['Esticar e devolver o tempo, com a pulsação de fundo preservada', 'Tocar sempre mais devagar', 'Tocar sem metrônomo e sem pulso'], answer: 0, why: '"Tempo roubado": o que se atrasa num lugar se recupera em outro. A esquerda fica mais estável que a direita.' },
+  { q: 'Voicing de melodia interna é…', options: ['Fazer soar mais a nota do meio do acorde, quando ela é a melodia', 'Tocar só a nota de cima', 'Tocar o acorde arpejado'], answer: 0, why: 'O peso vai para o dedo que tem a melodia; os outros tocam mais leves.' },
+  { q: 'A escala de tons inteiros tem…', options: ['6 notas, todas a um tom de distância', '7 notas com um semitom', '5 notas'], answer: 0, why: 'Dó, Ré, Mi, Fá♯, Sol♯, Lá♯ (Si♭). Sem semitons, ela não tem centro forte: soa como sonho.' },
+  { q: 'Acordes paralelos, no impressionismo, são…', options: ['O mesmo tipo de acorde deslizando junto, sem condução', 'Acordes com 5ªs proibidas no coral', 'Acordes de uma nota só'], answer: 0, why: 'Debussy usava a "regra proibida" de propósito, como cor.' },
+  { q: 'O Prelúdio Op. 28 nº 4 de Chopin e a Gnossienne nº 1 de Satie…', options: ['São de domínio público e ficam como próximos passos com partitura', 'São protegidos', 'Não existem para piano'], answer: 0, why: 'Chopin morreu em 1849 e Satie em 1925. O app usa um prelúdio original no lugar até entrar a partitura.' },
+];
+
+/** Escala de tons inteiros a partir de uma tônica: 6 notas e a oitava. */
+function wholeTone(opts: { tonics: Midi[] }): ItemGen {
+  return (rng) => {
+    const t = pick(rng, opts.tonics);
+    const ms = [0, 2, 4, 6, 8, 10, 12].map((x) => t + x);
+    return {
+      prompt: `Toque a escala de tons inteiros a partir de ${PT[t % 12]}, subindo`,
+      detail: 'Seis notas, todas a um tom de distância, e a oitava.',
+      hintKeys: ms,
+      hint: ms.map((m) => PT[m % 12]).join(', '),
+      steps: ms.map((m) => ({ kind: 'exact', midis: [m] }) as const),
+      skill: 'tons-inteiros',
+    };
+  };
+}
+const PT = ['Dó', 'Dó♯', 'Ré', 'Ré♯', 'Mi', 'Fá', 'Fá♯', 'Sol', 'Sol♯', 'Lá', 'Lá♯', 'Si'];
+const wholeToneGen = wholeTone({ tonics: [60, 62, 61, 65] });
+const parallel = chordSequence({
+  sequences: [
+    { name: 'Tríades maiores paralelas, subindo um tom.', symbols: ['C', 'D', 'E', 'D', 'C'] },
+    { name: 'Tétrades 7M paralelas, descendo.', symbols: ['E7M', 'D7M', 'C7M'] },
+    { name: 'Tríades paralelas em tons inteiros.', symbols: ['F', 'G', 'A', 'B'] },
+  ],
+});
+const sevenths = playChord({ symbols: ['C7M', 'Dm7', 'G7', 'Am7', 'F7M', 'Bm7(b5)', 'Eb7M', 'Ab7', 'F#m7', 'B7', 'Bbm7', 'Db7M', 'E7', 'Gm7'], low: 48, high: 84, skill: 'tetrade-rapida' });
+
+/** Arpejo na direita sobre o baixo na esquerda (um por compasso), para o pedal legato. */
+function pedalArp(bpm: number): () => TimedTask {
+  const bars: [string, string][] = [
+    ['C4 E4 G4 C5 G4 E4 C4 E4', 'C2:4'], ['A3 C4 E4 A4 E4 C4 A3 C4', 'A2:4'], ['A3 C4 F4 A4 F4 C4 A3 C4', 'F2:4'], ['B3 D4 F4 G4 F4 D4 B3 D4', 'G2:4'],
+    ['C4 E4 G4 C5 G4 E4 C4 E4', 'C2:4'], ['C4 F4 A4 C5 A4 F4 C4 F4', 'F2:4'], ['B3 D4 G4 B4 G4 D4 B3 D4', 'G2:4'], ['C4 E4 G4 C5 r:2', 'C2:4'],
+  ];
+  const r = bars.map(([x]) => x.split(' ').map((t) => (t.includes(':') ? t : `${t}:0.5`)).join(' ')).join(' | ');
+  return () => twoHandTask(r, bars.map(([, l]) => l).join(' | '), { bpm, caption: 'C | Am | F | G7 | C | F | G | C. Arpejo em colcheias na direita; troque o pedal a cada baixo novo.' });
+}
+
+const l93: Lesson = {
+  n: 93,
+  id: 'l93',
+  title: 'Técnica intermediária',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar escalas maiores de 2 oitavas mãos juntas em semicolcheias a 50 BPM, com variação abaixo de 25 ms.',
+    'Consigo tocar arpejos maiores de 2 oitavas mãos juntas em colcheias.',
+    'Consigo montar tétrades em qualquer tom em menos de 3 s.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Semicolcheias',
+      body: `A **semicolcheia** vale um quarto de tempo: quatro cabem numa semínima. Na pauta ela tem **duas bandeirolas** (ou duas barras ligando o grupo). Conte "**1** e a e **2** e a e".
+
+A 50 BPM em semicolcheias você toca 200 notas por minuto, mais de 3 por segundo. Parece pouco, mas com as duas mãos, 2 oitavas e passagens de polegar em lugares diferentes em cada mão, é o primeiro andamento "de verdade" das escalas.
+
+A meta do PLANO para o nível intermediário é a **uniformidade**: a variação entre as notas (IOI-SD) abaixo de **25 ms**, perto do limite em que o ouvido percebe uma nota fora do lugar.`,
+    },
+    {
+      kind: 'text',
+      title: 'Dedilhados de 2 oitavas',
+      body: `Dó, Sol e Ré maior usam o mesmo dedilhado:
+
+- **direita**: 1-2-3-1-2-3-4-1-2-3-1-2-3-4-**5** (o 5 só na nota mais aguda);
+- **esquerda**: **5**-4-3-2-1-3-2-1-4-3-2-1-3-2-1 (o 5 só na nota mais grave).
+
+Fá maior muda a direita, porque o polegar não pode cair no Si♭: **1-2-3-4**-1-2-3-**1-2-3-4**-1-2-3-4. A esquerda de Fá é a de Dó.
+
+Mãos juntas, os polegares **não passam juntos**: em Dó, subindo, a direita passa no Fá e a esquerda no Sol. Treine devagar o ponto em que uma mão passa e a outra não. É ali que a escala desencontra.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'acentuar a passagem do polegar',
+      body: 'O polegar é pesado e cai com força, e a nota depois dele sai atrasada. O resultado é um "galope" a cada passagem. Prepare o polegar antes (ele já viaja por baixo da mão durante as notas anteriores) e deixe ele cair leve, sem bater.',
+    },
+    {
+      kind: 'callout',
+      tone: 'saude',
+      title: 'velocidade sem tensão',
+      body: 'Escalas rápidas cansam o antebraço. Faça séries de 3 a 5 minutos e alterne com outra coisa. Se o punho ou o antebraço doer, pare e baixe o andamento no dia seguinte: a escada sobe sozinha quando a mão está solta.',
+    },
+    { kind: 'exercise', id: 'l93-escalas', exercise: quickTimed('Escalas de 2 oitavas em semicolcheias', 'Mãos juntas, tom sorteado (Dó, Sol, Ré ou Fá). De 44 até 60 BPM; variação abaixo de 25 ms.', (rng) => scale16(rng, 44), { ladder: { from: 44, to: 60, step: 4 }, evenness: 25 }) },
+    {
+      kind: 'text',
+      title: 'Platô: ritmos para destravar',
+      body: `Quando o andamento para de subir, não insista no mesmo tempo. Fitch e outros professores sugerem **variantes rítmicas**:
+
+- **pontuado** longo-curto, depois curto-longo;
+- **rajadas**: quatro notas rápidas e uma parada, mudando o lugar da parada.
+
+Cada variante obriga a mão a organizar um trecho diferente. Depois de duas ou três variantes, o ritmo reto sai mais igual. O metrônomo continua no mesmo andamento.`,
+    },
+    {
+      kind: 'text',
+      title: 'Arpejos mãos juntas',
+      body: `O arpejo maior de 2 oitavas usa os dedos 1-2-3 da direita (1-2-3-1-2-3-**5** subindo, em Dó) e 5-4-2-1 da esquerda (**5**-4-2-1-4-2-1). O polegar passa por baixo do 3º dedo (direita) ou o 3º/4º dedo cruza por cima do polegar (esquerda), num salto maior que na escala.
+
+Mantenha o **punho na altura** e deixe o braço levar a mão para o lado. Em colcheias, comece a 56 BPM.`,
+    },
+    { kind: 'exercise', id: 'l93-arpejos', exercise: quickTimed('Arpejos de 2 oitavas', 'Mãos juntas, colcheias, tom sorteado. De 56 até 72 BPM.', (rng) => arp8(rng, 56), { ladder: { from: 56, to: 72, step: 4 }, evenness: 30 }) },
+    { kind: 'exercise', id: 'l93-tetrades', exercise: items('Acordes de 4 notas, rápido', '14 tétrades em tons variados. Média abaixo de 3 s.', sevenths, 14, 48, 84, 0.85, 'off', 3000) },
+    { kind: 'exercise', id: 'l93-quiz', exercise: quiz('Técnica', 'Responda sem tocar.', TECH_Q) },
+  ],
+  review: [sevenths, choice(TECH_Q, 'tecnica')],
+  checkpoint: [
+    quickTimed('Escala a 50 BPM', 'Uma escala sorteada, mãos juntas, semicolcheias a 50 BPM. Meta: 85% das notas e variação abaixo de 25 ms.', (rng) => scale16(rng, 50), { evenness: 25 }),
+    quickTimed('Arpejo a 60 BPM', 'Um arpejo sorteado, mãos juntas, colcheias a 60 BPM.', (rng) => arp8(rng, 60), { evenness: 30 }),
+  ],
+  exit: [sevenths, choice(TECH_Q, 'tecnica')],
+};
+
+const l94: Lesson = {
+  n: 94,
+  id: 'l94',
+  title: 'Pedal avançado',
+  minutes: 60,
+  objectives: [
+    'Consigo trocar o pedal legato em arpejos, a cada baixo novo, com 85% das trocas no alvo.',
+    'Consigo explicar meio pedal, flutter e una corda e testar se o meu piano envia cada um.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Pedal em arpejos',
+      body: `Na unidade 4 você aprendeu o **pedal legato**: o pedal sobe logo depois do acorde novo e desce de novo, sem buraco e sem misturar harmonias. Em acordes cheios, o ouvido aceita uma troca um pouco atrasada. Em **arpejos**, não: cada nota do arpejo é uma camada a mais de som, e um atraso de meio tempo mistura duas harmonias inteiras.
+
+A regra: **o pedal troca com o baixo**, não com cada nota. Num arpejo sobre C | Am | F | G7, são quatro trocas, uma em cada baixo novo, no tempo 1. As notas do arpejo dentro do compasso ficam todas no mesmo pedal.
+
+Ouça o fim de cada compasso: se o acorde novo chega "sujo", a troca atrasou; se há um instante seco, ela adiantou.`,
+    },
+    {
+      kind: 'example',
+      title: 'Arpejo com o baixo',
+      steps: [
+        { say: 'C: baixo Dó2 e o arpejo Dó–Mi–Sol–Dó na direita. O pedal segura tudo.', play: { bpm: 66, steps: [{ midis: [n('C2'), n('C4')], beats: 0.5 }, ...[n('E4'), n('G4'), n('C5'), n('G4'), n('E4'), n('C4'), n('E4')].map((m) => ({ midis: [m], beats: 0.5 }))] } },
+        { say: 'Am: baixo novo, pedal troca **logo depois** do Lá2.', play: { bpm: 66, steps: [{ midis: [n('A2'), n('A3')], beats: 0.5 }, ...[n('C4'), n('E4'), n('A4'), n('E4'), n('C4'), n('A3'), n('C4')].map((m) => ({ midis: [m], beats: 0.5 }))] } },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'trocar o pedal junto com o baixo',
+      body: 'Subir e descer o pedal **no mesmo instante** do baixo novo apaga o baixo: ele soa sem o pedal e morre. O pé sobe **depois** que o baixo soou (um piscar de olhos) e desce em seguida. Pé atrasado em relação à mão: é esse o movimento.',
+    },
+    { kind: 'exercise', id: 'l94-arpejo', exercise: quickTimed('Pedal legato no arpejo', 'Arpejo na direita, baixo na esquerda, a 60 BPM. Troque o pedal a cada baixo novo.', pedalArp(60), { pedal: 'legato', reps: 2 }) },
+    {
+      kind: 'text',
+      title: 'Meio pedal, flutter e una corda',
+      body: `Três recursos do repertório romântico e impressionista:
+
+- **Meio pedal**: abaixar o pedal só em parte. Os abafadores encostam de leve nas cordas: os agudos se limpam e o baixo continua soando.
+- **Flutter** (pedal tremido): trocas rápidas e curtas, que tiram parte da lama sem cortar o som. Útil em passagens cromáticas com pedal.
+- **Una corda**: o pedal da **esquerda**. No piano acústico, os martelos batem em menos cordas, e o som fica mais suave e velado. É uma cor, não um "volume baixo".
+
+No piano digital, cada um depende do que o instrumento envia: o pedal de sustentação em **valores contínuos** (de 0 a 127) permite meio pedal; o una corda chega como outro controle (CC67). O app ainda mede só o pedal de sustentação ligado ou desligado, então o meio pedal e o una corda ficam na escuta e na gravação.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l94-teste',
+      exercise: {
+        kind: 'checklist',
+        title: 'O que o seu piano faz',
+        how: 'Teste no seu piano, com o som dele (não o do app), e marque o que funciona.',
+        items: ['Meio pedal: abaixando o pedal até a metade, o som fica mais curto que com o pedal inteiro.', 'Flutter: com trocas rápidas, o baixo continua soando e os agudos se limpam.', 'Una corda: o pedal da esquerda deixa o som mais suave (se o piano tiver o pedal).', 'Sei qual dos três vou usar no Prelúdio da próxima lição.'],
+      },
+    },
+    { kind: 'exercise', id: 'l94-quiz', exercise: quiz('Pedal', 'Responda sem tocar.', PEDAL_Q) },
+  ],
+  review: [choice(PEDAL_Q, 'pedal')],
+  checkpoint: [
+    quickTimed('Pedal no arpejo', 'Os 8 compassos a 66 BPM, sem dicas. Meta: 85% das notas e das trocas de pedal no alvo.', pedalArp(66), { pedal: 'legato' }),
+  ],
+  exit: [choice(PEDAL_Q, 'pedal')],
+};
+
+const l95: Lesson = {
+  n: 95,
+  id: 'l95',
+  title: 'Romântico e impressionista',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar o Prelúdio em Mi menor com a melodia acima dos acordes da esquerda e 95% das notas.',
+    'Consigo explicar rubato, voicing de melodia interna e pedal como cor.',
+    'Consigo tocar a escala de tons inteiros e acordes paralelos.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O piano romântico: cantar',
+      body: `No século XIX o piano virou o instrumento que **canta**. Chopin pedia aos alunos que ouvissem cantores de ópera. Três ideias resumem o estilo:
+
+- **Melodia acima de tudo**: a direita canta e a esquerda acompanha mais leve, mesmo quando toca acordes cheios.
+- **Rubato**: o "tempo roubado". A melodia estica uma nota e recupera depois, enquanto a pulsação de fundo continua. A descrição clássica, atribuída a Chopin: a esquerda é o maestro, que segura o tempo; a direita é o cantor, que respira.
+- **Pedal**: segura as harmonias e liga o que a mão não alcança.
+
+O Prelúdio Op. 28 nº 4 de Chopin, em Mi menor, é o exemplo perfeito: uma melodia quase parada sobre acordes repetidos que descem por meio tom. Ele é de domínio público e fica como próximo passo com a partitura; aqui você toca um **prelúdio original** com a mesma textura.`,
+    },
+    {
+      kind: 'text',
+      title: 'O Prelúdio em Mi menor',
+      body: `A esquerda toca **acordes de 3 notas em colcheias**, oito por compasso. A cada compasso uma nota desce meio tom: Em (Sol–Si–Mi), B7/Ré♯ (Fá♯–Lá–Ré♯), Em7 (Sol–Si–Ré), C♯ø (Sol–Si–Dó♯), C7M (Sol–Si–Dó)… É **condução de vozes** em câmera lenta, a da unidade 6.
+
+A direita canta notas longas: Si, Dó, Si… A melodia quase não se move; quem dá o movimento é a harmonia por baixo.
+
+Toque a esquerda **pianíssimo** e igual, como uma respiração. A direita fica por cima, sem força. O app mede o equilíbrio: a direita acima da esquerda em 80% dos compassos.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l95-esquerda',
+      exercise: quickTimed('Os acordes da esquerda', 'Só a esquerda, compassos 1 a 4, a 50 BPM. Acordes iguais e leves.', () => melodyTask(PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 50, fifths: 1, caption: 'Em | B7/D♯ | Em7 | C♯ø: uma nota desce meio tom a cada compasso.' }), { reps: 2 }),
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'rubato sem pulso',
+      body: 'Rubato não é tocar "do jeito que der". Se a esquerda também estica, a música perde o chão. Primeiro toque o Prelúdio **no metrônomo**, igual; só depois deixe a direita respirar, com a esquerda firme.',
+    },
+    {
+      kind: 'exercise',
+      id: 'l95-maos',
+      exercise: quickTimed('Prelúdio, compassos 1 a 4', 'Mãos juntas, a 46 BPM. A melodia acima dos acordes.', () => twoHandTask(PREL_R.slice(0, 4).join(' | '), PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 46, fifths: 1, caption: 'Esquerda: acordes em colcheias, Em | B7/D♯ | Em7 | C♯ø.' }), { reps: 2, balance: 8 }),
+    },
+    { kind: 'song', songId: 'u12-preludio', why: 'A música da lição: melodia longa sobre acordes repetidos que descem por meio tom.' },
+    {
+      kind: 'text',
+      title: 'Melodia interna',
+      body: `Às vezes a melodia não está em cima: está **no meio** do acorde. Para ela aparecer, o dedo que a toca desce com mais velocidade, e os outros dedos da mesma mão tocam mais leves. É o **voicing**: escolher o peso de cada nota de um acorde.
+
+Treine assim: toque o acorde Sol–Si–Mi na direita, fazendo o Si soar mais que os outros dois. Depois o Mi, depois o Sol. Grave e escute: a nota escolhida tem de sobressair. O app ainda não mede o peso dentro da mesma mão; a gravação é o juiz.`,
+    },
+    {
+      kind: 'text',
+      title: 'Impressionismo: o pedal como cor',
+      body: `No fim do século XIX, Debussy e Ravel usaram o piano como pintura: em vez de linhas que conduzem, **manchas de cor**. Três recursos:
+
+- **Escala de tons inteiros**: seis notas, todas a um tom (Dó, Ré, Mi, Fá♯, Sol♯, Lá♯). Sem semitons, sem sensível: nenhuma nota puxa para casa, e o som flutua.
+- **Acordes paralelos**: o mesmo acorde deslizando junto (C, D, E), sem condução, de propósito. As 5ªs paralelas que o coral evita viram cor.
+- **Pedal longo**: segurar o pedal sobre várias harmonias para misturá-las, como aquarela.
+
+Satie (Gymnopédies, Gnossiennes) fica no meio do caminho: harmonias paradas, sem pressa de resolver. É o estilo do projeto final.`,
+    },
+    { kind: 'exercise', id: 'l95-tons', exercise: items('Escala de tons inteiros', 'Toque a escala de tons inteiros a partir da nota pedida, subindo.', wholeToneGen, 6, 48, 84, 0.85, 'fade') },
+    { kind: 'exercise', id: 'l95-paralelos', exercise: items('Acordes paralelos', 'Toque os acordes em ordem, deslizando a mão inteira.', parallel, 4, 48, 84, 0.75, 'fade') },
+    { kind: 'exercise', id: 'l95-quiz', exercise: quiz('Romântico e impressionista', 'Responda sem tocar.', ROMANTIC_Q) },
+  ],
+  review: [wholeToneGen, choice(ROMANTIC_Q, 'romantico')],
+  checkpoint: [
+    quickTimed('Prelúdio em Mi menor inteiro', 'Os 8 compassos, mãos juntas, a 50 BPM, sem dicas. Meta: 95% das notas e a melodia acima da esquerda.', () => twoHandTask(PREL_R.join(' | '), [...PREL_LH.map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')), 'G3+B3+E4:4'].join(' | '), { bpm: 50, fifths: 1 }), { pass: { accuracy: 0.95 }, balance: 8 }),
+  ],
+  exit: [wholeToneGen, choice(ROMANTIC_Q, 'romantico')],
+};
+
 // ---------- unidade ----------
 
 const unit: Unit = {
@@ -474,7 +749,7 @@ const unit: Unit = {
   title: 'Arranjo, forma e repertório',
   goal: 'Reconhecer a forma, arranjar uma melodia para piano solo e apresentar um recital próprio com peças de três mundos.',
   technique: 'Escalas de 2 oitavas mãos juntas em semicolcheias, de 44 rumo a 60 BPM (variação abaixo de 25 ms), e arpejos maiores mãos juntas. Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l90, l91, l92],
+  lessons: [l90, l91, l92, l93, l94, l95],
   songs: [odeArr, preludio, tema, valsa],
   final: {
     songId: 'u12-valsa-lenta',
@@ -483,4 +758,3 @@ const unit: Unit = {
 };
 
 export default unit;
-export { scale16, arp8 };
