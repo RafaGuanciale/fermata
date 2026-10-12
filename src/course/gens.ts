@@ -176,6 +176,7 @@ const QUALITIES: Record<string, number[]> = {
   ø: [0, 3, 6, 10],
   '°7': [0, 3, 6, 9],
   dim7: [0, 3, 6, 9],
+  '7(b9)': [0, 4, 7, 10, 1],
 };
 const ROOT_PC: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
@@ -244,7 +245,7 @@ export function playChord(opts: { symbols: string[]; low: Midi; high: Midi; requ
 const SHARP_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const FLAT_NAMES = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 const FLAT_KEYS = new Set([5, 10, 3, 8, 1]);
-const KEY_PT: Record<string, string> = { C: 'Dó', G: 'Sol', F: 'Fá', D: 'Ré', A: 'Lá', Bb: 'Si♭', E: 'Mi', Eb: 'Mi♭' };
+const KEY_PT: Record<string, string> = { C: 'Dó', G: 'Sol', F: 'Fá', D: 'Ré', A: 'Lá', Bb: 'Si♭', E: 'Mi', Eb: 'Mi♭', Ab: 'Lá♭', Db: 'Ré♭', Gb: 'Sol♭', B: 'Si', 'F#': 'Fá♯' };
 export type Degree = 'I' | 'IV' | 'V' | 'V7';
 const DEGREE_ROOT: Record<Degree, number> = { I: 0, IV: 5, V: 7, V7: 7 };
 
@@ -761,7 +762,7 @@ export function relativeKey(opts: { majors: string[]; ask: ('menor' | 'maior')[]
 /** Semitons de cada intervalo: número + qualidade (m menor, M maior, J justo, A aumentado, d diminuto). */
 export const IV_SEMIS: Record<string, number> = {
   '2m': 1, '2M': 2, '2A': 3, '3d': 2, '3m': 3, '3M': 4, '4d': 4, '4J': 5, '4A': 6, '5d': 6, '5J': 7, '5A': 8,
-  '6m': 8, '6M': 9, '7d': 9, '7m': 10, '7M': 11, '8J': 12,
+  '6m': 8, '6M': 9, '7d': 9, '7m': 10, '7M': 11, '8J': 12, '9m': 13,
 };
 const Q_PT: Record<string, string> = { m: 'menor', M: 'maior', J: 'justa', A: 'aumentada', d: 'diminuta' };
 
@@ -914,6 +915,7 @@ const CHORD_IVS: Record<string, string[]> = {
   sus2: ['2M', '5J'], sus4: ['4J', '5J'],
   '7': ['3M', '5J', '7m'], '7M': ['3M', '5J', '7M'], maj7: ['3M', '5J', '7M'], m7: ['3m', '5J', '7m'],
   'm7(b5)': ['3m', '5d', '7m'], ø: ['3m', '5d', '7m'], '°7': ['3m', '5d', '7d'], dim7: ['3m', '5d', '7d'],
+  '7(b9)': ['3M', '5J', '7m', '9m'],
 };
 
 /** Acorde soletrado (tríades, sus e tétrades): "Bb7M" → ["Bb", "D", "F", "A"]; "C#ø" → ["C#", "E", "G", "B"]. */
@@ -1371,6 +1373,129 @@ export function nonChordTones(opts: {
       answer: options.indexOf(ex.kind),
       hint: `${ex.strange.map((m) => nameOf(m)).join(', ')}: ${ex.kind}.`,
       steps: [],
+    };
+  };
+}
+
+// ---------- harmonia cromática (Unidade 10) ----------
+
+/** Acordes de fora do campo, pelo papel na tonalidade maior: dominantes secundárias, subV, empréstimo do homônimo menor e diminutos. */
+export type ChromRoman =
+  | 'V7/ii' | 'V7/iii' | 'V7/IV' | 'V7/V' | 'V7/vi'
+  | 'subV7' | 'subV7/V' | 'subV7/ii'
+  | 'iv' | 'ivm7' | 'bIII' | 'bVI' | 'bVII' | 'bVI7M' | 'bVII7'
+  | 'i' | 'im7' | 'iiø' | 'V7(b9)'
+  | 'vii°7' | '#i°7' | '#ii°7' | '#iv°7';
+
+/** Distância da tônica, qualidade e grafia da fundamental ('key' = a da tonalidade; empréstimo e subV em bemol; diminuto de passagem em sustenido). */
+const CHROM: Record<ChromRoman, [number, string, 'key' | 'flat' | 'sharp']> = {
+  'V7/ii': [9, '7', 'key'], 'V7/iii': [11, '7', 'key'], 'V7/IV': [0, '7', 'key'], 'V7/V': [2, '7', 'key'], 'V7/vi': [4, '7', 'key'],
+  subV7: [1, '7', 'flat'], 'subV7/V': [8, '7', 'flat'], 'subV7/ii': [3, '7', 'flat'],
+  iv: [5, 'm', 'key'], ivm7: [5, 'm7', 'key'], bIII: [3, '', 'flat'], bVI: [8, '', 'flat'], bVII: [10, '', 'flat'], bVI7M: [8, '7M', 'flat'], bVII7: [10, '7', 'flat'],
+  i: [0, 'm', 'key'], im7: [0, 'm7', 'key'], 'iiø': [2, 'm7(b5)', 'key'], 'V7(b9)': [7, '7(b9)', 'key'],
+  'vii°7': [11, '°7', 'key'], '#i°7': [1, '°7', 'sharp'], '#ii°7': [3, '°7', 'sharp'], '#iv°7': [6, '°7', 'sharp'],
+};
+
+/** "bVI" → "♭VI"; "#iv°7" → "♯iv°7". */
+export const romanLabel = (r: string) => r.replace(/^b/, '♭').replace(/^#/, '♯').replace('(b9)', '(♭9)');
+
+/** Cifra de um grau, do campo ou cromático: ("C", "V7/ii") → "A7"; ("C", "subV7") → "Db7"; ("G", "bVI") → "Eb"; ("F", "#i°7") → "F#°7". */
+export function chromaticSymbol(key: string, roman: Roman | ChromRoman): string {
+  if (roman in DIATONIC) return diatonicSymbol(key, roman as Roman);
+  const k = rootPc(key);
+  const [off, q, how] = CHROM[roman as ChromRoman];
+  const names = how === 'flat' ? FLAT_NAMES : how === 'sharp' ? SHARP_NAMES : FLAT_KEYS.has(k) ? FLAT_NAMES : SHARP_NAMES;
+  return names[(k + off) % 12] + q;
+}
+
+/** Graus pensados no tom menor (o ii–V–i): o prompt diz "Lá menor". */
+const MINOR_ROMANS = new Set<string>(['i', 'im7', 'iiø', 'V7(b9)']);
+
+function chromaticDetail(key: string, roman: Roman | ChromRoman): string {
+  if (roman in DIATONIC) return 'Qualquer posição.';
+  if (roman.startsWith('V7/')) {
+    const target = roman.split('/')[1] as Roman;
+    return `O V7 de ${target} (${chordLabel(diatonicSymbol(key, target))}): fundamental uma 5ª justa acima da do alvo, acorde maior com 7ª menor.`;
+  }
+  if (roman.startsWith('subV7')) {
+    const target = (roman.split('/')[1] ?? 'I') as Roman;
+    return `O dominante substituto do ${target} (${chordLabel(diatonicSymbol(key, target))}): fundamental meio tom acima da do alvo, acorde com 7ª.`;
+  }
+  if (roman.includes('°7')) return 'Diminuto com 7ª: três terças menores empilhadas.';
+  if (roman === 'V7(b9)') return `O V7 de ${keyName(key)} menor com a 9ª menor (o 6º grau da escala menor). A 5ª pode ficar de fora.`;
+  if (MINOR_ROMANS.has(roman)) return `Grau do tom de ${keyName(key)} menor.`;
+  return `Emprestado de ${keyName(key)} menor (o homônimo).`;
+}
+
+/** "Em Fá maior, toque o V7/vi": acordes cromáticos (ou do campo) pelo papel na tonalidade. */
+export function chromaticChord(opts: { keys: string[]; romans: (Roman | ChromRoman)[]; low: Midi; high: Midi; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const roman = pick(rng, opts.romans);
+    const symbol = chromaticSymbol(key, roman);
+    const minor = MINOR_ROMANS.has(roman);
+    return {
+      prompt: `Em ${keyName(key)} ${minor ? 'menor' : 'maior'}, toque o ${romanLabel(roman)}`,
+      detail: chromaticDetail(key, roman),
+      hintKeys: voiced(symbol, Math.round((opts.low + opts.high) / 2)).slice(1),
+      hint: `${chordLabel(symbol)}: ${spelledHint(symbol) ?? parseChord(symbol).pcs.map((p) => PC_NAMES[p]).join(', ')}`,
+      steps: [chordAccept(symbol)],
+      skill: opts.skill ?? 'acorde-cromatico',
+    };
+  };
+}
+
+/** Ditado com acordes cromáticos: o app toca a progressão; você toca o baixo de cada acorde ou os acordes, em ordem. */
+export function chromaticByEar(opts: { keys: string[]; progressions: (Roman | ChromRoman)[][]; answer: 'bass' | 'chords'; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const prog = pick(rng, opts.progressions);
+    const symbols = prog.map((d) => chromaticSymbol(key, d));
+    return {
+      prompt: opts.answer === 'bass' ? 'Ouça e toque o baixo de cada acorde, em ordem' : 'Ouça e toque os acordes, em ordem',
+      detail: `Tom de ${keyName(key)} maior, ${prog.length} acordes. O primeiro é o ${romanLabel(prog[0])} (${chordLabel(symbols[0])}).`,
+      listen: { bpm: 72, steps: ledVoicings(symbols).map((v, i) => ({ midis: v, beats: i === symbols.length - 1 ? 3 : 2 })) },
+      hint: `${prog.map(romanLabel).join(' – ')}: ${symbols.map(chordLabel).join(' – ')}`,
+      steps: opts.answer === 'bass' ? symbols.map((x) => ({ kind: 'pc', pcs: [parseChord(x).bass ?? parseChord(x).root] }) as Accept) : symbols.map((x) => chordAccept(x)),
+      skill: opts.skill ?? (opts.answer === 'bass' ? 'ditado-baixo-cromatico' : 'ditado-cromatico'),
+    };
+  };
+}
+
+/** O app toca uma de duas (ou três) progressões parecidas; você diz qual foi (V7 ou subV7, IV ou iv, maior ou menor). */
+export function progressionChoice(opts: { keys: string[]; options: { label: string; romans: (Roman | ChromRoman)[] }[]; ask: string; skill?: string }): ItemGen {
+  return (rng) => {
+    const key = pick(rng, opts.keys);
+    const which = Math.floor(rng() * opts.options.length);
+    const opt = opts.options[which];
+    const symbols = opt.romans.map((r) => chromaticSymbol(key, r));
+    const order = shuffle(rng, opts.options.map((_, i) => i));
+    return {
+      prompt: opts.ask,
+      detail: `Tom de ${keyName(key)}.`,
+      listen: { bpm: 72, steps: ledVoicings(symbols).map((v, i) => ({ midis: v, beats: i === symbols.length - 1 ? 3 : 2 })) },
+      choices: order.map((i) => opts.options[i].label),
+      answer: order.indexOf(which),
+      hint: `Foi ${opt.label}: ${symbols.map(chordLabel).join(' – ')}.`,
+      steps: [],
+      skill: opts.skill ?? 'progressao-ouvido',
+    };
+  };
+}
+
+/** Harmonize com acordes cromáticos: a pauta mostra um compasso com nota alterada; qualquer acorde de `accept` serve. */
+export function harmonizeChromatic(opts: { key: string; fifths?: number; bars: { notes: Midi[]; accept: (Roman | ChromRoman)[]; say?: string }[]; skill?: string }): ItemGen {
+  return (rng) => {
+    const bar = pick(rng, opts.bars);
+    const symbols = bar.accept.map((r) => chromaticSymbol(opts.key, r));
+    return {
+      prompt: 'Que acorde cabe embaixo deste compasso? Toque-o',
+      detail: `Tom de ${keyName(opts.key)} maior. ${bar.say ?? 'A nota alterada é a pista: procure o acorde que a contém.'}`,
+      staff: { notes: bar.notes, clef: 'treble', fifths: opts.fifths },
+      listen: { bpm: 80, steps: bar.notes.map((m) => ({ midis: [m], beats: 1 })) },
+      hint: `Serve: ${bar.accept.map((r, i) => `${romanLabel(r)} (${chordLabel(symbols[i])})`).join(', ')}.`,
+      steps: [{ kind: 'anyChord', options: symbols.map((x) => ({ pcs: parseChord(x).pcs })) }],
+      skill: opts.skill ?? 'harmonizar-cromatico',
     };
   };
 }

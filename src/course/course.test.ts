@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
-import { chordSpelling, echoTransposed, nonChordTones, shellChord } from './gens';
+import { chordSpelling, chromaticByEar, chromaticChord, chromaticSymbol, echoTransposed, harmonizeChromatic, nonChordTones, progressionChoice, romanLabel, shellChord } from './gens';
 import { sightReadingTwoHands, twoHandTask } from './tasks';
 import { balanceScore } from './judge';
 import { swingTask } from './tasks';
@@ -293,6 +293,42 @@ describe('equilíbrio, quatro vozes e primeira vista com as duas mãos', () => {
       expect(t.events.filter((e) => e.hand === 'r').length).toBeGreaterThan(8);
       const last = t.events.filter((e) => e.beat === 28);
       expect(last.every((e) => (e.midi! - 62) % 12 === 0)).toBe(true);
+    }
+  });
+});
+
+describe('harmonia cromática', () => {
+  it('cifras de secundárias, subV, empréstimo e diminutos', () => {
+    expect(chromaticSymbol('C', 'V7/ii')).toBe('A7');
+    expect(chromaticSymbol('F', 'V7/vi')).toBe('A7');
+    expect(chromaticSymbol('G', 'V7/iii')).toBe('F#7');
+    expect(chromaticSymbol('Bb', 'V7/V')).toBe('C7');
+    expect(chromaticSymbol('C', 'subV7')).toBe('Db7');
+    expect(chromaticSymbol('C', 'subV7/V')).toBe('Ab7');
+    expect(chromaticSymbol('G', 'bVI')).toBe('Eb');
+    expect(chromaticSymbol('D', 'iv')).toBe('Gm');
+    expect(chromaticSymbol('F', '#i°7')).toBe('F#°7');
+    expect(chromaticSymbol('A', 'iiø')).toBe('Bm7(b5)');
+    expect(chromaticSymbol('C', 'ii7')).toBe('Dm7');
+    expect(parseChord('E7(b9)').pcs).toEqual([4, 8, 11, 2, 5]);
+    expect(chordSpelling('A7(b9)')).toEqual(['A', 'C#', 'E', 'G', 'Bb']);
+    expect(chromaticChord({ keys: ['A'], romans: ['iiø'], low: 48, high: 72 })(seeded(1)).prompt).toBe('Em Lá menor, toque o iiø');
+    expect(romanLabel('bVII')).toBe('♭VII');
+  });
+
+  it('itens cromáticos aceitam o acorde certo e recusam o diatônico', () => {
+    const item = chromaticChord({ keys: ['C'], romans: ['V7/ii'], low: 48, high: 72 })(seeded(1));
+    const play = (it: Item, keys: number[]) => keys.reduce((p, m, i) => pressItem(p, it, m, keys.slice(0, i + 1)), startItem());
+    expect(play(item, [57, 61, 64, 67]).done).toBe(true);
+    expect(play(item, [57, 60, 64, 67]).done).toBe(false);
+    const h = harmonizeChromatic({ key: 'C', bars: [{ notes: [64, 67, 73, 69], accept: ['V7/ii'] }] })(seeded(2));
+    expect(play(h, [57, 61, 64, 67]).done).toBe(true);
+    const ear = chromaticByEar({ keys: ['C'], progressions: [['ii7', 'subV7', 'I7M']], answer: 'bass' })(seeded(3));
+    expect(ear.steps).toEqual([{ kind: 'pc', pcs: [2] }, { kind: 'pc', pcs: [1] }, { kind: 'pc', pcs: [0] }]);
+    for (let seed = 1; seed < 20; seed++) {
+      const c = progressionChoice({ keys: ['C'], options: [{ label: 'V7', romans: ['ii7', 'V7', 'I7M'] }, { label: 'subV7', romans: ['ii7', 'subV7', 'I7M'] }], ask: '?' })(seeded(seed));
+      const bass = c.listen!.steps[1].midis[0] % 12;
+      expect(c.choices![c.answer!]).toBe(bass === 7 ? 'V7' : 'subV7');
     }
   });
 });
