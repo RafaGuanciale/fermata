@@ -6,7 +6,7 @@ import {
   progressionChoice, type ChoiceQuestion, type ChromRoman, type Roman,
 } from '../gens';
 import { n, pick } from '../music';
-import { melodyTask, twoHandTask } from '../tasks';
+import { melodyTask, transposedTask, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Listen, Rng, SongSpec, TimedTask, Unit } from '../types';
 
@@ -736,6 +736,7 @@ No exercício abaixo, a direita toca a melodia (Mi–Sol, Sol–Fá, pausa e Mi�
         { reps: 2 },
       ),
     },
+    { kind: 'song', songId: 'u10-santos', why: 'A versão original. No compasso 13, experimente trocar o F da esquerda por Fm e escute a diferença.' },
     { kind: 'exercise', id: 'l79-ouvido', exercise: items('IV, iv ou os dois?', 'Ouça a cor do acorde antes da volta ao I.', earIViv, 8, 48, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l79-ditado', exercise: items('Ditado com empréstimo', 'O app toca 4 acordes; o primeiro é o I. Toque os acordes, em ordem, em qualquer posição.', borrowedByEar, 4, 48, 72, 0.75, 'off') },
   ],
@@ -745,6 +746,248 @@ No exercício abaixo, a direita toca a melodia (Mi–Sol, Sol–Fá, pausa e Mi�
     items('Ouvido e revisão', 'IV × iv de ouvido, empréstimo na pauta, subV e secundárias.', mix([earIViv, borrowedHarm, subV, secDom]), 8, 48, 72, 0.85, 'off'),
   ],
   exit: [borrowed, choice(BORROW_Q, 'emprestimo')],
+};
+
+// ---------- modulação e projeto ----------
+
+const modulate = chordSequence({
+  sequences: [
+    { name: 'Dó → Sol. Pivô: Am (vi em Dó, ii em Sol).', symbols: ['C', 'Am', 'D', 'G'] },
+    { name: 'Dó → Fá. Pivô: Dm (ii em Dó, vi em Fá).', symbols: ['C', 'Dm', 'Bb', 'C', 'F'] },
+    { name: 'Dó → Lá menor. Pivô: Dm (ii em Dó, iv em Lá menor).', symbols: ['C', 'Dm', 'E', 'Am'] },
+    { name: 'Sol → Ré. Pivô: Em (vi em Sol, ii em Ré).', symbols: ['G', 'Em', 'A', 'D'] },
+    { name: 'Fá → Dó. Pivô: Dm (vi em Fá, ii em Dó).', symbols: ['F', 'Dm', 'G', 'C'] },
+    { name: 'Dó → Mi menor. Pivô: Am (vi em Dó, iv em Mi menor).', symbols: ['C', 'Am', 'B', 'Em'] },
+  ],
+  lead: 2,
+});
+const modByEar = chromaticByEar({ keys: ['C', 'F', 'G'], progressions: [['I', 'vi', 'V7/V', 'V'], ['I', 'ii', 'V7/vi', 'vi'], ['I', 'ii', 'V7/IV', 'IV'], ['I', 'vi', 'V7/iii', 'iii']], answer: 'bass' });
+
+const SAINTS_A = 'r C5 E5 F5 | G5:4 | r C5 E5 F5 | G5:4 | r C5 E5 F5 | G5:2 E5:2 | C5:2 E5:2 | D5:4';
+const SAINTS_B = 'r E5 E5 D5 | C5:3 C5 | E5:2 G5:2 | G5:2 F5:2 | r:2 E5 F5 | G5:2 E5:2 | C5:2 D5:2 | C5:4';
+const upATone = (rng: Rng) => transposedTask(pick(rng, [SAINTS_A, SAINTS_B]), 2, { bpm: 72, caption: 'A pauta está em Dó; toque tudo um tom acima, em Ré maior (Fá vira Sol, Mi vira Fá♯, Dó vira Ré).' });
+
+const MOD_Q: ChoiceQuestion[] = [
+  { q: 'Tons vizinhos de Dó maior são…', options: ['Sol, Fá e as relativas Lá menor, Mi menor e Ré menor', 'Ré, Mi e Lá', 'Dó menor e Dó♯ maior'], answer: 0, why: 'Vizinhos diferem em no máximo um acidente: um sustenido (Sol) ou um bemol (Fá), mais as relativas menores.' },
+  { q: 'Acorde pivô é…', options: ['Um acorde que pertence aos dois tons e muda de função no caminho', 'O primeiro acorde da música', 'Um acorde diminuto'], answer: 0, why: 'Am é vi em Dó e ii em Sol: entra como vi e sai como ii.' },
+  { q: 'Na modulação Dó → Sol, depois do pivô Am vem…', options: ['D (ou D7), o V de Sol', 'F, o IV de Dó', 'E♭, emprestado'], answer: 0, why: 'O V do tom novo confirma a casa nova.' },
+  { q: 'Qual a diferença entre tonicizar e modular?', options: ['Na tonicização a casa volta logo; na modulação ela muda e fica', 'Nenhuma', 'Modular só acontece em menor'], answer: 0, why: 'A7 → Dm em Dó é visita. Uma cadência inteira no tom novo, que fica, é mudança.' },
+  { q: '"Um tom acima no último refrão" é…', options: ['Uma modulação direta, sem pivô, para dar energia ao final', 'Um empréstimo modal', 'Um erro de afinação'], answer: 0, why: 'Muito comum no pop: o último refrão sobe de Dó para Ré, às vezes com o A7 antes.' },
+  { q: 'O acorde napolitano, em Lá menor, é…', options: ['B♭ (geralmente B♭/Ré), o ♭II maior', 'Bm7(♭5)', 'E7'], answer: 0, why: 'Opcional, só para reconhecer: tríade maior sobre o 2º grau abaixado, quase sempre com a 3ª no baixo, indo para o V.' },
+  { q: 'O acorde de sexta aumentada, em Lá menor, tem Fá e Ré♯, que…', options: ['Abrem por semitom para a oitava Mi–Mi do V', 'Descem para Dó', 'Ficam paradas'], answer: 0, why: 'Opcional, só para reconhecer: Fá desce para Mi, Ré♯ sobe para Mi. As duas vozes se afastam até a oitava.' },
+];
+
+const l80: Lesson = {
+  n: 80,
+  id: 'l80',
+  title: 'Modulação',
+  minutes: 60,
+  objectives: [
+    'Consigo dizer os tons vizinhos de um tom maior e achar um acorde pivô entre dois deles.',
+    'Consigo tocar uma progressão que modula pelo pivô.',
+    'Consigo tocar uma frase um tom acima lendo a pauta no tom original, a 72 BPM.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Visitar ou mudar de casa',
+      body: `Nas lições 74 a 76, o A7 visitava o Dm e voltava. Isso é **tonicizar**. **Modular** é diferente: a casa muda e fica. Depois da modulação, o I antigo vira um acorde qualquer e a cadência acontece no tom novo.
+
+Os tons mais fáceis de alcançar são os **vizinhos**, os que diferem em no máximo um acidente. Para **Dó maior**:
+
+- **Sol maior** (1 sustenido) e **Fá maior** (1 bemol): a dominante e a subdominante.
+- **Lá menor**, **Mi menor** e **Ré menor**: a relativa e as relativas desses dois.
+
+Modular para um vizinho soa natural porque quase todas as notas continuam as mesmas: de Dó para Sol, só o Fá vira Fá♯.`,
+    },
+    {
+      kind: 'text',
+      title: 'O acorde pivô',
+      body: `O jeito mais suave de modular é pelo **acorde pivô**: um acorde que existe nos dois tons. O ouvido o recebe numa função e o deixa em outra.
+
+De **Dó para Sol**: o **Am** é vi em Dó e ii em Sol. A frase vai **C – Am – D – G**: o Am chega como vi de Dó, mas o D (o V de Sol, com Fá♯) revela que ele já era o ii de Sol. A cadência D – G fecha a mudança.
+
+Para achar o pivô, compare os campos dos dois tons e procure os acordes comuns. Entre Dó e Sol: C, Em, G e Am. Entre Dó e Fá: C, Dm, F e Am. Depois do pivô, toque o **V do tom novo** e a chegada.`,
+    },
+    {
+      kind: 'example',
+      title: 'Dó → Sol pelo Am',
+      steps: [
+        { say: '**C – Am**: até aqui, tudo em Dó.', play: progListen(['C', 'Am']) },
+        { say: '**C – Am – D – G**: o Fá♯ do D muda a casa. O G soa como chegada, não como V.', play: progListen(['C', 'Am', 'D', 'G']), keys: [n('F#4')] },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'esquecer de confirmar o tom novo',
+      body: 'Só tocar o pivô não modula: C – Am – C volta para casa. Depois do pivô vem o **V do tom novo** (com a nota alterada) e a chegada nele. Sem isso, o ouvido continua em Dó.',
+    },
+    { kind: 'exercise', id: 'l80-pivo', exercise: items('Modulações pelo pivô', 'Toque os acordes conduzindo as vozes. Leia o pivô no nome antes de tocar.', modulate, 6, 48, 76, 0.85, 'fade') },
+    { kind: 'exercise', id: 'l80-ouvido', exercise: items('Para onde foi?', 'O app toca 4 acordes: casa, preparação, dominante e chegada num vizinho. Toque o baixo de cada um.', modByEar, 5, 36, 72, 0.8, 'off') },
+    {
+      kind: 'text',
+      title: 'Modulação direta e "um tom acima"',
+      body: `Nem toda modulação usa pivô. Na **modulação direta**, a música simplesmente começa a próxima parte no tom novo, muitas vezes depois de uma pausa ou de um fim de frase.
+
+O caso mais famoso no pop é subir **um tom no último refrão**: a música inteira vai de Dó para Ré. Às vezes entra o A7 (o V do tom novo) um compasso antes, às vezes nem isso. O efeito é de energia nova.
+
+Para tocar assim, você precisa **transpor em tempo real**: ler na pauta em Dó e tocar em Ré. Pense em graus, não em notas. Em When the Saints, a frase começa no 1º, 3º e 4º graus (Dó, Mi, Fá); em Ré, os mesmos graus são **Ré, Fá♯, Sol**, e o 5º grau, Sol, vira **Lá**.`,
+    },
+    {
+      kind: 'example',
+      title: 'A mesma frase, um tom acima',
+      steps: [
+        { say: 'Em Dó: Dó, Mi, Fá, Sol.', play: { bpm: 84, steps: [n('C5'), n('E5'), n('F5')].map((m) => ({ midis: [m], beats: 1 })).concat([{ midis: [n('C4'), n('E4'), n('G5')], beats: 3 }]) } },
+        { say: 'O A7 prepara a casa nova e a frase volta em Ré: Ré, Fá♯, Sol, Lá.', play: { bpm: 84, steps: [{ midis: [n('A3'), n('C#4'), n('G4')], beats: 2 }, ...[n('D5'), n('F#5'), n('G5')].map((m) => ({ midis: [m], beats: 1 })), { midis: [n('D4'), n('F#4'), n('A5')], beats: 3 }] }, keys: [n('D5'), n('F#5'), n('G5'), n('A5')] },
+      ],
+    },
+    { kind: 'exercise', id: 'l80-transpor', exercise: quickTimed('Um tom acima', 'Metade de When the Saints, escrita em Dó: toque em Ré maior, a 72 BPM. Duas passadas boas.', upATone, { reps: 2 }) },
+    {
+      kind: 'text',
+      title: 'Para reconhecer: napolitano e sexta aumentada',
+      body: `Dois acordes cromáticos da música clássica aparecem às vezes antes do V, sobretudo em menor. Aqui é só para **reconhecer** quando encontrar numa partitura:
+
+- **Napolitano (♭II)**: em Lá menor, **B♭** maior, quase sempre com Ré no baixo (B♭/D). Tem função de subdominante e vai para o V (E7).
+- **Sexta aumentada**: em Lá menor, Fá no baixo e **Ré♯** em cima, a uma 6ª aumentada. As duas notas se afastam por semitom até a oitava **Mi–Mi** do V: Fá desce, Ré♯ sobe.`,
+    },
+    { kind: 'exercise', id: 'l80-quiz', exercise: quiz('Modulação e cromáticos', 'Responda sem tocar.', MOD_Q) },
+  ],
+  review: [modulate, choice(MOD_Q.slice(0, 5), 'modulacao')],
+  checkpoint: [
+    items('Modulação sem dica', '7 progressões modulantes.', modulate, 7, 48, 76, 0.85, 'off'),
+    quickTimed('Um tom acima, sem dica', 'Metade sorteada de When the Saints, lida em Dó e tocada em Ré, a 72 BPM.', upATone),
+    items('Revisão', 'Empréstimo, subV e diminutos.', mix([borrowed, subV, dim7, earIViv]), 8, 48, 72, 0.85, 'off'),
+  ],
+  exit: [modulate, choice(MOD_Q.slice(0, 5), 'modulacao')],
+};
+
+/** Arpejo de V7, uma oitava subindo e descendo em colcheias, mão direita ou esquerda (trilho técnico). */
+const V7_ARPS: { text: string; clef: 'treble' | 'bass'; fifths: number; caption: string }[] = [
+  { text: 'G3:0.5 B3:0.5 D4:0.5 F4:0.5 G4:0.5 F4:0.5 D4:0.5 B3:0.5 | G3:4', clef: 'treble', fifths: 0, caption: 'G7, mão direita: dedos 1-2-3-4-5 subindo, 4-3-2-1 descendo.' },
+  { text: 'D4:0.5 F#4:0.5 A4:0.5 C5:0.5 D5:0.5 C5:0.5 A4:0.5 F#4:0.5 | D4:4', clef: 'treble', fifths: 1, caption: 'D7, mão direita: dedos 1-2-3-4-5 subindo, 4-3-2-1 descendo.' },
+  { text: 'C4:0.5 E4:0.5 G4:0.5 Bb4:0.5 C5:0.5 Bb4:0.5 G4:0.5 E4:0.5 | C4:4', clef: 'treble', fifths: -1, caption: 'C7, mão direita: dedos 1-2-3-4-5 subindo, 4-3-2-1 descendo.' },
+  { text: 'G2:0.5 B2:0.5 D3:0.5 F3:0.5 G3:0.5 F3:0.5 D3:0.5 B2:0.5 | G2:4', clef: 'bass', fifths: 0, caption: 'G7, mão esquerda: dedos 5-4-3-2-1 subindo, 2-3-4-5 descendo.' },
+  { text: 'E2:0.5 G#2:0.5 B2:0.5 D3:0.5 E3:0.5 D3:0.5 B2:0.5 G#2:0.5 | E2:4', clef: 'bass', fifths: 0, caption: 'E7, mão esquerda: dedos 5-4-3-2-1 subindo, 2-3-4-5 descendo.' },
+];
+const v7Arp = (bpm: number) => (rng: Rng) => {
+  const a = pick(rng, V7_ARPS);
+  return melodyTask(a.text, { bpm, clef: a.clef, fifths: a.fifths, caption: a.caption });
+};
+
+/** A cifra da rearmonização, em duas frases, para tocar em ordem (a execução sem erro de acorde que o projeto pede). */
+const reharmChart = chordSequence({
+  sequences: [
+    { name: 'When the Saints rearmonizada, compassos 2 a 10.', symbols: ['C7M', 'Dm7', 'G7', 'C7M', 'Dm7', 'G7', 'C7M', 'E7', 'Am7', 'A7', 'Dm7', 'G7', 'C7M'] },
+    { name: 'When the Saints rearmonizada, compassos 10 a 16.', symbols: ['C7M', 'C7', 'F7M', 'Fm6', 'C7M', 'Dm7', 'Db7', 'C7M'] },
+  ],
+});
+
+const REHARM_Q: ChoiceQuestion[] = [
+  { q: 'Compassos 3 e 5: Dm7 – G7 antes do C7M é…', options: ['Um ii–V que desdobra a volta ao I', 'Um empréstimo modal', 'Uma modulação para Ré menor'], answer: 0, why: 'O I original (C) vira ii–V–I: a melodia (Dó, Mi, Fá) cabe em Dm7 e G7.' },
+  { q: 'Compasso 6: o E7 é…', options: ['V7/vi: leva ao Am7', 'V7/V: leva ao G', 'subV7: leva ao Dó'], answer: 0, why: 'Sol♯ é a sensível de Lá.' },
+  { q: 'Compasso 7: o A7 é…', options: ['V7/ii: leva ao Dm7', 'iv emprestado', 'vi do campo'], answer: 0, why: 'Dó♯ sobe para Ré. A cadeia E7 → A7 → Dm7 → G7 → C anda em quintas.' },
+  { q: 'Compasso 11: o C7 é…', options: ['V7/IV: leva ao F7M', 'O I com a 7ª maior', 'subV7'], answer: 0, why: 'A 7ª menor (Si♭) desce para Lá, a 3ª do Fá.' },
+  { q: 'Compasso 13: o Fm6 é…', options: ['iv emprestado de Dó menor', 'ii do campo', 'V7/V'], answer: 0, why: 'Lá♭ vem de Dó menor; a melodia (Mi e Fá) não tem Lá natural, por isso cabe.' },
+  { q: 'Compasso 15: o D♭7 é…', options: ['subV7: no lugar do G7, com o baixo descendo Ré, Ré♭, Dó', 'Napolitano', 'V7/IV'], answer: 0, why: 'Mesmo trítono do G7 (Fá e Dó♭). A melodia desce para Si, a 7ª do D♭7.' },
+];
+
+const allU10 = mix([secDom, iiVI, guideAll, guideMinor, minorChords, dim7, subV, borrowed, modulate]);
+const allEarU10 = mix([earSecondary, earMajorMinor, earSubV, earIViv]);
+
+const l81: Lesson = {
+  n: 81,
+  id: 'l81',
+  title: 'Checkpoint da unidade e projeto: rearmonização',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 10, sem dicas.',
+    'Consigo analisar cada troca de uma rearmonização (secundária, ii–V, subV, empréstimo).',
+    'Consigo tocar When the Saints rearmonizada com as duas mãos, sem erro de acorde.',
+    'Consigo tocar arpejos de V7 com cada mão a 80 BPM em colcheias.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que você já sabe',
+      body: `Em sete lições a harmonia saiu do campo. Você aprendeu a **tonicizar** com dominantes secundárias, a tocar o **ii–V–I nos 12 tons** e o **ii–V–i menor**, a usar os **diminutos** em três funções, a trocar o V7 pelo **subV7**, a **emprestar** acordes do homônimo menor e a **modular** por pivô ou direto.
+
+Juntas, essas ferramentas fazem uma coisa só: **rearmonizar**. Pegar uma melodia simples, com I, IV e V7, e vestir de outra cor sem mexer nela (ou mexendo muito pouco).`,
+    },
+    {
+      kind: 'text',
+      title: 'Como rearmonizar sem errar',
+      body: `Uma rearmonização boa respeita a melodia. Antes de trocar um acorde, confira se **a nota mais longa ou do tempo forte** cabe no acorde novo, como nota do acorde ou tensão (9ª, 13ª). Depois, use estas trocas, uma de cada vez:
+
+1. **I longo → ii–V–I**: um compasso de C vira Dm7 – G7 → C7M.
+2. **Acorde do campo → secundária**: o Am vira A7 se o próximo for Dm (e a melodia não estiver no Dó natural).
+3. **IV → iv**: F vira Fm (ou Fm6) se a melodia não estiver no Lá.
+4. **V7 → subV7**: G7 vira D♭7 se a melodia couber (Fá, Si ou Lá♭ cabem; Ré e Sol chocam).
+
+Na rearmonização de When the Saints, todas as quatro aparecem. No penúltimo compasso a melodia desce de Ré para **Si**, a 7ª do D♭7: é a única nota mudada, e o arranjo avisa isso.`,
+    },
+    { kind: 'song', songId: 'u10-santos', why: 'A versão original, com I, IV e V7. Toque primeiro esta, para a melodia ficar na mão.' },
+    { kind: 'exercise', id: 'l81-analise', exercise: quiz('Análise da rearmonização', 'Para cada troca, diga o que ela é. Os compassos contam a anacruse como compasso 1, como na partitura.', REHARM_Q, 0.85) },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'rearmonizar tudo de uma vez',
+      body: 'Trocar todos os acordes ao mesmo tempo deixa a música irreconhecível e cheia de choques. Troque um acorde, toque, escute se a melodia ainda soa bem, e só então troque o próximo.',
+    },
+    {
+      kind: 'exercise',
+      id: 'l81-cadeia',
+      exercise: quickTimed(
+        'A cadeia de secundárias',
+        'Compassos 6 a 10 da rearmonização, a 76 BPM. Duas passadas boas.',
+        () => twoHandTask('G5:2 E5:2 | C5:2 E5:2 | D5:4 | r E5 E5 D5 | C5:3 C5', 'C3+E3+B3:2 E3+G#3+D4:2 | A2+C3+G3:2 A2+C#3+G3:2 | D3+F3+C4:4 | G2+B2+F3:4 | C3+E3+B3:4', { bpm: 76, caption: 'Esquerda em shells: C7M e E7 | Am7 e A7 | Dm7 | G7 | C7M.' }),
+        { reps: 2 },
+      ),
+    },
+    {
+      kind: 'exercise',
+      id: 'l81-final',
+      exercise: quickTimed(
+        'iv e subV no fim',
+        'Compassos 12 a 16, a 76 BPM. Repare no Lá♭ do Fm6 e no Ré♭ do D♭7 na esquerda.',
+        () => twoHandTask('G5:2 F5:2 | r:2 E5 F5 | G5:2 E5:2 | C5:2 B4:2 | C5:4', 'F3+A3+E4:4 | F3+Ab3+D4:4 | C3+E3+B3:4 | D3+F3+C4:2 Db3+F3+B3:2 | C3+E3+B3:4', { bpm: 76, caption: 'Esquerda: F7M | Fm6 (Fá–Lá♭–Ré) | C7M | Dm7 e D♭7 | C7M.' }),
+        { reps: 2 },
+      ),
+    },
+    {
+      kind: 'text',
+      title: 'Trilho técnico: arpejos de V7',
+      body: `A meta técnica da unidade é o arpejo de **V7** com cada mão, a 80 BPM em colcheias. O desenho é o do acorde: fundamental, 3ª, 5ª, 7ª e a oitava. Na direita, dedos **1-2-3-4-5** subindo e **4-3-2-1** descendo; na esquerda, **5-4-3-2-1** subindo e **2-3-4-5** descendo. O exercício sorteia G7, D7, C7 ou E7.`,
+    },
+    { kind: 'exercise', id: 'l81-arpejo', exercise: quickTimed('Arpejos de V7', 'Colcheias, uma mão por vez, de 64 até 80 BPM.', v7Arp(80), { ladder: { from: 64, to: 80, step: 4 }, evenness: 40 }) },
+    { kind: 'song', songId: 'u10-santos-rearm', why: 'O projeto final: a mesma melodia com a harmonia da unidade inteira.' },
+  ],
+  review: [allU10, allEarU10],
+  checkpoint: [
+    items('Checkpoint da unidade', '20 perguntas misturadas das lições 74 a 80, sem dicas.', mix([allU10, allU10, allEarU10]), 20, 40, 84, 0.85, 'off'),
+    quickTimed('ii–V–I no tempo', 'Tom sorteado, mãos juntas, a 80 BPM.', (rng) => iiVIHands(rng, 80), { pass: { accuracy: 0.9 } }),
+    quickTimed('Arpejo de V7 a 80 BPM', 'Um arpejo sorteado, colcheias.', v7Arp(80), { evenness: 40 }),
+  ],
+  project: {
+    title: 'Rearmonização',
+    brief: `Toque When the Saints duas vezes: primeiro a versão original (I, IV e V7) e depois a rearmonizada, com ii–V, secundárias, iv emprestado e subV. Antes de tocar, escreva o grau de cada acorde da versão nova em cima da cifra. Depois, crie uma troca sua num trecho e explique por que a melodia cabe.`,
+    steps: [
+      'Toque a versão original no "Tocar a música" até passar a 84 BPM.',
+      'Escreva a análise da rearmonização: grau e função de cada acorde (o quiz da lição confere as principais).',
+      'Toque a cifra da rearmonização em ordem, no exercício abaixo, sem errar acorde.',
+      'Toque a versão rearmonizada no "Tocar a música", começando a 60 BPM e subindo até 76.',
+      'Invente uma troca sua (por exemplo, E♭7 no lugar do A7, o subV do V7/ii) e confira se a melodia cabe.',
+      'Grave as duas versões, uma depois da outra.',
+    ],
+    rubric: [
+      'A análise dá o grau e a função de cada troca (secundária, ii–V, subV, empréstimo).',
+      'Nenhum acorde errado na versão rearmonizada.',
+      'A melodia continua clara por cima da esquerda.',
+      'A troca inventada respeita a melodia e você sabe explicar por quê.',
+    ],
+    exercise: items('A cifra da rearmonização', 'As duas frases da cifra, em ordem. Qualquer posição; tudo certo para passar.', reharmChart, 2, 40, 76, 1, 'off'),
+  },
+  exit: [allU10, choice([...SECONDARY_Q, ...SUBV_Q, ...BORROW_Q], 'cromatico')],
 };
 
 // ---------- músicas ----------
@@ -770,17 +1013,17 @@ const saints: SongSpec = {
 };
 
 // A rearmonização: ii–V no lugar do I (compassos 2 e 4), cadeia de secundárias (E7 → Am7/A7 → Dm7 → G7), C7 = V7/IV,
-// Fm = iv emprestado e Dm7 – D♭7 – C7M (subV) no fim. Esquerda em shells 1-3-7.
+// Fm6 = iv emprestado e Dm7 – D♭7 – C7M (subV) no fim. Esquerda em shells 1-3-7.
 const SAINTS_REHARM_L = [
   'r:4', 'C3+E3+B3:4', 'D3+F3+C4:2 G2+B2+F3:2', 'C3+E3+B3:4', 'D3+F3+C4:2 G2+B2+F3:2', 'C3+E3+B3:2 E3+G#3+D4:2', 'A2+C3+G3:2 A2+C#3+G3:2', 'D3+F3+C4:4',
-  'G2+B2+F3:4', 'C3+E3+B3:4', 'C3+E3+Bb3:4', 'F3+A3+E4:4', 'F3+Ab3+C4:4', 'C3+E3+B3:4', 'D3+F3+C4:2 Db3+F3+B3:2', 'C3+E3+B3:4',
+  'G2+B2+F3:4', 'C3+E3+B3:4', 'C3+E3+Bb3:4', 'F3+A3+E4:4', 'F3+Ab3+D4:4', 'C3+E3+B3:4', 'D3+F3+C4:2 Db3+F3+B3:2', 'C3+E3+B3:4',
 ].join(' | ');
 
 const saintsReharm: SongSpec = {
   id: 'u10-santos-rearm',
   title: 'When the Saints Go Marching In, rearmonizada',
   composer: 'spiritual afro-americano tradicional',
-  arrangement: 'rearmonização do Fermata: ii–V, secundárias (E7, A7, C7), iv emprestado (Fm) e subV (D♭7) na esquerda em shells; no penúltimo compasso a melodia desce para Si, a 7ª do D♭7',
+  arrangement: 'rearmonização do Fermata: ii–V, secundárias (E7, A7, C7), iv emprestado (Fm6) e subV (D♭7) na esquerda em shells; no penúltimo compasso a melodia desce para Si, a 7ª do D♭7',
   bpm: 76,
   beatsPerBar: 4,
   fifths: 0,
@@ -796,11 +1039,11 @@ const unit: Unit = {
   title: 'Harmonia cromática',
   goal: 'Usar dominantes secundárias, ii–V em qualquer tom, diminutos, subV, empréstimo modal e modulação para rearmonizar uma melodia simples.',
   technique: 'Arpejos de tônica, V7 e °7, mãos separadas, de 60 rumo a 80–92 BPM em colcheias (referência: RCM Levels 5–6). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l74, l75, l76, l77, l78, l79],
+  lessons: [l74, l75, l76, l77, l78, l79, l80, l81],
   songs: [saints, saintsReharm],
   final: {
     songId: 'u10-santos-rearm',
-    brief: 'A melodia de When the Saints, já tocada com I, IV e V7, agora com a harmonia da unidade inteira: ii–V no lugar do I, a cadeia E7 → A7 → Dm7 → G7, o C7 que leva ao Fá, o Fm emprestado e o D♭7 no lugar do G7 no fim. A esquerda toca shells; a direita, a melodia. Antes de tocar, escreva o grau de cada acorde em cima da cifra: é a análise que o projeto pede.',
+    brief: 'A melodia de When the Saints, já tocada com I, IV e V7, agora com a harmonia da unidade inteira: ii–V no lugar do I, a cadeia E7 → A7 → Dm7 → G7, o C7 que leva ao Fá, o Fm6 emprestado e o D♭7 no lugar do G7 no fim. A esquerda toca shells; a direita, a melodia. Antes de tocar, escreva o grau de cada acorde em cima da cifra: é a análise que o projeto pede.',
   },
 };
 
