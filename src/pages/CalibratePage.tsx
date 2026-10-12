@@ -12,6 +12,10 @@ import { CloseIcon, ExpandIcon, PlugIcon } from '../components/Icons';
 
 const CAL_BPM = 80;
 const CAL_BEATS = 12;
+/** Dois compassos de contagem: o primeiro só para escutar o pulso, o segundo para preparar a mão. */
+const CAL_COUNT = 8;
+/** Respiro antes do primeiro clique, para a mão chegar ao piano. */
+const LEAD_MS = 2000;
 
 export default function CalibratePage({ onClose }: { onClose: () => void }) {
   const [state, setState] = useState<'idle' | 'running' | 'done'>('idle');
@@ -27,18 +31,31 @@ export default function CalibratePage({ onClose }: { onClose: () => void }) {
     if (state === 'running') tapsRef.current.push(at - firstRef.current);
   });
 
+  const [preparing, setPreparing] = useState(false);
+
   const start = () => {
-    const track = scheduleTrack({ bpm: CAL_BPM, countIn: 4, beats: CAL_BEATS, beatsPerBar: 4 });
+    setError(null);
+    setReport(null);
+    setPreparing(true);
+    setState('running');
+    window.setTimeout(() => {
+      setPreparing(false);
+      run();
+    }, LEAD_MS);
+  };
+
+  const run = () => {
+    const track = scheduleTrack({ bpm: CAL_BPM, countIn: CAL_COUNT, beats: CAL_BEATS, beatsPerBar: 4 });
     if (!track) return setError('Este navegador não toca áudio.');
     tapsRef.current = [];
     firstRef.current = track.firstBeat;
     beatsRef.current = Array.from({ length: CAL_BEATS }, (_, i) => i * track.beatMs);
     setError(null);
     setReport(null);
-    setBeat(-4);
+    setBeat(-CAL_COUNT);
     setState('running');
     // Contagem na tela: 4, 3, 2, 1 e depois os toques.
-    const tick = window.setInterval(() => setBeat(Math.floor((performance.now() - track.firstBeat) / track.beatMs)), 50);
+    const tick = window.setInterval(() => setBeat(Math.floor((performance.now() - track.firstBeat) / track.beatMs)), 16);
     window.setTimeout(() => {
       window.clearInterval(tick);
       const r = latencyReport(tapsRef.current, beatsRef.current);
@@ -60,14 +77,23 @@ export default function CalibratePage({ onClose }: { onClose: () => void }) {
     <Shell eyebrow="Treino no tempo" title="Ajustar o atraso do piano" onClose={onClose}>
       <div className="training__done">
         <p className="training__how">
-          Entre o piano, o cabo e o computador sempre existe um pequeno atraso. Depois da contagem de 4, toque qualquer tecla <strong>quando ouvir</strong> cada clique, 12 vezes. Não tente adivinhar o clique: toque no som dele. O app mede a diferença e desconta em todos os exercícios no tempo.
+          Entre o piano, o cabo e o computador sempre existe um pequeno atraso. Primeiro vêm 4 cliques só para escutar o pulso e mais 4 de contagem (4, 3, 2, 1). Depois, toque qualquer tecla <strong>quando ouvir</strong> cada clique, 12 vezes. A bolinha pisca junto com o clique. Não tente adivinhar o clique: toque no som dele. O app mede a diferença e desconta em todos os exercícios no tempo.
         </p>
         {error && <p className="form__error">{error}</p>}
 
         {state === 'running' && (
-          <p className="timed__count" aria-live="polite">
-            {beat < 0 ? Math.max(1, -beat) : `Toque junto com o clique · ${Math.min(CAL_BEATS, beat + 1)} de ${CAL_BEATS}`}
-          </p>
+          <div className="calib__stage" aria-live="polite">
+            <span key={preparing ? 'p' : beat} className={'calib__pulse' + (!preparing && beat >= 0 ? ' calib__pulse-play' : '')} aria-hidden />
+            <p className="timed__count">
+              {preparing
+                ? 'Mão no piano. Já vai começar…'
+                : beat < -4
+                  ? `Só escute o pulso · ${-beat - 4}`
+                  : beat < 0
+                    ? `Prepare: ${-beat}`
+                    : `Toque junto · ${Math.min(CAL_BEATS, beat + 1)} de ${CAL_BEATS}`}
+            </p>
+          </div>
         )}
 
         {state === 'done' && report && (
