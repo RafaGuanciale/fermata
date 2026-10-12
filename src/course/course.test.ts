@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonProgress, TrainingRun } from '../db/db';
 import { UNITS } from '.';
-import { chordSpelling, chromaticByEar, chromaticChord, chromaticSymbol, echoTransposed, harmonizeChromatic, nonChordTones, progressionChoice, romanLabel, shellChord } from './gens';
+import { chordLabel, chordSpelling, chromaticByEar, chromaticChord, chromaticSymbol, echoTransposed, harmonizeChromatic, nonChordTones, progressionChoice, romanLabel, shellChord } from './gens';
 import { sightReadingTwoHands, twoHandTask } from './tasks';
 import { balanceScore } from './judge';
 import { swingTask } from './tasks';
@@ -330,6 +330,20 @@ describe('harmonia cromática', () => {
       const bass = c.listen!.steps[1].midis[0] % 12;
       expect(c.choices![c.answer!]).toBe(bass === 7 ? 'V7' : 'subV7');
     }
+  });
+});
+
+describe('tensões (Unidade 11)', () => {
+  it('cifras com 9ª, 11ª e 13ª: classes, grafia e rótulo', () => {
+    expect(parseChord('C7M(9)').pcs).toEqual([0, 4, 7, 11, 2]);
+    expect(parseChord('G7(13)').pcs).toEqual([7, 11, 2, 5, 4]);
+    expect(parseChord('Dm7(9)').pcs).toEqual([2, 5, 9, 0, 4]);
+    expect(parseChord('A7(b13)').pcs).toEqual([9, 1, 4, 7, 5]);
+    expect(chordSpelling('G7(#9)')).toEqual(['G', 'B', 'D', 'F', 'A#']);
+    expect(chordSpelling('F7M(#11)')).toEqual(['F', 'A', 'C', 'E', 'B']);
+    expect(chordSpelling('Bb7(13)')).toEqual(['Bb', 'D', 'F', 'Ab', 'G']);
+    expect(chordLabel('G7(#9)')).toBe('G7(♯9)');
+    expect(chordLabel('Eb7(b13)')).toBe('E♭7(♭13)');
   });
 });
 
