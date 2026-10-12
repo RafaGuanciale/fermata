@@ -1,8 +1,8 @@
 // Unidade 12 — Arranjo, forma e repertório (lições 90 a 100). Projeto final: Valsa lenta (original, no estilo de Satie).
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
-import { chordSequence, choice, keyName, playChord, type ChoiceQuestion } from '../gens';
-import { n, pick, shuffle } from '../music';
+import { chordLabel, chordSequence, chordSpelling, choice, chromaticByEar, diatonicByEar, echo, keyName, mix, parseChord, playChord, type ChoiceQuestion } from '../gens';
+import { n, pick, ptName, shuffle } from '../music';
 import { melodyTask, sci, transposedTask, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Listen, Rng, SongSpec, TimedTask, Unit } from '../types';
@@ -741,6 +741,341 @@ Satie (Gymnopédies, Gnossiennes) fica no meio do caminho: harmonias paradas, se
   exit: [wholeToneGen, choice(ROMANTIC_Q, 'romantico')],
 };
 
+// ---------- sonata, trilhas e improviso avançado ----------
+
+const THEME1 = 'C5 E5 G5 E5 | F5 D5 B4 G4 | C5 E5 G5 C6 | B5:2 G5:2';
+const THEME2_G = 'D5 B4 C5 A4 | B4 G4 A4 F#4 | G4 B4 D5 B4 | G4:4';
+const CADENCE_C: Listen['steps'] = [
+  { midis: [n('C3'), n('E4'), n('G4'), n('C5')], beats: 1 }, { midis: [n('F3'), n('F4'), n('A4'), n('C5')], beats: 1 },
+  { midis: [n('G2'), n('F4'), n('G4'), n('B4')], beats: 1 }, { midis: [n('C3'), n('E4'), n('G4'), n('C5')], beats: 2 }, { midis: [], beats: 1 },
+];
+
+/** O app toca a cadência de Dó e o tema 2: em Sol (exposição) ou em Dó (recapitulação). */
+function themeKeyByEar(): ItemGen {
+  return (rng) => {
+    const inC = rng() < 0.5;
+    const notes = melodyTask(THEME2_G, { bpm: 100 }).events.map((e) => ({ midis: [(e.midi ?? 60) - (inC ? 7 : 0)], beats: e.beats }));
+    const opts = ['No V, Sol maior (exposição)', 'No I, Dó maior (recapitulação)'];
+    const order = shuffle(rng, [0, 1]);
+    const which = inC ? 1 : 0;
+    return {
+      prompt: 'Depois da cadência em Dó, o tema 2 veio em que tom?',
+      detail: 'Cante o Dó da cadência por dentro e veja se o tema termina nele.',
+      listen: { bpm: 100, steps: [...CADENCE_C, ...notes] },
+      choices: order.map((i) => opts[i]),
+      answer: order.indexOf(which),
+      hint: inC ? 'Terminou no Dó: o tema voltou no I, como na recapitulação.' : 'Terminou no Sol, com Fá♯: o tema estava no V, como na exposição.',
+      steps: [],
+      skill: 'sonata-ouvido',
+    };
+  };
+}
+const themeEar = themeKeyByEar();
+
+const SONATA_Q: ChoiceQuestion[] = [
+  { q: 'Na exposição de uma sonata em Dó maior, o tema 2 aparece em…', options: ['Sol maior (o V)', 'Dó maior', 'Lá menor'], answer: 0, why: 'A exposição cria um conflito de tons: tema 1 no I, tema 2 no V.' },
+  { q: 'Na recapitulação, o tema 2 aparece em…', options: ['Dó maior (o I)', 'Sol maior', 'Fá maior'], answer: 0, why: 'A recapitulação resolve o conflito: tudo no I.' },
+  { q: 'O desenvolvimento…', options: ['Fragmenta os temas, passa por vários tons e termina parado no V', 'Repete a exposição igual', 'Apresenta um tema novo no I'], answer: 0, why: 'É a parte instável; a nota longa no V prepara a volta do tema 1.' },
+  { q: 'A transição (ponte) da exposição serve para…', options: ['Modular do I para o V', 'Terminar a peça', 'Repetir o tema 1'], answer: 0, why: 'Muitas vezes ela chega no V do novo tom (em Dó → Sol, o D7).' },
+  { q: 'Numa sonata em menor (Lá menor), o tema 2 da exposição costuma vir em…', options: ['Dó maior, a relativa', 'Mi menor', 'Lá maior'], answer: 0, why: 'Em menor, o segundo tom é a relativa maior.' },
+  { q: 'Sonatina é…', options: ['Uma sonata pequena, com desenvolvimento curto', 'Uma peça sem forma', 'Uma sonata para dois pianos'], answer: 0, why: 'As de Clementi (Op. 36) e Kuhlau são o primeiro contato com a forma.' },
+];
+
+const ROYAL = [
+  { name: 'Royal Road em Dó: IV7M–V7–iii7–vi7.', symbols: ['F7M', 'G7', 'Em7', 'Am7'] },
+  { name: 'Royal Road em Sol.', symbols: ['C7M', 'D7', 'Bm7', 'Em7'] },
+  { name: 'Royal Road em Fá.', symbols: ['Bb7M', 'C7', 'Am7', 'Dm7'] },
+  { name: 'Royal Road em Ré.', symbols: ['G7M', 'A7', 'F#m7', 'Bm7'] },
+];
+const royal = chordSequence({ sequences: ROYAL, lead: 2 });
+const royalEar = diatonicByEar({ keys: ['C', 'G', 'F'], progressions: [['IV7M', 'V7', 'iii7', 'vi7'], ['IV7M', 'V7', 'I7M', 'vi7'], ['vi7', 'IV7M', 'V7', 'I7M']], answer: 'bass' });
+const epicEar = chromaticByEar({ keys: ['C', 'D', 'F'], progressions: [['bVI', 'bVII', 'I'], ['I', 'bVII', 'IV', 'I'], ['vi', 'IV', 'bVI', 'bVII']], answer: 'bass' });
+const lydianChords = chordSequence({
+  sequences: [
+    { name: 'O "voo" lídio em Dó: I – II/I (Ré maior sobre Dó).', symbols: ['C', 'D/C', 'C'] },
+    { name: 'Em Fá: I – II/I (Sol maior sobre Fá).', symbols: ['F', 'G/F', 'F'] },
+    { name: 'Em Sol: I – II/I (Lá maior sobre Sol).', symbols: ['G', 'A/G', 'G'] },
+  ],
+});
+const GAME_MOTIFS = [
+  [n('E5'), n('C5'), n('B4'), n('A4'), n('C5')], [n('G5'), n('E5'), n('D5'), n('D5')], [n('E5'), n('F5'), n('G5'), n('A5'), n('F5')],
+  [n('A4'), n('C5'), n('E5'), n('D5'), n('C5'), n('B4')], [n('C5'), n('D5'), n('E5'), n('G5'), n('E5'), n('A4')], [n('E5'), n('D5'), n('C5'), n('B4'), n('A4')],
+];
+const melodyEar = echo({ motifs: GAME_MOTIFS, bpm: 96, skill: 'transcrever' });
+
+const FILM_Q: ChoiceQuestion[] = [
+  { q: 'A Royal Road (王道進行, muito usada em J-pop e anime) é…', options: ['IV7M – V7 – iii7 – vi7', 'I – V – vi – IV', 'ii – V – I'], answer: 0, why: 'Começa fora da tônica e termina no vi: sensação de saudade, sem resolver no I.' },
+  { q: 'O ♭VI – ♭VII – I soa…', options: ['Épico, de vitória', 'Triste e parado', 'Como blues'], answer: 0, why: 'Dois acordes emprestados do menor sobem por tom até o I maior. Trilhas de aventura usam muito.' },
+  { q: 'O "voo" lídio (I – II maior sobre o mesmo baixo) vem…', options: ['Da 4ª aumentada do lídio, a 3ª do acorde de II', 'Do V7', 'Da escala de blues'], answer: 0, why: 'Em Dó, o Ré maior traz o Fá♯: o som de fantasia das trilhas.' },
+  { q: 'Um ostinato de esquerda é…', options: ['Um desenho curto repetido sob a melodia', 'Uma nota longa', 'Um acorde por música'], answer: 0, why: 'Estilo "Comptine" de Tiersen ou o arpejo do "Prelude" de Final Fantasy: a esquerda gira e a melodia flutua.' },
+  { q: 'Para transcrever de ouvido, a primeira coisa a achar é…', options: ['A tônica', 'O andamento exato', 'O instrumento'], answer: 0, why: 'Os quatro passos da unidade 8: tônica, qualidade (maior/menor), campo harmônico e baixo.' },
+];
+
+/** Pilha de três 4ªs justas a partir de uma nota (o voicing quartal). */
+function quartal(opts: { from: Midi[] }): ItemGen {
+  return (rng) => {
+    const b = pick(rng, opts.from);
+    const ms = [b, b + 5, b + 10, b + 15];
+    return {
+      prompt: `Empilhe três 4ªs justas a partir de ${PT[b % 12]}`,
+      detail: 'Quatro notas, cada uma uma 4ª justa (5 semitons) acima da anterior. A de baixo é a que o app pediu.',
+      hintKeys: ms,
+      hint: ms.map((m) => PT[m % 12]).join(', '),
+      steps: [{ kind: 'chord', pcs: ms.map((m) => m % 12), bass: b % 12 }],
+      skill: 'quartal',
+    };
+  };
+}
+const quartalGen = quartal({ from: [n('E3'), n('A3'), n('D3'), n('G3'), n('B3')] });
+
+/** Upper structure: shell do dominante na esquerda (1-3-7) e uma tríade maior na direita (no II ou no ♭VI). */
+function upperStructure(): ItemGen {
+  // Fundamental, tríade no II e tríade no ♭VI, com a grafia certa.
+  const SETS: [string, string, string][] = [['C', 'D', 'Ab'], ['F', 'G', 'Db'], ['G', 'A', 'Eb'], ['Bb', 'C', 'Gb'], ['D', 'E', 'Bb']];
+  const pt = (x: string) => ptName(`${x}4`);
+  return (rng) => {
+    const [root, ii, bvi] = pick(rng, SETS);
+    const kind = pick(rng, ['II', 'bVI'] as const);
+    const top = kind === 'II' ? ii : bvi;
+    const shell = chordSpelling(`${root}7`).filter((_, i) => i !== 2);
+    const triad = chordSpelling(top);
+    const pcs = [...new Set([...parseChord(`${root}7`).pcs.filter((_, i) => i !== 2), ...parseChord(top).pcs])];
+    return {
+      prompt: `Toque ${chordLabel(top)}/${chordLabel(root)}7`,
+      detail: `Esquerda: o shell de ${chordLabel(root)}7 (fundamental, 3ª e 7ª). Direita: a tríade de ${pt(top)} maior. ${kind === 'II' ? 'Dá as tensões 9, ♯11 e 13.' : 'Dá as tensões ♭13 e ♯9.'}`,
+      hint: `Esquerda: ${shell.map(pt).join(', ')}. Direita: ${triad.map(pt).join(', ')}.`,
+      steps: [{ kind: 'chord', pcs, bass: parseChord(root).root }],
+      skill: 'upper-structure',
+    };
+  };
+}
+const upperGen = upperStructure();
+
+const C_IIVI: Midi[][] = [
+  [n('D3'), n('F3'), n('A3'), n('C4')], [n('G2'), n('F3'), n('B3'), n('D4')], [n('C3'), n('E3'), n('G3'), n('B3')], [n('C3'), n('E3'), n('G3'), n('B3')],
+];
+const targetImprov: Exercise = {
+  kind: 'improv',
+  title: 'Notas-alvo no ii–V–I',
+  how: 'O app toca Dm7 – G7 – C7M – C7M em loop. Improvise em Dó maior e, em cada troca de acorde, chegue numa nota do acorde novo (de preferência a 3ª ou a 7ª). Termine no Dó, Mi, Sol ou Si.',
+  pcs: [0, 2, 4, 5, 7, 9, 11],
+  bars: 8,
+  bpm: 92,
+  beatsPerBar: 4,
+  backing: [...C_IIVI, ...C_IIVI],
+  low: 60,
+  high: 84,
+  pass: { inSet: 0.9, restsPer4: 1, endOn: [0, 4, 7, 11], targets: 0.6 },
+};
+
+const IMPROV_Q: ChoiceQuestion[] = [
+  { q: 'O voicing de "So What" (Bill Evans, 1959) sobre Dm é…', options: ['Três 4ªs justas e uma 3ª maior: Mi, Lá, Ré, Sol, Si', 'Ré, Fá, Lá, Dó', 'Uma tríade de Ré maior'], answer: 0, why: 'A pilha de 4ªs com a 3ª maior em cima: aberto, sem cara de tríade.' },
+  { q: 'Por que o acorde quartal soa "moderno"?', options: ['Não tem terças empilhadas: a qualidade (maior, menor) fica ambígua', 'Porque é dissonante', 'Porque tem 7 notas'], answer: 0, why: 'Sem 3ª clara, o mesmo acorde serve em vários lugares. McCoy Tyner fez disso uma marca.' },
+  { q: 'D/C7 (tríade de Ré sobre C7) dá ao C7 as tensões…', options: ['9 (Ré), ♯11 (Fá♯) e 13 (Lá)', '♭9 e ♯9', 'Só a 5ª'], answer: 0, why: 'A tríade fica um tom acima da fundamental: o som do dominante lídio.' },
+  { q: 'Ab/C7 dá ao C7…', options: ['♭13 (Lá♭) e ♯9 (Mi♭), com o Dó dobrado', '9 e 13', '♯11'], answer: 0, why: 'Tríade no ♭VI: o som alterado, que pede resolução.' },
+  { q: '"Nota-alvo" no improviso é…', options: ['Chegar numa nota do acorde novo, de preferência a 3ª ou a 7ª, na troca', 'Tocar só a fundamental', 'Tocar a nota mais aguda'], answer: 0, why: 'O resto da frase pode passear; a chegada é o que faz o improviso "desenhar" a harmonia.' },
+];
+
+const l96: Lesson = {
+  n: 96,
+  id: 'l96',
+  title: 'Forma sonata (panorama)',
+  minutes: 60,
+  objectives: [
+    'Consigo explicar exposição, desenvolvimento e recapitulação e o tom de cada tema.',
+    'Consigo tocar o tema 2 no V (exposição) e no I (recapitulação).',
+    'Consigo dizer de ouvido se um tema voltou no I ou no V.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Uma história em três partes',
+      body: `A **forma sonata** é a forma do primeiro movimento de quase toda sonata, sinfonia e quarteto do período clássico (Haydn, Mozart, Beethoven). Ela conta uma história de **conflito e resolução entre dois tons**:
+
+1. **Exposição**: o **tema 1** no **I**; uma **transição** que modula; o **tema 2** no **V** (ou na relativa maior, se a peça é menor); uma pequena **codeta**. Em geral a exposição inteira se repete.
+2. **Desenvolvimento**: os temas são **fragmentados**, passam por vários tons e a tensão cresce até uma parada longa no **V**.
+3. **Recapitulação**: o tema 1 volta no **I** e o **tema 2 também volta no I**. O conflito acabou.
+
+A **sonatina** (Clementi, Kuhlau) é a mesma forma em tamanho pequeno, com um desenvolvimento curto. É o que você leu na unidade 9.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'porque',
+      title: 'por que o tema 2 muda de tom',
+      body: 'Na exposição, o tema 2 no V cria uma pergunta: a música saiu de casa. Na recapitulação, o mesmo tema no I é a resposta. Se o tema 2 voltasse no V, a peça terminaria fora de casa. Ouvir isso é entender a forma.',
+    },
+    {
+      kind: 'text',
+      title: 'Os dois temas',
+      body: `Os temas de uma sonata costumam contrastar: o **tema 1** é mais afirmativo (arpejos, ritmo marcado) e o **tema 2** mais cantado.
+
+Para treinar, o app usa dois temas originais. O **tema 1**, em Dó: Dó, Mi, Sol, Mi | Fá, Ré, Si, Sol | Dó, Mi, Sol, Dó | Si, Sol. O **tema 2**, na exposição, em **Sol maior** (com Fá♯): Ré, Si, Dó, Lá | Si, Sol, Lá, Fá♯ | Sol, Si, Ré, Si | Sol.
+
+Na recapitulação o tema 2 vem **uma 5ª abaixo**, em Dó: o Fá♯ vira Si, e a frase termina no Dó.`,
+    },
+    { kind: 'exercise', id: 'l96-tema1', exercise: quickTimed('Tema 1 no I', 'Só a direita, a 84 BPM. Duas passadas boas.', () => melodyTask(THEME1, { bpm: 84 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l96-tema2', exercise: quickTimed('Tema 2 no V (exposição)', 'Em Sol maior, com Fá♯, a 84 BPM.', () => melodyTask(THEME2_G, { bpm: 84, fifths: 1 }), { reps: 2 }) },
+    {
+      kind: 'exercise',
+      id: 'l96-recap',
+      exercise: quickTimed('Tema 2 no I (recapitulação)', 'A pauta mostra o tema em Sol; toque-o uma 5ª abaixo, em Dó maior, a 80 BPM.', () => transposedTask(THEME2_G, -7, { bpm: 80, fifths: 1, caption: 'Leia em Sol, toque em Dó: cada nota uma 5ª justa abaixo. O Fá♯ vira Si.' }), { reps: 2 }),
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'transpor nota por nota',
+      body: 'Contar 7 semitons para cada nota é lento e erra. Pense em **graus**: o tema 2 começa no 5º grau (Ré em Sol; Sol em Dó) e anda pelos mesmos graus no tom novo. A mão faz o mesmo desenho, só em outra casa.',
+    },
+    { kind: 'exercise', id: 'l96-ouvido', exercise: items('I ou V?', 'O app toca a cadência de Dó e depois o tema 2. Ele estava no I ou no V?', themeEar, 8, 48, 84, 0.75, 'off') },
+    { kind: 'exercise', id: 'l96-quiz', exercise: quiz('Análise da forma', 'Responda sem tocar.', SONATA_Q, 0.85) },
+  ],
+  review: [themeEar, choice(SONATA_Q, 'sonata')],
+  checkpoint: [
+    items('I ou V, de ouvido', '8 temas, sem dica. Meta: 7 de 8.', themeEar, 8, 48, 84, 0.85, 'off'),
+    quickTimed('Recapitulação', 'O tema 2 em Dó, lendo em Sol, a 84 BPM, sem dicas.', () => transposedTask(THEME2_G, -7, { bpm: 84, fifths: 1 })),
+  ],
+  exit: [themeEar, choice(SONATA_Q, 'sonata')],
+};
+
+const l97: Lesson = {
+  n: 97,
+  id: 'l97',
+  title: 'Trilhas de cinema, anime e games',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar a Royal Road conduzida em quatro tons e reconhecê-la pelo baixo.',
+    'Consigo tocar e reconhecer o ♭VI–♭VII–I e o "voo" lídio.',
+    'Consigo tocar um ostinato de esquerda com a melodia por cima e transcrever frases curtas de ouvido.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'A harmonia das trilhas',
+      body: `As trilhas de cinema, anime e games usam a harmonia que você já conhece, com alguns favoritos:
+
+- **Royal Road** (王道進行, "progressão do caminho real"): **IV7M – V7 – iii7 – vi7**. Em Dó: F7M – G7 – Em7 – Am7. Onipresente em J-pop e aberturas de anime. Começa longe da tônica e termina no vi: um sentimento de saudade, sem fechar.
+- **Épico**: **♭VI – ♭VII – I** (em Dó: A♭ – B♭ – C). O empréstimo da unidade 10 subindo por tom até o I maior. É o som da vitória e da aventura.
+- **Lídio**: **I – II/I** (em Dó: C – D/C). O acorde de Ré maior sobre o baixo Dó traz o Fá♯, a 4ª aumentada: o som de voo e fantasia.`,
+    },
+    { kind: 'exercise', id: 'l97-royal', exercise: items('Royal Road conduzida', 'Quatro tétrades em ordem, uma nota de cada, andando o mínimo. Quatro tons.', royal, 8, 48, 84, 0.85, 'fade') },
+    {
+      kind: 'example',
+      title: 'Três cores em Dó',
+      steps: [
+        { say: '**Royal Road**: F7M – G7 – Em7 – Am7.', play: { bpm: 72, steps: [{ midis: [n('F2'), n('E4'), n('A4'), n('C5')], beats: 2 }, { midis: [n('G2'), n('D4'), n('F4'), n('B4')], beats: 2 }, { midis: [n('E2'), n('D4'), n('G4'), n('B4')], beats: 2 }, { midis: [n('A2'), n('C4'), n('E4'), n('G4')], beats: 3 }] } },
+        { say: '**Épico**: A♭ – B♭ – C.', play: { bpm: 72, steps: [{ midis: [n('Ab2'), n('Eb4'), n('Ab4'), n('C5')], beats: 2 }, { midis: [n('Bb2'), n('D4'), n('F4'), n('Bb4')], beats: 2 }, { midis: [n('C3'), n('E4'), n('G4'), n('C5')], beats: 4 }] } },
+        { say: '**Lídio**: C e D/C, sobre o mesmo baixo.', play: { bpm: 72, steps: [{ midis: [n('C3'), n('E4'), n('G4'), n('C5')], beats: 2 }, { midis: [n('C3'), n('D4'), n('F#4'), n('A4')], beats: 2 }, { midis: [n('C3'), n('E4'), n('G4'), n('C5')], beats: 4 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l97-cores', exercise: items('O voo lídio', 'Toque os acordes em ordem; no II/I, o baixo continua na tônica.', lydianChords, 6, 36, 84, 0.85, 'fade') },
+    { kind: 'exercise', id: 'l97-ouvido', exercise: items('Ditado de baixo: trilhas', 'O app toca uma progressão; toque o baixo de cada acorde. Mistura Royal Road e épico.', mix([royalEar, epicEar]), 8, 36, 72, 0.75, 'off') },
+    {
+      kind: 'text',
+      title: 'Ostinato na esquerda',
+      body: `Muitas trilhas de piano se apoiam num **ostinato**: a esquerda repete um desenho curto, em colcheias, e a melodia flutua por cima. Pense na "Comptine d'un autre été" de Tiersen ou no arpejo do "Prelude" de Final Fantasy (as duas protegidas; aqui, só como referência).
+
+O **Tema de jogo** do app (original) usa o desenho mais simples: **fundamental, 5ª, oitava, 5ª**, duas vezes por compasso, sobre Am – F – C – G.
+
+Como no baião, o ostinato precisa ficar **automático** antes de a melodia entrar. Toque a esquerda sozinha até poder conversar enquanto toca.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l97-ostinato',
+      exercise: quickTimed('Ostinato sozinho', 'Só a esquerda: Am | F | C | G em colcheias, de 72 até 84 BPM.', () => melodyTask(['Am', 'F', 'C', 'G'].map(ost).join(' | '), { bpm: 72, clef: 'bass', caption: 'Fundamental, 5ª, oitava, 5ª: Lá–Mi–Lá–Mi, Fá–Dó–Fá–Dó, Dó–Sol–Dó–Sol, Sol–Ré–Sol–Ré.' }), { ladder: { from: 72, to: 84, step: 4 } }),
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'o ostinato engolir a melodia',
+      body: 'Oito colcheias por compasso fazem muito mais "barulho" que duas mínimas na direita. Toque o ostinato **piano** e igual, e a melodia **mezzo forte**. Se não der para ouvir a melodia na gravação, a esquerda está forte demais.',
+    },
+    { kind: 'song', songId: 'u12-tema-jogo', why: 'A música da lição: melodia original em Lá menor sobre o ostinato.' },
+    {
+      kind: 'text',
+      title: 'Transcrever de ouvido',
+      body: `A tabela pede **transcrever 8 compassos de uma trilha** e arranjar. O método é o da unidade 8, em quatro passos: **tônica**, **qualidade** (maior ou menor), **campo harmônico** e **baixo**. Para a melodia, cante frases curtas (3 a 6 notas), ache a primeira nota no teclado e siga por intervalos.
+
+O exercício abaixo treina o passo da melodia com frases do Tema de jogo. A transcrição de uma trilha de verdade (a sua escolha) é o projeto da lição 100.`,
+    },
+    { kind: 'exercise', id: 'l97-transcrever', exercise: items('Frases de ouvido', 'O app toca uma frase de 4 a 6 notas; repita. Ele diz a primeira nota.', melodyEar, 8, 60, 84, 0.75, 'off') },
+    { kind: 'exercise', id: 'l97-quiz', exercise: quiz('Trilhas', 'Responda sem tocar.', FILM_Q) },
+  ],
+  review: [royal, royalEar, choice(FILM_Q, 'trilhas')],
+  checkpoint: [
+    items('Ditado de trilhas', '8 progressões, sem dica. Meta: 7 de 8.', mix([royalEar, epicEar]), 8, 36, 72, 0.85, 'off'),
+    items('Frases de ouvido', '6 frases, sem dica. Meta: 5 de 6.', melodyEar, 6, 60, 84, 0.8, 'off'),
+    quickTimed('Tema de jogo', 'Compassos 1 a 4, mãos juntas, a 80 BPM.', () => twoHandTask(GAME_R.slice(0, 4).join(' | '), GAME_CHORDS.slice(0, 4).map(ost).join(' | '), { bpm: 80 })),
+  ],
+  exit: [royal, choice(FILM_Q, 'trilhas')],
+};
+
+const l98: Lesson = {
+  n: 98,
+  id: 'l98',
+  title: 'Improvisação e rearmonização avançadas',
+  minutes: 60,
+  objectives: [
+    'Consigo montar voicings quartais e upper structures (tríade sobre o dominante).',
+    'Consigo improvisar sobre o ii–V–I com 60% das chegadas em nota do acorde e 90% das notas no tom.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Acordes em quartas',
+      body: `Até aqui todo acorde foi uma pilha de **terças**. Nos anos 1950 e 60, pianistas como Bill Evans e McCoy Tyner começaram a empilhar **quartas**: Mi, Lá, Ré, Sol. Sem terças, o acorde não diz se é maior ou menor; ele soa aberto, moderno, "suspenso".
+
+O exemplo famoso é o voicing de "So What" (Miles Davis, 1959, com Bill Evans ao piano): sobre Ré menor, **três 4ªs justas e uma 3ª maior** em cima: Mi, Lá, Ré, Sol, Si.
+
+A mesma pilha serve a vários acordes. Mi–Lá–Ré–Sol cabe em Dm7 (9, 5, 1, 11), em C (3, 6, 9, 5) e em G7sus. Por isso os quartais são ótimos para **vamps modais**: a mão sobe e desce a pilha pelas notas do modo.`,
+    },
+    { kind: 'exercise', id: 'l98-quartal', exercise: items('Pilhas de quartas', 'Três 4ªs justas a partir da nota pedida. Quatro notas.', quartalGen, 8, 48, 84, 0.85, 'fade') },
+    {
+      kind: 'text',
+      title: 'Upper structures: tríade em cima do dominante',
+      body: `Um atalho para tensões no V7: a esquerda toca o **shell** (fundamental, 3ª e 7ª) e a direita toca uma **tríade maior** por cima. A tríade escolhida decide as tensões:
+
+- tríade **um tom acima** da fundamental (o **II**): **D/C7** = C7 com 9 (Ré), ♯11 (Fá♯) e 13 (Lá). Som claro, lídio.
+- tríade no **♭VI**: **A♭/C7** = C7 com ♭13 (Lá♭) e ♯9 (Mi♭), mais o Dó. Som alterado, tenso.
+
+A cifra "D/C7" se lê "Ré sobre Dó sete". É um panorama: há outras tríades possíveis, mas essas duas cobrem os dois sabores do dominante, o natural e o alterado.`,
+    },
+    {
+      kind: 'example',
+      title: 'D/C7 e A♭/C7 resolvendo',
+      steps: [
+        { say: '**D/C7** → F: Dó–Mi–Si♭ na esquerda, Ré–Fá♯–Lá na direita.', play: { bpm: 66, steps: [{ midis: [n('C3'), n('E3'), n('Bb3'), n('D4'), n('F#4'), n('A4')], beats: 2 }, { midis: [n('F2'), n('A3'), n('E3'), n('C4'), n('F4'), n('A4')], beats: 3 }] } },
+        { say: '**A♭/C7** → F: o Lá♭ desce para o Sol, o Mi♭ para o Ré.', play: { bpm: 66, steps: [{ midis: [n('C3'), n('E3'), n('Bb3'), n('Eb4'), n('Ab4'), n('C5')], beats: 2 }, { midis: [n('F2'), n('A3'), n('E3'), n('D4'), n('G4'), n('C5')], beats: 3 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l98-upper', exercise: items('Upper structures', 'Shell do dominante na esquerda e a tríade na direita, juntos.', upperGen, 8, 36, 84, 0.85, 'fade') },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'tríade de cima na mesma região do shell',
+      body: 'Se a tríade da direita desce para perto do shell, as notas se embolam e a tríade some. Deixe um espaço: o shell na região de Dó3, a tríade a partir do Dó4 ou acima.',
+    },
+    {
+      kind: 'text',
+      title: 'Notas-alvo no ii–V–I',
+      body: `No blues da unidade 8 você mirou notas do acorde nas trocas. Agora o alvo é o **ii–V–I**, onde as trocas são rápidas. A técnica:
+
+- saiba as **notas-guia** de cada acorde (3ª e 7ª): Dm7 = Fá e Dó; G7 = Si e Fá; C7M = Mi e Si;
+- no fim de cada frase, **chegue** numa delas no tempo 1 do acorde novo, de preferência pelo meio tom de cima ou de baixo (a **aproximação cromática**: Si♭ → Si no G7, Ré♯ → Mi no C7M);
+- entre as chegadas, passeie livre pela escala.
+
+Meta da tabela: **60% das chegadas** em nota do acorde e **90% das notas** no tom (as aproximações cromáticas contam fora, então use poucas).`,
+    },
+    { kind: 'exercise', id: 'l98-alvos', exercise: targetImprov },
+    { kind: 'exercise', id: 'l98-quiz', exercise: quiz('Improviso avançado', 'Responda sem tocar.', IMPROV_Q) },
+  ],
+  review: [quartalGen, upperGen, choice(IMPROV_Q, 'improviso')],
+  checkpoint: [
+    targetImprov,
+    items('Quartais e upper structures', '8 acordes, sem dica. Meta: 7 de 8.', mix([quartalGen, upperGen]), 8, 36, 84, 0.85, 'off'),
+  ],
+  exit: [upperGen, choice(IMPROV_Q, 'improviso')],
+};
+
 // ---------- unidade ----------
 
 const unit: Unit = {
@@ -749,7 +1084,7 @@ const unit: Unit = {
   title: 'Arranjo, forma e repertório',
   goal: 'Reconhecer a forma, arranjar uma melodia para piano solo e apresentar um recital próprio com peças de três mundos.',
   technique: 'Escalas de 2 oitavas mãos juntas em semicolcheias, de 44 rumo a 60 BPM (variação abaixo de 25 ms), e arpejos maiores mãos juntas. Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l90, l91, l92, l93, l94, l95],
+  lessons: [l90, l91, l92, l93, l94, l95, l96, l97, l98],
   songs: [odeArr, preludio, tema, valsa],
   final: {
     songId: 'u12-valsa-lenta',
