@@ -2,7 +2,7 @@
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 // Músicas protegidas (Asa Branca, bossa nova, Villa-Lobos) ficam só citadas no texto; o repertório tocado é original.
 
-import { chordLabel, choice, keyName, nearestVoicing, playChord, spellInterval, spellScale, type ChoiceQuestion } from '../gens';
+import { chordLabel, choice, keyName, nearestVoicing, parseChord, playChord, spellInterval, spellScale, type ChoiceQuestion } from '../gens';
 import { PC_NAMES, n, pcOf, pick, ptName, shuffle } from '../music';
 import { melodyTask, rhythmTask, sci, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
@@ -47,8 +47,6 @@ const MODE_COLOR: Record<Mode, string> = {
   nordestina: 'maior com a 4ª aumentada e a 7ª menor (lídio e mixolídio juntos).',
 };
 const modeName = (m: Mode) => (m === 'nordestina' ? 'escala nordestina' : m);
-/** Pcs do modo sobre uma tônica. */
-export const modePcs = (tonicPc: number, m: Mode) => MODE_STEPS[m].slice(0, 7).map((x) => (tonicPc + x) % 12);
 
 /** "Toque Ré dórico, subindo uma oitava": a tônica escrita ("D4") e o modo. */
 function modeScale(opts: { tonics: string[]; modes: Mode[]; skill?: string }): ItemGen {
@@ -70,7 +68,7 @@ function modeScale(opts: { tonics: string[]; modes: Mode[]; skill?: string }): I
 }
 
 /** O app toca a tônica e o modo subindo; você diz qual dos dois foi. */
-export function modeByEar(opts: { tonics: Midi[]; pairs: [Mode, Mode][]; skill?: string }): ItemGen {
+function modeByEar(opts: { tonics: Midi[]; pairs: [Mode, Mode][]; skill?: string }): ItemGen {
   return (rng) => {
     const t = pick(rng, opts.tonics);
     const pair = pick(rng, opts.pairs);
@@ -239,7 +237,7 @@ function bossaBars(upper: Midi[], root: Midi): { r: string; l: string } {
 }
 
 /** ii (2 compassos), V (2) e I (4) em bossa, num tom sorteado: 8 compassos, `cycles` vezes. */
-export function bossaTask(rng: Rng, bpm: number, cycles = 1, keys = RL_KEYS.filter((x) => ['C', 'F', 'Bb', 'G'].includes(x.key))): TimedTask {
+function bossaTask(rng: Rng, bpm: number, cycles = 1, keys = RL_KEYS.filter((x) => ['C', 'F', 'Bb', 'G'].includes(x.key))): TimedTask {
   const k = pick(rng, keys);
   const { upper } = rootlessChain(k.pc);
   // Fundamental entre Mi2 e Ré♯3, para a 5ª abaixo caber e a direita (de Fá3 para cima) ficar livre.
@@ -254,6 +252,37 @@ export function bossaTask(rng: Rng, bpm: number, cycles = 1, keys = RL_KEYS.filt
     fifths: k.fifths,
     caption: `${keyName(k.key)} maior: ${names[0]} (2 compassos), ${names[1]} (2), ${names[2]} (4). Esquerda: fundamental longa-curta, depois a 5ª abaixo longa-curta.`,
   });
+}
+
+// ---------- comping de uma cifra (lição 87) ----------
+
+/** Qualidade da cifra → voicing sem fundamental (m7 como o ii, 7 como o V, 7M como o I). */
+const RL_BY_Q: Record<string, Role> = { m7: 'ii', '7': 'V', '7M': 'I' };
+
+/**
+ * Comping de bossa sobre uma cifra (um acorde por compasso): direita com voicings sem fundamental conduzidos,
+ * no desenho de dois compassos; esquerda com a fundamental e a 5ª abaixo, longa-curta.
+ */
+function chartComping(chart: string[], opts: { bpm: number; fifths: number; caption: string }): TimedTask {
+  const parsed = chart.map((c) => {
+    const m = /^([A-G](?:#|b)?)(m7|7M|7)$/.exec(c)!;
+    const root = parseChord(`${m[1]}7`).root;
+    const role = RL_BY_Q[m[2]];
+    return { root, pcs: ROOTLESS[role].offs.map((o) => (root + o) % 12), first: (root + ROOTLESS[role].offs[0]) % 12, offs: ROOTLESS[role].offs };
+  });
+  const f = parsed[0];
+  const third = 53 + ((f.first - 53 + 120) % 12);
+  let cur = f.offs.map((o) => third + o - f.offs[0]);
+  const rs: string[] = [];
+  const ls: string[] = [];
+  parsed.forEach((p, i) => {
+    if (i > 0) cur = nearestVoicing(cur, p.pcs);
+    const c = cur.map(sci).join('+');
+    rs.push(i % 2 === 0 ? `${c}:1.5 ${c}:1.5 ${c}:1` : `r:1 ${c}:1.5 ${c}:1.5`);
+    const root = 40 + ((p.root - 40 + 120) % 12);
+    ls.push(`${sci(root)}:1.5 ${sci(root)}:0.5 ${sci(root - 5)}:1.5 ${sci(root - 5)}:0.5`);
+  });
+  return twoHandTask(rs.join(' | '), ls.join(' | '), { bpm: opts.bpm, fifths: opts.fifths, caption: opts.caption });
 }
 
 // ---------- músicas ----------
@@ -655,6 +684,313 @@ Dica de leitura: a 3ª do ii é o **4º grau** do tom e a 7ª do ii é a **tôni
   exit: [rlChord, choice(ROOTLESS_Q, 'rootless')],
 };
 
+const BOSSA_Q: ChoiceQuestion[] = [
+  { q: 'Síncope é…', options: ['Um ataque no tempo fraco (ou no contratempo) que se prolonga pelo tempo forte', 'Uma nota mais forte no tempo 1', 'Uma pausa no fim da frase'], answer: 0, why: 'O acento sai do lugar esperado: o ataque vem antes e o tempo forte fica "dentro" da nota.' },
+  { q: 'Antecipação é…', options: ['A nota ou o acorde seguinte chegar uma colcheia antes da barra', 'Tocar mais rápido que o metrônomo', 'Repetir o compasso anterior'], answer: 0, why: 'Na bossa, a melodia e o acorde do próximo compasso costumam entrar no "e" do 4.' },
+  { q: 'O desenho da direita, em dois compassos, ataca…', options: ['No 1, no "e" do 2 e no 4 | no 2 e no "e" do 3', 'Em todos os tempos', 'Só no 1 de cada compasso'], answer: 0, why: 'É um dos desenhos clássicos do violão de bossa transposto para o piano.' },
+  { q: 'Na esquerda, o baixo da bossa é…', options: ['Fundamental longa-curta, depois a 5ª abaixo longa-curta', 'Colcheias retas na fundamental', 'Um acorde inteiro no tempo 1'], answer: 0, why: 'Semínima pontuada e colcheia, como o surdo do samba "desacelerado".' },
+  { q: 'Quem fixou a "batida" da bossa nova no violão, no fim dos anos 1950?', options: ['João Gilberto', 'Luiz Gonzaga', 'Chiquinha Gonzaga'], answer: 0, why: 'Em gravações como "Chega de Saudade" (1958), com Tom Jobim nos arranjos.' },
+];
+
+const MODES_Q: ChoiceQuestion[] = [
+  { q: 'A nota característica do lídio é…', options: ['A 4ª aumentada', 'A 7ª menor', 'A 2ª menor'], answer: 0, why: 'Lídio = maior com ♯4. Em Fá: Si natural.' },
+  { q: 'A nota característica do dórico é…', options: ['A 6ª maior (num modo menor)', 'A 3ª maior', 'A 5ª diminuta'], answer: 0, why: 'Dórico = menor natural com a 6ª maior. Em Ré: Si natural.' },
+  { q: 'Do mais claro para o mais escuro, a ordem é…', options: ['Lídio, jônio, mixolídio, dórico, eólio, frígio, lócrio', 'Jônio, dórico, frígio, lídio, mixolídio, eólio, lócrio', 'Eólio, dórico, jônio, lídio, frígio, mixolídio, lócrio'], answer: 0, why: 'Cada passo abaixa uma nota meio tom: ♯4 → 4, 7 → ♭7, 3 → ♭3, 6 → ♭6, 2 → ♭2, 5 → ♭5.' },
+  { q: 'Ré dórico e Fá lídio usam…', options: ['As mesmas teclas brancas, com centros diferentes', 'Notas completamente diferentes', 'Só as pretas'], answer: 0, why: 'São rotações de Dó maior. O que muda o som é o centro: a tônica que o vamp e o final afirmam.' },
+  { q: 'Para o dórico soar dórico, e não Dó maior, o mais importante é…', options: ['Afirmar o Ré: vamp em Dm, frase terminando no Ré, a 6ª (Si) em tempo forte', 'Tocar rápido', 'Usar o pedal'], answer: 0, why: 'O modo depende do centro. Sem um centro claro, as brancas soam como Dó maior.' },
+  { q: 'Frígio sobre Mi é…', options: ['Mi, Fá, Sol, Lá, Si, Dó, Ré', 'Mi, Fá♯, Sol, Lá, Si, Dó, Ré', 'Mi, Fá♯, Sol♯, Lá, Si, Dó♯, Ré♯'], answer: 0, why: 'Menor natural com a 2ª menor: o Fá natural logo acima do Mi.' },
+];
+
+const FORM_Q: ChoiceQuestion[] = [
+  { q: 'Na forma AABA de 32 compassos, o B (a ponte) tem…', options: ['8 compassos', '16 compassos', '4 compassos'], answer: 0, why: 'Quatro seções de 8: A, A, B, A.' },
+  { q: 'A ponte costuma…', options: ['Sair do tom (outro centro, outra região da melodia) e preparar a volta do A', 'Repetir o A igual', 'Ser só bateria'], answer: 0, why: 'É o contraste: na Bossa em Fá, o B começa no IV (B♭7M) e passa pelo iv emprestado.' },
+  { q: 'No compasso 10 da Bossa em Fá, o B♭m6 é…', options: ['O iv emprestado de Fá menor', 'O V7 de Fá', 'Um erro de cifra'], answer: 0, why: 'Si♭, Ré♭, Fá, Sol: o Ré♭ vem de Fá menor (unidade 10, empréstimo modal).' },
+  { q: 'No piano solo de bossa, a esquerda…', options: ['Toca shells no ritmo da bossa enquanto a direita canta', 'Fica parada', 'Dobra a melodia'], answer: 0, why: 'A esquerda faz o violão; a direita, a voz.' },
+  { q: 'A forma ABAC é…', options: ['A, B, A de novo e um final C diferente', 'Igual à AABA', 'Uma forma de fuga'], answer: 0, why: 'Muito comum em canções de 32 compassos: o C substitui a última repetição do A.' },
+];
+
+const modes6 = modeScale({ tonics: ['C4', 'D4', 'F4', 'G4', 'A4'], modes: ['jônio', 'lídio', 'mixolídio', 'dórico', 'eólio', 'frígio'] });
+const modeEar = modeByEar({ tonics: [n('C4'), n('D4'), n('A3')], pairs: [['jônio', 'lídio'], ['jônio', 'mixolídio'], ['eólio', 'dórico'], ['eólio', 'frígio']] });
+
+const DM7 = [n('D3'), n('F3'), n('A3'), n('C4')];
+const G7V = [n('G2'), n('F3'), n('B3'), n('D4')];
+const F7M = [n('F2'), n('E3'), n('A3'), n('C4')];
+const G_F = [n('F2'), n('G3'), n('B3'), n('D4')];
+
+const dorianImprov: Exercise = {
+  kind: 'improv',
+  title: 'Ré dórico sobre Dm7 – G7',
+  how: 'O app alterna Dm7 e G7 (o G7 traz o Si, a 6ª maior de Ré). Improvise só nas brancas, com o Ré como casa: comece e termine nele e ponha o Si em tempo forte.',
+  pcs: [0, 2, 4, 5, 7, 9, 11],
+  bars: 8,
+  bpm: 84,
+  beatsPerBar: 4,
+  backing: Array.from({ length: 8 }, (_, i) => (i % 2 === 0 ? DM7 : G7V)),
+  low: 60,
+  high: 84,
+  pass: { inSet: 0.9, restsPer4: 1, endOn: [2] },
+};
+
+const lydianImprov: Exercise = {
+  kind: 'improv',
+  title: 'Fá lídio sobre F7M – G/F',
+  how: 'O app alterna F7M e G/F (Sol maior com Fá no baixo: traz o Si, a 4ª aumentada de Fá). Improvise nas brancas com o Fá como casa e termine nele.',
+  pcs: [0, 2, 4, 5, 7, 9, 11],
+  bars: 8,
+  bpm: 76,
+  beatsPerBar: 4,
+  backing: Array.from({ length: 8 }, (_, i) => (i % 2 === 0 ? F7M : G_F)),
+  low: 60,
+  high: 84,
+  pass: { inSet: 0.9, restsPer4: 1, endOn: [5] },
+};
+
+const BOSSA_CHART = ['F7M', 'F7M', 'Gm7', 'C7', 'Am7', 'D7', 'Gm7', 'C7'];
+const chartTask = (bpm: number) => () =>
+  chartComping(BOSSA_CHART, { bpm, fifths: -1, caption: 'Cifra do A: F7M(9) | F7M(9) | Gm7(9) | C7(13) | Am7(9) | D7(13) | Gm7(9) | C7(13). Esquerda: fundamental e 5ª abaixo.' });
+
+const l85: Lesson = {
+  n: 85,
+  id: 'l85',
+  title: 'Bossa nova I: o comping',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar o desenho de dois compassos da bossa na direita, no tempo.',
+    'Consigo tocar o baixo da bossa (fundamental e 5ª abaixo, longa-curta) na esquerda.',
+    'Consigo acompanhar um ii–V–I em bossa com as duas mãos, 16 compassos em ±40 ms.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'A bossa nova',
+      body: `A **bossa nova** nasceu no Rio de Janeiro no fim dos anos 1950. A ideia de João Gilberto foi tirar o samba da escola de samba e pôr no violão: o polegar faz o **surdo** (o baixo) e os outros dedos fazem o **tamborim** (os acordes, em síncope). Tom Jobim juntou a isso a harmonia do jazz, com tétrades e tensões.
+
+As canções de Jobim, Vinicius e companhia ainda são protegidas, então aqui você aprende o groove sobre progressões e, na lição 87, numa melodia original.
+
+Ao piano, a divisão é a mesma do violão: a **esquerda é o polegar** (baixo) e a **direita são os dedos** (acordes). A harmonia da direita é a da lição 84: voicings sem fundamental.`,
+    },
+    {
+      kind: 'text',
+      title: 'Síncope e antecipação',
+      body: `Duas palavras resumem o balanço da bossa:
+
+- **Síncope**: um ataque fora do tempo (no "e") que continua soando por cima do tempo seguinte. O tempo forte fica "dentro" da nota, sem ataque.
+- **Antecipação**: o acorde (ou a nota da melodia) do compasso seguinte chega **uma colcheia antes** da barra, no "e" do 4.
+
+O desenho da direita ocupa **dois compassos** e é o coração do comping. Conte em colcheias, "1 e 2 e 3 e 4 e":
+
+- 1º compasso: ataques no **1**, no **"e" do 2** e no **4**;
+- 2º compasso: ataques no **2** e no **"e" do 3**.
+
+Os ataques do "e" são síncopes: duram uma semínima pontuada e atravessam o tempo seguinte.`,
+    },
+    {
+      kind: 'example',
+      title: 'O desenho da direita',
+      steps: [
+        { say: 'Num acorde só (Gm7(9) sem fundamental: Si♭, Ré, Fá, Lá), dois compassos do desenho.', play: { bpm: 72, steps: [{ midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1 }, { midis: [], beats: 1 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }] }, keys: [n('Bb3'), n('D4'), n('F4'), n('A4')] },
+        { say: 'Agora a esquerda: Sol longo, Sol curto, Ré (a 5ª abaixo) longo, Ré curto.', play: { bpm: 72, steps: [{ midis: [n('G2')], beats: 1.5 }, { midis: [n('G2')], beats: 0.5 }, { midis: [n('D2')], beats: 1.5 }, { midis: [n('D2')], beats: 0.5 }] }, keys: [n('G2'), n('D2')] },
+      ],
+    },
+    {
+      kind: 'exercise',
+      id: 'l85-direita',
+      exercise: quickTimed('O desenho em qualquer tecla', 'Quatro compassos (o desenho duas vezes), a 70 BPM, em qualquer tecla. Duas passadas boas.', () => rhythmTask(rep('x:1.5 x:1.5 x | r x:1.5 x:1.5', 2), { bpm: 70, caption: 'Bossa: 1, "e" do 2, 4 | 2, "e" do 3.' }), { reps: 2, window: 60 }),
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'esperar o tempo para atacar',
+      body: 'Quem vem da música clássica tende a "puxar" a síncope para o tempo seguinte, e o desenho vira marcha. Toque o "e" de verdade e **não toque no tempo** que vem depois: ele fica dentro da nota. Conte as colcheias em voz alta; o metrônomo marca o que você não toca.',
+    },
+    {
+      kind: 'text',
+      title: 'O baixo: longa-curta',
+      body: `A esquerda imita o surdo: **fundamental** longa (semínima pontuada) e curta (colcheia), depois a **5ª abaixo** longa e curta. No Gm7: Sol, Sol, Ré, Ré. No C7: Dó, Dó, Sol, Sol.
+
+Por que a 5ª **abaixo**? Porque assim a esquerda fica grave e não esbarra nos voicings da direita, que começam perto do Fá3.
+
+A colcheia de cada par cai no "e" do 2 e no "e" do 4, junto com... nada: a direita ataca no "e" do 2 só no primeiro compasso do desenho. É essa conversa entre as mãos que dá o balanço.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l85-esquerda',
+      exercise: quickTimed('Baixo da bossa', 'Só a esquerda: Gm7 (2 compassos), C7 (1) e F7M (1), de 64 até 76 BPM, janela de ±50 ms.', () => melodyTask('G2:1.5 G2:0.5 D2:1.5 D2:0.5 | G2:1.5 G2:0.5 D2:1.5 D2:0.5 | C3:1.5 C3:0.5 G2:1.5 G2:0.5 | F2:1.5 F2:0.5 C2:1.5 C2:0.5', { bpm: 64, clef: 'bass', fifths: -1, caption: 'Fundamental longa-curta, 5ª abaixo longa-curta.' }), { window: 50, ladder: { from: 64, to: 76, step: 4 } }),
+    },
+    {
+      kind: 'text',
+      title: 'Mãos juntas',
+      body: `Junte devagar. Primeiro só o primeiro compasso do desenho, em loop, até as duas mãos "conversarem" sem pensar: o 1 junto, o "e" do 2 só na direita, o 3 só na esquerda, o 4 na direita e o "e" do 4 na esquerda.
+
+O exercício toca o **ii–V–I** num tom sorteado (Dó, Fá, Si♭ ou Sol): ii por 2 compassos, V por 2, I por 4. A direita usa os voicings sem fundamental conduzidos da lição 84. A pauta mostra a direita; a legenda diz a cifra.
+
+A tabela pede a pontuação **por mão**; o app ainda junta as duas na mesma conta. Se a passada cair, toque cada mão sozinha com o metrônomo para achar qual está fugindo.`,
+    },
+    { kind: 'exercise', id: 'l85-maos', exercise: quickTimed('ii–V–I em bossa', '8 compassos, mãos juntas, a 64 BPM, janela de ±50 ms. Tom sorteado; duas passadas boas.', (rng) => bossaTask(rng, 64), { reps: 2, window: 50 }) },
+    { kind: 'exercise', id: 'l85-quiz', exercise: quiz('Bossa', 'Responda sem tocar.', BOSSA_Q) },
+  ],
+  review: [rlSeq, choice(BOSSA_Q, 'bossa')],
+  checkpoint: [
+    quickTimed('Comping de bossa, 16 compassos', 'ii–V–I duas vezes num tom sorteado, a 70 BPM, sem dicas. Meta: 85% das notas em ±40 ms.', (rng) => bossaTask(rng, 70, 2), { window: 40 }),
+  ],
+  exit: [rlChord, choice(BOSSA_Q, 'bossa')],
+};
+
+const l86: Lesson = {
+  n: 86,
+  id: 'l86',
+  title: 'Modos como cores',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar jônio, lídio, mixolídio, dórico, eólio e frígio sobre a mesma tônica.',
+    'Consigo dizer de ouvido qual de dois modos parecidos foi tocado.',
+    'Consigo improvisar em Ré dórico e Fá lídio sobre um vamp, com 90% das notas no modo e terminando na tônica.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Rotação ou cor?',
+      body: `O jeito antigo de ensinar modos é por **rotação**: "Ré dórico são as brancas de Ré a Ré". É verdade, mas não ajuda a tocar: pensando assim, você toca Dó maior começando no Ré e o ouvido continua ouvindo Dó maior.
+
+O jeito útil é por **cor**: fixe a tônica e compare com a escala maior ou menor que você já conhece. Cada modo é uma delas com **uma nota mudada**, a **nota característica**:
+
+- **Lídio**: maior com a **4ª aumentada**. Dó lídio: Fá♯.
+- **Jônio**: a escala maior.
+- **Mixolídio**: maior com a **7ª menor**. Dó mixolídio: Si♭ (o baião da lição 82).
+- **Dórico**: menor com a **6ª maior**. Dó dórico: Lá natural.
+- **Eólio**: a menor natural.
+- **Frígio**: menor com a **2ª menor**. Dó frígio: Ré♭.
+- **Lócrio**: menor com 2ª menor e **5ª diminuta**. Instável, quase não serve de casa.
+
+Nessa ordem eles vão do mais claro ao mais escuro: cada um abaixa uma nota do anterior.`,
+    },
+    {
+      kind: 'keys',
+      low: 60,
+      high: 72,
+      lit: [60, 62, 64, 66, 67, 69, 71, 72],
+      labels: { 60: 'Dó', 62: 'Ré', 64: 'Mi', 66: 'Fá♯', 67: 'Sol', 69: 'Lá', 71: 'Si', 72: 'Dó' },
+      caption: 'Dó lídio: Dó maior com o Fá♯. A 4ª aumentada deixa o som "flutuando", sem pressa de resolver.',
+    },
+    {
+      kind: 'example',
+      title: 'A mesma tônica, cores diferentes',
+      steps: [
+        { say: 'Dó **jônio** e Dó **lídio**: só o Fá muda. Escute o Fá♯ brilhar.', play: { bpm: 120, steps: [...MODE_STEPS['jônio'].map((x) => ({ midis: [60 + x], beats: 1 })), { midis: [], beats: 1 }, ...MODE_STEPS['lídio'].map((x) => ({ midis: [60 + x], beats: 1 }))] } },
+        { say: 'Dó **eólio** e Dó **dórico**: só o Lá♭ vira Lá. O menor fica mais "claro".', play: { bpm: 120, steps: [...MODE_STEPS['eólio'].map((x) => ({ midis: [60 + x], beats: 1 })), { midis: [], beats: 1 }, ...MODE_STEPS['dórico'].map((x) => ({ midis: [60 + x], beats: 1 }))] } },
+        { say: 'Dó **frígio**: o Ré♭ logo acima da tônica dá o sabor espanhol.', play: { bpm: 120, steps: MODE_STEPS['frígio'].map((x) => ({ midis: [60 + x], beats: 1 })) } },
+      ],
+    },
+    { kind: 'exercise', id: 'l86-escalas', exercise: items('Seis modos, cinco tônicas', 'O app pede um modo numa tônica. Pense na escala maior ou menor e mude a nota característica.', modes6, 10, 48, 84, 0.85, 'fade') },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'tocar a escala certa e soar Dó maior',
+      body: 'Ré dórico com as brancas só soa dórico se o **Ré for a casa**: um vamp em Dm, frases que começam e terminam no Ré, a 6ª (Si) num tempo forte. Se você passeia pelas brancas sem centro, o ouvido escolhe Dó maior sozinho.',
+    },
+    { kind: 'exercise', id: 'l86-ouvido', exercise: items('Qual modo?', 'O app toca a tônica e o modo subindo. Escolha entre os dois parecidos.', modeEar, 8, 48, 84, 0.75, 'off') },
+    {
+      kind: 'text',
+      title: 'O vamp segura o centro',
+      body: `Um **vamp** é um loop curto, de um ou dois acordes, que fica rodando enquanto alguém improvisa. Ele é o que faz o modo existir: os acordes dizem ao ouvido onde é a casa e trazem a nota característica.
+
+- **Ré dórico**: Dm7 – G7. O Dm7 diz "a casa é Ré"; o G7 traz o **Si**, a 6ª maior de Ré.
+- **Fá lídio**: F7M – G/F (Sol maior com Fá no baixo). O F7M diz "a casa é Fá"; o G/F traz o **Si**, a 4ª aumentada de Fá.
+
+Os dois usam só teclas brancas, e é isso que mostra que o modo é o centro, não as notas. Nos improvisos, o app mede as notas no modo (meta: 90%) e a nota final. A outra meta da tabela, a **nota característica em tempo forte pelo menos 4 vezes em 16 compassos**, você confere ouvindo a gravação.`,
+    },
+    { kind: 'exercise', id: 'l86-dorico', exercise: dorianImprov },
+    { kind: 'exercise', id: 'l86-lidio', exercise: lydianImprov },
+    {
+      kind: 'exercise',
+      id: 'l86-cor',
+      exercise: {
+        kind: 'checklist',
+        title: 'A cor apareceu?',
+        how: 'Grave os dois improvisos (o botão de gravar do teclado) e ouça. Marque o que aconteceu.',
+        items: ['No dórico, o Si caiu em tempo forte pelo menos 4 vezes.', 'No lídio, o Si caiu em tempo forte pelo menos 4 vezes.', 'As frases terminaram na tônica (Ré, depois Fá), e não no Dó.', 'Deixei respiros: pelo menos uma pausa a cada 4 compassos.'],
+      },
+    },
+    { kind: 'exercise', id: 'l86-quiz', exercise: quiz('Modos', 'Responda sem tocar.', MODES_Q) },
+  ],
+  review: [modes6, modeEar, choice(MODES_Q, 'modos')],
+  checkpoint: [
+    items('Modos sobre tônicas', '8 modos, sem dica. Meta: 7 de 8.', modes6, 8, 48, 84, 0.85, 'off'),
+    items('Modos de ouvido', '8 pares, sem dica. Meta: 7 de 8.', modeEar, 8, 48, 84, 0.85, 'off'),
+    dorianImprov,
+  ],
+  exit: [modes6, choice(MODES_Q, 'modos')],
+};
+
+const l87: Lesson = {
+  n: 87,
+  id: 'l87',
+  title: 'Bossa nova II: melodia e forma',
+  minutes: 60,
+  objectives: [
+    'Consigo explicar as formas AABA e ABAC e achar as seções numa canção.',
+    'Consigo tocar a Bossa em Fá com melodia na direita e shells na esquerda, com 90% das notas.',
+    'Consigo acompanhar a cifra do A em bossa, com o groove em ±40 ms.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'A forma da canção',
+      body: `Quase toda canção de bossa, samba-canção e do repertório americano da mesma época tem **32 compassos**, em seções de 8:
+
+- **AABA**: o A aparece, repete, vem a **ponte** (B) e o A volta. A ponte muda de região: outro centro, a melodia mais aguda ou mais grave, e no fim prepara a volta do A.
+- **ABAC**: A, B, o A de novo e um **final novo** (C) no lugar da última repetição.
+
+Saber a forma é metade da leitura: se você sabe que o terceiro A é igual ao primeiro, só precisa ler 16 compassos de verdade.
+
+A **Bossa em Fá** (original do Fermata) é curta: um **A** de 8 compassos e um **B** de 8. O A vai do F7M ao ii–V de Ré menor e volta; o B começa no IV (**B♭7M**) e passa pelo **B♭m6**, o iv emprestado da unidade 10.`,
+    },
+    {
+      kind: 'text',
+      title: 'Melodia e violão no mesmo piano',
+      body: `No piano solo de bossa, cada mão faz um papel: a **direita canta** a melodia e a **esquerda é o violão**, com shells (fundamental, 3ª e 7ª, da unidade 8) no ritmo da bossa: ataques no **1**, no **"e" do 2** e no **"e" do 3**.
+
+A melodia tem as **antecipações** da lição 85. No compasso 4, o Lá do "e" do 4 já é a fundamental do Am7 do compasso 5; no compasso 12, o Si♭ do "e" do 4 já é a 3ª do Gm7. A esquerda não antecipa: ela entra no 1 do compasso novo, e a melodia chega antes. Esse desencontro é o balanço.
+
+Toque a melodia sozinha primeiro, cantando junto. Depois a esquerda sozinha. Só então junte, trecho por trecho.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l87-a',
+      exercise: quickTimed('Compassos 1 a 4', 'Mãos juntas, a 60 BPM. Duas passadas boas.', () => twoHandTask(BOSSA_R.slice(0, 4).join(' | '), BOSSA_L.slice(0, 4).join(' | '), { bpm: 60, fifths: -1, caption: 'Esquerda em shells: F7M (Fá–Mi–Lá) | F7M | Gm7 (Sol–Fá–Si♭) | C7 (Dó–Mi–Si♭).' }), { reps: 2 }),
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'a esquerda copiar o ritmo da direita',
+      body: 'Quando a melodia antecipa, a esquerda tende a ir junto e o groove some. Segure a esquerda no desenho dela (1, "e" do 2, "e" do 3) e deixe a melodia chegar antes sozinha. Se escorregar, toque só a esquerda com o metrônomo e cante a melodia por cima.',
+    },
+    {
+      kind: 'exercise',
+      id: 'l87-b',
+      exercise: quickTimed('A ponte: compassos 9 a 12', 'Mãos juntas, a 60 BPM. Repare no Ré♭ do B♭m6 nas duas mãos.', () => twoHandTask(BOSSA_R.slice(8, 12).join(' | '), BOSSA_L.slice(8, 12).join(' | '), { bpm: 60, fifths: -1, caption: 'Esquerda: B♭7M (Si♭–Lá–Ré) | B♭m6 (Si♭–Ré♭–Sol) | Am7 (Lá–Sol–Dó) | D7 (Ré–Fá♯–Dó).' }), { reps: 2 }),
+    },
+    { kind: 'song', songId: 'u11-bossa', why: 'A música da lição: melodia original com antecipações e shells no ritmo da bossa.' },
+    {
+      kind: 'text',
+      title: 'Acompanhar quem canta',
+      body: `Agora o outro papel: alguém canta (ou toca a melodia) e você **acompanha** pela cifra. É o comping da lição 85 sobre a cifra do A da Bossa em Fá, um acorde por compasso, com os voicings sem fundamental conduzidos na direita e o baixo longa-curta na esquerda.
+
+Cifra: **F7M(9) | F7M(9) | Gm7(9) | C7(13) | Am7(9) | D7(13) | Gm7(9) | C7(13)**. O D7(13) é o V7/ii da unidade 10: ele leva ao Gm7.
+
+Meta da tabela: groove em **±40 ms**. Grave e cante a melodia por cima para conferir se o acompanhamento sustenta a canção.`,
+    },
+    { kind: 'exercise', id: 'l87-comping', exercise: quickTimed('Comping da cifra do A', '8 compassos, a 64 BPM, janela de ±50 ms. Duas passadas boas.', chartTask(64), { reps: 2, window: 50 }) },
+    { kind: 'exercise', id: 'l87-quiz', exercise: quiz('Forma e arranjo', 'Responda sem tocar.', FORM_Q) },
+  ],
+  review: [choice(FORM_Q, 'forma'), rlSeq],
+  checkpoint: [
+    quickTimed('A Bossa em Fá, seção A', 'Compassos 1 a 8, mãos juntas, a 66 BPM, sem dicas. Meta: 90% das notas.', () => twoHandTask(BOSSA_R.slice(0, 8).join(' | '), BOSSA_L.slice(0, 8).join(' | '), { bpm: 66, fifths: -1 }), { pass: { accuracy: 0.9 } }),
+    quickTimed('Comping no tempo', 'A cifra do A em bossa, a 70 BPM. Meta: 85% das notas em ±40 ms.', chartTask(70), { window: 40 }),
+  ],
+  exit: [choice(FORM_Q, 'forma'), choice(BOSSA_Q, 'bossa')],
+};
+
 // ---------- unidade ----------
 
 const unit: Unit = {
@@ -663,7 +999,7 @@ const unit: Unit = {
   title: 'Brasil ao piano',
   goal: 'Tocar baião, bossa e choro ao piano, com tensões e voicings sem fundamental, e usar os modos como cores.',
   technique: 'Grooves no metrônomo: baião (3 + 3 + 2) e bossa (longa-curta) na esquerda, de 64 rumo a 80 BPM, janela de ±50 ms. Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l82, l83, l84],
+  lessons: [l82, l83, l84, l85, l86, l87],
   songs: [baiao, bossa, tanguinho],
   final: {
     songId: 'u11-tanguinho',
