@@ -2,7 +2,7 @@
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 // Músicas protegidas (Asa Branca, bossa nova, Villa-Lobos) ficam só citadas no texto; o repertório tocado é original.
 
-import { chordLabel, choice, keyName, nearestVoicing, parseChord, playChord, spellInterval, spellScale, type ChoiceQuestion } from '../gens';
+import { chordLabel, choice, echo, keyName, mix, nearestVoicing, parseChord, playChord, spellInterval, spellScale, type ChoiceQuestion } from '../gens';
 import { PC_NAMES, n, pcOf, pick, ptName, shuffle } from '../music';
 import { melodyTask, rhythmTask, sci, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
@@ -991,6 +991,237 @@ Meta da tabela: groove em **±40 ms**. Grave e cante a melodia por cima para con
   exit: [choice(FORM_Q, 'forma'), choice(BOSSA_Q, 'bossa')],
 };
 
+const CHORO_Q: ChoiceQuestion[] = [
+  { q: 'No regional de choro, quem faz a baixaria?', options: ['O violão de 7 cordas', 'O pandeiro', 'A flauta'], answer: 0, why: 'A 7ª corda, mais grave, faz as linhas que ligam um acorde ao outro.' },
+  { q: 'Uma baixaria boa…', options: ['Chega na fundamental (ou na 3ª) do acorde novo no tempo 1', 'Termina sempre no meio do compasso', 'Usa só a fundamental'], answer: 0, why: 'Ela é uma ponte: o ponto de chegada é o acorde seguinte, no tempo forte.' },
+  { q: 'No samba, o surdo marca com mais força…', options: ['O tempo 2 do 2/4', 'O tempo 1', 'Só o contratempo'], answer: 0, why: 'O surdo de primeira bate no 2; é o "peso" característico do samba.' },
+  { q: 'Ernesto Nazareth chamava muitas de suas peças de…', options: ['Tango brasileiro', 'Bossa nova', 'Baião'], answer: 0, why: 'Odeon (1909), Brejeiro e outros: o choro escrito para piano, com a habanera na esquerda.' },
+  { q: 'O desenho da esquerda no tango brasileiro (habanera) é…', options: ['Baixo, acorde, baixo, acorde: 3 + 1 + 2 + 2 semicolcheias', '3 + 3 + 2 só no baixo', 'Quatro colcheias iguais'], answer: 0, why: 'Colcheia pontuada no baixo, semicolcheia no acorde, colcheia no baixo, colcheia no acorde.' },
+  { q: '"Três mãos" é…', options: ['A melodia no meio, com os polegares, e o acompanhamento em volta, acima e abaixo', 'Tocar com alguém ao lado', 'Usar o pedal tonal'], answer: 0, why: 'O efeito foi popularizado por Thalberg no século XIX e aparece em arranjos de choro ao piano.' },
+];
+
+const BAIXARIA_MOTIFS = [
+  [n('C3'), n('B2'), n('Bb2'), n('A2')], [n('G2'), n('A2'), n('B2'), n('C3')], [n('A2'), n('B2'), n('C#3'), n('D3')],
+  [n('D3'), n('C3'), n('B2'), n('A2'), n('G2')], [n('E2'), n('F2'), n('F#2'), n('G2')], [n('C3'), n('D3'), n('E3'), n('F3'), n('F#3'), n('G3')],
+  [n('F2'), n('F#2'), n('G2'), n('G#2'), n('A2')], [n('G3'), n('F3'), n('E3'), n('D3'), n('C3')],
+];
+const baixariaEar = echo({ motifs: BAIXARIA_MOTIFS, bpm: 84, skill: 'baixaria-ouvido' });
+
+const SAMBA_BAR: Record<string, [string, string]> = {
+  C: ['E4+G4+C5', 'C3:0.75 G2:0.25 G2:1'],
+  A7: ['E4+G4+C#5', 'A2:0.75 E2:0.25 E2:1'],
+  Dm: ['D4+F4+A4', 'D3:0.75 A2:0.25 A2:1'],
+  G7: ['D4+F4+B4', 'G2:0.75 D2:0.25 D2:1'],
+};
+const tamborim = (c: string) => `${c}:0.5 ${c}:0.25 ${c}:0.5 ${c}:0.25 ${c}:0.5`;
+const sambaTask = (bpm: number) => () => {
+  const seq = ['C', 'A7', 'Dm', 'G7', 'C', 'A7', 'Dm', 'G7'];
+  return twoHandTask(seq.map((c) => tamborim(SAMBA_BAR[c][0])).join(' | '), seq.map((c) => SAMBA_BAR[c][1]).join(' | '), {
+    bpm,
+    beatsPerBar: 2,
+    caption: 'C | A7 | Dm | G7, duas vezes. Esquerda: fundamental (pontuada), 5ª abaixo na última semicolcheia e no tempo 2.',
+  });
+};
+
+const l88: Lesson = {
+  n: 88,
+  id: 'l88',
+  title: 'Choro e samba',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar uma baixaria que liga os acordes e chega no tempo 1.',
+    'Consigo repetir de ouvido uma baixaria de 4 a 6 notas.',
+    'Consigo tocar o samba (tamborim na direita, surdo na esquerda) com 85% das notas em ±40 ms.',
+    'Consigo tocar a habanera do tango brasileiro na esquerda.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O choro',
+      body: `O **choro** nasceu no Rio de Janeiro na segunda metade do século XIX, quando músicos brasileiros passaram a tocar polcas, valsas e schottisches europeus "do seu jeito", com síncope e improviso. O grupo típico é o **regional**: flauta ou bandolim na melodia, cavaquinho no centro do ritmo, violão de 6 e de **7 cordas** e pandeiro.
+
+Três nomes para guardar: **Chiquinha Gonzaga** (1847–1935), **Ernesto Nazareth** (1863–1934), que escreveu o choro para piano, e **Pixinguinha** (1897–1973). As obras de Chiquinha e Nazareth são de domínio público; as de Pixinguinha, ainda não.
+
+A marca do choro que mais interessa ao pianista é a **baixaria**: a linha do violão de 7 cordas que caminha de um acorde para o próximo.`,
+    },
+    {
+      kind: 'text',
+      title: 'Baixaria: o caminho entre dois acordes',
+      body: `A baixaria preenche o fim de um compasso com uma linha no grave que **chega** no acorde seguinte, no tempo 1, na fundamental (às vezes na 3ª). Ela anda por **grau conjunto** e **cromatismo**:
+
+- de C para Am, descendo: Dó, **Si, Si♭**, Lá;
+- de A7 para Dm, subindo: Lá, **Si, Dó♯**, Ré (o Dó♯ é a sensível de Ré);
+- de G7 para C, subindo: Sol, **Lá, Si**, Dó.
+
+A regra de ouro: comece a linha **de trás para a frente**. Saiba onde ela tem que chegar e conte quantas notas cabem antes.`,
+    },
+    {
+      kind: 'example',
+      title: 'Três baixarias',
+      steps: [
+        { say: 'C → Am, descendo pelo cromático: Dó, Si, Si♭, Lá.', play: { bpm: 72, steps: [{ midis: [n('C3')], beats: 1 }, { midis: [n('B2')], beats: 0.5 }, { midis: [n('Bb2')], beats: 0.5 }, { midis: [n('A2')], beats: 2 }] }, keys: [n('C3'), n('B2'), n('Bb2'), n('A2')] },
+        { say: 'A7 → Dm, subindo até a fundamental: Lá, Si, Dó♯, Ré.', play: { bpm: 72, steps: [{ midis: [n('A2')], beats: 1 }, { midis: [n('B2')], beats: 0.5 }, { midis: [n('C#3')], beats: 0.5 }, { midis: [n('D3')], beats: 2 }] }, keys: [n('A2'), n('B2'), n('C#3'), n('D3')] },
+        { say: 'G7 → C, em colcheias: Sol, Lá, Si, Ré e chega no Dó.', play: { bpm: 72, steps: [{ midis: [n('G2')], beats: 0.5 }, { midis: [n('A2')], beats: 0.5 }, { midis: [n('B2')], beats: 0.5 }, { midis: [n('D3')], beats: 0.5 }, { midis: [n('C3')], beats: 2 }] } },
+      ],
+    },
+    {
+      kind: 'exercise',
+      id: 'l88-baixaria',
+      exercise: quickTimed('Baixaria em C | A7 | Dm | G7 | C', 'Só a esquerda, em 2/4, de 60 até 72 BPM.', () => melodyTask('C3:1 B2:0.5 Bb2:0.5 | A2:1 B2:0.5 C#3:0.5 | D3:1 C3:0.5 B2:0.5 | G2:0.5 A2:0.5 B2:0.5 D3:0.5 | C3:2', { bpm: 60, beatsPerBar: 2, clef: 'bass', caption: 'C | A7 | Dm | G7 | C: cada linha chega na fundamental do acorde seguinte.' }), { ladder: { from: 60, to: 72, step: 4 } }),
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'baixaria que não chega',
+      body: 'Uma linha bonita que termina no lugar errado vira nota perdida. Se faltar tempo, corte notas do começo, nunca do fim: a chegada na fundamental, no tempo 1, é o que o ouvido espera.',
+    },
+    { kind: 'exercise', id: 'l88-ouvido', exercise: items('Baixaria de ouvido', 'O app toca uma linha de 4 a 6 notas no grave. Repita. Comece pela nota que ele diz.', baixariaEar, 8, 36, 60, 0.75, 'off') },
+    {
+      kind: 'text',
+      title: 'Samba: surdo e tamborim',
+      body: `O **samba** também é em **2/4**, e o peso dele está no **tempo 2**: é onde bate o surdo de primeira, o mais grave da bateria.
+
+Ao piano, a **esquerda é o surdo**: a fundamental no 1 (colcheia pontuada), a **5ª abaixo** na última semicolcheia do 1 e de novo no **2**, mais longa. Em Dó: Dó, Sol, Sol.
+
+A **direita é o tamborim**: acordes curtos num desenho de semicolcheias. Um desenho típico, contando "1 e a e 2 e a e", ataca no **1**, no **"e"**, no **"a"**, no **"e" do 2** e no **"a" do 2**. Há muitos outros: o importante é que o desenho se repita igual, como numa escola de samba.
+
+Toque os acordes da direita **leves e curtos**: o tamborim é agudo e seco. O peso fica na esquerda.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l88-tamborim',
+      exercise: quickTimed('Desenho do tamborim', 'Quatro compassos em qualquer tecla, a 56 BPM, janela de ±50 ms. Duas passadas boas.', () => rhythmTask(rep('x:0.5 x:0.25 x:0.5 x:0.25 x:0.5', 4), { bpm: 56, beatsPerBar: 2, caption: 'Tamborim: 1, "e", "a" | "e" do 2, "a" do 2. Semicolcheias contadas "1 e a e 2 e a e".' }), { reps: 2, window: 50 }),
+    },
+    { kind: 'exercise', id: 'l88-samba', exercise: quickTimed('Samba com as duas mãos', 'Tamborim na direita e surdo na esquerda, 8 compassos, de 48 até 60 BPM, janela de ±50 ms.', sambaTask(48), { window: 50, ladder: { from: 48, to: 60, step: 4 } }) },
+    {
+      kind: 'text',
+      title: '"Três mãos" (uma prévia)',
+      body: `Nos arranjos de choro para piano solo aparece um truque antigo, popularizado por Sigismond Thalberg no século XIX: a **melodia no meio do teclado**, tocada pelos polegares das duas mãos, com o baixo embaixo e os acordes ou arpejos em cima. Quem ouve tem a impressão de três mãos.
+
+Ele exige equilíbrio (a melodia mais forte que tudo em volta) e pedal limpo, assuntos da unidade 12. Por ora, basta reconhecer o som e saber que ele existe.`,
+    },
+    {
+      kind: 'text',
+      title: 'Tango brasileiro: a habanera na esquerda',
+      body: `Nazareth chamava seus choros para piano de **tango brasileiro**. A esquerda deles tem um desenho fixo, a **habanera** (o mesmo ritmo do maxixe): em 2/4, contando semicolcheias, **3 + 1 + 2 + 2**.
+
+- **baixo** no 1 (colcheia pontuada);
+- **acorde** na última semicolcheia do 1;
+- **baixo** no 2 (colcheia), em geral a 5ª abaixo;
+- **acorde** no "e" do 2.
+
+Em Dó: Dó3, Mi3+Sol3, Sol2, Mi3+Sol3. A mão pula entre o grave e o meio: deixe o pulso solto e olhe para o baixo, que é o salto maior. A direita, por cima, corre em semicolcheias.
+
+O projeto final da unidade, o **Tanguinho**, usa exatamente esse desenho. Treine a primeira frase aqui.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l88-habanera',
+      exercise: quickTimed('Habanera na esquerda', 'Só a esquerda: C | G7 | G7 | C do Tanguinho, de 48 até 60 BPM.', () => melodyTask(TANGO_L.slice(0, 4).join(' | '), { bpm: 48, beatsPerBar: 2, clef: 'bass', caption: 'Baixo, acorde, baixo, acorde. C: Dó–(Mi Sol)–Sol–(Mi Sol). G7: Sol–(Si Fá)–Ré–(Si Fá).' }), { ladder: { from: 48, to: 60, step: 4 } }),
+    },
+    { kind: 'exercise', id: 'l88-tango', exercise: quickTimed('Tanguinho, primeira frase', 'Compassos 1 a 4 com as duas mãos, a 44 BPM. Duas passadas boas.', () => twoHandTask(TANGO_R.slice(0, 4).join(' | '), TANGO_L.slice(0, 4).join(' | '), { bpm: 44, beatsPerBar: 2, caption: 'Esquerda em habanera: C | G7 | G7 | C.' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l88-quiz', exercise: quiz('Choro e samba', 'Responda sem tocar.', CHORO_Q) },
+  ],
+  review: [baixariaEar, choice(CHORO_Q, 'choro')],
+  checkpoint: [
+    quickTimed('Samba no tempo', '8 compassos, mãos juntas, a 60 BPM, sem dicas. Meta: 85% das notas em ±40 ms.', sambaTask(60), { window: 40 }),
+    items('Baixaria de ouvido', '6 linhas, sem dica. Meta: 5 de 6.', baixariaEar, 6, 36, 60, 0.8, 'off'),
+  ],
+  exit: [baixariaEar, choice(CHORO_Q, 'choro')],
+};
+
+const allU11 = mix([tensions, rlChord, rlSeq, modes6, mixoScale, compound]);
+const allEarU11 = mix([modeEar, baixariaEar, choice([...BAIAO_Q, ...TENSION_Q, ...ROOTLESS_Q, ...BOSSA_Q, ...MODES_Q, ...CHORO_Q], 'brasil')]);
+
+const l89: Lesson = {
+  n: 89,
+  id: 'l89',
+  title: 'Checkpoint da unidade e projeto: Brasil ao piano',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint misto da unidade 11, sem dicas.',
+    'Consigo montar um arranjo solo curto (intro, melodia, ii–V e final) com voicings sem fundamental.',
+    'Consigo tocar o Tanguinho com as duas mãos, a 60 BPM.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O que você já sabe',
+      body: `Em sete lições você passou pelos três grandes grooves do piano brasileiro: o **baião** (3 + 3 + 2, com a 7ª menor nordestina), a **bossa** (síncope, antecipação, baixo longa-curta) e o **choro e o samba** (baixaria, surdo e tamborim, a habanera do tango brasileiro).
+
+No caminho entraram as ferramentas de harmonia moderna: **tensões** (9, 11, 13 e as alteradas), **voicings sem fundamental** (formas A e B) e os **modos como cores** sobre uma tônica fixa.
+
+O checkpoint mistura tudo: acordes com tensão, voicings, modos, escalas, ouvido e os grooves no tempo.`,
+    },
+    {
+      kind: 'text',
+      title: 'Arranjo solo: o roteiro',
+      body: `Um arranjo de piano solo de uma canção curta segue quase sempre o mesmo roteiro:
+
+1. **Intro** (2 a 4 compassos): um vamp no groove, por exemplo o ii–V do tom repetido (Gm7(9) – C7(13) em Fá), para o ouvinte entrar no balanço antes da melodia.
+2. **A melodia**, uma vez, com a esquerda fazendo o groove (shells na bossa, zabumba no baião).
+3. **Um ii–V de volta** (o turnaround) no fim da seção, para repetir ou ir para o final.
+4. **Final**: o I com tensão (F7M(9), C6(9)) segurado, ou o último ii–V repetido três vezes antes de parar.
+
+Os voicings sem fundamental entram na intro e no turnaround, onde a direita está livre da melodia.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'arranjo que perde o groove na melodia',
+      body: 'É comum a intro sair com balanço e, quando a melodia entra, a esquerda virar acordes parados. A esquerda faz o mesmo desenho do começo ao fim. Se a música ficar difícil, simplifique a melodia (notas longas), nunca o groove.',
+    },
+    {
+      kind: 'text',
+      title: 'O Tanguinho e a peça do Villa-Lobos',
+      body: `O projeto final é o **Tanguinho**, um tango brasileiro original do Fermata no estilo de Nazareth: semicolcheias na direita, habanera na esquerda e as secundárias da unidade 10 (**A7 → Dm** e **G7 → C**). O **Dó♯** que aparece na esquerda (no A7) e na direita (compassos 8 e 12) é a sensível de Ré: ele puxa para o Dm.
+
+Dois trechos pedem atenção: os compassos 5 a 8 (a direita sobe até o Dó6 e desce em arpejo de Ré menor) e 13 a 16 (a cadência final). Treine cada um separado antes de tocar tudo.
+
+O plano previa também uma peça do *Guia Prático* de Villa-Lobos. Villa-Lobos morreu em 1959, e a obra dele só fica livre em 2030: por isso ela não entra no app. O Odeon, de Nazareth (1909, livre), fica para uma rodada com a partitura de domínio público à mão.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l89-tango-meio',
+      exercise: quickTimed('Tanguinho, compassos 5 a 8', 'Mãos juntas, a 48 BPM. Duas passadas boas.', () => twoHandTask(TANGO_R.slice(4, 8).join(' | '), TANGO_L.slice(4, 8).join(' | '), { bpm: 48, beatsPerBar: 2, caption: 'Esquerda: C | A7 (Lá–(Dó♯ Sol)–Mi–(Dó♯ Sol)) | Dm | Dm.' }), { reps: 2 }),
+    },
+    {
+      kind: 'exercise',
+      id: 'l89-tango-fim',
+      exercise: quickTimed('Tanguinho, compassos 13 a 16', 'Mãos juntas, a 48 BPM. Duas passadas boas.', () => twoHandTask(TANGO_R.slice(12).join(' | '), TANGO_L.slice(12).join(' | '), { bpm: 48, beatsPerBar: 2, caption: 'Esquerda: Dm | G7 | C | Dó final.' }), { reps: 2 }),
+    },
+    { kind: 'song', songId: 'u11-tanguinho', why: 'O projeto final: tango brasileiro com habanera na esquerda e semicolcheias na direita.' },
+    { kind: 'song', songId: 'u11-baiao', why: 'Revisão: o baião da lição 82, para o checkpoint de groove.' },
+  ],
+  review: [allU11, allEarU11],
+  checkpoint: [
+    items('Checkpoint da unidade', '20 perguntas misturadas das lições 82 a 88, sem dicas.', mix([allU11, allU11, allEarU11]), 20, 36, 88, 0.85, 'off'),
+    quickTimed('Baião no tempo', 'Compassos 1 a 8 do Baião em Dó, mãos juntas, a 80 BPM. Meta: 85% em ±50 ms.', () => twoHandTask(BAIAO_R.slice(0, 8).join(' | '), BAIAO_L.slice(0, 8).join(' | '), { bpm: 80, beatsPerBar: 2 }), { window: 50 }),
+    quickTimed('Bossa no tempo', 'ii–V–I em bossa, tom sorteado, a 70 BPM. Meta: 85% em ±40 ms.', (rng) => bossaTask(rng, 70), { window: 40 }),
+  ],
+  project: {
+    title: 'Brasil ao piano',
+    brief: `Monte um arranjo solo curto da Bossa em Fá (ou do Baião em Dó) seguindo o roteiro da lição: intro no groove, a melodia uma vez, um ii–V de volta e um final. Use voicings sem fundamental na intro e no turnaround. Depois toque o Tanguinho, o projeto final da unidade.`,
+    steps: [
+      'Escolha a música (Bossa em Fá ou Baião em Dó) e toque-a no "Tocar a música" até passar.',
+      'Escreva a intro: 4 compassos de vamp (Gm7(9) – C7(13) na bossa; C – B♭ no baião, com o 3 + 3 + 2).',
+      'Toque a cifra do A em bossa com voicings sem fundamental (exercício abaixo), até passar.',
+      'Escreva um final: o I com tensão segurado, ou o último ii–V repetido três vezes.',
+      'Grave o arranjo inteiro: intro, melodia, ii–V e final.',
+      'Toque o Tanguinho no "Tocar a música", começando a 44 BPM e subindo até 60.',
+    ],
+    rubric: [
+      'O groove da esquerda não para quando a melodia entra.',
+      'A intro e o turnaround usam voicings sem fundamental conduzidos (a mão quase não pula).',
+      'A melodia fica clara por cima do acompanhamento.',
+      'O final soa como final: tônica com tensão, sem cortar seco.',
+      'O Tanguinho passa a 60 BPM com 85% das notas.',
+    ],
+    exercise: quickTimed('Comping da Bossa em Fá', 'A cifra do A em bossa, a 72 BPM, janela de ±50 ms.', chartTask(72), { window: 50 }),
+  },
+  exit: [allU11, choice([...TENSION_Q, ...ROOTLESS_Q, ...MODES_Q], 'brasil')],
+};
+
 // ---------- unidade ----------
 
 const unit: Unit = {
@@ -999,7 +1230,7 @@ const unit: Unit = {
   title: 'Brasil ao piano',
   goal: 'Tocar baião, bossa e choro ao piano, com tensões e voicings sem fundamental, e usar os modos como cores.',
   technique: 'Grooves no metrônomo: baião (3 + 3 + 2) e bossa (longa-curta) na esquerda, de 64 rumo a 80 BPM, janela de ±50 ms. Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l82, l83, l84, l85, l86, l87],
+  lessons: [l82, l83, l84, l85, l86, l87, l88, l89],
   songs: [baiao, bossa, tanguinho],
   final: {
     songId: 'u11-tanguinho',
