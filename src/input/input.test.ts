@@ -34,3 +34,15 @@ describe('parsePedalMessage', () => {
     expect(parsePedalMessage([0x90, 64, 100])).toBeNull();
   });
 });
+
+describe('hora do MIDI', () => {
+  it('desconta um relógio deslocado e mantém o carimbo quando a página atrasa', async () => {
+    const { midiTime } = await import('./NoteInputProvider');
+    // Relógio deslocado em 157 ms: depois de algumas mensagens, a hora volta para o relógio da página.
+    let last = 0;
+    for (let i = 0; i < 5; i++) last = midiTime(1000 + i * 500 - 157, 1000 + i * 500 + 2);
+    expect(Math.abs(last - (3000 + 2))).toBeLessThan(5);
+    // Página ocupada: a mensagem chega 120 ms depois, mas a hora da tecla continua a do carimbo (+ deslocamento).
+    expect(midiTime(4000 - 157, 4000 + 120) - 4000).toBeLessThan(10);
+  });
+});

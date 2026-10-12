@@ -9,6 +9,21 @@ function isTyping(target: EventTarget | null): boolean {
   return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
 }
 
+/**
+ * Hora da tecla no relógio da página. O carimbo do MIDI marca quando a tecla desceu, mesmo se a página estiver
+ * ocupada e a mensagem chegar atrasada. Em alguns sistemas (Windows) ele vem num relógio deslocado: a menor
+ * diferença entre a chegada e o carimbo, nas últimas mensagens, mede esse deslocamento, que é descontado.
+ */
+const recentGaps: number[] = [];
+// eslint-disable-next-line react-refresh/only-export-components
+export function midiTime(stamp: number | undefined, now: number): number {
+  if (!stamp || stamp > now + 1 || now - stamp > 2000) return now;
+  recentGaps.push(now - stamp);
+  if (recentGaps.length > 32) recentGaps.shift();
+  const offset = Math.min(...recentGaps);
+  return stamp + offset;
+}
+
 export function NoteInputProvider({ children }: { children: ReactNode }) {
   const [held, setHeld] = useState<ReadonlySet<Midi>>(() => new Set());
   const [midi, setMidi] = useState<MidiStatus>(() =>
@@ -81,10 +96,7 @@ export function NoteInputProvider({ children }: { children: ReactNode }) {
           input.onmidimessage = (e) => {
             if (!e.data) return;
             const ev = parseMidiMessage(e.data);
-            // O carimbo do MIDI marca quando a tecla desceu, mesmo se a página estiver ocupada e a mensagem chegar
-            // atrasada. Só é descartado se vier noutro relógio (no futuro ou mais de 1 s atrás).
-            const now = performance.now();
-            const at = e.timeStamp && e.timeStamp <= now + 1 && now - e.timeStamp < 1000 ? e.timeStamp : now;
+            const at = midiTime(e.timeStamp, performance.now());
             if (ev) emit(ev.type, ev.midi, 'midi', at, ev.velocity);
             const pedal = ev ? null : parsePedalMessage(e.data);
             if (pedal) {
