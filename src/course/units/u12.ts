@@ -1,9 +1,12 @@
-// Unidade 12 — Arranjo, forma e repertório (lições 90 a 100). Projeto final: Valsa lenta (original, no estilo de Satie).
+// Unidade 12 — Arranjo, forma e repertório (lições 90 a 100). Projeto final: Gymnopédie nº 1 (Satie), abertura, + arranjo próprio.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
-import { chordLabel, chordSequence, chordSpelling, choice, chromaticByEar, diatonicByEar, echo, keyName, mix, parseChord, playChord, type ChoiceQuestion } from '../gens';
+import {
+  buildMinorScale, buildScale, cadenceChoice, chordLabel, chordQualityByEar, chordSequence, chordSpelling, choice, chromaticByEar, chromaticChord, degreeByEar,
+  diatonicByEar, diatonicChord, echo, FIELD7, inversionChord, keyName, mix, parseChord, playCadence, playChord, qualityByEar, qualityInterval, shellChord, type ChoiceQuestion,
+} from '../gens';
 import { n, pick, ptName, shuffle } from '../music';
-import { melodyTask, sci, transposedTask, twoHandTask } from '../tasks';
+import { melodyTask, sci, sightReadingTwoHands, transposedTask, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Listen, Rng, SongSpec, TimedTask, Unit } from '../types';
 
@@ -1076,6 +1079,330 @@ Meta da tabela: **60% das chegadas** em nota do acorde e **90% das notas** no to
   exit: [upperGen, choice(IMPROV_Q, 'improviso')],
 };
 
+// ---------- revisão final e capstone ----------
+
+// Gymnopédie nº 1 (Erik Satie, 1888; domínio público). Trecho de abertura, compassos 1 a 12, em arranjo do Fermata.
+// Esquerda: baixo no tempo 1 e acorde no tempo 2, alternando G7M e D7M; direita: a melodia entra no compasso 5.
+const GYM_R = ['r:3', 'r:3', 'r:3', 'r:3', 'r F#5 A5', 'G5 F#5 C#5', 'B4 C#5 D5', 'A4:3', 'F#4:3', 'r:3', 'r:3', 'r:3'];
+const GYM_G = 'G2 B3+D4+F#4:2';
+const GYM_D = 'D3 A3+C#4+F#4:2';
+/** Nos compassos 9 a 12 a direita segura o Fá♯4: a esquerda tira o Fá♯ do acorde para as mãos não brigarem pela tecla. */
+const GYM_L = GYM_R.map((_, i) => (i < 8 ? (i % 2 === 0 ? GYM_G : GYM_D) : i % 2 === 0 ? 'G2 B3+D4:2' : 'D3 A3+C#4:2'));
+const gymnopedie: SongSpec = {
+  id: 'u12-gymnopedie',
+  title: 'Gymnopédie nº 1, compassos 1 a 12',
+  composer: 'Erik Satie',
+  arrangement: 'trecho de abertura em arranjo do Fermata: os 4 compassos da esquerda sozinha e a primeira frase da melodia; a nota longa que atravessa as barras vira nota e pausas; nos compassos 9 a 12 a esquerda deixa o Fá♯ para a direita; pedal a cada compasso',
+  bpm: 60,
+  beatsPerBar: 3,
+  fifths: 2,
+  right: GYM_R.join(' | '),
+  left: GYM_L.join(' | '),
+  hands: 'duas',
+  pass: { accuracy: 0.9 },
+};
+const gymTask = (bpm: number, caption?: string) => () =>
+  twoHandTask(GYM_R.join(' | '), GYM_L.join(' | '), { bpm, beatsPerBar: 3, fifths: 2, caption });
+
+const fScales = buildScale({ keys: ['C', 'G', 'D', 'A', 'E', 'F', 'Bb', 'Eb'], notes: 8 });
+const fMinor = buildMinorScale({ keys: ['A', 'E', 'D'], forms: ['natural', 'harmonica', 'melodica'] });
+const fIntervals = qualityInterval({ from: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4'], intervals: ['2m', '2M', '3m', '3M', '4J', '4A', '5J', '6m', '6M', '7m', '7M', '8J'] });
+const fInv = inversionChord({ chords: ['C', 'F', 'G', 'D', 'Am', 'Dm', 'Em', 'Bb', 'Eb', 'F#m'], inversions: [0, 1, 2] });
+const fField7 = diatonicChord({ keys: ['C', 'G', 'D', 'F', 'Bb', 'Eb'], romans: FIELD7, low: 48, high: 72 });
+const fCad = playCadence({ keys: ['C', 'G', 'F', 'D', 'Bb'], kinds: ['perfeita', 'plagal', 'meia', 'deceptiva'] });
+const fChrom = chromaticChord({ keys: ['C', 'G', 'F', 'D'], romans: ['V7/ii', 'V7/V', 'V7/vi', 'subV7', 'iv', 'bVI', 'bVII'], low: 48, high: 72 });
+const fTension = playChord({ symbols: ['C7M(9)', 'G7(13)', 'Dm7(9)', 'F7M(9)', 'A7(b13)', 'C6(9)', 'Bb7(9)', 'Em7(11)'], low: 48, high: 84, omitFifth: true, skill: 'tensao' });
+const fShells = shellChord({ symbols: ['C7', 'F7', 'G7', 'Bb7', 'D7', 'Dm7', 'Gm7', 'Am7', 'C7M', 'F7M'] });
+const fQualityEar = chordQualityByEar({ qualities: ['', 'm', 'dim', 'aug', '7M', '7', 'm7'], roots: [57, 60, 62, 64, 65, 67], answerRoots: [60, 62, 64, 65, 67, 69] });
+const fDegreeEar = degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6, 7] });
+const fCadEar = cadenceChoice({ keys: ['C', 'G', 'F'], kinds: ['perfeita', 'plagal', 'meia', 'deceptiva'] });
+const fIntEar = qualityByEar({ from: ['C4', 'D4', 'F4', 'G4'], intervals: ['3m', '3M', '4J', '5J', '6m', '6M'] });
+
+const SIGHT_KEYS: { tonic: Midi; fifths: number }[] = [
+  { tonic: 60, fifths: 0 }, { tonic: 67, fifths: 1 }, { tonic: 62, fifths: 2 }, { tonic: 65, fifths: -1 }, { tonic: 70, fifths: -2 },
+];
+const sightFinal = (bpm: number) => (rng: Rng) => {
+  const k = pick(rng, SIGHT_KEYS);
+  return sightReadingTwoHands(rng, { tonic: k.tonic, bars: 8, bpm, fifths: k.fifths, level: 2 });
+};
+
+const FINAL_Q: ChoiceQuestion[] = [
+  { q: 'A armadura com três bemóis (Si♭, Mi♭, Lá♭) é de…', options: ['Mi♭ maior ou Dó menor', 'Lá♭ maior ou Fá menor', 'Si♭ maior ou Sol menor'], answer: 0, why: 'O penúltimo bemol dá a tônica maior (Mi♭); a relativa menor fica uma 3ª menor abaixo (Dó).' },
+  { q: 'Na menor harmônica, o que muda em relação à natural?', options: ['O 7º grau sobe meio tom (vira sensível)', 'O 6º e o 7º descem', 'O 3º grau sobe'], answer: 0, why: 'Em Lá menor, o Sol vira Sol♯. É o que dá o V maior (E) e o salto de 2ª aumentada.' },
+  { q: 'Em Dó maior, o acorde de Ré menor com 7ª (Dm7) é o…', options: ['ii7, função subdominante', 'IV, função tônica', 'V7, função dominante'], answer: 0, why: 'ii e IV têm duas notas em comum (Fá e Lá) e a mesma função: preparar o V.' },
+  { q: 'A7 em Dó maior, indo para Dm, é…', options: ['V7/ii, dominante secundária', 'Empréstimo modal', 'SubV7'], answer: 0, why: 'O Dó♯ é a sensível do Ré. Toda dominante secundária traz a sensível do acorde que ela prepara.' },
+  { q: 'O D♭7 indo para C é o subV7 porque…', options: ['Tem o mesmo trítono (Fá–Si/Dó♭) do G7', 'Tem a mesma fundamental do G7', 'É o IV de Lá♭'], answer: 0, why: 'O trítono é o que resolve. D♭7 e G7 compartilham Fá e Si (Dó♭), e o baixo desce por semitom.' },
+  { q: 'A forma AABA tem…', options: ['Uma ponte (B) entre as voltas do A', 'Um refrão que volta cinco vezes', 'Duas partes repetidas'], answer: 0, why: 'É a canção de 32 compassos: 8 + 8 + 8 (ponte) + 8.' },
+  { q: 'Na recapitulação de uma sonata em Dó, o tema 2 vem em…', options: ['Dó maior', 'Sol maior', 'Lá menor'], answer: 0, why: 'Na exposição ele estava no V; a recapitulação resolve tudo no I.' },
+  { q: 'O baião na esquerda divide o compasso em…', options: ['3 + 3 + 2 colcheias', '2 + 2 + 2 + 2', '4 + 4'], answer: 0, why: 'O ritmo da zabumba: longa, longa, curta, com a última antecipando o compasso seguinte.' },
+];
+
+const ROADMAP_Q: ChoiceQuestion[] = [
+  { q: 'Depois do curso, a revisão espaçada…', options: ['Continua: os intervalos crescem (1, 3, 7 dias, 2 a 3 semanas, 1 a 2 meses)', 'Pode parar, o que foi aprendido fica', 'Vira prática em bloco de uma habilidade por semana'], answer: 0, why: 'Sem revisão, o que foi aprendido some. Com intervalos crescentes, pouco tempo por dia segura muito.' },
+  { q: 'Um bom próximo passo em polifonia é…', options: ['As Invenções a duas vozes de Bach (nº 1 e nº 8)', 'Só acordes em bloco', 'A Gymnopédie inteira'], answer: 0, why: 'Duas vozes independentes, uma em cada mão: o passo seguinte ao cânone e ao minueto da unidade 9.' },
+  { q: 'Na técnica, o roteiro sugere…', options: ['Escalas e arpejos em 4 oitavas, escalas em terças e Czerny em séries curtas', 'Hanon todo dia por uma hora', 'Só repertório, sem técnica'], answer: 0, why: 'Séries curtas, com um objetivo medido (andamento, uniformidade), como no trilho técnico do app.' },
+  { q: 'Num dia de consolidação de 60 minutos, a divisão sugerida é…', options: ['~10 min revisão, ~15 técnica, ~20 a 30 repertório, ~5 a 10 ouvido', '60 min de repertório', '30 min de técnica e 30 de teoria'], answer: 0, why: 'É a rotina do PLANO: tudo um pouco, com o repertório no centro.' },
+];
+
+const ANALYSIS_Q: ChoiceQuestion[] = [
+  { q: 'Na Gymnopédie nº 1, a esquerda alterna G7M e D7M. Com a armadura de Ré maior, eles são…', options: ['IV7M e I7M', 'I7M e V7M', 'ii7 e V7'], answer: 0, why: 'Em Ré maior, Sol é o 4º grau e Ré o 1º. Sem V7, a música não tem pressa de resolver.' },
+  { q: 'Por que se diz que o começo da Gymnopédie "flutua"?', options: ['Os dois acordes têm 7ª maior e nenhum é dominante: não há trítono pedindo resolução', 'Porque está em menor', 'Porque não tem baixo'], answer: 0, why: 'A tensão-resolução V7–I não aparece; os dois acordes balançam como uma maré.' },
+  { q: 'Ouvido o G7M como centro, o Dó♯ da melodia é…', options: ['A 4ª aumentada: a cor do lídio', 'A sensível de Ré', 'Uma nota errada'], answer: 0, why: 'Sol lídio = Sol maior com o Dó♯. É a mesma cor do "voo" lídio das trilhas da lição 97.' },
+  { q: 'Numa análise escrita, o que vem primeiro?', options: ['Forma e tom (as seções e onde cada uma está)', 'O dedilhado', 'O andamento do metrônomo'], answer: 0, why: 'Do geral para o detalhe: forma, tom, graus compasso a compasso, cadências, recursos (empréstimo, secundária, modulação).' },
+];
+
+const l99: Lesson = {
+  n: 99,
+  id: 'l99',
+  title: 'Revisão final e roteiro pós-curso',
+  minutes: 60,
+  objectives: [
+    'Consigo passar no checkpoint geral das 12 unidades, sem dicas, com 85%.',
+    'Consigo ler à primeira vista 8 compassos com as duas mãos, com acordes na esquerda.',
+    'Consigo tocar a esquerda e a melodia da abertura da Gymnopédie nº 1 separadas.',
+    'Consigo montar o meu plano de estudo para os meses depois do curso.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Doze unidades em uma página',
+      body: `Olhe o caminho de uma vez só:
+
+- **Unidades 1 a 4**: teclado, pulso, pauta dupla, intervalos, os primeiros acordes pela cifra, a escala maior, as armaduras e o pedal. Marco 1 na lição 33.
+- **Unidades 5 a 8**: o modo menor, intervalos com nome completo, tríades e inversões, condução de vozes, campo harmônico e cadências, tétrades, blues e improviso. Marco 2 na lição 65.
+- **Unidades 9 a 12**: leitura clássica e textura, harmonia cromática (secundárias, subV, empréstimo), o Brasil ao piano (baião, bossa, choro, tensões) e, agora, forma, arranjo e repertório.
+
+Esta lição é a revisão de tudo, **intercalada**: cada bloco mistura habilidades de unidades diferentes, como no aquecimento das lições. A lição 100 é o recital.`,
+    },
+    {
+      kind: 'text',
+      title: 'Por que misturar',
+      body: `Estudar uma coisa de cada vez (em **bloco**) dá a sensação de domínio rápido, mas some depressa. Misturar (**intercalar**) parece mais difícil, e é justamente isso que ajuda: a cada item, você precisa **escolher** a ferramenta certa, não só repetir a última.
+
+A mistura rende mais quando junta **pares confundíveis**: 3ª menor e maior, V e V7, ii e IV, ø e °7, 7 e 7M. Os blocos abaixo foram montados assim.
+
+Uma regra para hoje: **não consulte as lições antes de responder**. Erre, veja a dica, e anote o que errou. A lista de erros é o seu plano de revisão da semana.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'revisar só o que você já sabe',
+      body: 'É tentador abrir as músicas que saem bem e pular as escalas em Mi♭ ou os acordes de ouvido. A revisão que funciona começa pelo que dói. Se um bloco abaixo ficar abaixo de 85%, ele vai para o topo da lista.',
+    },
+    { kind: 'exercise', id: 'l99-escalas', exercise: items('Escalas maiores e menores', 'Oito escalas sorteadas: maiores com até 3 acidentes e as três menores de Lá, Mi e Ré. Uma oitava subindo.', mix([fScales, fMinor]), 8, 48, 84, 0.85, 'off') },
+    { kind: 'exercise', id: 'l99-intervalos', exercise: items('Intervalos com nome completo', 'Toque a nota pedida acima da nota dada, com a grafia certa no pensamento.', fIntervals, 8, 48, 84, 0.85, 'off') },
+    { kind: 'exercise', id: 'l99-acordes', exercise: items('Acordes de todas as unidades', 'Inversões, campo harmônico em tétrades, shells e acordes com tensão, misturados.', mix([fInv, fField7, fShells, fTension]), 10, 36, 84, 0.8, 'off') },
+    { kind: 'exercise', id: 'l99-harmonia', exercise: items('Cadências e acordes de fora do campo', 'Cadências pedidas pelo nome e acordes cromáticos pelo grau: secundárias, subV e empréstimo.', mix([fCad, fChrom]), 8, 48, 84, 0.8, 'off') },
+    { kind: 'exercise', id: 'l99-ouvido', exercise: items('Ouvido misturado', 'Qualidade de acorde, grau, intervalo, cadência e forma, de ouvido.', mix([fQualityEar, fDegreeEar, fIntEar, fCadEar, formEar]), 10, 48, 84, 0.75, 'off') },
+    {
+      kind: 'text',
+      title: 'Primeira vista: o último teste',
+      body: `Ler sem ensaio junta tudo: armadura, ritmo, mãos juntas, acordes. Antes de tocar, use os **30 segundos** da unidade 9:
+
+1. **Armadura e tom**: quantos acidentes, que tônica.
+2. **Compasso e figuras**: ache a figura mais rápida e escolha um andamento em que ela caiba.
+3. **Esquerda**: aqui ela toca **mínimas** com I, IV e V. Reconheça o acorde pela forma, não nota por nota.
+4. **Não pare**: errou, siga. Na primeira vista, o pulso vale mais que a nota.`,
+    },
+    { kind: 'exercise', id: 'l99-vista', exercise: quickTimed('Primeira vista com as duas mãos', '8 compassos novos em tom sorteado, a 60 BPM. A esquerda faz I, IV e V em mínimas.', sightFinal(60), { reps: 2 }) },
+    {
+      kind: 'text',
+      title: 'Preparando a Gymnopédie nº 1',
+      body: `O projeto final é a abertura da **Gymnopédie nº 1** de Erik Satie (1888), em compasso **3/4**, com a indicação *Lent et douloureux* (lento e doloroso). Duas dificuldades pedem preparo separado:
+
+- **O salto da esquerda**: o **baixo** no tempo 1 (Sol2 ou Ré3) e o **acorde** no tempo 2 (Si–Ré–Fá♯ ou Lá–Dó♯–Fá♯), quase uma oitava e meia acima. Olhe para o destino **antes** de sair, e deixe o braço levar a mão, não os dedos.
+- **A melodia longa**: entra no compasso 5, no tempo 2, com Fá♯5 e Lá5, e desce devagar até um Fá♯4 que dura 4 compassos. Cada nota precisa **durar** inteira: solte só quando a próxima já soou.
+
+O pedal troca **a cada compasso**, logo depois do baixo (o pedal legato da lição 94). Aqui o app não mede o pedal: ele contaria também o acorde do tempo 2 como troca. O juiz é a sua gravação: o acorde novo não pode chegar misturado com o anterior.`,
+    },
+    { kind: 'exercise', id: 'l99-gym-esquerda', exercise: quickTimed('Gymnopédie: a esquerda', 'Só a esquerda, compassos 1 a 4, de 52 até 60 BPM. Baixo no 1, acorde no 2.', () => melodyTask([GYM_G, GYM_D, GYM_G, GYM_D].join(' | '), { bpm: 52, beatsPerBar: 3, clef: 'bass', fifths: 2, caption: 'G7M | D7M | G7M | D7M: Sol2 e Si–Ré–Fá♯; Ré3 e Lá–Dó♯–Fá♯.' }), { ladder: { from: 52, to: 60, step: 4 } }) },
+    { kind: 'exercise', id: 'l99-gym-melodia', exercise: quickTimed('Gymnopédie: a melodia', 'Só a direita, compassos 5 a 9, a 60 BPM, com legato.', () => melodyTask(GYM_R.slice(4, 9).join(' | '), { bpm: 60, beatsPerBar: 3, fifths: 2 }), { reps: 2, articulation: 'legato' }) },
+    {
+      kind: 'text',
+      title: 'Depois do curso: o roteiro',
+      body: `O curso termina no nível **intermediário** (perto do RCM 5 e 6, ou ABRSM 4 e 5). O próximo trecho do caminho tem quatro trilhas:
+
+- **Técnica**: escalas e arpejos em **4 oitavas**, escalas em **terças** e em movimento contrário em todos os tons. Estudos de **Czerny** em séries curtas (Op. 599, depois 849, depois 299), sempre com um objetivo medido: andamento, uniformidade, dinâmica.
+- **Polifonia**: as **Invenções a duas vozes** de Bach, começando pela **nº 1** (Dó maior) e pela **nº 8** (Fá maior).
+- **Repertório**: a **Gymnopédie nº 1 inteira** (ela é mais difícil do que parece), o **Prelúdio Op. 28 nº 4** de Chopin, e depois os noturnos e o "Clair de Lune". No Brasil, **Odeon** e **Apanhei-te, cavaquinho**, de Nazareth, ambos de domínio público.
+- **Popular**: tirar músicas de ouvido e arranjar pela cifra, com os voicings sem fundamental e as tensões da unidade 11.`,
+    },
+    {
+      kind: 'text',
+      title: 'A rotina',
+      body: `Sem lição nova, a semana vira **consolidação**. Num dia de 60 minutos:
+
+- **~10 min** de revisão espaçada (o aquecimento do app continua funcionando com tudo o que você concluiu);
+- **~15 min** de técnica, na escada de andamento;
+- **~20 a 30 min** de repertório;
+- **~5 a 10 min** de ouvido.
+
+Os intervalos da revisão crescem: **1 dia, 3 dias, 7 dias, 2 a 3 semanas, 1 a 2 meses**. Uma falha devolve o item para o começo da fila. E meça o progresso no **começo** da sessão seguinte, não no fim da atual: é ali que se vê o que ficou.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'saude',
+      title: 'crescer devagar',
+      body: 'Peças maiores pedem mais horas, e o corpo precisa de tempo para acompanhar. Suba o tempo de técnica aos poucos de uma semana para a outra, faça pausas a cada 20 a 30 minutos e não aumente o andamento em dia de dor no punho, no antebraço ou no ombro.',
+    },
+    {
+      kind: 'exercise',
+      id: 'l99-plano',
+      exercise: {
+        kind: 'checklist',
+        title: 'O meu plano',
+        how: 'Escreva o seu plano para os próximos 3 meses e marque cada parte.',
+        items: [
+          'Escolhi uma peça clássica nova (por exemplo, a Invenção nº 1 ou a Gymnopédie inteira).',
+          'Escolhi uma música popular ou de trilha para tirar de ouvido e arranjar.',
+          'Escolhi uma peça brasileira (por exemplo, Odeon ou Apanhei-te, cavaquinho).',
+          'Defini a técnica da semana: duas escalas e um arpejo, com andamento alvo.',
+          'Reservei os dias de estudo e mantive a revisão diária do app.',
+          'Anotei os blocos desta lição que ficaram abaixo de 85% para revisar primeiro.',
+        ],
+      },
+    },
+    { kind: 'exercise', id: 'l99-quiz', exercise: quiz('Teoria de todas as unidades', 'Responda sem tocar.', [...FINAL_Q, ...ROADMAP_Q], 0.85) },
+  ],
+  review: [mix([fScales, fMinor]), mix([fInv, fField7, fTension]), mix([fQualityEar, fCadEar]), choice(FINAL_Q, 'revisao-final')],
+  checkpoint: [
+    items('Checkpoint geral', '30 perguntas de todas as unidades, sem dicas: escalas, intervalos, acordes, harmonia e ouvido. Meta: 85%.', mix([fScales, fMinor, fIntervals, fInv, fField7, fShells, fTension, fCad, fChrom, fQualityEar, fDegreeEar, fIntEar, fCadEar, formEar, choice(FINAL_Q, 'revisao-final')]), 30, 36, 84, 0.85, 'off'),
+    quickTimed('Primeira vista', '8 compassos com as duas mãos, a 60 BPM, sem dicas.', sightFinal(60)),
+  ],
+  exit: [mix([fScales, fMinor]), fCadEar, choice(ROADMAP_Q, 'roteiro')],
+};
+
+const l100: Lesson = {
+  n: 100,
+  id: 'l100',
+  title: 'Capstone: recital, arranjo e análise',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar a abertura da Gymnopédie nº 1 com 95% das notas, mãos juntas, com pedal.',
+    'Consigo apresentar um recital de 3 músicas: uma clássica, uma de trilha e uma brasileira.',
+    'Consigo escrever um arranjo próprio e a análise harmônica de uma das músicas.',
+    'Consigo comparar as gravações das lições 1, 33, 65 e 100 e dizer o que mudou.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O último marco',
+      body: `Os Marcos 1 e 2 tinham um checkpoint e um recital. O **capstone** é só portfólio: quatro entregas, de consulta livre.
+
+1. **Recital** de 3 músicas, gravado em sequência:
+   - **clássica**: a **Gymnopédie nº 1** (abertura, nesta lição) ou, se preferir, o Prelúdio em Mi menor (lição 95) ou o Minueto em Sol (unidade 9);
+   - **trilha**: o **Tema de jogo** (lição 97) ou a trilha que você transcreveu;
+   - **brasileira**: o **Tanguinho** ou a **Bossa em Fá** (unidade 11).
+2. **Arranjo próprio** de uma melodia, com intro e final.
+3. **Análise harmônica escrita** de uma das músicas.
+4. **Comparação** com as gravações das lições 1, 33 e 65.
+
+O critério do recital é alto: **95% das notas** no andamento que você escolher. Escolha um andamento em que isso é possível; devagar e limpo vale mais que rápido e sujo.`,
+    },
+    {
+      kind: 'text',
+      title: 'A Gymnopédie nº 1',
+      body: `Erik Satie escreveu as três Gymnopédies em 1888, em Paris. A primeira é das peças para piano mais conhecidas do mundo, e quase toda a abertura está em dois acordes:
+
+- **G7M** (Sol–Si–Ré–Fá♯) e **D7M** (Ré–Lá–Dó♯–Fá♯), um por compasso, com o baixo no tempo 1 e o acorde no tempo 2.
+- A melodia entra no compasso 5: **Fá♯, Lá | Sol, Fá♯, Dó♯ | Si, Dó♯, Ré | Lá | Fá♯**.
+
+Este trecho tem os 12 primeiros compassos. Duas adaptações do arranjo: a nota longa do fim (Fá♯4, que no original dura 4 compassos ligados) vira **nota e pausas**, e nesses compassos a esquerda deixa o **Fá♯** do acorde para a direita, porque as duas mãos não podem atacar a mesma tecla.
+
+Ela é lenta, mas não é fácil: a lista de níveis do PLANO a põe no fim do intermediário, por causa do salto da esquerda, do pedal e do som.`,
+    },
+    {
+      kind: 'example',
+      title: 'Os compassos 4 a 6',
+      steps: [
+        { say: 'Compasso 4: só a esquerda, Ré3 e o acorde Lá–Dó♯–Fá♯ (D7M).', play: { bpm: 60, steps: [{ midis: [n('D3')], beats: 1 }, { midis: [n('A3'), n('C#4'), n('F#4')], beats: 2 }] } },
+        { say: 'Compasso 5: Sol2 e Si–Ré–Fá♯ (G7M); a melodia entra no tempo 2 com Fá♯5 e Lá5.', play: { bpm: 60, steps: [{ midis: [n('G2')], beats: 1 }, { midis: [n('B3'), n('D4'), n('F#4'), n('F#5')], beats: 1 }, { midis: [n('A5')], beats: 1 }] } },
+        { say: 'Compasso 6: Ré3 e D7M; a melodia desce Sol, Fá♯, Dó♯.', play: { bpm: 60, steps: [{ midis: [n('D3'), n('G5')], beats: 1 }, { midis: [n('A3'), n('C#4'), n('F#4'), n('F#5')], beats: 1 }, { midis: [n('C#5')], beats: 1 }] } },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'o acorde da esquerda engolir a melodia',
+      body: 'O acorde do tempo 2 cai junto com notas da melodia, e três notas fortes cobrem uma. Toque o acorde **pianíssimo**, como um eco do baixo, e deixe a melodia cantar por cima. Grave e escute: se a melodia some no tempo 2, a esquerda está forte demais.',
+    },
+    { kind: 'exercise', id: 'l100-gym-trecho', exercise: quickTimed('Compassos 5 a 8, mãos juntas', 'A primeira metade da melodia com a esquerda, a 54 BPM.', () => twoHandTask(GYM_R.slice(4, 8).join(' | '), GYM_L.slice(4, 8).join(' | '), { bpm: 54, beatsPerBar: 3, fifths: 2, caption: 'Esquerda: G7M | D7M | G7M | D7M, baixo no 1 e acorde no 2.' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l100-gym', exercise: quickTimed('A abertura inteira', 'Os 12 compassos, mãos juntas, de 54 até 60 BPM. Pedal a cada compasso, logo depois do baixo.', gymTask(54, 'Esquerda: G7M e D7M alternados; nos compassos 9 a 12, sem o Fá♯ (a direita segura).'), { ladder: { from: 54, to: 60, step: 3 } }) },
+    { kind: 'song', songId: 'u12-gymnopedie', why: 'O projeto final da unidade e a peça clássica do recital.' },
+    {
+      kind: 'text',
+      title: 'O arranjo próprio',
+      body: `Escolha uma melodia: a **Valsa lenta** do app (abaixo), uma folclórica (Greensleeves, Brilha brilha, When the Saints) ou a trilha que você transcreveu. Monte o arranjo com as ferramentas da unidade:
+
+- **Forma**: decida as seções (A, B, volta do A) e escreva o mapa antes de tocar.
+- **Melodia no topo** da direita, com uma nota do acorde por baixo nos tempos fortes (lição 91).
+- **Esquerda**: escolha um padrão (décimas, baixo e acorde, ostinato, arpejo) e mantenha.
+- **Intro** de 4 compassos, **turnaround** para voltar, **final** com tônica com tensão, tag ou IV–iv–I (lição 92).
+- Uma ideia de **cor**: um empréstimo (♭VI–♭VII–I), uma dominante secundária ou o último A um tom acima.
+
+Escreva a cifra compasso a compasso; ela é a partitura do arranjo.`,
+    },
+    { kind: 'song', songId: 'u12-valsa-lenta', why: 'Uma melodia original no estilo de Satie, pronta para receber o seu arranjo.' },
+    {
+      kind: 'text',
+      title: 'A análise escrita',
+      body: `Analise uma das músicas do recital, do geral para o detalhe:
+
+1. **Forma**: as seções e os compassos de cada uma (AABA, ABA, binária…).
+2. **Tom**: a tonalidade principal e as passagens por outros tons.
+3. **Graus**: a cifra e o grau de cada compasso (I7M, ii7, V7/V…), com a função (T, S, D).
+4. **Cadências**: onde as frases fecham e com que cadência.
+5. **Recursos**: empréstimos, secundárias, subV, modulações, notas estranhas que chamam atenção.
+
+Exemplo, na abertura da Gymnopédie: tom de **Ré maior** pela armadura; a esquerda alterna **IV7M – I7M** (G7M – D7M) sem nenhum V7. Sem trítono, nada pede resolução, e a música flutua. Se o ouvido toma o Sol como centro, o **Dó♯** da melodia é a 4ª aumentada: a cor **lídia** da lição 97.`,
+    },
+    { kind: 'exercise', id: 'l100-analise', exercise: quiz('Análise da Gymnopédie', 'Responda sem tocar.', ANALYSIS_Q, 0.75) },
+    {
+      kind: 'text',
+      title: 'Ouvir o caminho',
+      body: `Você gravou a lição 1, o Marco 1 (lição 33) e o Marco 2 (lição 65). Ouça as três e depois o recital de hoje, na ordem. Anote, para cada uma:
+
+- **pulso**: o tempo ficou firme ou correu?
+- **som**: as notas soam iguais? a melodia aparece sobre o acompanhamento?
+- **pedal**: limpo ou embolado?
+- **segurança**: houve paradas? recomeços?
+
+Termine com uma reflexão curta: o que mudou mais, o que ainda falta e qual é a primeira peça do seu roteiro.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'porque',
+      title: 'por que comparar gravações',
+      body: 'Quem estuda todo dia não percebe o próprio progresso: a mudança é lenta demais para ser vista de um dia para o outro. Ouvir a lição 1 ao lado da lição 100 mostra de uma vez o que meses de estudo construíram, e aponta com clareza o próximo passo.',
+    },
+  ],
+  review: [choice(ANALYSIS_Q, 'analise'), formEar],
+  checkpoint: [
+    quickTimed('Gymnopédie nº 1, abertura', 'Os 12 compassos, mãos juntas, a 60 BPM, sem dicas. Meta: 95% das notas.', gymTask(60), { pass: { accuracy: 0.95 } }),
+    quickTimed('Tema de jogo', 'Os 8 compassos, mãos juntas, a 80 BPM, sem dicas. Meta: 95% das notas.', () => twoHandTask(GAME_R.join(' | '), [...GAME_CHORDS.map(ost), 'A2+E3+A3:4'].join(' | '), { bpm: 80 }), { pass: { accuracy: 0.95 } }),
+  ],
+  project: {
+    title: 'Recital final: três mundos, um arranjo e uma análise',
+    brief: 'Grave em sequência, sem recomeçar, uma música clássica (a Gymnopédie nº 1 ou outra do curso), uma de trilha (o Tema de jogo ou a sua transcrição) e uma brasileira (o Tanguinho ou a Bossa em Fá). Depois, toque o seu arranjo próprio, escreva a análise harmônica de uma das músicas e compare as gravações das lições 1, 33, 65 e 100.',
+    steps: [
+      'Passe as três músicas no "Tocar a música" com 95% das notas no andamento escolhido.',
+      'Escreva o mapa e a cifra do arranjo próprio (forma, intro, turnaround, final, uma cor) e ensaie.',
+      'Faça 5 minutos de aquecimento e grave o recital inteiro, seguido do arranjo.',
+      'Escreva a análise: forma, tom, graus com funções, cadências e recursos.',
+      'Ouça as gravações das lições 1, 33, 65 e 100 e escreva a reflexão.',
+    ],
+    rubric: [
+      'As três músicas passaram com 95% das notas no andamento escolhido.',
+      'O pedal ficou limpo na Gymnopédie e a melodia soou acima da esquerda.',
+      'O arranjo tem forma clara, melodia no topo, intro, turnaround e final.',
+      'A análise está correta: graus, funções, cadências e recursos.',
+      'A reflexão compara as quatro gravações e define o próximo passo.',
+    ],
+    exercise: quickTimed('Gymnopédie do recital', 'Os 12 compassos, mãos juntas, a 60 BPM, com pedal a cada compasso.', gymTask(60), { pass: { accuracy: 0.95 } }),
+  },
+  exit: [choice(ANALYSIS_Q, 'analise'), choice(ROADMAP_Q, 'roteiro')],
+};
+
 // ---------- unidade ----------
 
 const unit: Unit = {
@@ -1084,11 +1411,11 @@ const unit: Unit = {
   title: 'Arranjo, forma e repertório',
   goal: 'Reconhecer a forma, arranjar uma melodia para piano solo e apresentar um recital próprio com peças de três mundos.',
   technique: 'Escalas de 2 oitavas mãos juntas em semicolcheias, de 44 rumo a 60 BPM (variação abaixo de 25 ms), e arpejos maiores mãos juntas. Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l90, l91, l92, l93, l94, l95, l96, l97, l98],
-  songs: [odeArr, preludio, tema, valsa],
+  lessons: [l90, l91, l92, l93, l94, l95, l96, l97, l98, l99, l100],
+  songs: [odeArr, preludio, tema, valsa, gymnopedie],
   final: {
-    songId: 'u12-valsa-lenta',
-    brief: 'Uma valsa lenta original no estilo das Gymnopédies de Satie: na esquerda, o baixo no tempo 1 e o acorde no tempo 2 (G7M e D7M), com pedal a cada compasso; na direita, uma melodia calma com o Dó♯ lídio sobre o Sol. Toque devagar, deixando o som respirar, e depois faça o seu arranjo dela.',
+    songId: 'u12-gymnopedie',
+    brief: 'A abertura da Gymnopédie nº 1 de Erik Satie (1888), compassos 1 a 12: na esquerda, o baixo no tempo 1 e o acorde no tempo 2, alternando G7M e D7M, com pedal a cada compasso; na direita, a melodia lenta que entra no compasso 5. Toque devagar, com a melodia acima do acompanhamento, e feche o curso com o seu arranjo próprio da Valsa lenta.',
   },
 };
 
