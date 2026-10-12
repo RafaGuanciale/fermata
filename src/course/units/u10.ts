@@ -2,11 +2,11 @@
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
-  chordSequence, choice, chromaticChord, chromaticSymbol, harmonizeChromatic, keyName, ledVoicings, mix,
+  chordQualityByEar, chordSequence, choice, chromaticByEar, chromaticChord, chromaticSymbol, harmonizeChromatic, keyName, ledVoicings, mix, playChord,
   progressionChoice, type ChoiceQuestion, type ChromRoman, type Roman,
 } from '../gens';
 import { n, pick } from '../music';
-import { twoHandTask } from '../tasks';
+import { melodyTask, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Listen, Rng, SongSpec, TimedTask, Unit } from '../types';
 
@@ -395,6 +395,358 @@ No i com 7ª menor, a sensível não sobe: ela desce para a 7ª. Se você quiser
   exit: [minorChords, choice(MINOR_Q, 'ii-v-i-menor')],
 };
 
+// ---------- diminutos, subV e empréstimo ----------
+
+const DIM_ROOTS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const dim7 = playChord({ symbols: DIM_ROOTS.map((r) => `${r}°7`), low: 48, high: 72, requireBass: true });
+/** O mesmo diminuto com outra nota no baixo: só existem três conjuntos de teclas. */
+const dimSlash = playChord({ symbols: ['B°7/D', 'B°7/F', 'B°7/G#', 'C#°7/E', 'C#°7/G', 'C#°7/A#', 'D#°7/F#', 'D#°7/A', 'D#°7/C'], low: 48, high: 72 });
+const dimPassing = chordSequence({
+  sequences: [
+    { name: 'De passagem: o baixo sobe Dó, Dó♯, Ré.', symbols: ['C7M', 'C#°7', 'Dm7', 'G7'] },
+    { name: 'De passagem: o baixo sobe Ré, Ré♯, Mi.', symbols: ['Dm7', 'D#°7', 'Em7', 'A7'] },
+    { name: 'De passagem: o baixo sobe Fá, Fá♯, Sol.', symbols: ['F7M', 'F#°7', 'C7M/G', 'G7'] },
+    { name: 'Função dominante: vii°7 → I.', symbols: ['F7M', 'G7', 'B°7', 'C7M'] },
+    { name: 'Função dominante em Lá menor: vii°7 → i.', symbols: ['Dm7', 'Bm7(b5)', 'G#°7', 'Am7'] },
+    { name: 'Auxiliar: o Dó fica no baixo e o diminuto enfeita o I.', symbols: ['C7M', 'C°7', 'C7M', 'G7'] },
+  ],
+});
+const earDim = chordQualityByEar({ qualities: ['°7', '7', 'ø'], roots: [57, 60, 62, 64, 65, 67], answerRoots: [55, 57, 60, 62, 64, 65] });
+
+/** Arpejos de diminuta numa inversão que começa em tecla branca (um de cada um dos três conjuntos). */
+const DIM_ARPS: { text: string; fifths: number; caption: string }[] = [
+  { text: 'B3:0.5 D4:0.5 F4:0.5 G#4:0.5 B4:0.5 G#4:0.5 F4:0.5 D4:0.5 | B3:4', fifths: 0, caption: 'Arpejo de G♯°7 (o vii°7 de Lá menor) a partir do Si. Dedos 1-2-3-4-5 subindo, 4-3-2-1 descendo.' },
+  { text: 'E4:0.5 G4:0.5 Bb4:0.5 C#5:0.5 E5:0.5 C#5:0.5 Bb4:0.5 G4:0.5 | E4:4', fifths: -1, caption: 'Arpejo de C♯°7 (o vii°7 de Ré menor) a partir do Mi. Dedos 1-2-3-4-5 subindo, 4-3-2-1 descendo.' },
+  { text: 'A3:0.5 C4:0.5 D#4:0.5 F#4:0.5 A4:0.5 F#4:0.5 D#4:0.5 C4:0.5 | A3:4', fifths: 1, caption: 'Arpejo de D♯°7 (o vii°7 de Mi menor) a partir do Lá. Dedos 1-2-3-4-5 subindo, 4-3-2-1 descendo.' },
+];
+const dimArp = (bpm: number) => (rng: Rng) => {
+  const a = pick(rng, DIM_ARPS);
+  return melodyTask(a.text, { bpm, fifths: a.fifths, caption: a.caption });
+};
+
+const DIM_Q: ChoiceQuestion[] = [
+  { q: 'B°7 tem as notas…', options: ['Si, Ré, Fá, Lá♭', 'Si, Ré, Fá, Lá', 'Si, Ré♯, Fá♯, Lá'], answer: 0, why: 'Três terças menores: Si–Ré, Ré–Fá, Fá–Lá♭. A 7ª é diminuta (9 semitons).' },
+  { q: 'Quantos acordes °7 diferentes existem, contando só as teclas?', options: ['3', '4', '12'], answer: 0, why: 'Cada °7 divide a oitava em 4 partes iguais: suas inversões dão outros °7. Doze fundamentais, só três conjuntos de teclas.' },
+  { q: 'B°7, D°7, F°7 e A♭°7 são…', options: ['O mesmo conjunto de teclas, escrito de jeitos diferentes', 'Quatro acordes sem nota em comum', 'Acordes meio-diminutos'], answer: 0, why: 'Si, Ré, Fá, Lá♭: qualquer uma pode ser a fundamental escrita.' },
+  { q: 'O vii°7 de Dó (B°7) funciona como…', options: ['Um G7(♭9) sem a fundamental', 'Um IV', 'Uma tônica'], answer: 0, why: 'G7(♭9) = Sol, Si, Ré, Fá, Lá♭. Tire o Sol: sobra B°7. Resolve no Dó como o G7.' },
+  { q: 'No caminho C7M – C♯°7 – Dm7, o diminuto é…', options: ['De passagem: o baixo sobe por semitons', 'Auxiliar', 'Uma tônica nova'], answer: 0, why: 'Dó, Dó♯, Ré no baixo: o °7 liga dois acordes a um tom de distância.' },
+  { q: 'Um °7 auxiliar (de nota comum)…', options: ['Mantém o baixo e enfeita o acorde, voltando a ele', 'Muda de tom', 'Substitui o ii'], answer: 0, why: 'C7M – C°7 – C7M: o Dó fica; as outras vozes saem meio tom e voltam.' },
+];
+
+const l77: Lesson = {
+  n: 77,
+  id: 'l77',
+  title: 'Acordes diminutos',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar o °7 de qualquer fundamental e reconhecer as inversões dele como outros °7.',
+    'Consigo usar o °7 com função dominante, de passagem e auxiliar.',
+    'Consigo tocar um arpejo de diminuta, mão direita, a 60 BPM em colcheias.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O acorde que divide a oitava',
+      body: `O **acorde diminuto com 7ª**, cifrado **°7**, é feito só de **terças menores** empilhadas: Si–Ré (3 semitons), Ré–Fá (3), Fá–Lá♭ (3). **B°7 = Si, Ré, Fá, Lá♭.** A 7ª, Lá♭, é uma 7ª **diminuta**: 9 semitons acima da fundamental, a mesma tecla de uma 6ª maior.
+
+Ele é diferente do **meio-diminuto** (ø) da lição anterior: o Bm7(♭5) tem Lá natural, uma 7ª menor. Só a última nota muda, e o som muda muito: o ø é melancólico, o °7 é tenso e instável.
+
+Agora a parte curiosa. Se você empilhar mais uma terça menor sobre o Lá♭, chega ao Si de novo: **quatro terças menores fecham a oitava**. O °7 divide a oitava em quatro partes iguais. Por isso ele é **simétrico**: qualquer inversão tem o mesmo desenho, terça menor sobre terça menor.`,
+    },
+    { kind: 'exercise', id: 'l77-construir', exercise: items('Toque o °7', 'Fundamental embaixo, depois três terças menores (3 semitons cada).', dim7, 12, 48, 72, 0.85, 'fade') },
+    {
+      kind: 'text',
+      title: 'Só existem três diminutos',
+      body: `Como toda inversão de um °7 é outro °7, as 12 fundamentais caem em só **três conjuntos de teclas**:
+
+- **Dó, Mi♭, Sol♭, Lá**: C°7 = E♭°7 = G♭°7 (F♯°7) = A°7
+- **Dó♯, Mi, Sol, Si♭**: C♯°7 = E°7 = G°7 = B♭°7 (A♯°7)
+- **Ré, Fá, Lá♭, Si**: D°7 = F°7 = A♭°7 (G♯°7) = B°7
+
+Os nomes mudam porque a **grafia segue a função**: o mesmo acorde é B°7 quando leva a Dó, e G♯°7 quando leva a Lá menor. Nas teclas, é igual. Algumas grafias pedem dobrado bemol (C°7 tem Si𝄫, que soa Lá): na cifra popular isso quase nunca aparece, mas a lógica é essa.`,
+    },
+    { kind: 'exercise', id: 'l77-baixo', exercise: items('O mesmo °7, outro baixo', 'A cifra com barra pede uma das notas do acorde no baixo. As teclas são as mesmas; só muda quem fica embaixo.', dimSlash, 8, 48, 72, 0.85, 'fade') },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'confundir °7 com ø',
+      body: 'Bm7(♭5) = Si, Ré, Fá, **Lá**. B°7 = Si, Ré, Fá, **Lá♭**. Se a 7ª está um tom abaixo da oitava, é meio-diminuto; se está um tom e meio abaixo, é diminuto. Na dúvida, conte: o °7 só tem terças menores.',
+    },
+    {
+      kind: 'text',
+      title: 'Três funções do diminuto',
+      body: `O °7 aparece em três papéis:
+
+1. **Dominante.** Em Dó, o vii°7 é **B°7**: Si, Ré, Fá, Lá♭. Compare com o **G7(♭9)** da lição 76: Sol, Si, Ré, Fá, Lá♭. Tire o Sol e sobra o B°7. Ele é um dominante sem fundamental e resolve no Dó como o G7: Si sobe para Dó, Fá desce para Mi, Lá♭ desce para Sol. Em Lá menor, o mesmo papel é do **G♯°7** → Am.
+2. **De passagem.** Entre dois acordes a um tom de distância, o °7 preenche o meio tom do baixo: **C7M – C♯°7 – Dm7**. O C♯°7 é, na verdade, o A7(♭9) sem o Lá: um V7/ii disfarçado.
+3. **Auxiliar** (de nota comum). O baixo fica e o °7 enfeita o acorde: **C7M – C°7 – C7M**. Sai e volta, como uma bordadura de acordes.`,
+    },
+    {
+      kind: 'example',
+      title: 'As três funções',
+      steps: [
+        { say: '**Dominante**: F7M – G7 – **B°7** – C7M. O B°7 faz o papel do G7, ainda mais tenso.', play: progListen(['F7M', 'G7', 'B°7', 'C7M']) },
+        { say: '**De passagem**: C7M – **C♯°7** – Dm7 – G7. Escute o baixo subindo Dó, Dó♯, Ré.', play: progListen(['C7M', 'C#°7', 'Dm7', 'G7']) },
+        { say: '**Auxiliar**: C7M – **C°7** – C7M. O Dó fica embaixo; o resto sai e volta.', play: progListen(['C7M', 'C°7', 'C7M']) },
+      ],
+    },
+    { kind: 'exercise', id: 'l77-funcoes', exercise: items('Diminutos em progressões', 'Toque os acordes em ordem; a cifra com barra pede o baixo. Leia o nome da função antes de tocar.', dimPassing, 6, 48, 72, 0.8, 'fade') },
+    {
+      kind: 'text',
+      title: 'Arpejo de diminuta',
+      body: `O arpejo do °7 está no trilho técnico desta unidade (meta da banca: 60 BPM em colcheias, mãos separadas). Como as teclas se repetem a cada terça menor, o desenho da mão é sempre o mesmo, e há um truque para o dedilhado: **comece numa inversão que tenha tecla branca embaixo**. Assim o polegar nunca cai numa preta.
+
+Os três arpejos do exercício, um de cada conjunto, sobem uma oitava e voltam: **Si–Ré–Fá–Sol♯–Si** (G♯°7), **Mi–Sol–Si♭–Dó♯–Mi** (C♯°7) e **Lá–Dó–Ré♯–Fá♯–Lá** (D♯°7). Dedos **1-2-3-4-5** subindo e **4-3-2-1** descendo. A mão fica aberta numa oitava inteira: deixe o punho acompanhar, sem esticar os dedos à força.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'saude',
+      title: 'abertura de oitava sem tensão',
+      body: 'Se a mão dói ao abrir a oitava, não force: toque as quatro notas de baixo, solte a mão, e só então alcance a oitava com o 5. Abrir a mão é desenho, não esforço.',
+    },
+    { kind: 'exercise', id: 'l77-arpejo', exercise: quickTimed('Arpejo de diminuta', 'Colcheias, mão direita, de 48 até 60 BPM. Notas iguais: o app mede a regularidade.', dimArp(60), { ladder: { from: 48, to: 60, step: 4 }, evenness: 45 }) },
+    { kind: 'exercise', id: 'l77-ouvido', exercise: items('°7, 7 ou ø de ouvido', 'Ouça o acorde e toque um da mesma qualidade sobre a fundamental pedida.', earDim, 8, 48, 72, 0.85, 'off') },
+  ],
+  review: [dim7, dimSlash, choice(DIM_Q, 'diminutos')],
+  checkpoint: [
+    items('Diminutos sem dica', '10 acordes °7 com a fundamental embaixo. Meta: 9 de 10.', dim7, 10, 48, 72, 0.9, 'off'),
+    items('Funções e ouvido', 'Progressões com diminuto, °7 com outro baixo, qualidade de ouvido e secundárias da lição 74.', mix([dimPassing, dimSlash, earDim, secDom]), 8, 48, 72, 0.85, 'off'),
+    quickTimed('Arpejo a 60 BPM', 'Um arpejo sorteado, colcheias, mão direita.', dimArp(60), { evenness: 45 }),
+  ],
+  exit: [dim7, choice(DIM_Q, 'diminutos')],
+};
+
+const subV = chromaticChord({ keys: ['C', 'F', 'G', 'D', 'Bb'], romans: ['subV7', 'subV7/V', 'subV7/ii'], low: 48, high: 72 });
+const guideSubV = chordSequence({
+  sequences: ['C', 'F', 'Bb', 'Eb', 'G', 'D'].map((k) => ({ name: `ii–subV–I em ${keyName(k)} maior.`, symbols: (['ii7', 'subV7', 'I7M'] as (Roman | ChromRoman)[]).map((r) => chromaticSymbol(k, r)) })),
+  voicing: 'guide',
+  lead: 1,
+});
+const earSubV = progressionChoice({
+  keys: ['C', 'F', 'G', 'D'],
+  options: [{ label: 'V7 (o baixo cai uma 5ª)', romans: ['ii7', 'V7', 'I7M'] }, { label: 'subV7 (o baixo desce meio tom)', romans: ['ii7', 'subV7', 'I7M'] }],
+  ask: 'O acorde do meio foi o V7 ou o subV7?',
+});
+const subVByEar = chromaticByEar({ keys: ['C', 'F', 'G'], progressions: [['ii7', 'subV7', 'I7M'], ['ii7', 'V7', 'I7M'], ['I7M', 'subV7/ii', 'ii7', 'subV7', 'I7M'], ['I7M', 'subV7/V', 'V7', 'I7M']], answer: 'bass' });
+
+/** ii–V–I ou ii–subV–I com as duas mãos: as notas-guia do subV são as mesmas do V7; só o baixo muda. */
+function iiSubVHands(rng: Rng, bpm: number): TimedTask {
+  const k = pick(rng, KEYS_STAFF.filter((x) => ['C', 'F', 'G', 'Bb', 'D', 'Eb'].includes(x.key)));
+  const t = 62 + ((k.pc - 2 + 12) % 12);
+  const f = t - 7;
+  const bass = (pc: number) => 40 + ((pc - 4 + 12) % 12);
+  const right = `${sci(f)}+${sci(t)}:2 ${sci(f)}+${sci(t - 1)}:2 | ${sci(f - 1)}+${sci(t - 1)}:4`;
+  const left = `${sci(bass(k.pc + 2))}:2 ${sci(bass(k.pc + 1))}:2 | ${sci(bass(k.pc))}:4`;
+  const symbols = (['ii7', 'subV7', 'I7M'] as (Roman | ChromRoman)[]).map((r) => chromaticSymbol(k.key, r));
+  return twoHandTask(`${right} | ${right}`, `${left} | ${left}`, {
+    bpm,
+    fifths: k.fifths,
+    caption: `ii–subV–I em ${keyName(k.key)} maior: ${symbols.join(' – ')}, duas vezes. Direita: as notas-guia. Esquerda: a fundamental, descendo por semitons.`,
+  });
+}
+
+const SUBV_Q: ChoiceQuestion[] = [
+  { q: 'O trítono do G7 é…', options: ['Si e Fá', 'Sol e Ré', 'Si e Ré'], answer: 0, why: 'A 3ª (Si) e a 7ª (Fá) estão a 6 semitons uma da outra.' },
+  { q: 'Qual dominante tem o mesmo trítono do G7?', options: ['D♭7 (Fá e Dó♭ = Si)', 'D7', 'C7'], answer: 0, why: 'O trítono divide a oitava ao meio; ele pertence a dois dominantes a um trítono de distância.' },
+  { q: 'Em Dó maior, o subV7 (o substituto do G7) é…', options: ['D♭7', 'A♭7', 'F♯7'], answer: 0, why: 'Um trítono acima de Sol, ou meio tom acima do alvo (Dó).' },
+  { q: 'No ii–subV–I em Dó, o baixo faz…', options: ['Ré, Ré♭, Dó: desce por semitons', 'Ré, Sol, Dó', 'Ré, Mi, Dó'], answer: 0, why: 'É o som característico do subV: o baixo escorrega meio tom para a casa.' },
+  { q: 'O subV7/V em Dó maior é…', options: ['A♭7, que leva a G', 'D♭7, que leva a C', 'E♭7, que leva a Dm'], answer: 0, why: 'O substituto do D7 (V7/V): meio tom acima de Sol.' },
+  { q: 'Na cifra romana, o subV7 também aparece como…', options: ['♭II7', 'IV7', 'vii°'], answer: 0, why: 'Ele fica sobre o 2º grau abaixado: em Dó, Ré♭.' },
+];
+
+const l78: Lesson = {
+  n: 78,
+  id: 'l78',
+  title: 'Dominante substituta (subV7)',
+  minutes: 60,
+  objectives: [
+    'Consigo explicar por que D♭7 substitui G7 (o trítono compartilhado).',
+    'Consigo tocar o subV7, o subV7/V e o subV7/ii em cinco tons.',
+    'Consigo tocar ii–subV–I com as duas mãos e reconhecer V7 × subV7 de ouvido.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'O trítono é a alma do V7',
+      body: `O que faz o G7 puxar para o Dó? Não é a fundamental: é o **trítono** entre a 3ª e a 7ª, **Si e Fá**. O Si sobe para Dó, o Fá desce para Mi. As outras notas (Sol e Ré) só dão corpo.
+
+O trítono tem 6 semitons: **metade da oitava**. Então, se você inverter Si–Fá, ganha Fá–Si, outro trítono com as mesmas teclas. E existe outro acorde dominante com essas duas notas: o **D♭7** = Ré♭, Fá, Lá♭, Dó♭. Dó♭ é a mesma tecla de Si. No D♭7, o Fá é a 3ª e o Dó♭ é a 7ª, o contrário do G7.
+
+Como o trítono é o mesmo, o D♭7 também resolve no Dó. Ele se chama **dominante substituta**, ou **subV7**: o V7 trocado pelo dominante que fica um trítono acima (ou, mais fácil de achar, **meio tom acima do alvo**).`,
+    },
+    {
+      kind: 'keys',
+      low: 55,
+      high: 72,
+      lit: [n('B4'), n('F4')],
+      labels: { [n('F4')]: 'Fá', [n('B4')]: 'Si / Dó♭' },
+      caption: 'O mesmo trítono: no G7, Si é a 3ª e Fá a 7ª; no D♭7, Fá é a 3ª e Dó♭ (Si) a 7ª.',
+    },
+    {
+      kind: 'example',
+      title: 'V7 e subV7 lado a lado',
+      steps: [
+        { say: '**Dm7 – G7 – C7M**: o baixo faz Ré, Sol, Dó.', play: progListen(['Dm7', 'G7', 'C7M']) },
+        { say: '**Dm7 – D♭7 – C7M**: o baixo escorrega Ré, Ré♭, Dó. Em cima, as notas-guia são as mesmas.', play: progListen(['Dm7', 'Db7', 'C7M']) },
+        { say: 'O trítono sozinho, Fá e Si, e a resolução em Mi e Dó.', play: { bpm: 60, steps: [{ midis: [n('F4'), n('B4')], beats: 2 }, { midis: [n('E4'), n('C5')], beats: 3 }] }, keys: [n('F4'), n('B4')] },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'contar o trítono para o lado errado',
+      body: 'O subV de G7 é D♭7, não D7 nem A♭7. Atalho seguro: **meio tom acima do acorde de chegada**. Vai para Dó? D♭7. Vai para Sol (V7/V)? A♭7. Vai para Ré menor (V7/ii)? E♭7.',
+    },
+    { kind: 'exercise', id: 'l78-construir', exercise: items('Toque o subV', 'Em cinco tons: o subV7 do I, do V e do ii. Ache o alvo e suba meio tom; acorde maior com 7ª menor.', subV, 10, 48, 72, 0.85, 'fade') },
+    {
+      kind: 'text',
+      title: 'ii–♭II7–I: o baixo cromático',
+      body: `Na cifra romana o subV7 aparece como **♭II7** (sobre o 2º grau abaixado). A frase **ii–♭II7–I** é um clichê do jazz e da bossa: Dm7 – D♭7 – C7M.
+
+O melhor desta troca: **as notas-guia da direita não mudam**. Fá–Dó → Fá–Si → Mi–Si, exatamente como no ii–V–I. Quem muda é só a **esquerda**, que deixa de saltar Ré → Sol → Dó e passa a descer Ré → Ré♭ → Dó. Você troca o V7 pelo subV7 mexendo só um dedo da mão esquerda.
+
+O mesmo vale para as secundárias: o A7 (V7/ii) pode virar **E♭7**, o D7 (V7/V) pode virar **A♭7**. Num ii–V encadeado, a esquerda inteira vira uma linha cromática.`,
+    },
+    { kind: 'exercise', id: 'l78-guias', exercise: items('ii–subV–I nas notas-guia', 'Seis tons. Repare: as mesmas notas-guia do ii–V–I.', guideSubV, 6, 48, 84, 0.85, 'fade') },
+    { kind: 'exercise', id: 'l78-maos', exercise: quickTimed('ii–subV–I com as duas mãos', 'Direita nas notas-guia, esquerda descendo por semitons, a 80 BPM. Tom novo a cada passada boa; 3 seguidas.', (rng) => iiSubVHands(rng, 80), { reps: 3, pass: { accuracy: 0.9 } }) },
+    {
+      kind: 'callout',
+      tone: 'porque',
+      title: 'por que o subV soa "moderno"',
+      body: 'O D♭7 traz notas bem longe de Dó maior (Ré♭ e Lá♭). Elas soam como tensões alteradas do G7: Ré♭ é a 5ª diminuta do Sol, Lá♭ a 9ª menor. É o mesmo efeito de um G7(♭5,♭9), com o baixo andando por semitons.',
+    },
+    { kind: 'exercise', id: 'l78-ouvido', exercise: items('V7 ou subV7?', 'O app toca ii – ? – I. Ouça o baixo: cai uma 5ª ou desce meio tom?', earSubV, 8, 48, 72, 0.85, 'off') },
+    { kind: 'exercise', id: 'l78-baixo', exercise: items('Ditado do baixo', 'O app toca 3 a 5 acordes com V7, subV7 ou subV secundário. Toque a fundamental de cada um, em ordem.', subVByEar, 5, 36, 72, 0.8, 'off') },
+    { kind: 'exercise', id: 'l78-quiz', exercise: quiz('Trítono e substituição', 'Responda sem tocar.', SUBV_Q) },
+  ],
+  review: [subV, earSubV, choice(SUBV_Q, 'subv')],
+  checkpoint: [
+    items('subV sem dica', '10 acordes. Meta: 9 de 10.', subV, 10, 48, 72, 0.9, 'off'),
+    items('Ouvido e revisão', 'V7 × subV7 de ouvido, diminutos e ii–V–i menor.', mix([earSubV, dim7, guideMinor]), 8, 48, 84, 0.85, 'off'),
+    quickTimed('ii–subV–I no tempo', 'Tom sorteado, a 80 BPM.', (rng) => iiSubVHands(rng, 80), { pass: { accuracy: 0.9 } }),
+  ],
+  exit: [subV, choice(SUBV_Q, 'subv')],
+};
+
+const borrowed = chromaticChord({ keys: ['C', 'G', 'F', 'D'], romans: ['iv', 'bVI', 'bVII', 'bIII'], low: 48, high: 72 });
+const borrowedSeq = chordSequence({
+  sequences: [
+    { name: 'IV – iv – I em Dó.', symbols: ['C', 'F', 'Fm', 'C'] },
+    { name: 'IV – iv – I em Sol.', symbols: ['G', 'C', 'Cm', 'G'] },
+    { name: 'IV – iv – I em Fá.', symbols: ['F', 'Bb', 'Bbm', 'F'] },
+    { name: '♭VI – ♭VII – I em Dó.', symbols: ['C', 'Ab', 'Bb', 'C'] },
+    { name: '♭VI – ♭VII – I em Sol.', symbols: ['G', 'Eb', 'F', 'G'] },
+    { name: 'I – ♭VII – IV – I em Dó.', symbols: ['C', 'Bb', 'F', 'C'] },
+    { name: 'I – ♭III – ♭VI – ♭VII em Dó.', symbols: ['C', 'Eb', 'Ab', 'Bb'] },
+  ],
+  lead: 2,
+});
+const borrowedHarm = harmonizeChromatic({
+  key: 'C',
+  fifths: -3,
+  bars: [
+    { notes: [n('C5'), n('Ab4'), n('F4'), n('Ab4')], accept: ['iv', 'ivm7'], say: 'Lá♭ é o 6º grau de Dó menor.' },
+    { notes: [n('Bb4'), n('D5'), n('F5'), n('D5')], accept: ['bVII'], say: 'Si♭ é o 7º grau de Dó menor.' },
+    { notes: [n('Eb5'), n('G4'), n('Bb4'), n('G4')], accept: ['bIII'], say: 'Mi♭ e Si♭: dois empréstimos juntos.' },
+    { notes: [n('Ab4'), n('C5'), n('Eb5'), n('C5')], accept: ['bVI'], say: 'Lá♭, Dó e Mi♭.' },
+  ],
+});
+const earIViv = progressionChoice({
+  keys: ['C', 'G', 'F', 'D'],
+  options: [{ label: 'IV (maior)', romans: ['I', 'IV', 'I'] }, { label: 'iv (menor, emprestado)', romans: ['I', 'iv', 'I'] }, { label: 'IV e depois iv', romans: ['I', 'IV', 'iv', 'I'] }],
+  ask: 'O que veio antes da volta ao I: IV, iv ou os dois?',
+});
+const borrowedByEar = chromaticByEar({ keys: ['C', 'G'], progressions: [['I', 'IV', 'iv', 'I'], ['I', 'bVI', 'bVII', 'I'], ['I', 'bVII', 'IV', 'I'], ['I', 'V7/vi', 'vi', 'iv']], answer: 'chords' });
+
+const BORROW_Q: ChoiceQuestion[] = [
+  { q: 'O homônimo menor de Dó maior é…', options: ['Dó menor', 'Lá menor', 'Mi menor'], answer: 0, why: 'Homônimo: mesma tônica, outro modo. Lá menor é a relativa (mesma armadura).' },
+  { q: 'Em Dó maior, o iv emprestado é…', options: ['Fm (Fá, Lá♭, Dó)', 'Dm', 'F7'], answer: 0, why: 'O IV de Dó menor: o Lá vira Lá♭.' },
+  { q: 'Em Dó maior, o ♭VII é…', options: ['B♭', 'Bm', 'B°'], answer: 0, why: 'Si♭, Ré, Fá: vem do 7º grau de Dó menor (Si♭).' },
+  { q: 'Em Sol maior, o ♭VI é…', options: ['E♭', 'Em', 'E'], answer: 0, why: 'Mi♭, Sol, Si♭: o 6º grau de Sol menor.' },
+  { q: 'No caminho F – Fm – C, a voz que anda é…', options: ['Lá → Lá♭ → Sol, descendo por semitons', 'Fá → Sol → Lá', 'Dó → Ré → Mi'], answer: 0, why: 'É a linha cromática que dá ao iv o seu tom nostálgico.' },
+  { q: 'Empréstimo modal muda de tom?', options: ['Não: a casa continua o I maior; só a cor muda', 'Sim, sempre', 'Só no refrão'], answer: 0, why: 'O acorde vem do homônimo, mas a frase resolve no I maior.' },
+];
+
+const l79: Lesson = {
+  n: 79,
+  id: 'l79',
+  title: 'Empréstimo modal',
+  minutes: 60,
+  objectives: [
+    'Consigo tocar iv, ♭VI, ♭VII e ♭III emprestados em Dó, Sol, Fá e Ré.',
+    'Consigo rearmonizar uma frase trocando IV por iv.',
+    'Consigo reconhecer IV × iv de ouvido e tirar progressões com empréstimo.',
+  ],
+  blocks: [
+    {
+      kind: 'text',
+      title: 'Pegar acordes do homônimo menor',
+      body: `**Dó maior** e **Dó menor** têm a mesma casa (Dó), mas escalas diferentes: Dó menor tem **Mi♭, Lá♭ e Si♭**. São tons **homônimos**. (Não confunda com a relativa, Lá menor, que tem a mesma armadura.)
+
+O **empréstimo modal** é usar, numa música em Dó maior, um acorde que pertence a Dó menor. A casa continua sendo Dó maior; o acorde emprestado só traz uma sombra. Os mais usados:
+
+- **iv = Fm** (Lá♭): o mais comum de todos.
+- **♭VI = A♭** (Lá♭ e Mi♭).
+- **♭VII = B♭** (Si♭).
+- **♭III = E♭** (Mi♭ e Si♭).
+
+O "♭" na cifra romana diz que a fundamental está meio tom abaixo do grau da escala maior: ♭VI fica sobre Lá♭, não sobre Lá.`,
+    },
+    { kind: 'exercise', id: 'l79-construir', exercise: items('Toque o emprestado', 'Em Dó, Sol, Fá e Ré maior. Pense no homônimo menor: qual nota abaixa?', borrowed, 10, 48, 72, 0.85, 'fade') },
+    {
+      kind: 'text',
+      title: 'O iv menor das trilhas',
+      body: `O empréstimo mais famoso é **IV – iv – I**: F – Fm – C. A voz do meio desce por semitons, **Lá → Lá♭ → Sol**, e o ouvido sente uma saudade antes de voltar para casa. É o acorde das trilhas de filme nos momentos de memória, das baladas dos anos 60 e de muita canção brasileira.
+
+Ele também funciona sozinho: **I – iv – I** (C – Fm – C) é o "suspiro" de fim de cena. E aparece com 7ª ou 6ª: Fm7, Fm6.
+
+Para rearmonizar uma melodia trocando IV por iv, confira só uma coisa: **a melodia não pode estar no Lá natural** naquele momento. Se a melodia toca Lá, o Fm (com Lá♭) choca. Se toca Fá, Dó ou uma nota de passagem, o iv cabe.`,
+    },
+    {
+      kind: 'example',
+      title: 'IV, iv e ♭VI–♭VII–I',
+      steps: [
+        { say: '**C – F – C**: o IV, claro e aberto.', play: progListen(['C', 'F', 'C']) },
+        { say: '**C – F – Fm – C**: o Lá desce para Lá♭ e depois para Sol.', play: progListen(['C', 'F', 'Fm', 'C']), keys: [n('A4'), n('Ab4'), n('G4')] },
+        { say: '**C – A♭ – B♭ – C**: ♭VI – ♭VII – I, a chegada "heroica" das trilhas de videogame e do rock.', play: progListen(['C', 'Ab', 'Bb', 'C']) },
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'chamar o ♭VII de vii',
+      body: 'Em Dó maior, o vii é B° (Si, Ré, Fá), do próprio campo. O ♭VII é **B♭ maior** (Si♭, Ré, Fá), emprestado. A fundamental é outra tecla, e o som também: o B♭ é largo e resolvido, o B° é tenso.',
+    },
+    { kind: 'exercise', id: 'l79-progressoes', exercise: items('Progressões com empréstimo', 'Toque os acordes conduzindo as vozes: notas comuns ficam, as outras andam pouco (até 2 semitons além do caminho mais curto).', borrowedSeq, 7, 48, 76, 0.85, 'fade') },
+    { kind: 'exercise', id: 'l79-harmonizar', exercise: items('Qual empréstimo cabe?', 'A pauta usa a armadura de Dó menor, de onde vêm os acordes. Toque o acorde emprestado que contém as notas do compasso.', borrowedHarm, 6, 48, 72, 0.85, 'off') },
+    {
+      kind: 'text',
+      title: 'Rearmonizar: When the Saints com iv',
+      body: `Na música desta unidade, a frase "Oh Lord, I want to be in that number" fica sobre **Fá** por dois compassos. No segundo, a melodia tem só Mi e Fá: nada de Lá. Então o segundo compasso pode virar **Fm**, e a frase ganha o IV – iv – I.
+
+No exercício abaixo, a direita toca a melodia (Mi–Sol, Sol–Fá, pausa e Mi–Fá, Sol–Mi) e a esquerda faz **C – F – Fm – C**, um acorde por compasso: Dó–Mi–Sol, Fá–Lá–Dó, Fá–Lá♭–Dó, Dó–Mi–Sol. A única diferença entre o 2º e o 3º compasso da esquerda é o dedo que desce do Lá para o Lá♭.`,
+    },
+    {
+      kind: 'exercise',
+      id: 'l79-santos',
+      exercise: quickTimed(
+        'IV – iv – I na música',
+        'Melodia na direita, acordes na esquerda (a legenda diz quais), a 76 BPM. Duas passadas boas.',
+        () => twoHandTask('E5:2 G5:2 | G5:2 F5:2 | r:2 E5 F5 | G5:2 E5:2', 'C3+E3+G3:4 | F3+A3+C4:4 | F3+Ab3+C4:4 | C3+E3+G3:4', { bpm: 76, caption: 'Esquerda: C (Dó–Mi–Sol), F (Fá–Lá–Dó), Fm (Fá–Lá♭–Dó), C.' }),
+        { reps: 2 },
+      ),
+    },
+    { kind: 'exercise', id: 'l79-ouvido', exercise: items('IV, iv ou os dois?', 'Ouça a cor do acorde antes da volta ao I.', earIViv, 8, 48, 72, 0.85, 'off') },
+    { kind: 'exercise', id: 'l79-ditado', exercise: items('Ditado com empréstimo', 'O app toca 4 acordes; o primeiro é o I. Toque os acordes, em ordem, em qualquer posição.', borrowedByEar, 4, 48, 72, 0.75, 'off') },
+  ],
+  review: [borrowed, earIViv, choice(BORROW_Q, 'emprestimo')],
+  checkpoint: [
+    items('Empréstimos sem dica', '10 acordes em quatro tons. Meta: 9 de 10.', borrowed, 10, 48, 72, 0.9, 'off'),
+    items('Ouvido e revisão', 'IV × iv de ouvido, empréstimo na pauta, subV e secundárias.', mix([earIViv, borrowedHarm, subV, secDom]), 8, 48, 72, 0.85, 'off'),
+  ],
+  exit: [borrowed, choice(BORROW_Q, 'emprestimo')],
+};
+
 // ---------- músicas ----------
 
 // When the Saints Go Marching In: spiritual afro-americano tradicional (domínio público). Arranjo do Fermata, em Dó, com anacruse.
@@ -444,7 +796,7 @@ const unit: Unit = {
   title: 'Harmonia cromática',
   goal: 'Usar dominantes secundárias, ii–V em qualquer tom, diminutos, subV, empréstimo modal e modulação para rearmonizar uma melodia simples.',
   technique: 'Arpejos de tônica, V7 e °7, mãos separadas, de 60 rumo a 80–92 BPM em colcheias (referência: RCM Levels 5–6). Use a escada de andamento do treino nos dias sem lição nova.',
-  lessons: [l74, l75, l76],
+  lessons: [l74, l75, l76, l77, l78, l79],
   songs: [saints, saintsReharm],
   final: {
     songId: 'u10-santos-rearm',
