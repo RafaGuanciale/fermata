@@ -333,7 +333,7 @@ function Scales() {
           ))}
         </ul>
         <div className="runner__staff" ref={staffRef}>
-          <Staff notes={info.midis} states={info.midis.map(() => 'plain')} current={-1} showNames={false} width={staffWidth} fifths={circle?.fifths ?? 0} label={`Pauta da escala de ${info.name}`} />
+          <Staff fitAll notes={info.midis} states={info.midis.map(() => 'plain')} current={-1} showNames={false} width={staffWidth} fifths={circle?.fifths ?? 0} label={`Pauta da escala de ${info.name}`} />
         </div>
         <Keys lit={info.midis} labels={labels} />
         {fingering && (
@@ -468,7 +468,7 @@ function Notes() {
           <div key={clef} className="refCard">
             <p className="refCard__name">{CLEF_TIPS[clef].title}</p>
             <div className="runner__staff" ref={clef === 'treble' ? refT : refB}>
-              <Staff notes={clef === 'treble' ? treble : bass} states={(clef === 'treble' ? treble : bass).map(() => 'plain')} current={-1} showNames width={clef === 'treble' ? wT : wB} clef={clef} label={CLEF_TIPS[clef].title} />
+              <Staff fitAll notes={clef === 'treble' ? treble : bass} states={(clef === 'treble' ? treble : bass).map(() => 'plain')} current={-1} showNames width={clef === 'treble' ? wT : wB} clef={clef} label={CLEF_TIPS[clef].title} />
             </div>
             <p className="runner__note">{CLEF_TIPS[clef].lines}</p>
             <p className="runner__note">{CLEF_TIPS[clef].spaces}</p>
@@ -480,7 +480,7 @@ function Notes() {
         <p className="refCard__name">Espelho: toque uma tecla e veja onde ela fica na pauta</p>
         <div className="runner__staff" ref={refL}>
           {last !== undefined ? (
-            <Staff notes={[last]} states={['current']} current={0} showNames width={Math.min(wL, 280)} clef={last >= 60 ? 'treble' : 'bass'} label="Nota tocada" />
+            <Staff fitAll notes={[last]} states={['current']} current={0} showNames width={Math.min(wL, 280)} clef={last >= 60 ? 'treble' : 'bass'} label="Nota tocada" />
           ) : (
             <p className="runner__note refEmpty">Toque qualquer tecla no piano ou no teclado de baixo.</p>
           )}
@@ -505,7 +505,7 @@ function Rhythm() {
           {FIGURES.map((f) => (
             <li key={f.name} className="refFigures__item">
               <div className="refFigures__glyph">
-                <Staff notes={[71]} states={['plain']} current={-1} showNames={false} width={Math.min(140, w / 3)} durations={[f.beats]} label={f.name} />
+                <Staff fitAll notes={[71]} states={['plain']} current={-1} showNames={false} width={Math.min(140, w / 3)} durations={[f.beats]} label={f.name} />
               </div>
               <span>
                 <strong>{f.name}</strong>: {f.beats >= 1 ? `${f.beats} ${f.beats === 1 ? 'tempo' : 'tempos'}` : `${f.beats === 0.5 ? 'meio tempo' : 'um quarto de tempo'}`}

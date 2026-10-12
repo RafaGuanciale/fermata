@@ -240,7 +240,7 @@ A barra também aparece com notas que não são do acorde (C/D, por exemplo), ma
     {
       kind: 'text',
       title: 'Tríades quebradas pelas inversões',
-      body: `Um exercício técnico clássico: tocar a tríade **quebrada** (uma nota por vez) subindo pelas inversões e descendo de volta, em **tercinas**, uma tríade por tempo:
+      body: `Um exercício técnico clássico: tocar a tríade **quebrada** (uma nota por vez) subindo pelas inversões e descendo de volta, em **tercinas**, um grupo de três notas por tempo:
 
 Dó–Mi–Sol · Mi–Sol–Dó · Sol–Dó–Mi · Dó–Mi–Sol (oitava acima), e desce pelo mesmo caminho.
 
@@ -353,7 +353,7 @@ A troca precisa acontecer **no tempo 1**, com as duas mãos juntas. Para isso, p
 const SONG_R = [
   'r:4', 'r:4',
   'E4 G4 C5 B4', 'D5:2 B4:2', 'C5 A4 E4 A4', 'C5:3 r',
-  'E4 G4 C5 B4', 'D5 C5 B4 G4', 'A4 C5 B4 A4', 'F4:2 G4:2',
+  'E4 G4 C5 B4', 'D5 C5 B4 G4', 'A4 C5 B4 A4', 'A4:2 C5:2',
   'E5:2 D5 C5', 'B4:2 D5:2', 'C5 B4 A4 E4', 'F4:2 A4:2',
   'B4:2 D5:2', 'C5:4',
 ].join(' | ');
@@ -392,7 +392,7 @@ const COLORS: ChoiceQuestion[] = [
 const COMPOUND: ChoiceQuestion[] = [
   { q: 'No 6/8, quantos tempos você sente por compasso?', options: ['2', '6', '3'], answer: 0, why: 'Seis colcheias em dois grupos de três: o tempo é a semínima pontuada.' },
   { q: 'No 6/8, o tempo vale…', options: ['Uma semínima pontuada (3 colcheias)', 'Uma semínima', 'Uma colcheia'], answer: 0, why: 'O número de baixo (8) diz colcheia, mas o pulso junta três delas.' },
-  { q: 'Os acentos do 6/8 caem…', options: ['Na 1ª e na 4ª colcheia', 'Em todas as colcheias', 'Na 2ª e na 5ª'], answer: 0, why: 'UM-dois-três-QUA-tro-cin... os inícios dos dois grupos.' },
+  { q: 'Os acentos do 6/8 caem…', options: ['Na 1ª e na 4ª colcheia', 'Em todas as colcheias', 'Na 2ª e na 5ª'], answer: 0, why: 'UM-dois-três, DOIS-dois-três: os inícios dos dois grupos.' },
   { q: '9/8 tem…', options: ['3 tempos de semínima pontuada', '9 tempos', '4 tempos e meio'], answer: 0, why: 'Compostos: 6/8 (2), 9/8 (3), 12/8 (4) tempos.' },
   { q: 'Diferença entre 3/4 e 6/8:', options: ['3/4 tem 3 tempos de semínima; 6/8 tem 2 tempos de semínima pontuada', 'São iguais', '6/8 é mais rápido'], answer: 0, why: 'Nos dois cabem 6 colcheias, mas agrupadas 2+2+2 (3/4) ou 3+3 (6/8).' },
 ];
@@ -609,7 +609,7 @@ const l47: Lesson = {
   objectives: [
     'Consigo tocar quatro padrões de mão esquerda sobre C – G – Am – F: alternado, meio-arpejo, arpejo contínuo e balada.',
     'Consigo ler um lead sheet (melodia + cifra) e escolher o padrão da esquerda.',
-    'Consigo tocar 16 compassos de melodia com arpejo na esquerda a 72 BPM, com 90% das notas e as mãos juntas em ±50 ms.',
+    'Consigo tocar a canção de 16 compassos (introdução e 14 de melodia) com arpejo na esquerda a 72 BPM, com 90% das notas, cada uma em ±50 ms do tempo.',
   ],
   blocks: [
     {

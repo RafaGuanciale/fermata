@@ -85,7 +85,7 @@ Em tempo fraco, as mais comuns:
 
 - **Passagem**: liga duas notas do acorde por grau conjunto, na mesma direção. Sobre C: Mi–**Fá**–Sol.
 - **Bordadura**: sai de uma nota do acorde por grau conjunto e **volta** para ela. Sobre C: Mi–**Fá**–Mi, ou Mi–**Ré**–Mi.
-- **Escapada**: sai por grau conjunto e volta por **salto** na direção contrária. Sobre C: Mi–**Fá**–Dó.
+- **Escapada**: sai por grau conjunto e segue por **salto**, na direção contrária, para outra nota do acorde. Sobre C: Mi–**Fá**–Dó.
 - **Antecipação**: a nota do **próximo** acorde chega um pouco antes dele. Sobre G, antes do C: Si–**Dó** (e o acorde de Dó vem logo depois).`,
     },
     {
@@ -98,7 +98,7 @@ Em tempo fraco, as mais comuns:
 
 E uma especial:
 
-- **Nota pedal**: uma nota longa ou repetida (quase sempre no **baixo**) que fica parada enquanto os acordes mudam por cima. O Dó grave repetido nos primeiros compassos do Prelúdio de Bach funciona como um pedal.`,
+- **Nota pedal**: uma nota longa ou repetida (quase sempre no **baixo**) que fica parada enquanto os acordes mudam por cima. O exemplo clássico é o Sol grave preso nos compassos 24 a 31 do Prelúdio em Dó de Bach, enquanto a harmonia muda por cima.`,
     },
     {
       kind: 'example',
@@ -333,9 +333,9 @@ const SIGHT_KEYS = [
   { tonic: 60, fifths: 0 }, { tonic: 67, fifths: 1 }, { tonic: 62, fifths: 2 }, { tonic: 69, fifths: 3 },
   { tonic: 65, fifths: -1 }, { tonic: 70, fifths: -2 }, { tonic: 63, fifths: -3 },
 ];
-const sight2 = (bpm: number) => (rng: Rng) => {
+const sight2 = (bpm: number, level: 1 | 2 = 1) => (rng: Rng) => {
   const k = pick(rng, SIGHT_KEYS);
-  return sightReadingTwoHands(rng, { tonic: k.tonic, bars: 8, bpm, fifths: k.fifths });
+  return sightReadingTwoHands(rng, { tonic: k.tonic, bars: 8, bpm, fifths: k.fifths, level });
 };
 
 const SIGHT_Q: ChoiceQuestion[] = [
@@ -376,7 +376,7 @@ Duas técnicas ajudam:
 - **Olhe adiante**: os olhos ficam meio compasso ou um compasso à frente das mãos. Assim, quando a mão chega, ela já sabe para onde ir.
 - **Simplifique**: se as duas mãos ficarem pesadas, mantenha a **direita** inteira e toque na esquerda só a **primeira nota** de cada compasso. É o que pianistas fazem em ensaios: o essencial primeiro.
 
-Nesta lição, a esquerda toca notas longas (tônica e dominante) e a direita uma melodia nova em posição de cinco dedos. A melodia é gerada na hora: cada passada é uma leitura nova.`,
+Nesta lição há dois níveis. No primeiro, a esquerda toca semibreves (tônica e dominante) e a direita uma melodia em posição de cinco dedos. No segundo, a esquerda passa a mínimas, trocando entre I, IV e V no meio do compasso, e a direita ganha colcheias e semínimas pontuadas. A melodia é gerada na hora: cada passada é uma leitura nova.`,
     },
     {
       kind: 'callout',
@@ -386,11 +386,11 @@ Nesta lição, a esquerda toca notas longas (tônica e dominante) e a direita um
     },
     { kind: 'exercise', id: 'l69-quiz', exercise: quiz('Antes de ler', 'Quatro perguntas rápidas.', SIGHT_Q, 0.75) },
     { kind: 'exercise', id: 'l69-leitura', exercise: quickTimed('Primeira vista, mãos juntas', '8 compassos novos a cada passada, armaduras até 3 acidentes, a 52 BPM. Olhe 30 s antes. Três passadas boas.', sight2(52), { reps: 3, pass: { accuracy: 0.8 } }) },
-    { kind: 'exercise', id: 'l69-mais', exercise: quickTimed('Um pouco mais rápido', 'O mesmo, a 60 BPM.', sight2(60), { reps: 2, pass: { accuracy: 0.8 } }) },
+    { kind: 'exercise', id: 'l69-mais', exercise: quickTimed('Nível 2: colcheias e baixo em mínimas', 'Direita com colcheias e pontuadas; esquerda trocando no meio do compasso, a 50 BPM. Duas passadas boas. Se pesar, use o truque de simplificar a esquerda.', sight2(50, 2), { reps: 2, pass: { accuracy: 0.8 } }) },
   ],
   review: [choice(SIGHT_Q, 'primeira-vista'), strangeName],
   checkpoint: [
-    quickTimed('Primeira vista a 56 BPM', '8 compassos novos, duas mãos, sem dicas. Meta: 85% das notas no tempo.', sight2(56)),
+    quickTimed('Primeira vista, nível 2', '8 compassos novos a 50 BPM, duas mãos, colcheias na direita e mínimas na esquerda, sem dicas. Meta: 80% das notas no tempo.', sight2(50, 2), { pass: { accuracy: 0.8 } }),
   ],
   exit: [choice(SIGHT_Q, 'primeira-vista')],
 };
@@ -460,7 +460,7 @@ Comece devagar, em semicolcheias medidas, e só acelere quando ficar igual. O ex
     {
       kind: 'text',
       title: 'O Minueto em Sol',
-      body: `O **Minueto em Sol** é provavelmente a música mais tocada por estudantes de piano no mundo. Ele está no **Caderno de Anna Magdalena Bach** (1725), uma coleção doméstica da família Bach, e por muito tempo foi atribuído a Johann Sebastian. Hoje se sabe que é de **Christian Petzold**, organista de Dresden.
+      body: `O **Minueto em Sol** é provavelmente a música mais tocada por estudantes de piano no mundo. Ele está no **Caderno de Anna Magdalena Bach** (1725), uma coleção doméstica da família Bach, e por muito tempo foi atribuído a Johann Sebastian. Hoje é atribuído a **Christian Petzold**, organista de Dresden.
 
 O minueto é uma **dança em 3/4**, elegante, com o primeiro tempo apoiado. A forma é de período: o compasso 8 termina no **V** (Ré, meia cadência) e o 16 no **I** (Sol, cadência perfeita). Repare nas notas estranhas da lição 66: passagens em quase todo compasso, e as bordaduras do compasso 6.
 

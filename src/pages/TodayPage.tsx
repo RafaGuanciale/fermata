@@ -8,6 +8,7 @@ import PhotoCard from '../components/PhotoCard';
 import PieceList from '../components/PieceList';
 import StatTile from '../components/StatTile';
 import WeeklyGoal from '../progress/WeeklyGoal';
+import StreakLine from '../progress/StreakLine';
 import { PlayIcon } from '../components/Icons';
 import { useTrainingToday } from '../course/useTrainingToday';
 
@@ -56,6 +57,7 @@ export default function TodayPage() {
           )}
         </span>
       </PhotoCard>
+      <StreakLine />
 
       {data && data.learning.length > 0 && (
         <section className="page__section">
@@ -70,7 +72,9 @@ export default function TodayPage() {
       <section className="page__section" aria-label="Sua evolução">
         <h2 className="page__sectionTitle">Sua evolução</h2>
         {data === undefined ? null : data.sessions.length === 0 ? (
-          <p className="emptyState__body">Depois do primeiro treino aparecem aqui seus minutos praticados, o tempo para achar cada nota e os acertos de primeira.</p>
+          <div className="today__stats">
+            <WeeklyGoal />
+          </div>
         ) : (
           <Evolution sessions={data.sessions} attempts={data.attempts} now={now} />
         )}

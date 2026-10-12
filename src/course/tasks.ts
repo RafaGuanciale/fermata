@@ -108,18 +108,20 @@ export function transposedTask(text: string, semitones: number, opts: { bpm: num
 }
 
 const READ_RHYTHMS = [[1, 1, 1, 1], [2, 1, 1], [1, 1, 2], [2, 2], [1, 2, 1]];
+/** Nível 2: colcheias e semínima pontuada misturadas às figuras do nível 1. */
+const READ_RHYTHMS_2 = [[1.5, 0.5, 1, 1], [1, 0.5, 0.5, 2], [0.5, 0.5, 1, 2], [1, 1, 0.5, 0.5, 1], [2, 1.5, 0.5], [1, 1, 1, 1], [2, 1, 1]];
 
 /**
  * Leitura à primeira vista: melodia nova a cada vez, na posição de cinco dedos a partir de `tonic` (pentacorde maior),
  * andando por grau conjunto e saltos de 3ª, terminando na tônica com uma semibreve.
  */
-export function sightReadingTask(rng: Rng, opts: { tonic: Midi; bars: number; bpm: number; fifths?: number; clef?: Clef; caption?: string }): TimedTask {
+export function sightReadingTask(rng: Rng, opts: { tonic: Midi; bars: number; bpm: number; fifths?: number; clef?: Clef; caption?: string; level?: 1 | 2 }): TimedTask {
   const pos = [0, 2, 4, 5, 7].map((x) => opts.tonic + x);
   let i = pick(rng, [0, 2, 4]);
   const bars: string[] = [];
   for (let b = 0; b < opts.bars - 1; b++) {
     const notes: string[] = [];
-    for (const beats of pick(rng, READ_RHYTHMS)) {
+    for (const beats of pick(rng, opts.level === 2 ? READ_RHYTHMS_2 : READ_RHYTHMS)) {
       notes.push(beats === 1 ? sci(pos[i]) : `${sci(pos[i])}:${beats}`);
       const moves = [-2, -1, -1, 1, 1, 2].filter((d) => i + d >= 0 && i + d < pos.length);
       i += pick(rng, moves);
@@ -182,15 +184,30 @@ export function swingTwoHands(right: string, left: string, opts: { bpm: number; 
  * Primeira vista com as duas mãos: melodia nova na direita (posição de cinco dedos) e, na esquerda, a tônica ou a dominante
  * em semibreves, escolhida pela nota do tempo forte. Termina com as duas mãos na tônica.
  */
-export function sightReadingTwoHands(rng: Rng, opts: { tonic: Midi; bars: number; bpm: number; fifths?: number; caption?: string }): TimedTask {
-  const right = sightReadingTask(rng, { tonic: opts.tonic, bars: opts.bars, bpm: opts.bpm, fifths: opts.fifths });
+export function sightReadingTwoHands(rng: Rng, opts: { tonic: Midi; bars: number; bpm: number; fifths?: number; caption?: string; level?: 1 | 2 }): TimedTask {
+  const right = sightReadingTask(rng, { tonic: opts.tonic, bars: opts.bars, bpm: opts.bpm, fifths: opts.fifths, level: opts.level });
   const bassT = opts.tonic - 24 + (opts.tonic - 24 < 36 ? 12 : 0);
+  // Grau da nota da direita num tempo (0 a 11 semitons acima da tônica).
+  const degAt = (beat: number) => {
+    const e = right.events.find((x) => x.midi !== null && x.beat <= beat + 1e-6 && x.beat + x.beats > beat + 1e-6);
+    return e && e.midi !== null ? (((e.midi - opts.tonic) % 12) + 12) % 12 : 0;
+  };
   const left: string[] = [];
   for (let b = 0; b < opts.bars; b++) {
-    const first = right.events.find((e) => Math.abs(e.beat - b * 4) < 1e-6);
-    const deg = first && first.midi !== null ? (((first.midi - opts.tonic) % 12) + 12) % 12 : 0;
+    const last = b === opts.bars - 1;
+    if (opts.level === 2 && !last) {
+      // Nível 2: duas mínimas por compasso, I, IV ou V pela nota de cada meio compasso.
+      const half = (beat: number) => {
+        const d = degAt(beat);
+        const root = d === 5 || d === 9 ? 5 : d === 2 || d === 11 || (d === 7 && beat % 4 === 2) ? 7 : 0;
+        return `${sci(bassT + root - (root === 7 ? 12 : 0))}:2`;
+      };
+      left.push(`${half(b * 4)} ${half(b * 4 + 2)}`);
+      continue;
+    }
+    const deg = degAt(b * 4);
     // Graus 2 e 7 (e o 5 no meio da frase) pedem a dominante; o resto, a tônica.
-    const useV = b < opts.bars - 1 && (deg === 2 || deg === 11 || (deg === 7 && b % 2 === 1));
+    const useV = !last && (deg === 2 || deg === 11 || (deg === 7 && b % 2 === 1));
     left.push(`${sci(useV ? bassT + 7 - 12 : bassT)}:4`);
   }
   const rightText = right.display.map((d) => (d.midi === null ? `r:${d.beats}` : `${sci(d.midi)}:${d.beats}`));

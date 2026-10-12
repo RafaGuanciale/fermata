@@ -180,7 +180,11 @@
   }
 
   .dock__midi {
-    max-width: 150px;
+    max-width: 120px;
+  }
+
+  .dock__bar {
+    gap: var(--space-2);
   }
 
   .dock__soundLabel {
@@ -205,6 +209,9 @@
 .fullKeyboard__white {
   position: relative;
   flex: 1 1 0;
+  /* Sem isso, as teclas com rótulo (C1, C2…) ficam mais largas que as outras quando o teclado aperta. */
+  min-width: 0;
+  overflow: hidden;
   margin: 0 0.5px;
   border-radius: 0 0 3px 3px;
   background: var(--key-white);

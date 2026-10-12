@@ -11,6 +11,7 @@ import { db } from '../db/db';
 import type { SongSpec } from '../course/types';
 import { songXml } from '../course/song';
 import { songPassed } from '../course/progress';
+import { BigCelebration, celebratedOnce } from '../celebrate/Celebrate';
 import { getFile, setPieceBpm } from '../repertoire/repo';
 import { useNoteInput, useNoteOn, midiStatusLabel } from '../input/useNoteInput';
 import { useMetronome } from '../metronome/MetronomeProvider';
@@ -156,6 +157,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   const [bpm, setBpm] = useState(80);
   const [guideKeys, setGuideKeys] = useState(true);
   const [cascade, setCascade] = useState(true);
+  const [songParty, setSongParty] = useState<{ bpm: number; accuracy: number } | null>(null);
   const [otherHand, setOtherHand] = useState(true);
   const [click, setClick] = useState(() => {
     try {
@@ -221,10 +223,14 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       const all = steps.flatMap((s) => s.notes.map((n) => n.midi));
       const minNote = Math.min(...all, 60);
       const maxNote = Math.max(...all, 72);
-      // Teclado do trecho da música, de Dó a Dó, com pelo menos duas oitavas.
-      // Teclado inteiro (88 teclas), como o piano de verdade.
-      const low = Math.min(21, minNote);
-      const high = Math.max(108, maxNote);
+      // Teclado inteiro (88 teclas) no notebook e no tablet; no celular, só a região da música (de Dó a Dó),
+      // senão cada tecla fica com poucos pixels.
+      const narrow = typeof window !== 'undefined' && window.innerWidth < 720;
+      let low = narrow ? minNote - (((minNote % 12) + 12) % 12) : Math.min(21, minNote);
+      let high = narrow ? maxNote + ((12 - (((maxNote % 12) + 12) % 12)) % 12) : Math.max(108, maxNote);
+      if (narrow && high - low < 24) high = low + 24;
+      low = Math.max(21, low);
+      high = Math.min(108, high);
       const ts = osmd.Sheet.SourceMeasures[0]?.ActiveTimeSignature;
       const beatsPerBar = ts ? Math.round((ts.Numerator * 4) / ts.Denominator) || 4 : 4;
       // Compasso composto (6/8, 9/8, 12/8): o clique marca a semínima pontuada, 2 por compasso no 6/8.
@@ -364,6 +370,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
         setTake('done');
         const passed = loaded.song ? songPassed(loaded.song, { bpm, accuracy: r.accuracy, hand, from: range.from, to: range.to, bars: measureCount(loaded.steps) }) : undefined;
         void saveRun({ treinoId: loaded.runId, kind: 'timed', bpm, accuracy: r.accuracy, clean: r.clean, weakFrom: weak?.from, weakTo: weak?.to, passed });
+        if (passed && loaded.song && celebratedOnce(`musica-${loaded.song.id}`)) setSongParty({ bpm, accuracy: r.accuracy });
         return;
       }
       raf = requestAnimationFrame(tick);
@@ -498,6 +505,14 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
 
   return (
     <div className="session session-fit">
+      {songParty && loaded?.song && (
+        <BigCelebration
+          eyebrow="Projeto final aprovado"
+          title={loaded.song.title}
+          body={`A música inteira a ${songParty.bpm} BPM, com ${Math.round(songParty.accuracy * 100)}% de acerto.`}
+          onClose={() => setSongParty(null)}
+        />
+      )}
       <header className="session__bar">
         <button className="session__icon" type="button" onClick={onClose} aria-label="Fechar" title="Fechar">
           <CloseIcon className="session__iconSvg" />

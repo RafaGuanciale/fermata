@@ -72,6 +72,8 @@ const ARP_Q: ChoiceQuestion[] = [
 
 const seventhsAll = playChord({ symbols: [...SEVENTHS, ...HALF_DIM, ...DIM7], low: 48, high: 72, requireBass: true });
 const seventhsMain = playChord({ symbols: SEVENTHS, low: 48, high: 72, requireBass: true });
+/** Tétrades invertidas pela cifra com barra: o baixo pedido embaixo, o resto em qualquer ordem. */
+const seventhInversions = playChord({ symbols: ['G7/B', 'G7/D', 'G7/F', 'C7M/E', 'C7M/B', 'Dm7/F', 'Dm7/C', 'Am7/G', 'F7M/A', 'D7/F#', 'D7/C', 'E7/G#'], low: 36, high: 72 });
 const halfDimDim = playChord({ symbols: [...HALF_DIM, ...DIM7], low: 48, high: 72, requireBass: true });
 const field7 = diatonicChord({ keys: ['C', 'G', 'D', 'F', 'Bb', 'Eb'], romans: FIELD7, low: 48, high: 72 });
 const field7C = diatonicChord({ keys: ['C'], romans: FIELD7, low: 48, high: 72 });
@@ -227,12 +229,13 @@ Combinando: **7M** = maior + doce; **7** = maior + tenso, pedindo resolução; *
 const l60: Lesson = {
   n: 60,
   id: 'l60',
-  title: 'Shells e notas-guia',
+  title: 'Inversões, shells e notas-guia',
   minutes: 60,
   objectives: [
-    'Consigo tocar shells (1-3-7 e 1-7-3) de qualquer tétrade com a mão esquerda.',
+    'Consigo tocar shells (1-3-7 e 1-7-3) de 7M, 7 e m7 com a mão esquerda.',
     'Consigo conduzir as notas-guia (3ª e 7ª) num ii–V–I em 6 tons, com no máximo 1 semitom além do caminho mais curto.',
     'Consigo seguir o ciclo diatônico de tétrades só com as notas-guia.',
+    'Consigo tocar tétrades invertidas pela cifra com barra (G7/F, C7M/B, Dm7/C).',
   ],
   blocks: [
     {
@@ -253,6 +256,29 @@ Por isso **3ª e 7ª** se chamam **notas-guia** (*guide tones*): sozinhas, elas 
     { kind: 'exercise', id: 'l60-shells', exercise: items('Shells', 'Fundamental embaixo; 3ª e 7ª em cima, em qualquer ordem. Use a mão esquerda.', shells, 14, 36, 72, 0.85) },
     {
       kind: 'text',
+      title: 'Tétrades invertidas',
+      body: `Como as tríades, as tétrades têm inversões: basta pôr outra nota do acorde no baixo. Com quatro notas, são **quatro posições**. Em G7 (Sol–Si–Ré–Fá):
+
+- **Estado fundamental**: Sol no baixo (G7).
+- **1ª inversão**: a 3ª no baixo, Si (G7/B).
+- **2ª inversão**: a 5ª no baixo, Ré (G7/D).
+- **3ª inversão**: a **7ª no baixo**, Fá (G7/F). Ela é a mais instável e quase sempre resolve descendo: G7/F vai para C/E, com o baixo andando Fá → Mi.
+
+Na cifra, a inversão aparece com a barra: o que vem depois da barra é o baixo. Você vai encontrá-las no Prelúdio de Bach (Dm7/C, G7/B, C7M/B) e em todo baixo que desce por grau conjunto.`,
+    },
+    {
+      kind: 'example',
+      title: 'As quatro posições de G7, resolvendo',
+      steps: [
+        { say: 'G7 no estado fundamental, resolvendo em Dó.', keys: [43, 59, 62, 65], play: { bpm: 72, steps: [{ midis: [43, 59, 62, 65], beats: 2 }, { midis: [48, 60, 64, 67], beats: 2 }] } },
+        { say: 'G7/B: o Si no baixo sobe para o Dó.', keys: [47, 55, 62, 65], play: { bpm: 72, steps: [{ midis: [47, 55, 62, 65], beats: 2 }, { midis: [48, 55, 64, 67], beats: 2 }] } },
+        { say: 'G7/D: o Ré no baixo, entre dois Dó.', keys: [50, 55, 59, 65], play: { bpm: 72, steps: [{ midis: [50, 55, 59, 65], beats: 2 }, { midis: [48, 55, 60, 64], beats: 2 }] } },
+        { say: 'G7/F: a 7ª no baixo desce para o Mi, chegando em C/E.', keys: [41, 55, 59, 62], play: { bpm: 72, steps: [{ midis: [41, 55, 59, 62], beats: 2 }, { midis: [40, 55, 60, 64], beats: 2 }] } },
+      ],
+    },
+    { kind: 'exercise', id: 'l60-inversoes', exercise: items('Tétrades pela cifra com barra', 'O baixo pedido (depois da barra) embaixo; as outras três notas em qualquer ordem.', seventhInversions, 12, 36, 72, 0.85) },
+    {
+      kind: 'text',
       title: 'O ii–V–I com notas-guia',
       body: `O **ii–V–I** (Dm7 – G7 – C7M, em Dó) é a progressão mais importante do jazz e da bossa nova. Olhe só as notas-guia:
 
@@ -269,7 +295,7 @@ Conduzindo: **Fá–Dó → Fá–Si → Mi–Si**. A cada troca, **uma nota fic
       title: 'ii–V–I: shells na esquerda, notas-guia ouvidas',
       steps: [
         { say: 'Só as notas-guia: Fá–Dó, Fá–Si, Mi–Si.', keys: [65, 72], play: { bpm: 72, steps: [{ midis: [65, 72], beats: 2 }, { midis: [65, 71], beats: 2 }, { midis: [64, 71], beats: 3 }] } },
-        { say: 'Com a fundamental no baixo: Ré, Sol, Dó. O acorde inteiro aparece.', play: { bpm: 72, steps: [{ midis: [38, 65, 72], beats: 2 }, { midis: [43, 65, 71], beats: 2 }, { midis: [36, 64, 71], beats: 3 }] } },
+        { say: 'Com a fundamental no baixo: Ré, Sol, Dó. O acorde fica completo para o ouvido.', play: { bpm: 72, steps: [{ midis: [38, 65, 72], beats: 2 }, { midis: [43, 65, 71], beats: 2 }, { midis: [36, 64, 71], beats: 3 }] } },
       ],
     },
     { kind: 'exercise', id: 'l60-iivi', exercise: items('ii–V–I com notas-guia', 'Duas notas por acorde (3ª e 7ª), tom sorteado. Uma fica, a outra anda.', guideIiVI, 10, 55, 84, 0.85) },
@@ -356,7 +382,7 @@ Um teste: grave-se tocando devagar. Se a mão estiver aberta como um leque no mo
       kind: 'example',
       title: 'Arpejo de Dó maior em tercinas',
       steps: [
-        { say: 'Duas oitavas, subindo e descendo, uma tríade por tempo.', play: { bpm: 60, steps: [60, 64, 67, 72, 76, 79, 84, 79, 76, 72, 67, 64].map((m) => ({ midis: [m], beats: 1 / 3 })).concat([{ midis: [60], beats: 2 }]) } },
+        { say: 'Duas oitavas, subindo e descendo, um grupo Dó–Mi–Sol por tempo (tercina).', play: { bpm: 60, steps: [60, 64, 67, 72, 76, 79, 84, 79, 76, 72, 67, 64].map((m) => ({ midis: [m], beats: 1 / 3 })).concat([{ midis: [60], beats: 2 }]) } },
       ],
     },
     { kind: 'exercise', id: 'l61-quiz', exercise: quiz('Arpejos', 'Três perguntas antes de tocar.', ARP_Q, 0.66) },
@@ -634,7 +660,7 @@ Depois, faça o mesmo com uma música de verdade: escolha o refrão de uma canç
       title: 'comece curto e devagar',
       body: 'Escolha um trecho de 4 a 8 compassos e um aplicativo que diminua a velocidade sem mudar a altura. Tire o baixo primeiro, depois a melodia. Um refrão bem tirado vale mais que uma música inteira pela metade.',
     },
-    { kind: 'exercise', id: 'l64-transpor', exercise: items('Ouve em Dó, toca em outro tom', 'O app toca 5 notas em Dó. Toque o mesmo desenho a partir da nota pedida.', transposeEar, 8, 48, 84, 0.8, 'off') },
+    { kind: 'exercise', id: 'l64-transpor', exercise: items('Ouça em Dó, toque em outro tom', 'O app toca 5 notas em Dó. Toque o mesmo desenho a partir da nota pedida.', transposeEar, 8, 48, 84, 0.8, 'off') },
     {
       kind: 'exercise',
       id: 'l64-refrao',

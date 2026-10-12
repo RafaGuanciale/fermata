@@ -1,6 +1,7 @@
 // Peças visuais das recompensas: estrelas, faíscas, sequência de acertos e a faixa de "passou".
 
 import { useEffect, useState } from 'react';
+import type React from 'react';
 import { CheckIcon, StarIcon } from '../components/Icons';
 import { isComboMilestone } from './rewards';
 import { playReward } from './sound';
@@ -56,4 +57,45 @@ export function PassReward({ stars, children }: { stars: 0 | 1 | 2 | 3; children
       {children}
     </div>
   );
+}
+
+/**
+ * Comemoração grande, por cima da tela: projeto final aprovado, unidade concluída.
+ * Toca a cadência de recompensa uma vez e some no "Continuar".
+ */
+export function BigCelebration({ eyebrow, title, body, action, onClose }: { eyebrow: string; title: string; body?: string; action?: React.ReactNode; onClose: () => void }) {
+  useEffect(() => {
+    playReward('lesson');
+  }, []);
+  return (
+    <div className="bigCeleb" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="bigCeleb__card">
+        <div className="bigCeleb__hero">
+          <Burst big />
+          <span className="bigCeleb__badge"><StarIcon className="bigCeleb__icon" /></span>
+        </div>
+        <span className="page__eyebrow">{eyebrow}</span>
+        <h2 className="bigCeleb__title">{title}</h2>
+        {body && <p className="bigCeleb__body">{body}</p>}
+        <div className="bigCeleb__actions">
+          {action}
+          <button className="button button-secondary" type="button" onClick={onClose}>Continuar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const CELEBRATED_KEY = 'fermata-celebrated';
+
+/** Marcos já comemorados neste aparelho (para não repetir a festa a cada visita). */
+export function celebratedOnce(id: string): boolean {
+  try {
+    const list: string[] = JSON.parse(localStorage.getItem(CELEBRATED_KEY) ?? '[]');
+    if (list.includes(id)) return false;
+    localStorage.setItem(CELEBRATED_KEY, JSON.stringify([...list, id].slice(-200)));
+    return true;
+  } catch {
+    return false;
+  }
 }

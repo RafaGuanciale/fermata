@@ -28,6 +28,8 @@ interface StaffProps {
   ties?: boolean[];
   /** Acordes: todas as notas da figura (a de `notes` é uma delas). Desenhadas na mesma haste. */
   chords?: (Midi[] | undefined)[];
+  /** Mostra todas as notas de uma vez, encolhendo o quanto precisar (figuras fixas, como na Consulta). */
+  fitAll?: boolean;
 }
 
 // Medidas em "staff-space" (S): distância entre duas linhas da pauta. Tamanho natural: S = 20px.
@@ -44,10 +46,12 @@ const y = (step: number) => BOTTOM - (step * S) / 2;
 const KEY_X = 72;
 const KEY_GAP = 13;
 
-export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1, ties, chords }: StaffProps) {
+export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1, ties, chords, fitAll = false }: StaffProps) {
   if (width <= 0) return <div className="staff" style={{ height: HEIGHT * 0.62 }} />;
   const keyW = fifths ? Math.abs(fifths) * KEY_GAP + 6 : 0;
-  const { scale, visible } = staffLayout(width, notes.length, keyW);
+  const layout = staffLayout(width, notes.length, keyW);
+  const allWidth = FIRST_X + keyW + (Math.max(1, notes.length) - 1) * GAP + END_PAD;
+  const { scale, visible } = fitAll ? { scale: Math.min(1, width / allWidth), visible: notes.length } : layout;
   const start = windowStart(current, visible, notes.length);
   const slice = notes.slice(start, start + visible);
   const sliceStates = states.slice(start, start + visible);

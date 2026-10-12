@@ -47,7 +47,7 @@ const ROMAN_Q: ChoiceQuestion[] = [
 const FUNCTION_Q: ChoiceQuestion[] = [
   { q: 'Quais graus têm função de tônica?', options: ['I, vi e iii', 'IV e ii', 'V e vii°'], answer: 0, why: 'Repouso. O vi e o iii dividem duas notas com o I.' },
   { q: 'Quais graus têm função de subdominante?', options: ['IV e ii', 'I e vi', 'V e vii°'], answer: 0, why: 'Afastamento: saem de casa e preparam a dominante.' },
-  { q: 'Quais graus têm função de dominante?', options: ['V e vii°', 'IV e ii', 'I e iii'], answer: 0, why: 'Tensão: têm a sensível e pedem a tônica.' },
+  { q: 'Quais graus têm função de dominante?', options: ['V e vii°', 'IV e ii', 'I e iii'], answer: 0, why: 'Os dois têm a sensível e o trítono (Si–Fá, em Dó) e pedem a tônica. O iii tem a sensível, mas não o trítono.' },
   { q: 'Trocar o IV pelo ii mantém…', options: ['A função (subdominante)', 'A cifra', 'A tônica'], answer: 0, why: 'IV (Fá–Lá–Dó) e ii (Ré–Fá–Lá) dividem Fá e Lá.' },
   { q: 'O caminho típico das funções é…', options: ['T → S → D → T', 'D → S → T → D', 'T → D → S → T'], answer: 0, why: 'Casa, sai, tensão, volta. Ex.: I – IV – V – I, ou I – ii – V – I.' },
   { q: 'Para harmonizar um compasso de melodia, o acorde precisa…', options: ['Conter a nota do tempo forte', 'Conter todas as notas do compasso', 'Ser sempre o I'], answer: 0, why: 'As outras notas podem ser de passagem, nos tempos fracos.' },
@@ -252,7 +252,7 @@ A grande consequência: **acordes da mesma função podem se substituir**. Onde 
 2. Escolha **qualquer acorde do campo que contenha essa nota**.
 3. As outras notas do compasso podem ficar fora do acorde, se estiverem em tempo fraco e andando por grau conjunto: são **notas de passagem**.
 
-Exemplo: compasso com **Mi**–Fá–Sol–Mi. O Mi está em **C** (Dó–Mi–Sol), em **Em** (Mi–Sol–Si) e em **Am** (Lá–Dó–Mi). Os três servem; cada um dá uma cor. O Fá, no tempo fraco, é passagem.
+Exemplo: compasso com **Mi**–Fá–Sol–Mi. O Mi está em **C** (Dó–Mi–Sol), em **Em** (Mi–Sol–Si) e em **Am** (Lá–Dó–Mi). Os três contêm o Mi, mas C e Em funcionam melhor: sobre Am, o Sol do tempo 3 também fica fora do acorde. O Fá, no tempo fraco, é passagem.
 
 Por isso harmonizar não tem uma resposta só. O exercício aceita qualquer acorde válido; depois de acertar, a dica mostra as outras opções.`,
     },

@@ -1,7 +1,9 @@
 // Uma unidade do curso: lições em ordem (cada uma abre quando a anterior passa no checkpoint)
 // e o projeto final, a música que fecha o módulo.
 
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
+import { BigCelebration, celebratedOnce } from '../celebrate/Celebrate';
 import PhotoCard from '../components/PhotoCard';
 import { BackIcon, PlayIcon } from '../components/Icons';
 import { useRuns } from '../training/runs';
@@ -16,6 +18,11 @@ export default function CourseUnitPage() {
   const rows = useCourseRows();
   const runs = useRuns();
   const index = UNITS.findIndex((u) => u.n === n);
+  const [party, setParty] = useState(false);
+  const done = index >= 0 && !!rows && !!runs && !!finalPassedAt(UNITS[index], runs) && UNITS[index].lessons.every((l) => isPassed(rows.get(lessonKey(UNITS[index], l))));
+  useEffect(() => {
+    if (done && celebratedOnce(`unidade-${n}`)) setParty(true);
+  }, [done, n]);
   if (index < 0) return <Navigate to="/estudo" replace />;
   if (!rows || !runs) return null;
 
@@ -37,6 +44,16 @@ export default function CourseUnitPage() {
       <PhotoCard photo={UNIT_PHOTOS[unit.n - 1]} size="hero" eyebrow={`Unidade ${unit.n} · ${unit.lessons.length} lições + projeto final`} title={unit.title} sizes="100vw">
         <span className="photoCard__body">{unit.goal}</span>
       </PhotoCard>
+
+      {party && (
+        <BigCelebration
+          eyebrow={`Unidade ${unit.n} concluída`}
+          title={unit.title}
+          body={UNITS[index + 1] ? `Todas as lições e a música final. A unidade ${UNITS[index + 1].n} está liberada.` : 'Todas as lições e a música final.'}
+          action={UNITS[index + 1] ? <Link className="button button-primary" to={`/estudo/unidade/${UNITS[index + 1].n}`} onClick={() => setParty(false)}>Abrir a unidade {UNITS[index + 1].n}</Link> : undefined}
+          onClose={() => setParty(false)}
+        />
+      )}
 
       {!open && <p className="courseBanner">Esta unidade abre quando você concluir a anterior: todas as lições e o projeto final.</p>}
 
