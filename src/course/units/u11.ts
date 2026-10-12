@@ -757,7 +757,7 @@ const l85: Lesson = {
   objectives: [
     'Consigo tocar o desenho de dois compassos da bossa na direita, no tempo.',
     'Consigo tocar o baixo da bossa (fundamental e 5ª abaixo, longa-curta) na esquerda.',
-    'Consigo acompanhar um ii–V–I em bossa com as duas mãos, 16 compassos em ±40 ms.',
+    'Consigo acompanhar um ii–V–I em bossa com as duas mãos, 16 compassos em ±50 ms.',
   ],
   blocks: [
     {
@@ -831,7 +831,7 @@ A tabela pede a pontuação **por mão**; o app ainda junta as duas na mesma con
   ],
   review: [rlSeq, choice(BOSSA_Q, 'bossa')],
   checkpoint: [
-    quickTimed('Comping de bossa, 16 compassos', 'ii–V–I duas vezes num tom sorteado, a 70 BPM, sem dicas. Meta: 85% das notas em ±40 ms.', (rng) => bossaTask(rng, 70, 2), { window: 40 }),
+    quickTimed('Comping de bossa, 16 compassos', 'ii–V–I duas vezes num tom sorteado, a 70 BPM, sem dicas. Meta: 85% das notas em ±50 ms.', (rng) => bossaTask(rng, 70, 2), { window: 50 }),
   ],
   exit: [rlChord, choice(BOSSA_Q, 'bossa')],
 };
@@ -930,7 +930,7 @@ const l87: Lesson = {
   objectives: [
     'Consigo explicar as formas AABA e ABAC e achar as seções numa canção.',
     'Consigo tocar a Bossa em Fá com melodia na direita e shells na esquerda, com 90% das notas.',
-    'Consigo acompanhar a cifra do A em bossa, com o groove em ±40 ms.',
+    'Consigo acompanhar a cifra do A em bossa, com o groove em ±50 ms.',
   ],
   blocks: [
     {
@@ -978,7 +978,7 @@ Toque a melodia sozinha primeiro, cantando junto. Depois a esquerda sozinha. Só
 
 Cifra: **F7M(9) | F7M(9) | Gm7(9) | C7(13) | Am7(9) | D7(13) | Gm7(9) | C7(13)**. O D7(13) é o V7/ii da unidade 10: ele leva ao Gm7.
 
-Meta da tabela: groove em **±40 ms**. Grave e cante a melodia por cima para conferir se o acompanhamento sustenta a canção.`,
+Meta da tabela: groove em **±50 ms**. Grave e cante a melodia por cima para conferir se o acompanhamento sustenta a canção.`,
     },
     { kind: 'exercise', id: 'l87-comping', exercise: quickTimed('Comping da cifra do A', '8 compassos, a 64 BPM, janela de ±50 ms. Duas passadas boas.', chartTask(64), { reps: 2, window: 50 }) },
     { kind: 'exercise', id: 'l87-quiz', exercise: quiz('Forma e arranjo', 'Responda sem tocar.', FORM_Q) },
@@ -986,7 +986,7 @@ Meta da tabela: groove em **±40 ms**. Grave e cante a melodia por cima para con
   review: [choice(FORM_Q, 'forma'), rlSeq],
   checkpoint: [
     quickTimed('A Bossa em Fá, seção A', 'Compassos 1 a 8, mãos juntas, a 66 BPM, sem dicas. Meta: 90% das notas.', () => twoHandTask(BOSSA_R.slice(0, 8).join(' | '), BOSSA_L.slice(0, 8).join(' | '), { bpm: 66, fifths: -1 }), { pass: { accuracy: 0.9 } }),
-    quickTimed('Comping no tempo', 'A cifra do A em bossa, a 70 BPM. Meta: 85% das notas em ±40 ms.', chartTask(70), { window: 40 }),
+    quickTimed('Comping no tempo', 'A cifra do A em bossa, a 70 BPM. Meta: 85% das notas em ±50 ms.', chartTask(70), { window: 50 }),
   ],
   exit: [choice(FORM_Q, 'forma'), choice(BOSSA_Q, 'bossa')],
 };
@@ -1031,7 +1031,7 @@ const l88: Lesson = {
   objectives: [
     'Consigo tocar uma baixaria que liga os acordes e chega no tempo 1.',
     'Consigo repetir de ouvido uma baixaria de 4 a 6 notas.',
-    'Consigo tocar o samba (tamborim na direita, surdo na esquerda) com 85% das notas em ±40 ms.',
+    'Consigo tocar o samba (tamborim na direita, surdo na esquerda) com 85% das notas em ±50 ms.',
     'Consigo tocar a habanera do tango brasileiro na esquerda.',
   ],
   blocks: [
@@ -1124,7 +1124,7 @@ O projeto final da unidade, o **Tanguinho**, usa exatamente esse desenho. Treine
   ],
   review: [baixariaEar, choice(CHORO_Q, 'choro')],
   checkpoint: [
-    quickTimed('Samba no tempo', '8 compassos, mãos juntas, a 60 BPM, sem dicas. Meta: 85% das notas em ±40 ms.', sambaTask(60), { window: 40 }),
+    quickTimed('Samba no tempo', '8 compassos, mãos juntas, a 60 BPM, sem dicas. Meta: 85% das notas em ±50 ms.', sambaTask(60), { window: 50 }),
     items('Baixaria de ouvido', '6 linhas, sem dica. Meta: 5 de 6.', baixariaEar, 6, 36, 60, 0.8, 'off'),
   ],
   exit: [baixariaEar, choice(CHORO_Q, 'choro')],
@@ -1197,7 +1197,7 @@ O plano previa também uma peça do *Guia Prático* de Villa-Lobos. Villa-Lobos 
   checkpoint: [
     items('Checkpoint da unidade', '20 perguntas misturadas das lições 82 a 88, sem dicas.', mix([allU11, allU11, allEarU11]), 20, 36, 88, 0.85, 'off'),
     quickTimed('Baião no tempo', 'Compassos 1 a 8 do Baião em Dó, mãos juntas, a 80 BPM. Meta: 85% em ±50 ms.', () => twoHandTask(BAIAO_R.slice(0, 8).join(' | '), BAIAO_L.slice(0, 8).join(' | '), { bpm: 80, beatsPerBar: 2 }), { window: 50 }),
-    quickTimed('Bossa no tempo', 'ii–V–I em bossa, tom sorteado, a 70 BPM. Meta: 85% em ±40 ms.', (rng) => bossaTask(rng, 70), { window: 40 }),
+    quickTimed('Bossa no tempo', 'ii–V–I em bossa, tom sorteado, a 70 BPM. Meta: 85% em ±50 ms.', (rng) => bossaTask(rng, 70), { window: 50 }),
   ],
   project: {
     title: 'Brasil ao piano',

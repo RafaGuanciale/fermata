@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import PhotoCard from '../components/PhotoCard';
 import type { PhotoKey } from '../media/photos';
 import { useRuns } from '../training/runs';
 import { PLAN, UNITS } from '../course';
-import { courseSummary, isPassed, lessonKey, nextLesson, unitComplete, unitUnlocked } from '../course/progress';
+import { courseStep, courseSummary, isPassed, lessonKey, nextLesson, unitComplete, unitUnlocked } from '../course/progress';
 import { useCourseRows } from '../course/useCourseRows';
 
 /** Foto de cada unidade (reaproveita as fotos dos módulos e do repertório). */
@@ -12,9 +12,13 @@ export const UNIT_PHOTOS: PhotoKey[] = ['teclado', 'leitura', 'acordes', 'escala
 export default function StudyPage() {
   const rows = useCourseRows();
   const runs = useRuns();
+  const location = useLocation();
 
   const next = rows && runs ? nextLesson(UNITS, rows, runs) : null;
   const summary = rows && runs ? courseSummary(UNITS, rows, runs) : null;
+  const step = rows && runs ? courseStep(UNITS, rows, runs) : null;
+  const finalUnit = step?.kind === 'final' ? step.unit : null;
+  const finalSong = finalUnit ? finalUnit.songs.find((s) => s.id === finalUnit.final.songId) : undefined;
 
   return (
     <>
@@ -34,6 +38,15 @@ export default function StudyPage() {
               {rows?.get(lessonKey(next.unit, next.lesson)) ? 'Continuar a lição' : 'Começar a lição'}
             </Link>
             {summary && <span className="photoCard__note">{summary.lessonsPassed} de {summary.lessonsTotal} lições escritas concluídas</span>}
+          </span>
+        </PhotoCard>
+      )}
+
+      {!next && finalUnit && finalSong && (
+        <PhotoCard photo={UNIT_PHOTOS[finalUnit.n - 1]} size="hero" eyebrow={`Unidade ${finalUnit.n} · música final`} title={finalSong.title} sizes="100vw">
+          <span className="photoCard__body">As lições da unidade estão feitas. Toque a música final no andamento pedido para abrir a próxima unidade.</span>
+          <span className="photoCard__actions">
+            <Link className="button button-primary" to={`/curso/musica/${finalSong.id}`} state={{ background: location }}>Tocar a música</Link>
           </span>
         </PhotoCard>
       )}

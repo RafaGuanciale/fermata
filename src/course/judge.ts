@@ -175,6 +175,20 @@ export function scoreItems(results: { misses: number; ms: number; timedOut?: boo
   };
 }
 
+/**
+ * Quantos acertos a meta pede numa rodada de `count`: a meta arredondada para o número inteiro mais perto.
+ * Assim 85% em 6 perguntas aceita 5 (um erro), em vez de exigir as 6.
+ */
+export function needCount(count: number, share: number): number {
+  return Math.min(count, Math.max(1, Math.round(share * count - 1e-9)));
+}
+
+/** A rodada passou na meta? `accuracy` é a fração certa de `count`. */
+export function meetsShare(accuracy: number, count: number, share: number): boolean {
+  if (count <= 0) return false;
+  return Math.round(accuracy * count) >= needCount(count, share);
+}
+
 /** Teclado com nomes que somem: some quando as últimas 5 respostas estão certas. */
 export function labelsVisible(mode: 'on' | 'fade' | 'off', recent: boolean[]): boolean {
   if (mode !== 'fade') return mode === 'on';
@@ -338,6 +352,8 @@ export interface PedalScore {
   missed: number;
   /** Pedal legato: trocas antecipadas (o pedal subiu antes do acorde novo, deixando um buraco). */
   early: number;
+  /** Quantos pontos foram julgados (acordes e pausas), para a meta aceitar um escorregão em rodadas curtas. */
+  total: number;
 }
 
 /** Onde o pedal troca: a cada ataque, ou, com duas mãos, só nos ataques da esquerda (a harmonia), não a cada nota da melodia. */
@@ -391,7 +407,7 @@ export function pedalScore(task: TimedTask, bpm: number, pedal: PedalEvent[], ki
   }
   const stuck = rests.filter((mid) => isDown(mid)).length;
   const total = onsets.length + rests.length;
-  return { score: total ? (ok + rests.length - stuck) / total : 0, muddy, stuck, missed, early: 0 };
+  return { score: total ? (ok + rests.length - stuck) / total : 0, muddy, stuck, missed, early: 0, total };
 }
 
 /**
@@ -426,7 +442,7 @@ function legatoPedal(task: TimedTask, bpm: number, pedal: PedalEvent[]): PedalSc
     if (ev.some((e) => e.down && e.t > up.t && e.t <= at + 400)) ok++;
     else missed++;
   });
-  return { score: onsets.length ? ok / onsets.length : 0, muddy, stuck: 0, missed, early };
+  return { score: onsets.length ? ok / onsets.length : 0, muddy, stuck: 0, missed, early, total: onsets.length };
 }
 
 // ---------- força (velocity) ----------
@@ -569,10 +585,15 @@ export interface TakeChecks {
   extras: number;
   noExtras?: boolean;
   ped: number | null;
+  /** Pontos de pedal julgados e compassos medidos no equilíbrio: com eles, a meta aceita um escorregão em rodadas curtas. */
+  pedN?: number;
   even: number | null;
   evenness?: number;
   bal: number | null;
+  balN?: number;
 }
+
+const shareOk = (x: number, n: number | undefined, need: number) => (n ? meetsShare(x, n, need) : x >= need);
 
 /** O que faltou, além do tempo, para a passada valer. Vazio = só o tempo decide. */
 export function takeShortfalls(c: TakeChecks): string[] {
@@ -580,9 +601,9 @@ export function takeShortfalls(c: TakeChecks): string[] {
   if (c.artic !== null && c.artic < ARTIC_PASS) out.push(c.articulation === 'staccato' ? 'o staccato' : 'o legato');
   if (c.dyn !== null && c.dyn < c.need) out.push('a dinâmica');
   if (c.noExtras && c.extras > 0) out.push('tocar sem notas a mais');
-  if (c.ped !== null && c.ped < 0.85) out.push('o pedal');
+  if (c.ped !== null && !shareOk(c.ped, c.pedN, 0.85)) out.push('o pedal');
   if (c.even !== null && c.evenness !== undefined && c.even > c.evenness) out.push('a uniformidade');
-  if (c.bal !== null && c.bal < 0.8) out.push('o equilíbrio entre as mãos');
+  if (c.bal !== null && !shareOk(c.bal, c.balN, 0.8)) out.push('o equilíbrio entre as mãos');
   return out;
 }
 
@@ -603,11 +624,60 @@ export function takeHeadline(c: TakeChecks, pct: (x: number) => string): string 
  * ou falta quanto para concluir. Null quando nada muda (o próprio resultado da passada já diz tudo).
  */
 export function takeAftermath(o: { ok: boolean; bpm: number; nextBpm: number; streak: number; reps: number; newTask: boolean }): string | null {
-  if (o.nextBpm > o.bpm) return `Subiu para ${o.nextBpm} BPM.`;
+  if (o.nextBpm > o.bpm) return `Subiu para ${o.nextBpm} BPM${o.newTask ? ', com um desenho novo' : ''}.`;
   if (o.nextBpm < o.bpm) return `Voltou para ${o.nextBpm} BPM: firme o tempo antes de subir de novo.`;
   if (o.ok && o.streak < o.reps) {
     const left = o.reps - o.streak;
     return `Falta${left > 1 ? 'm' : ''} ${left} para concluir${o.newTask ? ', com um desenho novo' : ''}.`;
   }
   return null;
+}
+
+/** Veredito do improviso: passou, e a frase com o motivo de verdade quando faltou algo além das notas certas. */
+export function improvVerdict(
+  s: ImprovScore,
+  pass: { inSet: number; restsPer4: number; endOn?: Pc[]; targets?: number },
+  bars: number,
+  targetsRatio: number | null,
+  pct: (x: number) => string,
+): { passed: boolean; headline: string } {
+  const miss: string[] = [];
+  if (s.notes < bars) miss.push('tocar mais (pelo menos uma nota por compasso)');
+  if (s.restsPer4 < pass.restsPer4) miss.push('respirar entre as frases');
+  if (pass.endOn && (s.lastPc === null || !pass.endOn.includes(s.lastPc))) miss.push('terminar na nota da casa');
+  if (pass.targets !== undefined && targetsRatio !== null && targetsRatio < pass.targets) miss.push('chegar numa nota do acorde nas trocas');
+  const base = `${pct(s.inSet)} das notas nas teclas certas`;
+  if (s.inSet < pass.inSet) return { passed: false, headline: `${base} (precisa de ${pct(pass.inSet)})` };
+  if (miss.length) return { passed: false, headline: `${base}, mas faltou ${miss.join(' e ')}` };
+  return { passed: true, headline: `${base}: improviso bom` };
+}
+
+/**
+ * "O que conta" de um exercício no tempo, em uma linha: tudo o que o app vai medir, com a explicação curta de cada
+ * termo. Vale para o Treino, que pode pedir legato ou uniformidade antes de a lição chegar lá.
+ */
+export function rulesLine(o: {
+  need: number;
+  window: number;
+  articulation?: 'legato' | 'staccato';
+  evenness?: number;
+  pedal?: 'direto' | 'legato';
+  dynamics?: 'p' | 'mf' | 'f' | 'crescendo' | 'diminuendo';
+  noExtras?: boolean;
+  balance?: number;
+}, pct: (x: number) => string): string {
+  const parts = [`${pct(o.need)} das notas no tempo (até ${o.window} ms de diferença)`];
+  if (o.articulation === 'legato') parts.push('legato: solte cada tecla só quando a próxima já estiver descendo');
+  if (o.articulation === 'staccato') parts.push('staccato: solte cada tecla logo depois de tocar');
+  if (o.evenness) parts.push(`notas igualmente espaçadas (variação até ${o.evenness} ms)`);
+  if (o.pedal === 'direto') parts.push('pedal: desce com o acorde e sobe antes do próximo');
+  if (o.pedal === 'legato') parts.push('pedal legato: troque logo depois de tocar o acorde novo');
+  if (o.dynamics === 'p') parts.push('toque suave (p)');
+  if (o.dynamics === 'mf') parts.push('toque médio (mf)');
+  if (o.dynamics === 'f') parts.push('toque forte (f)');
+  if (o.dynamics === 'crescendo') parts.push('crescendo: cada nota um pouco mais forte');
+  if (o.dynamics === 'diminuendo') parts.push('diminuendo: cada nota um pouco mais suave');
+  if (o.noExtras) parts.push('nota ligada não se toca de novo');
+  if (o.balance !== undefined) parts.push('melodia mais forte que o acompanhamento');
+  return `O que conta: ${parts.join(' · ')}.`;
 }

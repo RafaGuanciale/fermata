@@ -9,7 +9,7 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { playNotes } from '../../audio/synth';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { Midi } from '../../music/notes';
-import { calibrate, chordTargets, levelOf, scoreImprov, type CourseEvent, type ImprovScore } from '../judge';
+import { calibrate, chordTargets, improvVerdict, levelOf, meetsShare, needCount, scoreImprov, type CourseEvent, type ImprovScore } from '../judge';
 import { PC_NAMES, nameOf } from '../music';
 import type { Block, Exercise, Listen, Rng } from '../types';
 import { LEVEL_LABEL, RichText, Verdict, getVelocityCal, pct, playListen, setVelocityCal, useStopOnUnmount } from './shared';
@@ -27,7 +27,7 @@ type ImprovEx = Extract<Exercise, { kind: 'improv' }>;
 
 export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Outcome) => void }) {
   const metronome = useMetronome();
-  const { subscribe, press, release } = useNoteInput();
+  const { held, subscribe, press, release } = useNoteInput();
   const [phase, setPhaseState] = useState<'idle' | 'countin' | 'playing' | 'done'>('idle');
   const [score, setScore] = useState<ImprovScore | null>(null);
   const [targets, setTargets] = useState<ReturnType<typeof chordTargets> | null>(null);
@@ -66,11 +66,15 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
   useEffect(() => {
     if (phase !== 'countin' && phase !== 'playing') return;
     let raf = 0;
+    let lastPaint = 0;
     const tick = () => {
       const track = trackRef.current;
       if (!track) return;
       const t = performance.now();
-      setNow(t);
+      if (t - lastPaint >= 50) {
+        lastPaint = t;
+        setNow(t);
+      }
       const elapsed = t - track.firstBeat;
       if (elapsed >= 0 && phaseRef.current === 'countin') setPhase('playing');
       if (elapsed > lengthMs + 100) {
@@ -80,9 +84,7 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
         setScore(s);
         setTargets(tg);
         setPhase('done');
-        const endOk = !ex.pass.endOn || (s.lastPc !== null && ex.pass.endOn.includes(s.lastPc));
-        const targetsOk = !tg || tg.ratio >= (ex.pass.targets ?? 0);
-        const passed = s.notes >= ex.bars && s.inSet >= ex.pass.inSet && s.restsPer4 >= ex.pass.restsPer4 && endOk && targetsOk;
+        const { passed } = improvVerdict(s, ex.pass, ex.bars, tg?.ratio ?? null, pct);
         onFinish({ accuracy: s.inSet, passed });
         return;
       }
@@ -107,8 +109,10 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
   const elapsed = track ? now - track.firstBeat : -Infinity;
   const bar = phase === 'playing' ? Math.min(ex.bars, Math.floor(elapsed / (ex.beatsPerBar * beatMs)) + 1) : 0;
   const marks: Partial<Record<Midi, KeyMark>> = {};
-  for (let m = ex.low; m <= ex.high; m++) if (ex.pcs.includes(((m % 12) + 12) % 12)) marks[m] = 'lit';
+  // Teclas que valem: contorno. A tecla apertada afunda na hora.
+  for (let m = ex.low; m <= ex.high; m++) if (ex.pcs.includes(((m % 12) + 12) % 12)) marks[m] = 'next';
   const endOk = score && (!ex.pass.endOn || (score.lastPc !== null && ex.pass.endOn.includes(score.lastPc)));
+  const verdict = score ? improvVerdict(score, ex.pass, ex.bars, targets?.ratio ?? null, pct) : null;
 
   return (
     <div className="runner">
@@ -123,11 +127,17 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
             {phase === 'done' ? 'De novo' : 'Começar com a base'}
           </button>
         )}
-        {phase === 'idle' && <span className="timed__hint">{ex.bars} compassos a {ex.bpm} BPM. As teclas acesas são as que valem.</span>}
+        {phase === 'idle' && <span className="timed__hint">{ex.bars} compassos a {ex.bpm} BPM. As teclas marcadas são as que valem.</span>}
       </div>
-      {score && (
+      {score && verdict && (
         <div className="runner__feedback">
-          <Verdict tone={score.inSet >= ex.pass.inSet ? 'hit' : 'miss'}>{pct(score.inSet)} das notas nas teclas certas ({score.notes} notas)</Verdict>
+          {verdict.passed ? (
+            <PassReward stars={starsFor(score.inSet, ex.pass.inSet) || 1}>
+              <p className="passReward__text">{verdict.headline} ({score.notes} notas)</p>
+            </PassReward>
+          ) : (
+            <Verdict tone="miss">{verdict.headline} ({score.notes} notas)</Verdict>
+          )}
           <p className="runner__note">
             Pausas: {score.rests} {score.restsPer4 >= ex.pass.restsPer4 ? '(boa respiração entre as frases)' : `(faltou respirar: pelo menos ${ex.pass.restsPer4} a cada 4 compassos)`}
             {ex.pass.endOn && (endOk ? '. Terminou na casa.' : `. Termine num ${ex.pass.endOn.map((p) => PC_NAMES[p]).join(' ou ')} para soar como fim.`)}
@@ -140,7 +150,7 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
         </div>
       )}
       <div className="runner__keys">
-        <PianoKeyboard low={ex.low} high={ex.high} marks={marks} onPress={press} onRelease={release} label="Teclado do improviso" />
+        <PianoKeyboard low={ex.low} high={ex.high} marks={marks} pressed={held} onPress={press} onRelease={release} label="Teclado do improviso" />
       </div>
     </div>
   );
@@ -151,11 +161,12 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
 type DynEx = Extract<Exercise, { kind: 'dynamics' }>;
 
 export function DynamicsRunner({ ex, rng, onFinish }: { ex: DynEx; rng: Rng; onFinish: (o: Outcome) => void }) {
-  const { subscribe, midi, press, release } = useNoteInput();
+  const { held, subscribe, midi, press, release } = useNoteInput();
   const [asks, setAsks] = useState(() => ex.gen(rng));
   const [i, setI] = useState(0);
   const [results, setResults] = useState<boolean[]>([]);
   const [last, setLast] = useState<{ ok: boolean; level: string } | null>(null);
+  const [wrongKey, setWrongKey] = useState<Midi | null>(null);
   const cal = getVelocityCal();
   const done = i >= asks.length;
   const finishRef = useRef(onFinish);
@@ -164,7 +175,11 @@ export function DynamicsRunner({ ex, rng, onFinish }: { ex: DynEx; rng: Rng; onF
   useEffect(() => subscribe((e) => {
     if (e.type !== 'on' || done || e.velocity === undefined || !cal) return;
     const ask = asks[i];
-    if (e.midi !== ask.midi) return;
+    if (e.midi !== ask.midi) {
+      setWrongKey(e.midi);
+      return;
+    }
+    setWrongKey(null);
     const level = levelOf(e.velocity, cal);
     const ok = level === ask.level;
     const all = [...results, ok];
@@ -173,7 +188,7 @@ export function DynamicsRunner({ ex, rng, onFinish }: { ex: DynEx; rng: Rng; onF
     setI(i + 1);
     if (i + 1 >= asks.length) {
       const acc = all.filter(Boolean).length / all.length;
-      finishRef.current({ accuracy: acc, passed: acc >= ex.pass.accuracy });
+      finishRef.current({ accuracy: acc, passed: meetsShare(acc, all.length, ex.pass.accuracy) });
     }
   }), [subscribe, asks, i, results, done, cal, ex.pass.accuracy]);
 
@@ -196,8 +211,10 @@ export function DynamicsRunner({ ex, rng, onFinish }: { ex: DynEx; rng: Rng; onF
     <div className="runner">
       {done ? (
         <div className="runner__summary">
-          <Verdict tone={acc >= ex.pass.accuracy ? 'hit' : 'miss'}>{pct(acc)} na faixa pedida</Verdict>
-          <button className="button button-secondary" type="button" onClick={() => { setAsks(ex.gen(rng)); setI(0); setResults([]); setLast(null); }}>De novo</button>
+          <Verdict tone={meetsShare(acc, results.length, ex.pass.accuracy) ? 'hit' : 'miss'}>
+            {results.filter(Boolean).length} de {results.length} na faixa pedida{meetsShare(acc, results.length, ex.pass.accuracy) ? '' : ` (precisa de ${needCount(results.length, ex.pass.accuracy)})`}
+          </Verdict>
+          <button className="button button-secondary" type="button" onClick={() => { setAsks(ex.gen(rng)); setI(0); setResults([]); setLast(null); setWrongKey(null); }}>De novo</button>
         </div>
       ) : (
         <>
@@ -207,11 +224,13 @@ export function DynamicsRunner({ ex, rng, onFinish }: { ex: DynEx; rng: Rng; onF
             <p className="runner__symbol">{ask.level}</p>
             <p className="runner__detail">{LEVEL_LABEL[ask.level]}</p>
           </div>
-          {last && <div className="runner__feedback"><Verdict tone={last.ok ? 'hit' : 'miss'}>{last.ok ? 'Na faixa' : `Saiu ${last.level}`}</Verdict></div>}
+          {wrongKey !== null ? (
+            <div className="runner__feedback"><Verdict tone="miss">Tocou {nameOf(wrongKey)}. A nota pedida é {nameOf(ask.midi)}, a marcada no teclado.</Verdict></div>
+          ) : last && <div className="runner__feedback"><Verdict tone={last.ok ? 'hit' : 'miss'}>{last.ok ? 'Na faixa' : `Saiu ${last.level}`}</Verdict></div>}
         </>
       )}
       <div className="runner__keys">
-        <PianoKeyboard low={ex.low} high={ex.high} marks={!done ? { [ask.midi]: 'lit' } : {}} onPress={press} onRelease={release} label="Teclado" />
+        <PianoKeyboard low={ex.low} high={ex.high} marks={!done ? { [ask.midi]: 'next', ...(wrongKey !== null ? { [wrongKey]: 'miss' as const } : {}) } : {}} pressed={held} onPress={press} onRelease={release} label="Teclado" />
       </div>
     </div>
   );
@@ -320,25 +339,27 @@ type QuizEx = Extract<Exercise, { kind: 'quiz' }>;
 
 export function QuizRunner({ ex: raw, onFinish }: { ex: QuizEx; onFinish: (o: Outcome) => void }) {
   // Opções embaralhadas a cada vez: a resposta certa não fica sempre no mesmo lugar.
-  const [ex] = useState<QuizEx>(() => ({
+  const shuffle = (): QuizEx => ({
     ...raw,
     questions: raw.questions.map((q) => {
       const order = q.options.map((_, k) => k).sort(() => Math.random() - 0.5);
       return { ...q, options: order.map((k) => q.options[k]), answer: order.indexOf(q.answer) };
     }),
-  }));
+  });
+  const [ex, setEx] = useState<QuizEx>(shuffle);
   const [i, setI] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [right, setRight] = useState(0);
   const q = ex.questions[i];
   if (!q) {
     const acc = right / ex.questions.length;
+    const ok = meetsShare(acc, ex.questions.length, ex.pass.accuracy);
     return (
       <div className="runner__summary">
-        <PassReward stars={acc >= ex.pass.accuracy ? starsFor(acc, ex.pass.accuracy) : 0}>
-          <p className="passReward__text">{right} de {ex.questions.length} certas</p>
+        <PassReward stars={ok ? starsFor(acc, ex.pass.accuracy) || 1 : 0}>
+          <p className="passReward__text">{right} de {ex.questions.length} certas{ok ? '' : ` (precisa de ${needCount(ex.questions.length, ex.pass.accuracy)})`}</p>
         </PassReward>
-        <button className="button button-secondary" type="button" onClick={() => { setI(0); setRight(0); setChosen(null); }}>De novo</button>
+        <button className="button button-secondary" type="button" onClick={() => { setEx(shuffle()); setI(0); setRight(0); setChosen(null); }}>De novo</button>
       </div>
     );
   }
@@ -353,7 +374,7 @@ export function QuizRunner({ ex: raw, onFinish }: { ex: QuizEx; onFinish: (o: Ou
     setI(nextI);
     if (nextI >= ex.questions.length) {
       const acc = right / ex.questions.length;
-      onFinish({ accuracy: acc, passed: acc >= ex.pass.accuracy });
+      onFinish({ accuracy: acc, passed: meetsShare(acc, ex.questions.length, ex.pass.accuracy) });
     }
   };
   return (

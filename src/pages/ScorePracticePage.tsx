@@ -347,12 +347,17 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   useEffect(() => {
     if (take !== 'countin' && take !== 'playing') return;
     let raf = 0;
+    let lastPaint = 0;
     const tick = () => {
       const track = trackRef.current;
       const plan = planRef.current;
       if (!track || !plan || !loaded) return;
       const t = performance.now();
-      setNow(t);
+      // Redesenha a ~25 quadros por segundo: o cursor anda igual e o computador fica folgado para receber as notas.
+      if (t - lastPaint >= 40) {
+        lastPaint = t;
+        setNow(t);
+      }
       const elapsed = t - track.firstBeat;
       if (elapsed >= 0 && takeRef.current === 'countin') setTake('playing');
       const reach = Math.max(150, track.beatMs / 2);

@@ -13,10 +13,10 @@ import { optimalMove, voiceMove } from './judge';
 import { buildMinorScale, chordQualityByEar, minorChord, minorDegreeSymbol, minorSteps, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellInterval, spellIntervalChoice, spellScale } from './gens';
 import { buildScale, degreeByEar, degreeSymbol, keyFromSignature, scaleDegreeNote, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
 import {
-  articulationScore, calibrate, nextToPlay, releaseGap, takeAftermath, takeHeadline, takePassed, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
+  articulationScore, calibrate, nextToPlay, releaseGap, takeAftermath, needCount, meetsShare, improvVerdict, rulesLine, takeHeadline, takePassed, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
 } from './judge';
 import { n, parseLine, ptName, seeded } from './music';
-import { afterCheckpoint, canMaster, lessonKey, lessonState, nextLesson, rowsById, songPassed, unitComplete, warmupItems } from './progress';
+import { afterCheckpoint, canMaster, courseStep, currentUnitN, lessonKey, lessonState, nextLesson, rowsById, songPassed, unitComplete, warmupItems } from './progress';
 import { checkSong, songXml } from './song';
 import { melodyTask, rhythmTask, sightReadingTask, tiedMelodyTask, transposedTask } from './tasks';
 import type { Exercise, Item, ItemGen, Unit } from './types';
@@ -411,9 +411,28 @@ describe('julgamento', () => {
     expect(takeHeadline(legatoMiss, pct)).toBe('99% no tempo, mas faltou o legato');
     expect(takeHeadline({ ...legatoMiss, accuracy: 0.5 }, pct)).toBe('50% no tempo (precisa de 85%)');
     expect(takeAftermath({ ok: true, bpm: 60, nextBpm: 64, streak: 0, reps: 1, newTask: false })).toBe('Subiu para 64 BPM.');
+    expect(takeAftermath({ ok: true, bpm: 60, nextBpm: 64, streak: 0, reps: 1, newTask: true })).toBe('Subiu para 64 BPM, com um desenho novo.');
     expect(takeAftermath({ ok: false, bpm: 64, nextBpm: 60, streak: 0, reps: 1, newTask: false })).toMatch(/^Voltou para 60 BPM/);
     expect(takeAftermath({ ok: true, bpm: 60, nextBpm: 60, streak: 1, reps: 3, newTask: true })).toBe('Faltam 2 para concluir, com um desenho novo.');
     expect(takeAftermath({ ok: false, bpm: 60, nextBpm: 60, streak: 0, reps: 2, newTask: false })).toBeNull();
+  });
+
+  it('metas em número inteiro de acertos, improviso e o que conta', () => {
+    expect(needCount(6, 0.85)).toBe(5);
+    expect(needCount(4, 0.85)).toBe(3);
+    expect(needCount(10, 0.85)).toBe(8);
+    expect(needCount(2, 1)).toBe(2);
+    expect(meetsShare(5 / 6, 6, 0.85)).toBe(true);
+    expect(meetsShare(4 / 6, 6, 0.85)).toBe(false);
+    const pct = (x: number) => `${Math.round(x * 100)}%`;
+    const s = { notes: 20, inSet: 0.95, rests: 1, restsPer4: 1, lastPc: 7 };
+    expect(improvVerdict(s, { inSet: 0.9, restsPer4: 1 }, 8, null, pct)).toEqual({ passed: true, headline: '95% das notas nas teclas certas: improviso bom' });
+    const end = improvVerdict(s, { inSet: 0.9, restsPer4: 1, endOn: [0] }, 8, null, pct);
+    expect(end.passed).toBe(false);
+    expect(end.headline).toBe('95% das notas nas teclas certas, mas faltou terminar na nota da casa');
+    expect(rulesLine({ need: 0.85, window: 80, articulation: 'legato', evenness: 40 }, pct)).toBe(
+      'O que conta: 85% das notas no tempo (até 80 ms de diferença) · legato: solte cada tecla só quando a próxima já estiver descendo · notas igualmente espaçadas (variação até 40 ms).',
+    );
   });
 
   it('força: calibração, faixas e crescendo', () => {
@@ -429,7 +448,7 @@ describe('julgamento', () => {
   it('pedal direto: desce com o acorde, sobe antes do próximo, nunca preso na pausa', () => {
     const task = melodyTask('C3+E3+G3:2 r:2 | F3+A3+C4:2 G3+B3+D4:2', { bpm: 60 });
     const good = [{ down: true, t: 150 }, { down: false, t: 1500 }, { down: true, t: 4100 }, { down: false, t: 5900 }, { down: true, t: 6150 }, { down: false, t: 7900 }];
-    expect(pedalScore(task, 60, good)).toEqual({ score: 1, muddy: 0, stuck: 0, missed: 0, early: 0 });
+    expect(pedalScore(task, 60, good)).toMatchObject({ score: 1, muddy: 0, stuck: 0, missed: 0, early: 0 });
     const held = [{ down: true, t: 100 }, { down: false, t: 7900 }];
     const s = pedalScore(task, 60, held)!;
     expect(s.stuck).toBe(1);
@@ -439,7 +458,7 @@ describe('julgamento', () => {
     // Pedal legato: troca logo depois de cada acorde novo.
     const flow = melodyTask('C4+E4+G4:2 F4+A4+C5:2 | G4+B4+D5:2 C4+E4+G4:2', { bpm: 60 });
     const legato = [{ down: true, t: 120 }, { down: false, t: 2080 }, { down: true, t: 2200 }, { down: false, t: 4100 }, { down: true, t: 4220 }, { down: false, t: 6090 }, { down: true, t: 6200 }];
-    expect(pedalScore(flow, 60, legato, 'legato')).toEqual({ score: 1, muddy: 0, stuck: 0, missed: 0, early: 0 });
+    expect(pedalScore(flow, 60, legato, 'legato')).toMatchObject({ score: 1, muddy: 0, stuck: 0, missed: 0, early: 0 });
     const early = [{ down: true, t: 120 }, { down: false, t: 1800 }, { down: true, t: 2050 }];
     expect(pedalScore(flow, 60, early, 'legato')!.early).toBe(1);
   });
@@ -628,6 +647,11 @@ describe('progresso do curso', () => {
     expect(unitComplete(unit, all, [])).toBe(false);
     expect(unitComplete(unit, all, [songRun])).toBe(true);
     expect(nextLesson(UNITS, rowsById([passed(0, 0)]), [])?.lesson.id).toBe(unit.lessons[1].id);
+    // Lições feitas, música final pendente: o curso está na música final da unidade 1 (não pula para a última unidade).
+    expect(courseStep(UNITS, all, []).kind).toBe('final');
+    expect(currentUnitN(UNITS, all, [])).toBe(1);
+    expect(currentUnitN(UNITS, all, [songRun])).toBe(2);
+    expect(currentUnitN(UNITS, rowsById([]), [])).toBe(1);
   });
 
   it('música aprovada só inteira, nas mãos e no BPM pedidos', () => {

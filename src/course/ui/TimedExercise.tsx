@@ -12,7 +12,7 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
 import { swingBeat } from '../tasks';
-import { ARTIC_PASS, articulationScore, balanceScore, takeAftermath, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
+import { ARTIC_PASS, articulationScore, rulesLine, balanceScore, takeAftermath, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
 import { Burst, Combo, PassReward } from '../../celebrate/Celebrate';
@@ -72,6 +72,8 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
     } else if (ex.ladder && bpm < target) {
       nextBpm = Math.min(target, bpm + ex.ladder.step);
       setStreak(0);
+      // Degrau novo, desenho novo: a escada não vira decoreba.
+      newTask = true;
     } else {
       n = streak + 1;
       setStreak(n);
@@ -83,13 +85,16 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
         newTask = true;
       }
     }
-    const note = takeAftermath({ ok: s.ok, bpm, nextBpm, streak: n, reps: ex.reps, newTask });
+    // Só diz "desenho novo" quando o sorteio mudou mesmo (exercícios de melodia fixa repetem o trecho).
+    const fresh = newTask ? ex.gen(rng) : null;
+    const changed = !!fresh && JSON.stringify(fresh.display) !== JSON.stringify(task.display);
+    const note = takeAftermath({ ok: s.ok, bpm, nextBpm, streak: n, reps: ex.reps, newTask: changed });
     if (note && (nextBpm !== bpm || newTask)) {
       setLast({ ok: s.ok, headline, note });
       if (s.ok) playReward('pass');
     }
     if (nextBpm !== bpm) setBpm(nextBpm);
-    if (newTask) setTask(ex.gen(rng));
+    if (fresh) setTask(fresh);
   };
 
   return (
@@ -109,6 +114,11 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
         <PassReward stars={starsFor(best, ex.pass.accuracy) || 1}>
           <p className="passReward__text">Concluído: {pct(best)} no tempo na melhor passada.</p>
         </PassReward>
+      )}
+      {!finished && (
+        <p className="runner__detail timed__rules">
+          {rulesLine({ need: ex.pass.accuracy, window: ex.window, articulation: ex.articulation, evenness: ex.evenness, pedal: ex.pedal, dynamics: ex.dynamics, noExtras: ex.noExtras, balance: ex.balance }, pct)}
+        </p>
       )}
       {last && !finished && (
         <div className="timed__last">
@@ -177,7 +187,8 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
     const bal = ex.balance !== undefined ? balanceScore(task, bpm, events, ex.balance) : null;
     const checks: TakeChecks = {
       accuracy: r.accuracy, need: ex.pass.accuracy, articulation: ex.articulation, artic, dyn, extras: r.extras,
-      noExtras: ex.noExtras, ped: ped?.score ?? null, even, evenness: ex.evenness, bal,
+      noExtras: ex.noExtras, ped: ped?.score ?? null, pedN: ped?.total, even, evenness: ex.evenness, bal,
+      balN: Math.ceil(taskBeats(task) / task.beatsPerBar),
     };
     const gap = ex.articulation === 'legato' ? releaseGap(task, bpm, events) : null;
     const s = { r, artic, dyn, noVelocity, ped, even, bal, gap, checks, ok: takePassed(checks) };

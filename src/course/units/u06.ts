@@ -838,7 +838,7 @@ Dois toques que fazem diferença: troque o pedal a cada acorde (pedal legato) e 
       labels: 'off',
       pass: { accuracy: 0.85 },
     },
-    items('Dois ciclos conduzidos', 'I–V–vi–IV duas vezes, tom sorteado, sem dicas.', leadTwo, 3, 48, 84, 0.85, 'off'),
+    items('Dois ciclos conduzidos', 'I–V–vi–IV duas vezes, tom sorteado, sem dicas.', leadTwo, 4, 48, 84, 0.85, 'off'),
     quickTimed('6/8', 'Quatro compassos sorteados a 60 BPM (semínima pontuada).', compoundRhythm([...R68, ...R68_REST], 4, 60), { window: 60 }),
   ],
   project: {

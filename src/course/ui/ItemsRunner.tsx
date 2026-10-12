@@ -8,10 +8,10 @@ import { useElementWidth } from '../../hooks/useFullscreen';
 import { useNoteInput } from '../../input/useNoteInput';
 import type { Midi } from '../../music/notes';
 import { formatSeconds } from '../../format';
-import { labelsVisible, pressItem, scoreItems, startItem, type ItemProgress } from '../judge';
+import { labelsVisible, meetsShare, needCount, pressItem, scoreItems, startItem, type ItemProgress } from '../judge';
 import { nameOf } from '../music';
 import type { Item } from '../types';
-import { Verdict, pct, playListen, useStopOnUnmount } from './shared';
+import { Verdict, playListen, useStopOnUnmount } from './shared';
 import { Combo, PassReward } from '../../celebrate/Celebrate';
 import { starsFor, streakOf } from '../../celebrate/rewards';
 
@@ -36,7 +36,7 @@ interface Props {
 type Phase = 'idle' | 'listening' | 'answer' | 'between' | 'done';
 
 export default function ItemsRunner({ makeItems, low, high, labels, hints, pass, onFinish, startLabel = 'Começar' }: Props) {
-  const { subscribe, press, release } = useNoteInput();
+  const { held, subscribe, press, release } = useNoteInput();
   const [items, setItems] = useState<Item[]>([]);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -99,7 +99,7 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
         begin(items, index + 1);
       } else {
         const s = scoreItems(all);
-        const passed = s.accuracy >= pass.accuracy && (pass.avgMs === undefined || (s.avgMs ?? Infinity) <= pass.avgMs);
+        const passed = meetsShare(s.accuracy, all.length, pass.accuracy) && (pass.avgMs === undefined || (s.avgMs ?? Infinity) <= pass.avgMs);
         setPhase('done');
         finishRef.current({ accuracy: s.accuracy, avgMs: s.avgMs, passed, perItem: all.map((x) => ({ ok: x.misses === 0 && !x.timedOut, skill: x.skill })) });
       }
@@ -125,9 +125,13 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
   useEffect(() => {
     if (phase !== 'answer' || !item?.timeLimitMs) return;
     let raf = 0;
+    let lastPaint = 0;
     const tick = () => {
       const t = performance.now();
-      setNow(t);
+      if (t - lastPaint >= 50) {
+        lastPaint = t;
+        setNow(t);
+      }
       if (t - startedAt.current >= item.timeLimitMs!) {
         setShowHint(true);
         finishItem(progRef.current.misses, true);
@@ -143,12 +147,15 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
   const names = labelsVisible(labels, recent);
 
   const marks: Partial<Record<Midi, KeyMark>> = {};
-  if (item && (showHint || phase === 'between') && item.hintKeys && (hints || phase === 'between')) item.hintKeys.forEach((m) => (marks[m] = 'lit'));
+  // Dica e resposta mostrada: contorno (onde tocar). Notas já achadas: cheias. A tecla apertada afunda na hora.
+  if (item && (showHint || phase === 'between') && item.hintKeys && (hints || phase === 'between')) item.hintKeys.forEach((m) => (marks[m] = 'next'));
   prog.found.forEach((m) => (marks[m] = 'lit'));
   if (prog.lastWrong !== null && phase === 'answer') marks[prog.lastWrong] = 'miss';
 
   const score = scoreItems(results);
-  const summaryPassed = score.accuracy >= pass.accuracy && (pass.avgMs === undefined || (score.avgMs ?? Infinity) <= pass.avgMs);
+  const rightCount = Math.round(score.accuracy * results.length);
+  const enoughRight = meetsShare(score.accuracy, results.length, pass.accuracy);
+  const summaryPassed = enoughRight && (pass.avgMs === undefined || (score.avgMs ?? Infinity) <= pass.avgMs);
   const streak = streakOf(recent);
   const last = results[results.length - 1];
   const remaining = item?.timeLimitMs && phase === 'answer' ? Math.max(0, item.timeLimitMs - (now - startedAt.current)) : null;
@@ -161,10 +168,10 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
         </div>
       ) : phase === 'done' ? (
         <div className="runner__summary">
-          <PassReward stars={summaryPassed ? starsFor(score.accuracy, pass.accuracy) : 0}>
+          <PassReward stars={summaryPassed ? starsFor(score.accuracy, pass.accuracy) || 1 : 0}>
             <p className="passReward__text">
-              {pct(score.accuracy)} certas de primeira{score.avgMs !== null ? ` · média ${formatSeconds(score.avgMs)}` : ''}
-              {score.accuracy >= pass.accuracy ? '' : ` (precisa de ${pct(pass.accuracy)})`}
+              {rightCount} de {results.length} certas de primeira{score.avgMs !== null ? ` · média ${formatSeconds(score.avgMs)}` : ''}
+              {enoughRight ? '' : ` (precisa de ${needCount(results.length, pass.accuracy)})`}
             </p>
           </PassReward>
           {pass.avgMs !== undefined && score.avgMs !== null && score.avgMs > pass.avgMs && (
@@ -215,7 +222,7 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
               <Verdict tone="neutral">Ouça…</Verdict>
             ) : phase === 'between' && last ? (
               last.timedOut ? (
-                <Verdict tone="miss">O tempo acabou. As teclas certas estão acesas.</Verdict>
+                <Verdict tone="miss">O tempo acabou. As teclas certas estão marcadas.</Verdict>
               ) : last.misses === 0 ? (
                 <Verdict tone="hit" detail={formatSeconds(last.ms)}>Certo</Verdict>
               ) : (
@@ -247,7 +254,7 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
         </>
       ) : null}
       <div className="runner__keys">
-        <PianoKeyboard low={low} high={high} marks={marks} showNames={names} onPress={press} onRelease={release} label="Teclado do exercício" />
+        <PianoKeyboard low={low} high={high} marks={marks} pressed={held} showNames={names} onPress={press} onRelease={release} label="Teclado do exercício" />
       </div>
     </div>
   );

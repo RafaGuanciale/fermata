@@ -43,7 +43,11 @@ export default function TodayPage() {
         sizes="100vw"
       >
         <span className="photoCard__body">
-          {lessonTitle ? `Aquecimento, revisão, técnica, leitura e ouvido. Lição do curso: ${lessonTitle}.` : 'Aquecimento, revisão, técnica, leitura e ouvido, no nível da sua unidade.'}
+          {lessonTitle
+            ? `Aquecimento, revisão, técnica, leitura e ouvido. Lição do curso: ${lessonTitle}.`
+            : training?.finalSong
+              ? `Aquecimento, revisão, técnica, leitura e ouvido. Para abrir a próxima unidade, falta a música final: ${training.finalSong.title}.`
+              : 'Aquecimento, revisão, técnica, leitura e ouvido, no nível da sua unidade.'}
         </span>
         <span className="photoCard__actions">
           <Link className="button button-primary" to="/treino">
@@ -53,6 +57,11 @@ export default function TodayPage() {
           {training?.next && (
             <Link className="button button-secondary" to={`/curso/foco/${training.next.unit.n}/${training.next.lesson.id}`} state={{ background: location }}>
               Lição: {training.next.lesson.title}
+            </Link>
+          )}
+          {!training?.next && training?.finalSong && (
+            <Link className="button button-secondary" to={`/curso/musica/${training.finalSong.id}`} state={{ background: location }}>
+              Música final: {training.finalSong.title}
             </Link>
           )}
         </span>

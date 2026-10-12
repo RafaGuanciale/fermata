@@ -75,6 +75,15 @@ Uma revisão independente achou estes erros repetidos. Não os repita:
 - **Pelo menos um callout de erro comum por lição.**
 - O robô (`src/course/playthrough.test.ts`) toca a resposta certa de todo exercício: se ele falhar, o exercício é impossível. Rode `npm test` e conserte o conteúdo, não o robô.
 
+## Regras dos exercícios (auditoria de 2026-10-12, obrigatório)
+
+- Janela de tempo de pelo menos ±50 ms (o atraso do cabo e da calibração come o resto). O teste `exercises.test.ts` cobra.
+- Meta em número inteiro: rodadas de perguntas aceitam um erro quando a meta não é 100% (`needCount` arredonda: 85% de 6 = 5). Não escreva rodada de 3 perguntas com meta abaixo de 100% esperando que aceite erro.
+- Todo exercício no tempo mostra a linha "O que conta" (`rulesLine`), com a explicação de legato, uniformidade, pedal, dinâmica. O enunciado não precisa repetir, mas não pode contradizer.
+- O resultado sempre diz o motivo real da reprovação ("99% no tempo, mas faltou o legato") e fica na tela quando o exercício reinicia (BPM novo, desenho novo).
+- O teclado do exercício mostra a tecla apertada na hora (`pressed`); dica e "onde tocar" são contorno (`next`); notas achadas são cheias (`lit`).
+- Treino nunca é decoreba: todo aquecimento e todo item de técnica sorteiam tom, desenho, ordem ou progressão a cada passada (o teste "todo aquecimento e toda técnica mudam" cobra), e cada degrau da escada de BPM traz um desenho novo.
+
 ## Estilo do texto (obrigatório)
 
 - PT-BR, "você", frases curtas, sem emoji, vírgula decimal, número com unidade ("72 BPM", "2 tempos").

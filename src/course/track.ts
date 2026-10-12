@@ -57,6 +57,20 @@ export function pentachord(tonic: Midi, steps: number[] = MAJOR): Midi[] {
   return [...five, ...five.slice(0, -1).reverse()];
 }
 
+/** Desenhos do pentacorde (graus 0 a 4 da posição). Nenhum repete a mesma tecla em seguida, para o legato valer. */
+export const PENTA_PATTERNS: { name: string; degrees: number[] }[] = [
+  { name: 'subindo e descendo', degrees: [0, 1, 2, 3, 4, 3, 2, 1, 0] },
+  { name: 'descendo e subindo', degrees: [4, 3, 2, 1, 0, 1, 2, 3, 4] },
+  { name: 'em terças', degrees: [0, 2, 1, 3, 2, 4, 3, 1, 2, 0] },
+  { name: 'em grupos de três', degrees: [0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 2, 1, 0] },
+];
+
+/** Pentacorde num desenho: as cinco notas da posição na ordem dos graus. */
+export function pentaPattern(tonic: Midi, steps: number[], degrees: number[]): Midi[] {
+  const five = steps.slice(0, 5).map((x) => tonic + x);
+  return degrees.map((d) => five[d]);
+}
+
 /** Arpejo da tríade (ou tétrade) em `octaves` oitavas, subindo e descendo. */
 export function arpeggio(tonic: Midi, chord: number[], octaves: number): Midi[] {
   const up: Midi[] = [];
@@ -166,13 +180,14 @@ function pentaItem(id: string, keys: Key[], hands: Hands, dur: number, from: num
   return {
     id,
     title: `Pentacorde, ${HAND_LABEL[hands]}${articulation ? `, ${articulation}` : ''}`,
-    how: `Cinco notas subindo e descendo em ${DUR_LABEL[String(dur)]}, em ${keys.map((k) => k.name).join(', ')}. Mão parada, um dedo por tecla.${articulation ? ` ${ARTIC_HOW[articulation]}` : ''}`,
+    how: `As cinco notas da posição em ${DUR_LABEL[String(dur)]}, num desenho sorteado a cada passada (subindo e descendo, em terças, em grupos de três), em ${keys.map((k) => k.name).join(', ')}. Mão parada, um dedo por tecla.${articulation ? ` ${ARTIC_HOW[articulation]}` : ''}`,
     gen: (rng) => {
       const k = pick(rng, keys);
+      const pattern = pick(rng, PENTA_PATTERNS);
       const minor = k.name.includes('menor');
       // lineTask desce uma oitava para a esquerda: a tônica escrita fica na região da direita (Dó4 → toca Dó3).
       const tonic = hands === 'esquerda' ? (k.tonic < 55 ? k.tonic + 12 : k.tonic) : k.tonic < 60 ? k.tonic + 12 : k.tonic;
-      return lineTask(pentachord(tonic, minor ? HARMONIC_MINOR : MAJOR), dur, { bpm: from, hands, fifths: k.fifths, caption: k.name });
+      return lineTask(pentaPattern(tonic, minor ? HARMONIC_MINOR : MAJOR, pattern.degrees), dur, { bpm: from, hands, fifths: k.fifths, caption: `${k.name} · ${pattern.name}` });
     },
     from,
     target,
@@ -198,24 +213,17 @@ function arpItem(id: string, keys: Key[], hands: Hands, from: number, target: nu
   };
 }
 
+const CHROMATIC_STARTS: { name: string; midi: Midi }[] = [
+  { name: 'Dó', midi: 60 }, { name: 'Ré', midi: 62 }, { name: 'Mi', midi: 64 }, { name: 'Fá', midi: 65 }, { name: 'Sol', midi: 67 },
+];
+
 const chromaticItem = (from: number, target: number): TechItem => ({
   id: 'cromatica-md',
   title: 'Escala cromática, 1 oitava, mão direita',
-  how: 'Todas as teclas, brancas e pretas, em colcheias. Dedilhado: 3 nas pretas, 1 nas brancas e 2 em Fá e Dó, subindo e descendo.',
-  gen: () => lineTask(scaleUpDown(60, CHROMATIC, 1), 0.5, { bpm: from, hands: 'direita' }),
-  from,
-  target,
-  step: 4,
-  evenness: 35,
-});
-
-const albertiItem = (from: number, target: number): TechItem => ({
-  id: 'alberti-me',
-  title: 'Baixo de Alberti, mão esquerda',
-  how: 'Dó, Fá, Sol e Dó em Alberti (1-5-3-5), colcheias. Leve e igual: é acompanhamento.',
-  gen: () => {
-    const t = lineTask(alberti([[48, 52, 55], [48, 53, 57], [47, 50, 55], [48, 52, 55]]), 0.5, { bpm: from, hands: 'direita' });
-    return { ...t, clef: 'bass' };
+  how: 'Todas as teclas, brancas e pretas, em colcheias, começando numa nota sorteada a cada passada. Dedilhado: 3 nas pretas, 1 nas brancas; nas duas brancas vizinhas (Mi–Fá e Si–Dó), a segunda leva o 2.',
+  gen: (rng) => {
+    const start = pick(rng, CHROMATIC_STARTS);
+    return lineTask(scaleUpDown(start.midi, CHROMATIC, 1), 0.5, { bpm: from, hands: 'direita', caption: `Começando em ${start.name}` });
   },
   from,
   target,
@@ -223,11 +231,47 @@ const albertiItem = (from: number, target: number): TechItem => ({
   evenness: 35,
 });
 
+/** Progressões para o baixo de Alberti, em posição fechada na região da mão esquerda. */
+export const ALBERTI_PROGRESSIONS: { name: string; fifths: number; chords: Midi[][] }[] = [
+  { name: 'Dó maior: I–IV–V–I', fifths: 0, chords: [[48, 52, 55], [48, 53, 57], [47, 50, 55], [48, 52, 55]] },
+  { name: 'Dó maior: I–vi–IV–V', fifths: 0, chords: [[48, 52, 55], [45, 48, 52], [45, 48, 53], [47, 50, 55]] },
+  { name: 'Dó maior: I–V–vi–IV', fifths: 0, chords: [[48, 52, 55], [47, 50, 55], [45, 48, 52], [45, 48, 53]] },
+  { name: 'Sol maior: I–IV–V–I', fifths: 1, chords: [[43, 47, 50], [43, 48, 52], [42, 45, 50], [43, 47, 50]] },
+  { name: 'Fá maior: I–IV–V–I', fifths: -1, chords: [[41, 45, 48], [41, 46, 50], [40, 43, 48], [41, 45, 48]] },
+];
+
+function albertiTask(rng: Rng, bpm: number): TimedTask {
+  const p = pick(rng, ALBERTI_PROGRESSIONS);
+  const t = lineTask(alberti(p.chords), 0.5, { bpm, hands: 'direita', fifths: p.fifths, caption: p.name });
+  return { ...t, clef: 'bass' };
+}
+
+const albertiItem = (from: number, target: number): TechItem => ({
+  id: 'alberti-me',
+  title: 'Baixo de Alberti, mão esquerda',
+  how: 'Alberti (1-5-3-5) em colcheias, numa progressão sorteada a cada passada. Leve e igual: é acompanhamento.',
+  gen: (rng) => albertiTask(rng, from),
+  from,
+  target,
+  step: 4,
+  evenness: 35,
+});
+
+/** Toques iguais: as cinco notas da posição de Dó, cada uma quatro vezes, numa ordem sorteada. */
+export function touchesLine(rng: Rng): Midi[] {
+  const five = [60, 62, 64, 65, 67];
+  for (let i = five.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [five[i], five[j]] = [five[j], five[i]];
+  }
+  return [...five.flatMap((m) => [m, m, m, m]), 60];
+}
+
 const touchesItem: TechItem = {
   id: 'toques-md',
   title: 'Toques iguais, mão direita',
-  how: 'Cada nota da posição de Dó quatro vezes, com o mesmo volume e o mesmo espaço entre elas.',
-  gen: () => lineTask([60, 60, 60, 60, 62, 62, 62, 62, 64, 64, 64, 64, 65, 65, 65, 65, 67, 67, 67, 67, 60], 1, { bpm: 60, hands: 'direita' }),
+  how: 'Cada nota da posição de Dó quatro vezes, numa ordem sorteada a cada passada, com o mesmo volume e o mesmo espaço entre elas.',
+  gen: (rng) => lineTask(touchesLine(rng), 1, { bpm: 60, hands: 'direita' }),
   from: 60,
   target: 100,
   step: 4,
@@ -236,8 +280,38 @@ const touchesItem: TechItem = {
 // ---------- aquecimento, leitura e ouvido ----------
 
 const warm = (title: string, gen: (rng: Rng) => TimedTask): Exercise => ({
-  kind: 'timed', title, how: 'Devagar e solto. É para acordar as mãos, não para medir velocidade.', gen, reps: 1, window: 120, pass: { accuracy: 0.7 },
+  kind: 'timed', title, how: 'Devagar e solto. É para acordar as mãos, não para medir velocidade. Muda a cada dia.', gen, reps: 1, window: 120, pass: { accuracy: 0.7 },
 });
+
+/** Tônica na região certa para a mão (a esquerda é escrita uma oitava acima e o lineTask desce). */
+const near = (k: Key, low: Midi) => {
+  let t = k.tonic;
+  while (t < low) t += 12;
+  while (t >= low + 12) t -= 12;
+  return t;
+};
+
+/** Aquecimento de pentacorde: tonalidade e desenho sorteados. */
+const pentaWarm = (keys: Key[], hands: Hands, dur: number, bpm: number) => (rng: Rng): TimedTask => {
+  const k = pick(rng, keys);
+  const pattern = pick(rng, PENTA_PATTERNS);
+  const tonic = hands === 'duas' ? near(k, 60) : near(k, hands === 'esquerda' ? 55 : 60);
+  return lineTask(pentaPattern(tonic, k.name.includes('menor') ? HARMONIC_MINOR : MAJOR, pattern.degrees), dur, { bpm, hands, fifths: k.fifths, caption: `${k.name} · ${pattern.name}` });
+};
+
+/** Aquecimento de escala: tonalidade sorteada. */
+const scaleWarm = (keys: Key[], hands: Hands, dur: number, bpm: number, octaves = 1, low = 60) => (rng: Rng): TimedTask => {
+  const k = pick(rng, keys);
+  const tonic = near(k, hands === 'duas' ? low : hands === 'esquerda' ? 55 : low);
+  return lineTask(scaleUpDown(tonic, k.name.includes('menor') ? HARMONIC_MINOR : MAJOR, octaves), dur, { bpm, hands, fifths: k.fifths, caption: k.name });
+};
+
+/** Aquecimento de arpejo: tonalidade sorteada. */
+const arpWarm = (keys: Key[], dur: number, bpm: number, octaves = 1, chord?: number[]) => (rng: Rng): TimedTask => {
+  const k = pick(rng, keys);
+  const steps = chord ?? (k.name.includes('menor') ? [0, 3, 7] : [0, 4, 7]);
+  return lineTask(arpeggio(near(k, 55), steps, octaves), dur, { bpm, hands: 'direita', fifths: k.fifths, caption: k.name });
+};
 
 const readingEx = (gen: (rng: Rng) => TimedTask, how: string): Exercise => ({
   kind: 'timed', title: 'Leitura à primeira vista', how, gen, reps: 1, window: 100, pass: { accuracy: 0.85 },
@@ -255,7 +329,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 1,
     goal: 'Pentacordes da posição de Dó em semínimas, legato, de 60 rumo a 100 BPM.',
-    warmup: [warm('Pentacorde, mão direita', () => lineTask(pentachord(60), 1, { bpm: 60, hands: 'direita' })), warm('Pentacorde, mão esquerda', () => lineTask(pentachord(60), 1, { bpm: 60, hands: 'esquerda' }))],
+    warmup: [warm('Pentacorde, mão direita', pentaWarm([C], 'direita', 1, 60)), warm('Pentacorde, mão esquerda', pentaWarm([C], 'esquerda', 1, 60))],
     technique: [pentaItem('penta-do-md', [C], 'direita', 1, 60, 100, 'legato'), pentaItem('penta-do-me', [{ ...C, tonic: 48 }], 'esquerda', 1, 60, 100, 'legato'), touchesItem],
     reading: readingEx((rng) => sightReadingTask(rng, { tonic: 60, bars: 4, bpm: 60 }), '4 compassos novos na posição de Dó, clave de sol. Não pare: errou, siga no tempo.'),
     ear: earEx(degreeByEar({ tonic: 60, degrees: [1, 3, 5] }), 'Depois da cadência, toque a nota: 1, 3 ou 5.'),
@@ -263,7 +337,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 2,
     goal: 'Pentacordes em Dó, Sol, Ré e Lá menor, mãos separadas, rumo a 100 BPM.',
-    warmup: [warm('Pentacorde em Sol', () => lineTask(pentachord(67), 1, { bpm: 60, hands: 'direita', fifths: 1 })), warm('Pentacorde, mãos juntas', () => lineTask(pentachord(60), 1, { bpm: 56, hands: 'duas' }))],
+    warmup: [warm('Pentacorde, mão direita', pentaWarm([C, G, D, A_MIN], 'direita', 1, 60)), warm('Pentacorde, mãos juntas', pentaWarm([C, G], 'duas', 1, 56))],
     technique: [pentaItem('penta-tons-md', [C, { ...G, tonic: 67 }, D, { ...A_MIN, tonic: 69 }], 'direita', 1, 60, 100), pentaItem('penta-tons-me', [{ ...C, tonic: 48 }, G, { ...D, tonic: 50 }, A_MIN], 'esquerda', 1, 60, 100)],
     reading: readingEx((rng) => (rng() < 0.5 ? sightReadingTask(rng, { tonic: 60, bars: 4, bpm: 60 }) : sightReadingTask(rng, { tonic: 48, bars: 4, bpm: 60, clef: 'bass' })), '4 compassos novos, ora na clave de sol, ora na de fá.'),
     ear: earEx(intervalByEar({ sizes: [2, 3, 4, 5], from: [60, 62, 64, 65, 67] }), 'O app toca um intervalo; toque as duas notas.'),
@@ -271,19 +345,19 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 3,
     goal: 'Pentacordes em colcheias a 60 BPM e tríades quebradas em tercinas a 50 BPM.',
-    warmup: [warm('Pentacorde em colcheias', () => lineTask(pentachord(60), 0.5, { bpm: 52, hands: 'direita' })), warm('Pentacorde, mãos juntas', () => lineTask(pentachord(60), 1, { bpm: 60, hands: 'duas' }))],
+    warmup: [warm('Pentacorde em colcheias', pentaWarm([C, G, F], 'direita', 0.5, 52)), warm('Pentacorde, mãos juntas', pentaWarm([C, G, F], 'duas', 1, 60))],
     technique: [pentaItem('penta-colcheias', [C, { ...G, tonic: 67 }, { ...F, tonic: 65 }], 'direita', 0.5, 44, 60), arpItem('triade-quebrada', [C, { ...F, tonic: 65 }, { ...G, tonic: 67 }], 'direita', 40, 50)],
     reading: readingEx((rng) => sightReadingTwoHands(rng, { tonic: 60, bars: 4, bpm: 60 }), '4 compassos com as duas mãos: melodia na direita, tônica ou dominante na esquerda.'),
     ear: earEx(progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'I', 'I'], ['I', 'IV', 'I', 'V7']], answer: 'bass' }), 'O app toca 4 acordes; toque o baixo de cada um.'),
   },
   {
     unit: 4,
-    goal: 'Escalas maiores de 1 oitava, mãos separadas, em colcheias a 60 BPM; Dó em movimento contrário.',
-    warmup: [warm('Escala de Dó, mão direita', () => lineTask(scaleUpDown(60, MAJOR, 1), 1, { bpm: 60, hands: 'direita' })), warm('Escala de Dó, mão esquerda', () => lineTask(scaleUpDown(60, MAJOR, 1), 1, { bpm: 60, hands: 'esquerda' }))],
+    goal: 'Escalas maiores de 1 oitava, mãos separadas, em colcheias a 60 BPM; movimento contrário em Dó, Sol ou Fá.',
+    warmup: [warm('Escala, mão direita', scaleWarm([C, G, F], 'direita', 1, 60)), warm('Escala, mão esquerda', scaleWarm([C, G, F], 'esquerda', 1, 60))],
     technique: [
       scaleItem('escala-1-md', [C, { ...G, tonic: 67 }, { ...F, tonic: 65 }, D, { ...BB, tonic: 70 }], { octaves: 1, dur: 0.5, hands: 'direita', from: 44, target: 60, evenness: 40 }),
       scaleItem('escala-1-me', [{ ...C, tonic: 60 }, { ...G, tonic: 55 }, { ...F, tonic: 53 }, { ...D, tonic: 62 }, BB], { octaves: 1, dur: 0.5, hands: 'esquerda', from: 44, target: 60, evenness: 40 }),
-      scaleItem('escala-contraria', [C], { octaves: 1, dur: 0.5, hands: 'contrario', from: 44, target: 60, evenness: 40 }),
+      scaleItem('escala-contraria', [C, G, F], { octaves: 1, dur: 0.5, hands: 'contrario', from: 44, target: 60, evenness: 40 }),
     ],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -294,7 +368,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 5,
     goal: 'Escalas menores harmônicas, 2 oitavas, mãos separadas, rumo a 69 BPM em colcheias.',
-    warmup: [warm('Lá menor harmônica, 1 oitava', () => lineTask(scaleUpDown(57, HARMONIC_MINOR, 1), 1, { bpm: 60, hands: 'direita' })), warm('Escala de Sol, mãos juntas', () => lineTask(scaleUpDown(67, MAJOR, 1), 1, { bpm: 56, hands: 'duas', fifths: 1 }))],
+    warmup: [warm('Escala menor harmônica, 1 oitava', scaleWarm([A_MIN, E_MIN, D_MIN], 'direita', 1, 60)), warm('Escala maior, mãos juntas', scaleWarm([G, C, F], 'duas', 1, 56))],
     technique: [
       scaleItem('menor-2-md', [{ ...A_MIN, tonic: 57 }, { ...E_MIN, tonic: 52 }, { ...D_MIN, tonic: 62 }], { octaves: 2, dur: 0.5, hands: 'direita', minor: true, from: 50, target: 69, evenness: 40 }),
       scaleItem('menor-2-me', [A_MIN, E_MIN, D_MIN], { octaves: 2, dur: 0.5, hands: 'esquerda', minor: true, from: 50, target: 69, evenness: 40 }),
@@ -308,7 +382,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 6,
     goal: 'Escalas de 2 oitavas mãos separadas a 80 BPM em colcheias e a escala cromática.',
-    warmup: [warm('Arpejo de Dó, 1 oitava', () => lineTask(arpeggio(60, [0, 4, 7], 1), 1, { bpm: 60, hands: 'direita' })), warm('Escala de Dó, mãos juntas', () => lineTask(scaleUpDown(72, MAJOR, 1), 1, { bpm: 60, hands: 'duas' }))],
+    warmup: [warm('Arpejo, 1 oitava', arpWarm([C, G, F], 1, 60)), warm('Escala, mãos juntas', scaleWarm([C, G, F], 'duas', 1, 60))],
     technique: [
       scaleItem('escala-2-md', [C, { ...G, tonic: 55 }, { ...F, tonic: 53 }, D, BB], { octaves: 2, dur: 0.5, hands: 'direita', from: 56, target: 80, evenness: 35 }),
       scaleItem('escala-2-me', [{ ...C, tonic: 48 }, { ...G, tonic: 43 }, { ...F, tonic: 41 }, { ...D, tonic: 50 }, { ...BB, tonic: 46 }].map((k) => ({ ...k, tonic: k.tonic + 12 })), { octaves: 2, dur: 0.5, hands: 'esquerda', from: 56, target: 80, evenness: 35 }),
@@ -323,7 +397,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 7,
     goal: 'Escalas de 2 oitavas com as mãos juntas, rumo a 80 BPM em colcheias.',
-    warmup: [warm('Escala de Dó, mãos juntas', () => lineTask(scaleUpDown(72, MAJOR, 1), 0.5, { bpm: 56, hands: 'duas' })), warm('Cromática, mão direita', () => lineTask(scaleUpDown(60, CHROMATIC, 1), 0.5, { bpm: 50, hands: 'direita' }))],
+    warmup: [warm('Escala, mãos juntas', scaleWarm([C, G, F], 'duas', 0.5, 56)), warm('Cromática, mão direita', (rng) => { const st = pick(rng, CHROMATIC_STARTS); return lineTask(scaleUpDown(st.midi, CHROMATIC, 1), 0.5, { bpm: 50, hands: 'direita', caption: `Começando em ${st.name}` }); })],
     technique: [scaleItem('escala-2-mj', [C, G, F, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', minor: false, from: 56, target: 80, evenness: 35 })],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -334,7 +408,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 8,
     goal: 'Arpejos de 2 oitavas, mãos separadas, rumo a 72 BPM em tercinas.',
-    warmup: [warm('Escala de Sol, mãos juntas', () => lineTask(scaleUpDown(67, MAJOR, 1), 0.5, { bpm: 60, hands: 'duas', fifths: 1 })), warm('Arpejo de Dó, 1 oitava', () => lineTask(arpeggio(60, [0, 4, 7], 1), 1, { bpm: 66, hands: 'direita' }))],
+    warmup: [warm('Escala, mãos juntas', scaleWarm([G, D, C], 'duas', 0.5, 60)), warm('Arpejo, 1 oitava', arpWarm([C, F, G, A_MIN], 1, 66))],
     technique: [arpItem('arpejo-md', [C, { ...G, tonic: 55 }, { ...F, tonic: 53 }, A_MIN], 'direita', 50, 72), arpItem('arpejo-me', [C, G, F, A_MIN], 'esquerda', 50, 72), scaleItem('escala-2-mj-b', [C, G, F, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', from: 64, target: 84, evenness: 35 })],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -345,7 +419,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 9,
     goal: 'Escalas de 2 oitavas mãos juntas a 92–104 BPM e baixo de Alberti.',
-    warmup: [warm('Arpejo de Dó, 2 oitavas', () => lineTask(arpeggio(60, [0, 4, 7], 2), 1 / 3, { bpm: 50, hands: 'direita' })), warm('Escala de Ré, mãos juntas', () => lineTask(scaleUpDown(62, MAJOR, 1), 0.5, { bpm: 66, hands: 'duas', fifths: 2 }))],
+    warmup: [warm('Arpejo, 2 oitavas', arpWarm([C, G, F], 1 / 3, 50, 2)), warm('Escala, mãos juntas', scaleWarm([D, G, C], 'duas', 0.5, 66))],
     technique: [scaleItem('escala-2-mj-c', [C, G, D, F, BB].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', from: 72, target: 104, evenness: 30 }), albertiItem(60, 100)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -356,7 +430,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 10,
     goal: 'Arpejos de tônica, V7 e diminuta, mãos separadas, rumo a 92 BPM.',
-    warmup: [warm('Escala de Dó, 2 oitavas, mãos juntas', () => lineTask(scaleUpDown(60, MAJOR, 2), 0.5, { bpm: 72, hands: 'duas' })), warm('Alberti', () => ({ ...lineTask(alberti([[48, 52, 55], [47, 50, 55]]), 0.5, { bpm: 72, hands: 'direita' }), clef: 'bass' as Clef }))],
+    warmup: [warm('Escala, 2 oitavas, mãos juntas', scaleWarm([C, G, F], 'duas', 0.5, 72, 2, 55)), warm('Alberti', (rng) => albertiTask(rng, 72))],
     technique: [arpItem('arpejo-v7', [{ ...G, tonic: 55 }, { ...C, tonic: 48 }, { ...F, tonic: 53 }], 'direita', 60, 92, { name: 'dominante com sétima', steps: [0, 4, 7, 10] }), arpItem('arpejo-dim7', [{ ...C, tonic: 59 }, { ...C, tonic: 61 }, { ...C, tonic: 62 }], 'direita', 60, 92, { name: 'diminuta com sétima', steps: [0, 3, 6, 9] }), arpItem('arpejo-mj', [C, G, F], 'duas', 50, 72)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -367,7 +441,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 11,
     goal: 'Escalas de 2 oitavas mãos juntas em semicolcheias, rumo a 60 BPM.',
-    warmup: [warm('Arpejo de V7 em Dó', () => lineTask(arpeggio(55, [0, 4, 7, 10], 1), 0.5, { bpm: 66, hands: 'direita' })), warm('Escala de Sol, mãos juntas', () => lineTask(scaleUpDown(67, MAJOR, 2), 0.5, { bpm: 80, hands: 'duas', fifths: 1 }))],
+    warmup: [warm('Arpejo de dominante com sétima', arpWarm([{ name: 'Sol com sétima', tonic: 55, fifths: 0 }, { name: 'Ré com sétima', tonic: 62, fifths: 1 }, { name: 'Dó com sétima', tonic: 60, fifths: -1 }], 0.5, 66, 1, [0, 4, 7, 10])), warm('Escala, 2 oitavas, mãos juntas', scaleWarm([G, C, D], 'duas', 0.5, 80, 2, 55))],
     technique: [scaleItem('escala-semicolcheias', [C, G, D, F, BB].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.25, hands: 'duas', from: 44, target: 60, evenness: 25 }), arpItem('arpejo-mj-b', [C, G, F, A_MIN], 'duas', 56, 80)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -378,7 +452,7 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 12,
     goal: 'Escalas em semicolcheias mãos juntas rumo a 76 BPM e arpejos com as duas mãos.',
-    warmup: [warm('Escala de Ré, 2 oitavas, mãos juntas', () => lineTask(scaleUpDown(62, MAJOR, 2), 0.5, { bpm: 88, hands: 'duas', fifths: 2 })), warm('Arpejo diminuto', () => lineTask(arpeggio(59, [0, 3, 6, 9], 1), 0.5, { bpm: 72, hands: 'direita' }))],
+    warmup: [warm('Escala, 2 oitavas, mãos juntas', scaleWarm([D, G, F, BB], 'duas', 0.5, 88, 2, 55)), warm('Arpejo diminuto', arpWarm([{ name: 'Si diminuto', tonic: 59, fifths: 0 }, { name: 'Dó♯ diminuto', tonic: 61, fifths: 2 }, { name: 'Ré diminuto', tonic: 62, fifths: -1 }], 0.5, 72, 1, [0, 3, 6, 9]))],
     technique: [scaleItem('escala-semicolcheias-b', [C, G, D, F, BB, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.25, hands: 'duas', from: 56, target: 76, evenness: 22 }), arpItem('arpejo-mj-c', [C, G, D, F, A_MIN], 'duas', 64, 88)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);

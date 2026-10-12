@@ -117,6 +117,30 @@ export function nextLesson(units: Unit[], rows: Rows, runs: TrainingRun[]): Posi
   return null;
 }
 
+/** Onde você está no curso: numa lição, na música final de uma unidade (lições feitas, falta tocar), ou no fim. */
+export type CourseStep =
+  | { kind: 'lesson'; pos: Position }
+  | { kind: 'final'; unit: Unit; unitIndex: number }
+  | { kind: 'done' };
+
+export function courseStep(units: Unit[], rows: Rows, runs: TrainingRun[]): CourseStep {
+  for (let ui = 0; ui < units.length; ui++) {
+    const unit = units[ui];
+    const li = unit.lessons.findIndex((l) => !isPassed(rows.get(lessonKey(unit, l))));
+    if (li >= 0) return { kind: 'lesson', pos: { unit, unitIndex: ui, lesson: unit.lessons[li], lessonIndex: li } };
+    if (finalPassedAt(unit, runs) === null) return { kind: 'final', unit, unitIndex: ui };
+  }
+  return { kind: 'done' };
+}
+
+/** Unidade em que você está (para o Treino): a da lição atual ou a da música final que falta; no fim, a última. */
+export function currentUnitN(units: Unit[], rows: Rows, runs: TrainingRun[]): number {
+  const step = courseStep(units, rows, runs);
+  if (step.kind === 'lesson') return step.pos.unit.n;
+  if (step.kind === 'final') return step.unit.n;
+  return units[units.length - 1]?.n ?? 1;
+}
+
 /**
  * Aquecimento de revisão: itens de lições anteriores já concluídas, misturados.
  * Lições com mais erros na revisão e mais tempo desde a conclusão pesam mais.

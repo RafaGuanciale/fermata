@@ -480,7 +480,7 @@ const l55: Lesson = {
   minutes: 60,
   objectives: [
     'Consigo tocar Dó, Sol e Fá maior e Lá menor harmônica em 2 oitavas, mãos juntas em movimento paralelo.',
-    'Consigo 3 passadas limpas seguidas a 60 BPM em colcheias, com variação abaixo de 35 ms e as mãos juntas em ±40 ms.',
+    'Consigo 3 passadas limpas seguidas a 60 BPM em colcheias, com variação abaixo de 35 ms e as mãos juntas em ±50 ms.',
   ],
   blocks: [
     {
@@ -511,9 +511,9 @@ O desafio do paralelo é que **os polegares não passam ao mesmo tempo**. Subind
     { kind: 'exercise', id: 'l55-quiz', exercise: quiz('Dedilhados de 2 oitavas', 'Quatro perguntas, antes de tocar.', SCALE2_Q, 0.75) },
     { kind: 'exercise', id: 'l55-do-md', exercise: quickTimed('Dó maior, 2 oitavas, direita', 'Só a direita, colcheias, de 56 a 72 BPM. Variação até 35 ms.', () => melodyTask(twoOctaves(60, MAJ_ST), { bpm: 56 }), { ladder: { from: 56, to: 72, step: 4 }, evenness: 35 }) },
     { kind: 'exercise', id: 'l55-do-me', exercise: quickTimed('Dó maior, 2 oitavas, esquerda', 'Só a esquerda, de 50 a 66 BPM. Atenção ao 4 cruzando no Ré do meio. Variação até 35 ms.', () => melodyTask(twoOctaves(SCALES2.C.l, MAJ_ST), { bpm: 50, clef: 'bass' }), { ladder: { from: 50, to: 66, step: 4 }, evenness: 35 }) },
-    { kind: 'exercise', id: 'l55-do-mj', exercise: quickTimed('Dó maior, mãos juntas', 'Paralelo, de 50 a 66 BPM. Mãos juntas em ±40 ms, variação até 35 ms.', () => parallel('C', 50), { ladder: { from: 50, to: 66, step: 4 }, window: 40, evenness: 35 }) },
+    { kind: 'exercise', id: 'l55-do-mj', exercise: quickTimed('Dó maior, mãos juntas', 'Paralelo, de 50 a 66 BPM. Mãos juntas em ±50 ms, variação até 35 ms.', () => parallel('C', 50), { ladder: { from: 50, to: 66, step: 4 }, window: 50, evenness: 35 }) },
     { kind: 'exercise', id: 'l55-separadas', exercise: quickTimed('Sol, Fá ou Lá menor, só a direita', 'Tom sorteado, de 50 a 60 BPM. Toque também a esquerda sozinha antes do próximo exercício.', (rng) => { const k = pick(rng, ['G', 'F', 'Am']); const sc = SCALES2[k]; return melodyTask(twoOctaves(sc.r, sc.st), { bpm: 50, fifths: sc.fifths }); }, { ladder: { from: 50, to: 60, step: 5 }, evenness: 35 }) },
-    { kind: 'exercise', id: 'l55-sorteada', exercise: quickTimed('Sol, Fá ou Lá menor, mãos juntas', 'Tom sorteado, de 50 a 60 BPM.', (rng) => parallel(pick(rng, ['G', 'F', 'Am']), 50), { ladder: { from: 50, to: 60, step: 5 }, window: 40, evenness: 35 }) },
+    { kind: 'exercise', id: 'l55-sorteada', exercise: quickTimed('Sol, Fá ou Lá menor, mãos juntas', 'Tom sorteado, de 50 a 60 BPM.', (rng) => parallel(pick(rng, ['G', 'F', 'Am']), 50), { ladder: { from: 50, to: 60, step: 5 }, window: 50, evenness: 35 }) },
     {
       kind: 'text',
       title: 'O trilho técnico daqui em diante',
@@ -526,7 +526,7 @@ Lembre-se do limite de saúde: se o polegar ou o antebraço doer, o andamento n�
   ],
   review: [choice(SCALE2_Q, 'escalas-2-oitavas'), cadencePlay],
   checkpoint: [
-    quickTimed('3 passadas a 60 BPM', 'Dó maior, mãos juntas, paralelo, sem dicas. 3 passadas limpas seguidas, ±40 ms, variação até 35 ms.', () => parallel('C', 60), { reps: 3, window: 40, evenness: 35 }),
+    quickTimed('3 passadas a 60 BPM', 'Dó maior, mãos juntas, paralelo, sem dicas. 3 passadas limpas seguidas, ±50 ms, variação até 35 ms.', () => parallel('C', 60), { reps: 3, window: 50, evenness: 35 }),
   ],
   exit: [choice(SCALE2_Q, 'escalas-2-oitavas')],
 };
@@ -695,7 +695,7 @@ Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7
       labels: 'off',
       pass: { accuracy: 0.85 },
     },
-    quickTimed('Escala em 2 oitavas', 'Sol, Fá ou Lá menor, mãos juntas, a 60 BPM. ±40 ms, variação até 35 ms.', (rng) => parallel(pick(rng, ['G', 'F', 'Am']), 60), { window: 40, evenness: 35 }),
+    quickTimed('Escala em 2 oitavas', 'Sol, Fá ou Lá menor, mãos juntas, a 60 BPM. ±50 ms, variação até 35 ms.', (rng) => parallel(pick(rng, ['G', 'F', 'Am']), 60), { window: 50, evenness: 35 }),
   ],
   project: {
     title: 'Minha primeira canção',

@@ -96,3 +96,42 @@ describe('registro da mão esquerda no treino', () => {
     }
   });
 });
+
+describe('variação do treino', () => {
+  const variety = (gen: (rng: () => number) => TimedTask, n = 40) => {
+    const rng = seeded(7);
+    return new Set(Array.from({ length: n }, () => JSON.stringify(gen(rng).display.map((d) => d.midi)))).size;
+  };
+
+  it('desenhos do pentacorde não repetem a tecla em seguida e terminam na tônica ou na 5ª', async () => {
+    const { PENTA_PATTERNS, pentaPattern } = await import('./track');
+    for (const p of PENTA_PATTERNS) {
+      const line = pentaPattern(60, MAJOR, p.degrees);
+      for (let i = 1; i < line.length; i++) expect(line[i], p.name).not.toBe(line[i - 1]);
+      expect([60, 67]).toContain(line[line.length - 1]);
+    }
+  });
+
+  it('todo aquecimento e toda técnica mudam de uma vez para outra', () => {
+    for (const t of ALL_TRACKS) {
+      for (const w of t.warmup) if (w.kind === 'timed') expect(variety(w.gen), `u${t.unit} aquecimento ${w.title}`).toBeGreaterThan(1);
+      for (const it of t.technique) expect(variety(it.gen), `u${t.unit} técnica ${it.title}`).toBeGreaterThan(1);
+    }
+  });
+
+  it('toques iguais: as cinco notas, quatro vezes cada, em ordem sorteada', async () => {
+    const { touchesLine } = await import('./track');
+    const rng = seeded(3);
+    const a = touchesLine(rng);
+    expect(a.length).toBe(21);
+    for (const m of [60, 62, 64, 65, 67]) expect(a.filter((x) => x === m).length).toBe(m === 60 ? 5 : 4);
+  });
+
+  it('Alberti: tríades na região da mão esquerda', async () => {
+    const { ALBERTI_PROGRESSIONS } = await import('./track');
+    for (const p of ALBERTI_PROGRESSIONS) for (const c of p.chords) {
+      expect(c.length).toBe(3);
+      expect(Math.min(...c) >= 40 && Math.max(...c) <= 57, p.name).toBe(true);
+    }
+  });
+});

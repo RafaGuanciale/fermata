@@ -9,9 +9,9 @@ import { getLatency } from '../training/clickTrack';
 import { saveRun, useRuns } from '../training/runs';
 import { dayIndex, dayKey } from '../training/progress';
 import { PLAN, UNITS } from '../course';
-import { afterReview, nextLesson, unitUnlocked, warmupItems } from '../course/progress';
+import { afterReview, courseStep, currentUnitN, nextLesson, unitUnlocked, warmupItems, type Position } from '../course/progress';
 import {
-  DAY_PARTS, DAY_PART_LABEL, bestTechBpm, dayRunId, partsDone, techRunId, techStartBpm, techStatus, techniqueForDay, trackFor, trainingUnit,
+  DAY_PARTS, DAY_PART_LABEL, bestTechBpm, dayRunId, partsDone, techRunId, techStartBpm, techStatus, techniqueForDay, trackFor,
   type DayPart, type TechItem,
 } from '../course/track';
 import type { Exercise } from '../course/types';
@@ -35,17 +35,25 @@ export default function PracticeHubPage() {
   const today = dayKey(now);
 
   const next = rows && runs ? nextLesson(UNITS, rows, runs) : null;
-  const anyPassed = !!rows && [...rows.values()].some((r) => r.passedAt);
-  const courseUnit = trainingUnit(next, UNITS[UNITS.length - 1]?.n ?? 1, anyPassed);
+  const courseUnit = rows && runs ? currentUnitN(UNITS, rows, runs) : 1;
   const unitN = chosenUnit ?? courseUnit;
   const track = trackFor(unitN);
 
+  // Revisão: lições antes da atual. Com as lições da unidade feitas (falta a música final) ou o curso no fim, todas contam.
+  const reviewPos: Position | null = useMemo(() => {
+    if (!rows || !runs) return null;
+    if (next) return next;
+    const step = courseStep(UNITS, rows, runs);
+    const ui = step.kind === 'final' ? step.unitIndex : UNITS.length - 1;
+    const unit = UNITS[ui];
+    return unit ? { unit, unitIndex: ui, lesson: unit.lessons[unit.lessons.length - 1], lessonIndex: unit.lessons.length } : null;
+  }, [rows, runs, next]);
   const review = useMemo(() => {
-    if (!rows || !next) return [];
-    return warmupItems(UNITS, rows, next, Math.random, Date.now());
+    if (!rows || !reviewPos) return [];
+    return warmupItems(UNITS, rows, reviewPos, Math.random, Date.now());
     // Sorteia de novo só quando pedir outra rodada.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows === undefined, next?.lesson.id, round]);
+  }, [rows === undefined, reviewPos?.lesson.id, reviewPos?.lessonIndex, round]);
 
   if (!runs || !rows) return null;
 
@@ -246,7 +254,8 @@ function Single({ exercise, onDone }: { exercise: Exercise; onDone: (accuracy: n
 /** Um item de técnica: escada que começa onde você parou e guarda cada passada. */
 function TechCard({ item, startBpm, best }: { item: TechItem; startBpm: number; best: number | null }) {
   const [from] = useState(startBpm);
-  const ex: Exercise = {
+  // Mesmo objeto entre renderizações: a passada em andamento não reinicia o relógio quando a página atualiza.
+  const ex: Exercise = useMemo(() => ({
     kind: 'timed',
     title: item.title,
     how: item.how,
@@ -257,7 +266,7 @@ function TechCard({ item, startBpm, best }: { item: TechItem; startBpm: number; 
     evenness: item.evenness,
     articulation: item.articulation,
     ladder: { from, to: item.target, step: item.step },
-  };
+  }), [item, from]);
   return (
     <div className="exerciseCard">
       <div className="exerciseCard__head">
