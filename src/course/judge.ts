@@ -594,3 +594,17 @@ export function takeHeadline(c: TakeChecks, pct: (x: number) => string): string 
   if (!miss.length) return `${pct(c.accuracy)} no tempo: passada boa`;
   return `${pct(c.accuracy)} no tempo, mas faltou ${miss.join(' e ')}`;
 }
+
+/**
+ * O que mudou depois da passada, para o aviso que fica na tela até a próxima: o andamento subiu ou desceu,
+ * ou falta quanto para concluir. Null quando nada muda (o próprio resultado da passada já diz tudo).
+ */
+export function takeAftermath(o: { ok: boolean; bpm: number; nextBpm: number; streak: number; reps: number; newTask: boolean }): string | null {
+  if (o.nextBpm > o.bpm) return `Subiu para ${o.nextBpm} BPM.`;
+  if (o.nextBpm < o.bpm) return `Voltou para ${o.nextBpm} BPM: firme o tempo antes de subir de novo.`;
+  if (o.ok && o.streak < o.reps) {
+    const left = o.reps - o.streak;
+    return `Falta${left > 1 ? 'm' : ''} ${left} para concluir${o.newTask ? ', com um desenho novo' : ''}.`;
+  }
+  return null;
+}

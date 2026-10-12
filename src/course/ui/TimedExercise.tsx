@@ -12,10 +12,11 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
 import { swingBeat } from '../tasks';
-import { articulationScore, balanceScore, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
+import { articulationScore, balanceScore, takeAftermath, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
-import { Combo, PassReward } from '../../celebrate/Celebrate';
+import { Burst, Combo, PassReward } from '../../celebrate/Celebrate';
+import { playReward } from '../../celebrate/sound';
 import { starsFor } from '../../celebrate/rewards';
 
 type TimedEx = Extract<Exercise, { kind: 'timed' }>;
@@ -52,6 +53,8 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
   const [streak, setStreak] = useState(0);
   const [best, setBest] = useState(0);
   const [finished, setFinished] = useState(false);
+  // Resultado da última passada quando o exercício reinicia (BPM novo ou desenho novo): fica até a próxima.
+  const [last, setLast] = useState<{ ok: boolean; headline: string; note: string } | null>(null);
   const target = ex.ladder?.to ?? task.bpm;
   const finishRef = useRef(onFinish);
   finishRef.current = onFinish;
@@ -59,25 +62,34 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
   const onTake = (s: TakeScore) => {
     onEachTake?.({ bpm, accuracy: s.r.accuracy, ok: s.ok });
     setBest((b) => Math.max(b, s.r.accuracy));
+    const headline = takeHeadline(s.checks, pct);
+    let nextBpm = bpm;
+    let n = 0;
+    let newTask = false;
     if (!s.ok) {
       setStreak(0);
-      if (ex.ladder) setBpm((b) => Math.max(ex.ladder!.from, b - ex.ladder!.step));
-      return;
-    }
-    if (ex.ladder && bpm < target) {
-      setBpm(Math.min(target, bpm + ex.ladder.step));
+      if (ex.ladder) nextBpm = Math.max(ex.ladder.from, bpm - ex.ladder.step);
+    } else if (ex.ladder && bpm < target) {
+      nextBpm = Math.min(target, bpm + ex.ladder.step);
       setStreak(0);
-      return;
-    }
-    const n = streak + 1;
-    setStreak(n);
-    if (n >= ex.reps && !finished) {
-      setFinished(true);
-      finishRef.current({ accuracy: Math.max(best, s.r.accuracy), passed: true });
     } else {
-      // Instância nova a cada passada boa, para não decorar.
-      setTask(ex.gen(rng));
+      n = streak + 1;
+      setStreak(n);
+      if (n >= ex.reps && !finished) {
+        setFinished(true);
+        finishRef.current({ accuracy: Math.max(best, s.r.accuracy), passed: true });
+      } else {
+        // Instância nova a cada passada boa, para não decorar.
+        newTask = true;
+      }
     }
+    const note = takeAftermath({ ok: s.ok, bpm, nextBpm, streak: n, reps: ex.reps, newTask });
+    if (note && (nextBpm !== bpm || newTask)) {
+      setLast({ ok: s.ok, headline, note });
+      if (s.ok) playReward('pass');
+    }
+    if (nextBpm !== bpm) setBpm(nextBpm);
+    if (newTask) setTask(ex.gen(rng));
   };
 
   return (
@@ -98,12 +110,18 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
           <p className="passReward__text">Concluído: {pct(best)} no tempo na melhor passada.</p>
         </PassReward>
       )}
-      <TimedTake task={task} bpm={bpm} ex={ex} hints={hints} onTake={onTake} />
+      {last && !finished && (
+        <div className="timed__last">
+          {last.ok && <Burst />}
+          <Verdict tone={last.ok ? 'hit' : 'miss'} detail={last.note}>{last.headline}</Verdict>
+        </div>
+      )}
+      <TimedTake task={task} bpm={bpm} ex={ex} hints={hints} onTake={onTake} onStart={() => setLast(null)} />
     </div>
   );
 }
 
-function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: number; ex: TimedEx; hints: boolean; onTake: (s: TakeScore) => void }) {
+function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask; bpm: number; ex: TimedEx; hints: boolean; onTake: (s: TakeScore) => void; onStart: () => void }) {
   const metronome = useMetronome();
   const { held, subscribe, subscribePedal, press, release } = useNoteInput();
   const [staffRef, staffWidth] = useElementWidth<HTMLDivElement>();
@@ -139,11 +157,12 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     const track = scheduleTrack({ bpm, countIn: task.beatsPerBar, beats, beatsPerBar: task.beatsPerBar });
     if (!track) return;
     trackRef.current = track;
+    onStart();
     eventsRef.current = [];
     pedalRef.current = [];
     setScore(null);
     setPhase('countin');
-  }, [bpm, task, beats, metronome]);
+  }, [bpm, task, beats, metronome, onStart]);
 
   const finish = useCallback(() => {
     const events = eventsRef.current;

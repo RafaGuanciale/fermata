@@ -757,3 +757,9 @@ a.chip {
 @media (prefers-reduced-motion: reduce) {
   .calib__pulse { animation: none; }
 }
+
+/* Resultado da passada anterior quando o exercício reinicia (BPM novo ou desenho novo). */
+.timed__last {
+  position: relative;
+  margin-bottom: var(--space-3);
+}

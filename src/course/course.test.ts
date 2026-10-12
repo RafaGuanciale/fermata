@@ -13,7 +13,7 @@ import { optimalMove, voiceMove } from './judge';
 import { buildMinorScale, chordQualityByEar, minorChord, minorDegreeSymbol, minorSteps, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellInterval, spellIntervalChoice, spellScale } from './gens';
 import { buildScale, degreeByEar, degreeSymbol, keyFromSignature, scaleDegreeNote, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
 import {
-  articulationScore, calibrate, nextToPlay, releaseGap, takeHeadline, takePassed, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
+  articulationScore, calibrate, nextToPlay, releaseGap, takeAftermath, takeHeadline, takePassed, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
 } from './judge';
 import { n, parseLine, ptName, seeded } from './music';
 import { afterCheckpoint, canMaster, lessonKey, lessonState, nextLesson, rowsById, songPassed, unitComplete, warmupItems } from './progress';
@@ -410,6 +410,10 @@ describe('julgamento', () => {
     expect(takePassed(legatoMiss)).toBe(false);
     expect(takeHeadline(legatoMiss, pct)).toBe('99% no tempo, mas faltou o legato');
     expect(takeHeadline({ ...legatoMiss, accuracy: 0.5 }, pct)).toBe('50% no tempo (precisa de 85%)');
+    expect(takeAftermath({ ok: true, bpm: 60, nextBpm: 64, streak: 0, reps: 1, newTask: false })).toBe('Subiu para 64 BPM.');
+    expect(takeAftermath({ ok: false, bpm: 64, nextBpm: 60, streak: 0, reps: 1, newTask: false })).toMatch(/^Voltou para 60 BPM/);
+    expect(takeAftermath({ ok: true, bpm: 60, nextBpm: 60, streak: 1, reps: 3, newTask: true })).toBe('Faltam 2 para concluir, com um desenho novo.');
+    expect(takeAftermath({ ok: false, bpm: 60, nextBpm: 60, streak: 0, reps: 2, newTask: false })).toBeNull();
   });
 
   it('força: calibração, faixas e crescendo', () => {
