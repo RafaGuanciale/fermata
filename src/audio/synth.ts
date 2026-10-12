@@ -117,3 +117,67 @@ export function playNotes(notes: SynthNote[], volume = 0.6): () => void {
     master.disconnect();
   };
 }
+
+/**
+ * Uma nota ao vivo (o que você toca no piano, no teclado da tela ou do computador): começa agora e soa
+ * até a função devolvida ser chamada (a tecla solta, ou o pedal sobe). `velocity` de 0 a 1.
+ */
+export function startLiveNote(midi: number, velocity: number, volume = 0.8): () => void {
+  const ctx = audioContext();
+  if (!ctx) return () => undefined;
+  if (ctx.state !== 'running') void ctx.resume();
+  void loadPiano();
+  const v = Math.max(0.05, Math.min(1, velocity));
+  const at = ctx.currentTime + 0.003;
+  const gain = ctx.createGain();
+  gain.connect(ctx.destination);
+  const nodes: AudioScheduledSourceNode[] = [];
+  const sample = nearestSample(midi);
+  if (sample !== null) {
+    const src = ctx.createBufferSource();
+    src.buffer = buffers.get(sample)!;
+    src.playbackRate.value = Math.pow(2, (midi - sample) / 12);
+    const tone = ctx.createBiquadFilter();
+    tone.type = 'lowpass';
+    tone.frequency.value = 1800 + 9000 * v * v;
+    src.connect(tone).connect(gain);
+    gain.gain.setValueAtTime(volume * (0.2 + 0.8 * v), at);
+    src.start(at);
+    nodes.push(src);
+  } else {
+    const peak = v * 0.4 * volume;
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(peak, at + 0.008);
+    gain.gain.exponentialRampToValueAtTime(peak * 0.3, at + 0.6);
+    gain.gain.exponentialRampToValueAtTime(peak * 0.05, at + 4);
+    for (const [type, mult, level] of [['triangle', 1, 1], ['sine', 2, 0.25]] as const) {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq(midi) * mult;
+      g.gain.value = level;
+      osc.connect(g).connect(gain);
+      osc.start(at);
+      nodes.push(osc);
+    }
+  }
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    // O abafador desce: some em ~0,3 s (graves um pouco mais).
+    const t = ctx.currentTime;
+    const release = midi < 48 ? 0.45 : 0.28;
+    gain.gain.cancelScheduledValues(t);
+    gain.gain.setValueAtTime(Math.max(0.0001, gain.gain.value), t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + release);
+    for (const n of nodes) {
+      try {
+        n.stop(t + release + 0.05);
+      } catch {
+        // já parou
+      }
+    }
+    window.setTimeout(() => gain.disconnect(), (release + 0.2) * 1000);
+  };
+}

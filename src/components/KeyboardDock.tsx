@@ -8,7 +8,8 @@ import { detectTriad } from '../music/theory';
 import MetronomeButton from './MetronomeButton';
 import { useNoteInput } from '../input/useNoteInput';
 import { midiStatusLabel } from '../input/useNoteInput';
-import { ChevronIcon, PlugIcon } from './Icons';
+import { ChevronIcon, PlugIcon, SpeakerIcon } from './Icons';
+import { useLiveSound } from '../audio/LiveSound';
 
 const LOW = 21; // Lá0
 const HIGH = 108; // Dó8
@@ -117,6 +118,7 @@ function readHeight(): number {
 
 export default function KeyboardDock() {
   const { held, midi, connectMidi, press, release } = useNoteInput();
+  const sound = useLiveSound();
   const [open, setOpen] = useState(readOpen);
   const [height, setHeight] = useState(readHeight);
   const [dragging, setDragging] = useState(false);
@@ -256,6 +258,16 @@ export default function KeyboardDock() {
             <span className="dock__hint">Toque no piano, clique nas teclas ou use A S D F G H J K</span>
           )}
         </span>
+        <button
+          className={'dock__sound' + (sound.on ? ' dock__sound-on' : '')}
+          type="button"
+          aria-pressed={sound.on}
+          onClick={() => sound.setOn(!sound.on)}
+          title={sound.on ? 'O app toca o que você toca (bom para usar fone no computador). Clique para voltar ao som do piano.' : 'Som vindo do próprio piano. Clique para o app tocar o que você toca (fone no computador).'}
+        >
+          <SpeakerIcon className="dock__soundIcon" />
+          <span className="dock__soundLabel">{sound.on ? (sound.ready ? 'Som do app' : 'Clique para ativar o som') : 'Som do piano'}</span>
+        </button>
         <MetronomeButton placement="up" />
         <button className="dock__midi" type="button" onClick={connectMidi} title="Ligue o piano pelo cabo USB. Funciona no Chrome e no Edge.">
           {midi.kind === 'connected' ? <span className="dock__dot" aria-hidden /> : <PlugIcon className="dock__plug" />}

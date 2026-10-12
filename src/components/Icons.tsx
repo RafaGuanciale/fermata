@@ -262,3 +262,12 @@ export function FlameIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function SpeakerIcon({ className }: IconProps) {
+  return (
+    <svg {...base} strokeWidth={1.6} className={className}>
+      <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+      <path d="M15.5 9a4 4 0 010 6M18 6.5a7.5 7.5 0 010 11" />
+    </svg>
+  );
+}

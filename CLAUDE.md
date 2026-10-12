@@ -23,6 +23,7 @@ App web pessoal de estudo de piano do Rafael. Marca endossada: "Fermata, um proj
 - Modo foco da lição: `src/pages/CourseFocusPage.tsx` (rota `/curso/foco/:n/:lessonId`, popup imersivo), passos montados por `src/course/focus.ts`; estado da lição compartilhado em `src/course/useLesson.ts` e partes em `src/course/ui/LessonParts.tsx`.
 - Recompensas: `src/celebrate/` (estrelas e sequência em `rewards.ts`, som de piano em `sound.ts` com liga/desliga, faíscas e estrelas em `Celebrate.tsx`). Elegante, sem ranking nem punição; respeita "reduzir movimento".
 - Curso (Estudo): conteúdo em `src/course/units/uNN.ts`, motor em `src/course/` (tipos, geradores, julgamento, progresso, telas em `ui/`). Como escrever uma unidade: `docs/curso/PROTOCOLO.md`; plano completo: `docs/curso/PLANO.md`; andamento: `docs/curso/STATUS.md`.
+- Som do app ao vivo: `src/audio/LiveSound.tsx` (botão "Som do piano / Som do app" no teclado fixo) toca o que se toca, com força e pedal, por `startLiveNote` em `synth.ts`.
 - Som de piano: `src/audio/synth.ts` usa amostras do Salamander Grand Piano (CC BY 3.0) em `public/samples/piano`.
 - Na interface, a palavra é "música", não "peça" (o código ainda usa `Piece`).
 - Repertório: telas nunca mexem no banco direto, passam por `src/repertoire/repo.ts` (é onde a nuvem vai entrar).

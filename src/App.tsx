@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, matchPath, useLocation, useParams, type Locati
 import { ThemeProvider } from './theme/ThemeProvider';
 import { NoteInputProvider } from './input/NoteInputProvider';
 import { MetronomeProvider } from './metronome/MetronomeProvider';
+import { LiveSoundProvider } from './audio/LiveSound';
 import PracticeClock from './progress/PracticeClock';
 import AppLayout from './components/AppLayout';
 import ImmersiveFrame, { useCloseImmersive, type ImmersiveState } from './components/ImmersiveFrame';
@@ -111,6 +112,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <NoteInputProvider>
+        <LiveSoundProvider>
         <MetronomeProvider>
           <PracticeClock />
         <Routes location={background}>
@@ -146,6 +148,7 @@ export default function App() {
           </Routes>
         )}
         </MetronomeProvider>
+        </LiveSoundProvider>
       </NoteInputProvider>
     </ThemeProvider>
   );
