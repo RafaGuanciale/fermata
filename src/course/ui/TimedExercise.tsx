@@ -164,11 +164,16 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
   useEffect(() => {
     if (phase !== 'countin' && phase !== 'playing') return;
     let raf = 0;
+    let lastPaint = 0;
     const tick = () => {
       const track = trackRef.current;
       if (!track) return;
       const t = performance.now();
-      setNow(t);
+      // Redesenha a pauta a ~25 quadros por segundo: suficiente para o cursor e leve para computadores mais simples.
+      if (t - lastPaint >= 40) {
+        lastPaint = t;
+        setNow(t);
+      }
       const elapsed = t - track.firstBeat;
       if (elapsed >= 0 && phaseRef.current === 'countin') setPhase('playing');
       if (elapsed > lengthMs + Math.max(ex.window * 1.5, 30000 / bpm) + 80) {
