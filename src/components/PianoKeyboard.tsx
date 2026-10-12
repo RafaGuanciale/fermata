@@ -2,13 +2,15 @@ import type React from 'react';
 import { noteInfo, whiteKeysBetween, type Midi } from '../music/notes';
 import { COMPUTER_KEYS } from '../input/useNoteInput';
 
-export type KeyMark = 'lit' | 'miss';
+export type KeyMark = 'lit' | 'next' | 'miss';
 
 interface PianoKeyboardProps {
   low: Midi;
   high: Midi;
-  /** Teclas destacadas: acesas (petróleo) ou erro (blush). */
+  /** Teclas destacadas: acesas (petróleo), próxima a tocar (contorno petróleo) ou erro (blush). */
   marks?: Partial<Record<Midi, KeyMark>>;
+  /** Teclas abaixadas agora (piano, clique ou teclado do computador): aparecem afundadas e cheias. */
+  pressed?: ReadonlySet<Midi>;
   showNames?: boolean;
   /** Texto sobre teclas específicas (grau do acorde, número da escala). Tem prioridade sobre o nome. */
   labels?: Partial<Record<Midi, string>>;
@@ -28,6 +30,7 @@ export default function PianoKeyboard({
   low,
   high,
   marks = {},
+  pressed,
   showNames = false,
   labels = {},
   showComputerKeys = false,
@@ -48,7 +51,8 @@ export default function PianoKeyboard({
 
   const markClass = (base: string, m: Midi) => {
     const mark = marks[m];
-    return mark ? `${base} ${base}-${mark}` : base;
+    const down = pressed?.has(m) ? ` ${base}-down` : '';
+    return (mark ? `${base} ${base}-${mark}` : base) + down;
   };
 
   const Tag = interactive ? 'button' : 'span';

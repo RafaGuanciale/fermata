@@ -12,7 +12,7 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
 import { swingBeat } from '../tasks';
-import { articulationScore, balanceScore, dynamicsScore, ioiSd, judgeTask, matchedVelocities, pedalScore, taskBeats, type CourseEvent, type PedalEvent, type PedalScore } from '../judge';
+import { articulationScore, balanceScore, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
 import { Combo, PassReward } from '../../celebrate/Celebrate';
@@ -37,6 +37,9 @@ interface TakeScore {
   ped: PedalScore | null;
   /** Uniformidade (IOI-SD em ms). */
   even: number | null;
+  /** Silêncio típico entre soltar uma nota e tocar a próxima (ms), para orientar o legato. */
+  gap: number | null;
+  checks: TakeChecks;
   ok: boolean;
 }
 
@@ -102,7 +105,7 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
 
 function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: number; ex: TimedEx; hints: boolean; onTake: (s: TakeScore) => void }) {
   const metronome = useMetronome();
-  const { subscribe, subscribePedal, press, release } = useNoteInput();
+  const { held, subscribe, subscribePedal, press, release } = useNoteInput();
   const [staffRef, staffWidth] = useElementWidth<HTMLDivElement>();
   const [phase, setPhaseState] = useState<Phase>('idle');
   const [now, setNow] = useState(0);
@@ -153,9 +156,12 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     const ped = ex.pedal ? pedalScore(task, bpm, pedalRef.current, ex.pedal) : null;
     const even = ex.evenness ? ioiSd(task, bpm, events) : null;
     const bal = ex.balance !== undefined ? balanceScore(task, bpm, events, ex.balance) : null;
-    const need = ex.pass.accuracy;
-    const ok = r.accuracy >= need && (artic === null || artic >= 0.9) && (dyn === null || dyn >= need) && (!ex.noExtras || r.extras === 0) && (ped === null || ped.score >= 0.85) && (even === null || even <= ex.evenness!) && (bal === null || bal >= 0.8);
-    const s = { r, artic, dyn, noVelocity, ped, even, bal, ok };
+    const checks: TakeChecks = {
+      accuracy: r.accuracy, need: ex.pass.accuracy, articulation: ex.articulation, artic, dyn, extras: r.extras,
+      noExtras: ex.noExtras, ped: ped?.score ?? null, even, evenness: ex.evenness, bal,
+    };
+    const gap = ex.articulation === 'legato' ? releaseGap(task, bpm, events) : null;
+    const s = { r, artic, dyn, noVelocity, ped, even, bal, gap, checks, ok: takePassed(checks) };
     setScore(s);
     setPhase('done');
     takeRef.current(s);
@@ -251,9 +257,12 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
     return phase === 'idle' ? 'plain' : 'upcoming';
   }
 
+  // Guia: a próxima nota ainda não tocada. Anda quando você toca, não sozinho com o relógio.
   const marks: Partial<Record<number, KeyMark>> = {};
-  const next = task.display[current]?.midi;
-  if (hints && !anyKey && next !== null && next !== undefined && phase !== 'done') marks[next + shift] = 'lit';
+  if (hints && !anyKey && phase !== 'done') {
+    const notesNow = phase === 'playing' && live ? live.notes : task.events.map(() => null);
+    for (const m of nextToPlay(task, notesNow)) marks[m] = 'next';
+  }
 
   const countdown = phase === 'countin' && track ? Math.max(1, Math.ceil(-elapsed / track.beatMs)) : null;
 
@@ -300,7 +309,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
       {phase === 'done' && score && (
         <div className="runner__feedback">
           <Verdict tone={score.ok ? 'hit' : 'miss'}>
-            {pct(score.r.accuracy)} no tempo{score.ok ? ': passada boa' : ` (precisa de ${pct(ex.pass.accuracy)})`}
+            {takeHeadline(score.checks, pct)}
           </Verdict>
           {ex.pedal && (
             <p className="runner__note">
@@ -329,7 +338,9 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
           {score.artic !== null && (
             <p className="runner__note">
               {ex.articulation === 'legato' ? 'Legato' : 'Staccato'}: {pct(score.artic)} das passagens certas
-              {score.artic < 0.9 && (ex.articulation === 'legato' ? '. Só solte a tecla quando a próxima já estiver descendo.' : '. Solte cada nota logo depois de tocar, como se a tecla estivesse quente.')}
+              {score.artic < 0.9 && (ex.articulation === 'legato'
+                ? `${score.gap !== null && score.gap > LEGATO_GAP_MS ? `. Entre uma nota e outra ficou em média ${Math.round(score.gap)} ms de silêncio` : ''}. Só solte a tecla quando a próxima já estiver descendo.`
+                : '. Solte cada nota logo depois de tocar, como se a tecla estivesse quente.')}
             </p>
           )}
           {ex.dynamics && (
@@ -344,7 +355,7 @@ function TimedTake({ task, bpm, ex, hints, onTake }: { task: TimedTask; bpm: num
         </div>
       )}
       <div className="runner__keys">
-        <PianoKeyboard low={task.low} high={task.high} marks={marks} showNames={hints} onPress={press} onRelease={release} label="Teclado do exercício" />
+        <PianoKeyboard low={task.low} high={task.high} marks={marks} pressed={held} showNames={hints} onPress={press} onRelease={release} label="Teclado do exercício" />
       </div>
     </>
   );

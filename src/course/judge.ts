@@ -254,11 +254,13 @@ export function ioiSd(task: TimedTask, bpm: number, events: CourseEvent[]): numb
 }
 
 /**
- * Legato: a nota seguinte começa antes (ou até 30 ms depois) de a anterior soltar.
- * Staccato: a nota dura menos da metade do espaço até a próxima.
- * Retorna a fração de transições certas.
+ * Folga do legato, em ms. No piano digital a nota anterior "solta" (note-off) quando a tecla começa a subir, e a
+ * seguinte só "toca" (note-on) quando chega ao fundo: uma troca ligada de verdade costuma chegar com 20 a 60 ms
+ * de diferença. Até 80 ms o abafador ainda não cortou o som, e o ouvido percebe ligado.
  */
-export function articulationScore(task: TimedTask, bpm: number, events: CourseEvent[], kind: 'legato' | 'staccato'): number | null {
+export const LEGATO_GAP_MS = 80;
+
+function articPairs(task: TimedTask, bpm: number, events: CourseEvent[]): [CourseEvent, CourseEvent][] {
   const matched = matchEvents(task, bpm, events);
   const pairs: [CourseEvent, CourseEvent][] = [];
   for (let i = 0; i + 1 < matched.length; i++) {
@@ -266,13 +268,52 @@ export function articulationScore(task: TimedTask, bpm: number, events: CourseEv
     const b = matched[i + 1];
     if (a && b && task.events[i + 1].beat > task.events[i].beat) pairs.push([a, b]);
   }
+  return pairs;
+}
+
+/**
+ * Legato: a nota seguinte começa antes (ou até LEGATO_GAP_MS depois) de a anterior soltar.
+ * Staccato: a nota dura menos da metade do espaço até a próxima.
+ * Retorna a fração de transições certas.
+ */
+export function articulationScore(task: TimedTask, bpm: number, events: CourseEvent[], kind: 'legato' | 'staccato'): number | null {
+  const pairs = articPairs(task, bpm, events);
   if (!pairs.length) return null;
   const ok = pairs.filter(([a, b]) => {
     const off = a.off ?? Infinity;
-    if (kind === 'legato') return b.t - off <= 30;
+    if (kind === 'legato') return b.t - off <= LEGATO_GAP_MS;
     return off - a.t < 0.5 * (b.t - a.t);
   });
   return ok.length / pairs.length;
+}
+
+/**
+ * Silêncio típico (mediana, em ms) entre soltar uma nota e tocar a seguinte. Negativo = as notas se encostaram
+ * (legato). Null sem pares com o soltar medido.
+ */
+export function releaseGap(task: TimedTask, bpm: number, events: CourseEvent[]): number | null {
+  const gaps = articPairs(task, bpm, events)
+    .filter(([a]) => a.off !== null)
+    .map(([a, b]) => b.t - (a.off as number))
+    .sort((x, y) => x - y);
+  if (!gaps.length) return null;
+  const mid = Math.floor(gaps.length / 2);
+  return gaps.length % 2 ? gaps[mid] : (gaps[mid - 1] + gaps[mid]) / 2;
+}
+
+/**
+ * Teclas da próxima nota ainda não tocada, na ordem da música: o guia do teclado acompanha quem toca, em vez de
+ * andar sozinho com o relógio. `notes` é o julgamento ao vivo (null = ainda não julgada).
+ */
+export function nextToPlay(task: TimedTask, notes: readonly (unknown | null)[]): number[] {
+  let beat: number | null = null;
+  task.events.forEach((e, i) => {
+    if (e.midi === null || notes[i] != null) return;
+    if (beat === null || e.beat < beat - 1e-6) beat = e.beat;
+  });
+  if (beat === null) return [];
+  const at = beat;
+  return task.events.filter((e, i) => e.midi !== null && notes[i] == null && Math.abs(e.beat - at) < 1e-6).map((e) => e.midi as number);
 }
 
 // ---------- pedal (CC64) ----------
@@ -512,4 +553,44 @@ export function scoreImprov(events: CourseEvent[], pcs: Pc[], bpm: number, bars:
     restsPer4: rests / Math.max(1, bars / 4),
     lastPc: inside.length ? pcOf(inside[inside.length - 1].midi) : null,
   };
+}
+
+// ---------- veredito da passada ----------
+
+export interface TakeChecks {
+  accuracy: number;
+  need: number;
+  articulation?: 'legato' | 'staccato';
+  artic: number | null;
+  dyn: number | null;
+  extras: number;
+  noExtras?: boolean;
+  ped: number | null;
+  even: number | null;
+  evenness?: number;
+  bal: number | null;
+}
+
+/** O que faltou, além do tempo, para a passada valer. Vazio = só o tempo decide. */
+export function takeShortfalls(c: TakeChecks): string[] {
+  const out: string[] = [];
+  if (c.artic !== null && c.artic < 0.9) out.push(c.articulation === 'staccato' ? 'o staccato' : 'o legato');
+  if (c.dyn !== null && c.dyn < c.need) out.push('a dinâmica');
+  if (c.noExtras && c.extras > 0) out.push('tocar sem notas a mais');
+  if (c.ped !== null && c.ped < 0.85) out.push('o pedal');
+  if (c.even !== null && c.evenness !== undefined && c.even > c.evenness) out.push('a uniformidade');
+  if (c.bal !== null && c.bal < 0.8) out.push('o equilíbrio entre as mãos');
+  return out;
+}
+
+export function takePassed(c: TakeChecks): boolean {
+  return c.accuracy >= c.need && takeShortfalls(c).length === 0;
+}
+
+/** Frase do resultado: diz o motivo de verdade quando o tempo passou mas outra coisa não. */
+export function takeHeadline(c: TakeChecks, pct: (x: number) => string): string {
+  if (c.accuracy < c.need) return `${pct(c.accuracy)} no tempo (precisa de ${pct(c.need)})`;
+  const miss = takeShortfalls(c);
+  if (!miss.length) return `${pct(c.accuracy)} no tempo: passada boa`;
+  return `${pct(c.accuracy)} no tempo, mas faltou ${miss.join(' e ')}`;
 }

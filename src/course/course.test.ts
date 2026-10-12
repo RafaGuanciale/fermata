@@ -13,7 +13,7 @@ import { optimalMove, voiceMove } from './judge';
 import { buildMinorScale, chordQualityByEar, minorChord, minorDegreeSymbol, minorSteps, qualityByEar, qualityInterval, relativeKey, resolveMinor, spellInterval, spellIntervalChoice, spellScale } from './gens';
 import { buildScale, degreeByEar, degreeSymbol, keyFromSignature, scaleDegreeNote, harmonize, intervalAbove, intervalByEar, parseChord, playChord, primaryChord, progressionByEar, readInterval, resolveCadence, tonicByEar, toneOrSemitone, transposeProgression, whiteAbove } from './gens';
 import {
-  articulationScore, calibrate, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
+  articulationScore, calibrate, nextToPlay, releaseGap, takeHeadline, takePassed, chordMatches, dynamicsScore, ioiSd, judgeTask, labelsVisible, levelOf, pedalScore, pressItem, scoreImprov, scoreItems, startItem, type CourseEvent,
 } from './judge';
 import { n, parseLine, ptName, seeded } from './music';
 import { afterCheckpoint, canMaster, lessonKey, lessonState, nextLesson, rowsById, songPassed, unitComplete, warmupItems } from './progress';
@@ -335,9 +335,31 @@ describe('julgamento', () => {
     expect(articulationScore(task, 60, legato, 'legato')).toBe(1);
     expect(articulationScore(task, 60, staccato, 'legato')).toBe(0);
     expect(articulationScore(task, 60, staccato, 'staccato')).toBe(1);
+    // Piano digital: o note-off sai quando a tecla sobe e o note-on só no fundo. 50 ms de diferença ainda é ligado.
+    const digital: CourseEvent[] = [60, 62, 64, 65].map((m, i) => ({ midi: m, t: i * 1000, off: i * 1000 + 950 }));
+    expect(articulationScore(task, 60, digital, 'legato')).toBe(1);
+    expect(releaseGap(task, 60, digital)).toBe(50);
+    const gappy: CourseEvent[] = [60, 62, 64, 65].map((m, i) => ({ midi: m, t: i * 1000, off: i * 1000 + 800 }));
+    expect(articulationScore(task, 60, gappy, 'legato')).toBe(0);
+    expect(releaseGap(task, 60, gappy)).toBe(200);
+    expect(releaseGap(task, 60, legato)).toBe(5);
     const rhythm = rhythmTask('x x x x', { bpm: 60 });
     const any = [70, 40, 55, 90].map((m, i) => ({ midi: m, t: i * 1000, off: null }));
     expect(judgeTask(rhythm, 60, any, 100).accuracy).toBe(1);
+  });
+
+  it('guia do teclado anda com quem toca; veredito diz o motivo de verdade', () => {
+    const task = melodyTask('C4 D4 E4 F4', { bpm: 60 });
+    expect(nextToPlay(task, [null, null, null, null])).toEqual([60]);
+    expect(nextToPlay(task, [{}, null, null, null])).toEqual([62]);
+    expect(nextToPlay(task, [{}, {}, {}, {}])).toEqual([]);
+    const pct = (x: number) => `${Math.round(x * 100)}%`;
+    const base = { accuracy: 0.99, need: 0.85, artic: null, dyn: null, extras: 0, ped: null, even: null, bal: null };
+    expect(takeHeadline(base, pct)).toBe('99% no tempo: passada boa');
+    const legatoMiss = { ...base, articulation: 'legato' as const, artic: 0 };
+    expect(takePassed(legatoMiss)).toBe(false);
+    expect(takeHeadline(legatoMiss, pct)).toBe('99% no tempo, mas faltou o legato');
+    expect(takeHeadline({ ...legatoMiss, accuracy: 0.5 }, pct)).toBe('50% no tempo (precisa de 85%)');
   });
 
   it('força: calibração, faixas e crescendo', () => {

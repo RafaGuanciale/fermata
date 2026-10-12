@@ -67,6 +67,25 @@
   color: var(--on-key-lit);
 }
 
+.pianoKeyboard__white-next,
+.pianoKeyboard__black-next {
+  background: color-mix(in srgb, var(--key-lit) 30%, var(--key-white));
+  box-shadow: inset 0 0 0 4px var(--key-lit);
+}
+
+.pianoKeyboard__black-next {
+  background: color-mix(in srgb, var(--key-lit) 55%, var(--key-black));
+}
+
+/* Tecla abaixada agora: cheia e afundada, responde na hora ao piano. */
+.pianoKeyboard__white-down,
+.pianoKeyboard__black-down {
+  background: var(--key-lit);
+  color: var(--on-key-lit);
+  transform: translateY(2px);
+  transition: none;
+}
+
 .pianoKeyboard__white-miss,
 .pianoKeyboard__black-miss {
   background: var(--miss);
