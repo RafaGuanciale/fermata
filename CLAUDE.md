@@ -25,6 +25,7 @@ App web pessoal de estudo de piano do Rafael. Marca endossada: "Fermata, um proj
 - Curso (Estudo): conteúdo em `src/course/units/uNN.ts`, motor em `src/course/` (tipos, geradores, julgamento, progresso, telas em `ui/`). Como escrever uma unidade: `docs/curso/PROTOCOLO.md`; plano completo: `docs/curso/PLANO.md`; andamento: `docs/curso/STATUS.md`.
 - Som do app ao vivo: `src/audio/LiveSound.tsx` (botão "Som do piano / Som do app" no teclado fixo) toca o que se toca, com força e pedal, por `startLiveNote` em `synth.ts`.
 - Som de piano: `src/audio/synth.ts` usa amostras do Salamander Grand Piano (CC BY 3.0) em `public/samples/piano`.
+- Arcade: `src/arcade/arcade.ts` (puro e testado) faz o gráfico por dificuldade (fácil = uma nota por tempo, médio = melodia, difícil = melodia + baixo), julga, conta notas longas (segurar soma pontos, soltar cedo perde) e o multiplicador ×1 a ×4 (a cada 10 seguidas). Músicas do app em `songs.ts`, só domínio público, cada uma com `bass` do mesmo tamanho da melodia. Música protegida entra só pelo "Importar MIDI" (`midi.ts`, arquivo do usuário, tabela `arcadeMidi`, fora da sincronização); nunca escrever no código as notas de música protegida.
 - Na interface, a palavra é "música", não "peça" (o código ainda usa `Piece`).
 - Repertório: telas nunca mexem no banco direto, passam por `src/repertoire/repo.ts` (é onde a nuvem vai entrar).
 - Fotos: Unsplash, ids em `src/media/photos.ts`, sempre via `PhotoCard` (tem fallback se a foto não carregar).

@@ -149,6 +149,17 @@ export interface NoteReadStat extends Synced {
   lastAt: number;
 }
 
+/** MIDI importado no arcade. Fica só neste aparelho (fora da sincronização): o arquivo é do usuário. */
+export interface ArcadeMidi {
+  id: string;
+  title: string;
+  data: ArrayBuffer;
+  /** Partes escolhidas (índices de `parseMidi(data).parts`). */
+  melody: number;
+  bass: number | null;
+  addedAt: number;
+}
+
 /** Fila do que mudou neste aparelho e ainda não subiu. */
 export interface OutboxEntry {
   /** `${table}:${uid}` */
@@ -170,6 +181,7 @@ class FermataDB extends Dexie {
   pieces!: Table<Piece, number>;
   files!: Table<StoredFile, number>;
   lessons!: Table<LessonProgress, string>;
+  arcadeMidi!: Table<ArcadeMidi, string>;
 
   constructor() {
     super('fermata');
@@ -211,6 +223,9 @@ class FermataDB extends Dexie {
     });
     this.version(6).stores({
       notes: 'id',
+    });
+    this.version(7).stores({
+      arcadeMidi: 'id, addedAt',
     });
   }
 }

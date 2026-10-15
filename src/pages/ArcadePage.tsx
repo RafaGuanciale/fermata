@@ -1,58 +1,115 @@
-// Arcade: tocar por diversão. Trechos fáceis de músicas conhecidas, notas caindo, sem nota mínima.
+// Arcade: tocar por diversão. Músicas do app (domínio público) e MIDIs que você importa; três dificuldades.
 
-import { useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ARCADE_SONGS } from '../arcade/songs';
-import { arcadeRunId } from '../arcade/ArcadeGame';
+import { arcadeRunId, parseArcadeRunId } from '../arcade/ArcadeGame';
+import { DIFFICULTIES, type Difficulty } from '../arcade/arcade';
+import { deleteMidi, importMidi, useArcadeMidis } from '../arcade/midiStore';
 import { useRuns } from '../training/runs';
-import { StarIcon } from '../components/Icons';
+import { StarIcon, TrashIcon, UploadIcon } from '../components/Icons';
 
-const LEVEL = { 1: 'Fácil', 2: 'Médio', 3: 'Desafio' } as const;
+interface Best { score: number; stars: number; diff: Difficulty }
+
+function BestLine({ b }: { b: Best | undefined }) {
+  if (!b) return <span className="arcadeCard__best">Ainda não jogou</span>;
+  const label = DIFFICULTIES.find((d) => d.id === b.diff)?.label.toLowerCase();
+  return (
+    <span className="arcadeCard__best">
+      <span className="arcadeCard__stars" aria-label={`${b.stars} de 3 estrelas`}>
+        {[0, 1, 2].map((k) => <StarIcon key={k} className={'arcadeCard__star' + (k < b.stars ? ' arcadeCard__star-on' : '')} />)}
+      </span>
+      {b.score.toLocaleString('pt-BR')} pontos no {label}
+    </span>
+  );
+}
 
 export default function ArcadePage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const runs = useRuns();
+  const midis = useArcadeMidis();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Melhor resultado por música, na dificuldade em que ele foi feito (mais estrelas, depois mais pontos).
   const best = useMemo(() => {
-    const out = new Map<string, { score: number; stars: number }>();
+    const out = new Map<string, Best>();
     for (const r of runs ?? []) {
-      if (!r.treinoId.startsWith('arcade-')) continue;
-      const id = r.treinoId.slice(7);
-      const stars = r.stars ?? 0;
-      const prev = out.get(id);
-      out.set(id, { score: Math.max(prev?.score ?? 0, r.score ?? 0), stars: Math.max(prev?.stars ?? 0, stars) });
+      const p = parseArcadeRunId(r.treinoId);
+      if (!p) continue;
+      const cur: Best = { score: r.score ?? 0, stars: r.stars ?? 0, diff: p.diff };
+      const prev = out.get(p.id);
+      if (!prev || cur.stars > prev.stars || (cur.stars === prev.stars && cur.score > prev.score)) out.set(p.id, cur);
     }
     return out;
   }, [runs]);
+
+  const onFile = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const id = await importMidi(file);
+      navigate(`/arcade/midi/${id}`, { state: { background: location } });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Não consegui ler este arquivo.');
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   return (
     <>
       <header className="page__header">
         <span className="page__eyebrow">Para quando você só quer tocar</span>
         <h1 className="page__title">Arcade</h1>
-        <p className="page__lead">Trechos fáceis de músicas conhecidas. As notas caem até o teclado e você toca quando elas chegam. Sem nota mínima: pontos, sequências e estrelas, só pela diversão.</p>
+        <p className="page__lead">As notas caem sobre as teclas: toque quando chegarem e segure as longas. Três dificuldades, sem nota mínima.</p>
       </header>
+
       <section className="page__section">
+        <div className="page__sectionHead">
+          <h2 className="page__sectionTitle">Suas músicas</h2>
+          <button className="button button-secondary button-small" type="button" disabled={busy} onClick={() => fileRef.current?.click()}>
+            <UploadIcon className="button__icon" />
+            {busy ? 'Lendo…' : 'Importar MIDI'}
+          </button>
+          <input ref={fileRef} type="file" accept=".mid,.midi,.kar,audio/midi,audio/x-midi" hidden onChange={(e) => void onFile(e.target.files?.[0])} />
+        </div>
+        {error && <p className="arcadeImport__error" role="alert"><strong>Não deu:</strong> {error}</p>}
+        {midis && midis.length > 0 ? (
+          <div className="arcadeGrid">
+            {midis.map((m) => (
+              <div key={m.id} className="arcadeCard arcadeCard-midi">
+                <Link className="arcadeCard__link" to={`/arcade/midi/${m.id}`} state={{ background: location }} id={arcadeRunId(m.id)}>
+                  <span className="arcadeCard__tag">MIDI</span>
+                  <span className="arcadeCard__title">{m.title}</span>
+                  <BestLine b={best.get(m.id)} />
+                </Link>
+                <button className="arcadeCard__delete" type="button" aria-label={`Apagar ${m.title}`} onClick={() => void deleteMidi(m.id)}>
+                  <TrashIcon className="arcadeCard__deleteIcon" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="page__lead arcadeImport__lead">Traga o arquivo .mid de qualquer música (no MuseScore, baixe como MIDI). O app monta a fase nas três dificuldades, e o arquivo fica só neste aparelho.</p>
+        )}
+      </section>
+
+      <section className="page__section">
+        <h2 className="page__sectionTitle">Músicas do app</h2>
         <div className="arcadeGrid">
-          {ARCADE_SONGS.map((s) => {
-            const b = best.get(s.id);
-            return (
-              <Link key={s.id} className="arcadeCard" to={`/arcade/${s.id}`} state={{ background: location }} id={arcadeRunId(s.id)}>
-                <span className={`arcadeCard__level arcadeCard__level-${s.level}`}>{LEVEL[s.level]}</span>
-                <span className="arcadeCard__title">{s.title}</span>
-                <span className="arcadeCard__origin">{s.origin}</span>
-                <span className="arcadeCard__best">
-                  {b ? (
-                    <>
-                      <span className="arcadeCard__stars" aria-label={`${b.stars} de 3 estrelas`}>
-                        {[0, 1, 2].map((k) => <StarIcon key={k} className={'arcadeCard__star' + (k < b.stars ? ' arcadeCard__star-on' : '')} />)}
-                      </span>
-                      {b.score.toLocaleString('pt-BR')} pontos
-                    </>
-                  ) : 'Ainda não jogou'}
-                </span>
-              </Link>
-            );
-          })}
+          {ARCADE_SONGS.map((s) => (
+            <Link key={s.id} className="arcadeCard" to={`/arcade/${s.id}`} state={{ background: location }} id={arcadeRunId(s.id)}>
+              <span className={`arcadeCard__tag arcadeCard__tag-${s.level}`}>{s.tag}</span>
+              <span className="arcadeCard__title">{s.title}</span>
+              <span className="arcadeCard__origin">{s.origin}</span>
+              <BestLine b={best.get(s.id)} />
+            </Link>
+          ))}
         </div>
       </section>
     </>

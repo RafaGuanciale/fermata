@@ -37,7 +37,7 @@ export const TRACKS: TrackDef[] = [
   { id: 'repertorio', name: 'Repertório', how: 'Aprenda músicas: as do curso, aprovadas no Tocar a música, e as do seu repertório.', tiers: [1, 3, 5, 10, 20, 35, 50], value: (i) => i.songsLearned, show: (v) => `${v} ${v === 1 ? 'música' : 'músicas'}` },
   { id: 'tecnica', name: 'Técnica', how: 'Leve itens de técnica do Treino até o andamento alvo.', tiers: [1, 3, 6, 10, 15, 20, 25], value: (i) => i.techAtTarget, show: (v) => `${v} no alvo` },
   { id: 'leitura', name: 'Leitura de notas', how: 'Passe os níveis da leitura de notas na pauta.', tiers: [1, 2, 3, 5, 7, 9, 10], value: (i) => i.readingLevels, show: (v) => `${v} de 10 níveis` },
-  { id: 'arcade', name: 'Arcade', how: 'Ganhe estrelas no arcade (até 3 por música).', tiers: [3, 8, 15, 22, 30, 36, 42], value: (i) => i.arcadeStars, show: (v) => `${v} ${v === 1 ? 'estrela' : 'estrelas'}` },
+  { id: 'arcade', name: 'Arcade', how: 'Ganhe estrelas no arcade: até 3 por música em cada dificuldade.', tiers: [3, 10, 20, 35, 55, 80, 120], value: (i) => i.arcadeStars, show: (v) => `${v} ${v === 1 ? 'estrela' : 'estrelas'}` },
   { id: 'treino', name: 'Treino do dia', how: 'Complete o Treino de hoje inteiro.', tiers: [1, 5, 15, 30, 60, 100, 200], value: (i) => i.fullDays, show: (v) => `${v} ${v === 1 ? 'dia completo' : 'dias completos'}` },
 ];
 

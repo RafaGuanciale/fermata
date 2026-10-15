@@ -282,3 +282,12 @@ export function ArcadeIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function RestartIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5" />
+      <path d="M4.5 4.5v4h4" />
+    </svg>
+  );
+}

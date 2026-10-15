@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import type React from 'react';
 import { Navigate, Route, Routes, matchPath, useLocation, useParams, type Location } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeProvider';
@@ -18,6 +18,7 @@ import PiecePage from './pages/PiecePage';
 import StudyPage from './pages/StudyPage';
 import { findSong } from './course';
 import { findArcadeSong } from './arcade/songs';
+import { songTune } from './arcade/arcade';
 import AccountPage from './pages/AccountPage';
 import CalibratePage from './pages/CalibratePage';
 import LoginPage from './pages/LoginPage';
@@ -35,6 +36,7 @@ const NoteReadingPage = lazy(() => import('./pages/NoteReadingPage'));
 const TreinoFocusPage = lazy(() => import('./pages/TreinoFocusPage'));
 const ArcadePage = lazy(() => import('./pages/ArcadePage'));
 const ArcadeGame = lazy(() => import('./arcade/ArcadeGame'));
+const MidiArcade = lazy(() => import('./arcade/MidiArcade'));
 // A partitura interativa (OpenSheetMusicDisplay) também só carrega quando você estuda uma peça.
 const ScorePracticePage = lazy(() => import('./pages/ScorePracticePage'));
 
@@ -94,11 +96,24 @@ function TreinoPopup({ label, render }: { label: string; render: (close: () => v
 function ArcadePopup() {
   const close = useCloseImmersive('/arcade');
   const song = findArcadeSong(useParams().id ?? '');
-  if (!song) return <Navigate to="/arcade" replace />;
+  const tune = useMemo(() => (song ? songTune(song) : null), [song]);
+  if (!song || !tune) return <Navigate to="/arcade" replace />;
   return (
     <ImmersiveFrame onClose={close} label={`Arcade: ${song.title}`}>
       <Suspense fallback={<div className="arcade" />}>
-        <ArcadeGame song={song} onClose={close} />
+        <ArcadeGame tune={tune} onClose={close} />
+      </Suspense>
+    </ImmersiveFrame>
+  );
+}
+
+function MidiArcadePopup() {
+  const close = useCloseImmersive('/arcade');
+  const id = useParams().id ?? '';
+  return (
+    <ImmersiveFrame onClose={close} label="Arcade: MIDI importado">
+      <Suspense fallback={<div className="arcade" />}>
+        <MidiArcade id={id} onClose={close} />
       </Suspense>
     </ImmersiveFrame>
   );
@@ -116,7 +131,7 @@ function FocusPopup() {
   );
 }
 
-const IMMERSIVE = ['/arcade/:id', '/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
+const IMMERSIVE = ['/arcade/midi/:id', '/arcade/:id', '/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
 
 export default function App() {
   const location = useLocation();
@@ -186,6 +201,7 @@ export default function App() {
             <Route path="/curso/musica/:songId" element={<CourseSongPopup />} />
             <Route path="/curso/foco/:n/:lessonId" element={<FocusPopup />} />
             <Route path="/arcade/:id" element={<ArcadePopup />} />
+            <Route path="/arcade/midi/:id" element={<MidiArcadePopup />} />
           </Routes>
         )}
         </MetronomeProvider>
