@@ -68,7 +68,7 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
     let newTask = false;
     if (!s.ok) {
       setStreak(0);
-      if (ex.ladder) nextBpm = Math.max(ex.ladder.from, bpm - ex.ladder.step);
+      // Errou: o andamento fica onde está. Para descer ou recomeçar, há os botões da escada.
     } else if (ex.ladder && bpm < target) {
       nextBpm = Math.min(target, bpm + ex.ladder.step);
       setStreak(0);
@@ -110,6 +110,18 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
           </button>
         )}
       </div>
+      {ex.ladder && !finished && bpm > ex.ladder.from && (
+        <div className="timed__ladder">
+          <button className="linkButton" type="button" onClick={() => { setBpm(Math.max(ex.ladder!.from, bpm - ex.ladder!.step)); setLast(null); }}>
+            Descer para {Math.max(ex.ladder.from, bpm - ex.ladder.step)} BPM
+          </button>
+          {bpm - ex.ladder.step > ex.ladder.from && (
+            <button className="linkButton" type="button" onClick={() => { setBpm(ex.ladder!.from); setLast(null); }}>
+              Recomeçar em {ex.ladder.from} BPM
+            </button>
+          )}
+        </div>
+      )}
       {finished && (
         <PassReward stars={starsFor(best, ex.pass.accuracy) || 1}>
           <p className="passReward__text">Concluído: {pct(best)} no tempo na melhor passada.</p>

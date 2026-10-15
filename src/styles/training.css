@@ -763,3 +763,12 @@ a.chip {
   position: relative;
   margin-bottom: var(--space-3);
 }
+
+/* Escada de andamento: descer um degrau ou recomeçar, quando quiser. */
+.timed__ladder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+  font-size: 13px;
+}
