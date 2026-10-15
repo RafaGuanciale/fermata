@@ -5,6 +5,7 @@ import { ArcadeIcon, BookIcon, ProgressIcon, PracticeIcon, RepertoireIcon, Study
 import ThemeToggle from './ThemeToggle';
 import KeyboardDock from './KeyboardDock';
 import AccountChip from './AccountChip';
+import MasteryToast from '../achievements/MasteryToast';
 
 const LINKS = [
   { to: '/', label: 'Hoje', Icon: TodayIcon, end: true },
@@ -65,6 +66,7 @@ export default function AppLayout() {
         </main>
       </div>
       <KeyboardDock />
+      <MasteryToast />
     </div>
   );
 }

@@ -138,7 +138,7 @@ export default function ArcadeGame({ song, onClose }: { song: ArcadeSong; onClos
     setSummary(s);
     const isRecord = bestRef.current === null || s.score > bestRef.current;
     setRecord(isRecord && s.score > 0);
-    void saveRun({ treinoId: arcadeRunId(song.id), kind: 'timed', accuracy: s.hits, score: s.score, passed: s.stars > 0, bpm: Math.round(song.bpm * speed) });
+    void saveRun({ treinoId: arcadeRunId(song.id), kind: 'timed', accuracy: s.hits, score: s.score, stars: s.stars, passed: s.stars > 0, bpm: Math.round(song.bpm * speed) });
     if (s.stars >= 2) playReward(s.stars === 3 ? 'great' : 'pass');
     endedAt.current = performance.now();
     setPhase('done');

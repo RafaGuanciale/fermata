@@ -4,8 +4,8 @@ import { db } from '../db/db';
 import { login, logout, takeSignOutReason, useAccount } from '../sync/account';
 import { syncLabel, useSyncStatus } from '../sync/status';
 import { syncNow } from '../sync/engine';
-import { initials } from '../repertoire/catalog';
 import { CloudIcon, SyncIcon } from '../components/Icons';
+import Profile from '../achievements/Profile';
 
 export default function AccountPage() {
   const account = useAccount();
@@ -71,19 +71,11 @@ function SignedIn() {
   return (
     <>
       <header className="page__header">
-        <span className="page__eyebrow">Conta</span>
-        <h1 className="page__title">Sua conta</h1>
+        <span className="page__eyebrow">@{account.user.username} · conta Permana</span>
+        <h1 className="page__title">Seu perfil</h1>
       </header>
 
-      <section className="account__card">
-        <span className="account__avatar">
-          {account.user.avatar ? <img src={account.user.avatar} alt="" referrerPolicy="no-referrer" /> : initials(account.user.name)}
-        </span>
-        <span className="account__who">
-          <strong className="account__name">{account.user.name}</strong>
-          <span className="account__user">@{account.user.username} · conta Permana</span>
-        </span>
-      </section>
+      <Profile account={account} />
 
       <section className="page__section">
         <h2 className="page__sectionTitle">Sincronização</h2>

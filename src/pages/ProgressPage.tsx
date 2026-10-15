@@ -246,6 +246,7 @@ export default function ProgressPage() {
               </div>
               <div className="progress__card">
                 <h3 className="progress__cardTitle">Marcos</h3>
+                <Link className="page__link" to="/conta">Ver suas maestrias e emblemas</Link>
                 <ul className="progress__marks">
                   {marks.map((m) => (
                     <li key={m.title} className={`progress__mark${m.at ? ' progress__mark-done' : ''}`}>

@@ -17,7 +17,7 @@ export default function ArcadePage() {
     for (const r of runs ?? []) {
       if (!r.treinoId.startsWith('arcade-')) continue;
       const id = r.treinoId.slice(7);
-      const stars = (r.accuracy ?? 0) >= 0.95 ? 3 : (r.accuracy ?? 0) >= 0.85 ? 2 : (r.accuracy ?? 0) >= 0.6 ? 1 : 0;
+      const stars = r.stars ?? 0;
       const prev = out.get(id);
       out.set(id, { score: Math.max(prev?.score ?? 0, r.score ?? 0), stars: Math.max(prev?.stars ?? 0, stars) });
     }

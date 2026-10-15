@@ -125,6 +125,8 @@ export interface TrainingRun extends Synced {
   level?: number;
   /** Pontos (modo arcade). */
   score?: number;
+  /** Estrelas de 0 a 3 (modo arcade). */
+  stars?: number;
 }
 
 /** Minutos tocando por dia, um registro por aparelho (somados na tela de Progresso). */
