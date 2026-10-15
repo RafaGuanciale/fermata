@@ -62,7 +62,26 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
     x: KEY_X + i * KEY_GAP,
     step: (fifths > 0 ? SHARP_STEPS[i] : FLAT_STEPS[i]) - (clef === 'bass' ? 2 : 0),
   }));
-  const nameY = BOTTOM + 2.6 * S;
+  // Notas longe da pauta (muitas linhas suplementares): a área do desenho cresce para cima ou para baixo.
+  // Mede todas as notas (não só as visíveis), para a pauta não mudar de altura no meio de um exercício.
+  let lowestHead = BOTTOM;
+  let top = 0;
+  let bottom = HEIGHT;
+  notes.forEach((m, i) => {
+    if (m === null) return;
+    const group = chords?.[i] && chords[i]!.length > 1 ? chords[i]! : [m];
+    for (const g of group) {
+      const st = spellOnStaff(g, clef, fifths).step;
+      const cy = y(st);
+      const stemUp = st < 4;
+      top = Math.min(top, cy - 28, stemUp ? cy - STEM - 8 : top);
+      bottom = Math.max(bottom, cy + 28, stemUp ? bottom : cy + STEM + 8);
+      lowestHead = Math.max(lowestHead, cy + HEAD_RY);
+    }
+  });
+  const nameY = Math.max(BOTTOM + 2.6 * S, lowestHead + 22);
+  if (showNames) bottom = Math.max(bottom, nameY + 8);
+  const viewH = bottom - top;
   const figures = durations?.map((d) => d * beatScale);
   const tuplets = tupletMiddles(figures);
 
@@ -79,9 +98,9 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
     <div className="staff">
       <svg
         className="staff__svg"
-        viewBox={`0 0 ${naturalWidth} ${HEIGHT}`}
+        viewBox={`0 ${top} ${naturalWidth} ${viewH}`}
         width={naturalWidth * scale}
-        height={HEIGHT * scale}
+        height={viewH * scale}
         role="img"
         aria-label={label}
       >
