@@ -19,6 +19,8 @@ import StudyPage from './pages/StudyPage';
 import { findSong } from './course';
 import AccountPage from './pages/AccountPage';
 import CalibratePage from './pages/CalibratePage';
+import LoginPage from './pages/LoginPage';
+import { useAccount } from './sync/account';
 
 // O leitor de PDF é pesado: só carrega quando você abre uma partitura.
 const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
@@ -110,6 +112,17 @@ export default function App() {
     : location.pathname.startsWith('/partitura') || location.pathname.startsWith('/peca') ? '/repertorio' : '/treino';
   const background: Location = (location.state as ImmersiveState | null)?.background ??
     (immersive ? { ...location, pathname: fallbackPath, search: '', state: null } : location);
+
+  // Só entra quem tem conta. Sem conta (ou com a sessão expirada), qualquer endereço mostra a entrada;
+  // depois do login, a mesma página abre.
+  const account = useAccount();
+  if (!account) {
+    return (
+      <ThemeProvider>
+        <LoginPage />
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider>

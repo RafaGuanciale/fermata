@@ -1,0 +1,93 @@
+/* Porta de entrada: foto de um lado, formulário do outro; no celular, só o formulário sobre a foto escurecida. */
+
+.login {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+.login__photo {
+  /* Sem a foto (sem internet na primeira visita), fica um degradê de petróleo. */
+  background:
+    var(--login-photo) center / cover no-repeat,
+    radial-gradient(120% 90% at 20% 30%, color-mix(in srgb, var(--color-petrol) 70%, var(--bg)), var(--bg));
+  position: relative;
+}
+
+.login__photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 55%, var(--bg));
+}
+
+.login__panel {
+  display: grid;
+  align-content: center;
+  gap: var(--space-4);
+  width: min(420px, 100%);
+  margin: 0 auto;
+  padding: var(--space-8, 32px) var(--space-6, 24px);
+}
+
+.login__brand {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+  margin-bottom: var(--space-6, 24px);
+}
+
+.login__brand .logo {
+  font-size: 1.35em;
+}
+
+.login__endorse {
+  font: 600 11px/1 var(--font-body);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.login__title {
+  margin: 0;
+  font: 500 clamp(30px, 4vw, 40px) / 1.15 var(--font-display);
+}
+
+.login__lead {
+  margin: 0;
+  color: var(--text-muted);
+  font: 500 15px/23px var(--font-body);
+}
+
+.login__form {
+  margin-top: var(--space-2);
+}
+
+.login__submit {
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
+}
+
+@media (max-width: 820px) {
+  .login {
+    grid-template-columns: minmax(0, 1fr);
+    background: var(--login-photo) center / cover no-repeat, var(--bg);
+  }
+
+  .login__photo {
+    display: none;
+  }
+
+  .login__panel {
+    align-self: center;
+    margin: var(--space-6, 24px) var(--space-4);
+    width: auto;
+    border-radius: var(--radius-l);
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-raised);
+  }
+}
