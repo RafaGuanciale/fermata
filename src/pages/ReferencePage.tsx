@@ -12,6 +12,7 @@ import { noteInfo, type Midi } from '../music/notes';
 import { UNITS } from '../course';
 import { playListen, Verdict } from '../course/ui/shared';
 import type { Listen } from '../course/types';
+import { ART_H, ART_W, SYMBOLS, SYMBOL_GROUPS } from '../reference/symbols';
 import {
   CHORD_TYPES, CIRCLE, CLEF_TIPS, FIGURES, INTERVALS, MAJOR_FINGERING, METERS, PROGRESSIONS, ROOTS, SCALE_TYPES, TERMS,
   chordInfo, harmonicField, identifyChord, intervalName, parseSymbol, pretty, rootPt, scaleInfo, signatureText, type Root,
@@ -25,13 +26,14 @@ const SECTIONS = [
   { id: 'notas', label: 'Notas e claves' },
   { id: 'ritmo', label: 'Ritmo' },
   { id: 'circulo', label: 'Círculo de quintas' },
+  { id: 'simbolos', label: 'Símbolos' },
   { id: 'termos', label: 'Termos' },
 ] as const;
 
 type SectionId = (typeof SECTIONS)[number]['id'];
 
 /** Em que unidade do curso cada assunto é ensinado (para o link "Onde estudar"). */
-const WHERE: Record<SectionId, number> = { acordes: 3, escalas: 4, campo: 7, intervalos: 2, notas: 2, ritmo: 1, circulo: 4, termos: 1 };
+const WHERE: Record<SectionId, number> = { acordes: 3, escalas: 4, campo: 7, intervalos: 2, notas: 2, ritmo: 1, circulo: 4, simbolos: 1, termos: 1 };
 
 function useSound() {
   const [stop, setStop] = useState<(() => void) | null>(null);
@@ -88,6 +90,7 @@ export default function ReferencePage() {
         {section === 'notas' && <Notes />}
         {section === 'ritmo' && <Rhythm />}
         {section === 'circulo' && <Circle />}
+        {section === 'simbolos' && <Symbols />}
         {section === 'termos' && <Terms />}
       </section>
 
@@ -131,6 +134,7 @@ function Search() {
     }
     for (const s of SCALE_TYPES) if (fold(s.name).includes(f)) out.push({ kind: 'Escala', label: `${s.name} (em Dó)`, to: `/consulta/escalas?raiz=C&tipo=${s.id}` });
     for (const c of CHORD_TYPES) if (fold(c.name).includes(f)) out.push({ kind: 'Acorde', label: `${c.name} (em Dó)`, to: `/consulta/acordes?raiz=C&tipo=${encodeURIComponent(c.suffix)}` });
+    for (const sy of SYMBOLS) if (fold(sy.name).includes(f) || fold(sy.what).includes(f)) out.push({ kind: 'Símbolo', label: sy.name, to: `/consulta/simbolos?q=${encodeURIComponent(sy.name)}` });
     for (const t of TERMS) if (fold(t.term).includes(f) || fold(t.meaning).includes(f)) out.push({ kind: 'Termo', label: t.term, to: `/consulta/termos?q=${encodeURIComponent(t.term)}` });
     for (const s of SECTIONS) if (fold(s.label).includes(f)) out.push({ kind: 'Seção', label: s.label, to: `/consulta/${s.id}` });
     for (const u of UNITS) for (const l of u.lessons) if (fold(l.title).includes(f)) out.push({ kind: `Lição ${l.n}`, label: l.title, to: `/estudo/unidade/${u.n}/${l.id}` });
@@ -563,6 +567,50 @@ function Circle() {
           <button className="button button-secondary button-small" type="button" onClick={() => navigate(`/consulta/campo?raiz=${encodeURIComponent(k.major)}&modo=maior`)}>Ver o campo harmônico</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ---------- símbolos ----------
+
+function Symbols() {
+  const [q, setQ] = useParam('q', '');
+  const [group, setGroup] = useParam('grupo', '');
+  const play = useSound();
+  const f = fold(q);
+  const list = SYMBOLS.filter((s) => (!group || s.group === group) && (!f || fold(s.name).includes(f) || fold(s.what).includes(f) || fold(s.how).includes(f)));
+  return (
+    <div className="refSection">
+      <p className="lesson__p">O que cada sinal da partitura pede para você fazer no piano. Toque em "Ouvir" para escutar o efeito.</p>
+      <input className="refInput" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar símbolos (ex.: ponto, ligadura, pedal)" aria-label="Filtrar símbolos" />
+      <div className="chips" role="group" aria-label="Grupos de símbolos">
+        <button type="button" className={'chip' + (!group ? ' chip-active' : '')} aria-pressed={!group} onClick={() => setGroup('')}>Todos</button>
+        {SYMBOL_GROUPS.map((g) => (
+          <button key={g} type="button" className={'chip' + (group === g ? ' chip-active' : '')} aria-pressed={group === g} onClick={() => setGroup(group === g ? '' : g)}>{g}</button>
+        ))}
+      </div>
+      <div className="symGrid">
+        {list.map((s) => (
+          <article key={s.id} className="symCard" id={s.id}>
+            <svg className="sym" viewBox={`0 0 ${ART_W} ${ART_H}`} role="img" aria-label={s.name}>{s.art}</svg>
+            <div className="symCard__text">
+              <h3 className="symCard__name">{s.name}</h3>
+              <p className="symCard__what">{s.what}</p>
+              <p className="symCard__how"><strong>No piano:</strong> {s.how}</p>
+              <div className="symCard__actions">
+                {s.listen && (
+                  <button className="button button-secondary button-small" type="button" onClick={() => play(s.listen!)}>
+                    <PlayIcon className="button__icon" />
+                    Ouvir
+                  </button>
+                )}
+                {s.unit && <Link className="page__link" to={`/estudo/unidade/${s.unit}`}>Ensinado na unidade {s.unit}</Link>}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+      {!list.length && <p className="runner__note">Nenhum símbolo com "{q}".</p>}
     </div>
   );
 }
