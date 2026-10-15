@@ -31,7 +31,7 @@ export interface TrackDef {
 const hours = (m: number) => (m < 60 ? `${Math.round(m)} min` : `${Math.floor(m / 60)} h`);
 
 export const TRACKS: TrackDef[] = [
-  { id: 'horas', name: 'Horas de piano', how: 'Toque com o piano conectado: cada minuto conta.', tiers: [60, 300, 600, 1500, 3000, 6000, 15000], value: (i) => i.minutesTotal, show: hours },
+  { id: 'horas', name: 'Horas de piano', how: 'Conta o tempo no treino, no arcade, nas músicas e nas lições e consulta. Nas outras páginas, não.', tiers: [60, 300, 600, 1500, 3000, 6000, 15000], value: (i) => i.minutesTotal, show: hours },
   { id: 'constancia', name: 'Constância', how: 'Toque em dias seguidos. Vale a sua maior sequência.', tiers: [3, 7, 14, 30, 60, 100, 365], value: (i) => i.bestStreak, show: (v) => `${v} ${v === 1 ? 'dia' : 'dias'}` },
   { id: 'curso', name: 'Curso', how: 'Conclua lições do Estudo. O último nível pede as 12 unidades completas.', tiers: [1, 8, 25, 50, 75, 100, 101], value: (i) => i.lessonsPassed + (i.allUnitsComplete ? 1 : 0), show: (v) => `${Math.min(v, 100)} ${v === 1 ? 'lição' : 'lições'}` },
   { id: 'repertorio', name: 'Repertório', how: 'Aprenda músicas: as do curso, aprovadas no Tocar a música, e as do seu repertório.', tiers: [1, 3, 5, 10, 20, 35, 50], value: (i) => i.songsLearned, show: (v) => `${v} ${v === 1 ? 'música' : 'músicas'}` },
