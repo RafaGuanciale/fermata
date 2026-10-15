@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import Logo from '../brand/Logo';
-import { BookIcon, ProgressIcon, PracticeIcon, RepertoireIcon, StudyIcon, TodayIcon } from './Icons';
+import { ArcadeIcon, BookIcon, ProgressIcon, PracticeIcon, RepertoireIcon, StudyIcon, TodayIcon } from './Icons';
 import ThemeToggle from './ThemeToggle';
 import KeyboardDock from './KeyboardDock';
 import AccountChip from './AccountChip';
@@ -11,6 +11,7 @@ const LINKS = [
   { to: '/treino', label: 'Treino', Icon: PracticeIcon, end: false },
   { to: '/repertorio', label: 'Repertório', Icon: RepertoireIcon, end: false },
   { to: '/estudo', label: 'Estudo', Icon: StudyIcon, end: false },
+  { to: '/arcade', label: 'Arcade', Icon: ArcadeIcon, end: false },
   { to: '/consulta', label: 'Consulta', Icon: BookIcon, end: false },
   { to: '/progresso', label: 'Progresso', Icon: ProgressIcon, end: false },
 ];

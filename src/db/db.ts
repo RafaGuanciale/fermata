@@ -123,6 +123,8 @@ export interface TrainingRun extends Synced {
   weakTo?: number;
   /** Mudança de nível (kind 'level') ou nível em que foi feito */
   level?: number;
+  /** Pontos (modo arcade). */
+  score?: number;
 }
 
 /** Minutos tocando por dia, um registro por aparelho (somados na tela de Progresso). */

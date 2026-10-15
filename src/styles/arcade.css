@@ -1,0 +1,262 @@
+/* Arcade: escolha de música e o jogo (palco em canvas com placar e telas por cima). */
+
+.arcadeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-4);
+}
+
+.arcadeCard {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-height: 150px;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background:
+    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--color-petrol) 28%, transparent), transparent 60%),
+    var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), border-color 160ms;
+}
+
+.arcadeCard:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--hit) 60%, transparent);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--color-petrol) 30%, transparent);
+}
+
+.arcadeCard__level {
+  justify-self: start;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font: 600 11px/1.4 var(--font-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--hit-soft);
+  color: var(--text);
+}
+
+.arcadeCard__level-2 {
+  background: color-mix(in srgb, var(--color-khaki) 35%, transparent);
+}
+
+.arcadeCard__level-3 {
+  background: color-mix(in srgb, var(--color-blush) 35%, transparent);
+}
+
+.arcadeCard__title {
+  font: 500 22px/1.2 var(--font-display);
+}
+
+.arcadeCard__origin,
+.arcadeCard__best {
+  font: 500 13px/1.4 var(--font-body);
+  color: var(--text-muted);
+}
+
+.arcadeCard__best {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+.arcadeCard__stars {
+  display: inline-flex;
+}
+
+.arcadeCard__star {
+  width: 16px;
+  height: 16px;
+  opacity: 0.35;
+}
+
+.arcadeCard__star-on {
+  opacity: 1;
+  color: var(--color-champagne);
+  fill: currentColor;
+}
+
+/* ---------- jogo ---------- */
+
+.arcade {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto !important;
+  background: var(--bg);
+}
+
+.arcade__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5, 20px);
+}
+
+.arcade__titles {
+  display: grid;
+  min-width: 0;
+}
+
+.arcade__song {
+  font: 500 20px/1.2 var(--font-display);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arcade__origin {
+  font: 500 12px/1.3 var(--font-body);
+  color: var(--text-muted);
+}
+
+.arcade__hud {
+  display: grid;
+  justify-items: end;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.arcade__score {
+  font: 600 26px/1 var(--font-body);
+}
+
+.arcade__combo {
+  min-height: 16px;
+  font: 600 13px/1.2 var(--font-body);
+  color: var(--text-muted);
+}
+
+.arcade__combo-hot {
+  color: var(--color-champagne);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--color-champagne) 70%, transparent);
+}
+
+:root[data-theme="light"] .arcade__combo-hot {
+  color: var(--color-petrol);
+  text-shadow: none;
+}
+
+.arcade__progress {
+  height: 3px;
+  background: var(--surface-sunk);
+}
+
+.arcade__progress span {
+  display: block;
+  height: 100%;
+  background: var(--hit);
+  transition: width 120ms linear;
+}
+
+.arcade__stage {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.arcade__canvas {
+  display: block;
+  touch-action: none;
+}
+
+.arcade__milestone {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 500 clamp(28px, 5vw, 48px) / 1 var(--font-display);
+  color: var(--color-champagne);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--color-petrol) 80%, transparent);
+  pointer-events: none;
+  animation: arcadePop 1.4s var(--ease-out) forwards;
+}
+
+@keyframes arcadePop {
+  0% { opacity: 0; transform: translate(-50%, 16px) scale(0.8); }
+  20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -12px) scale(1); }
+}
+
+.arcade__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6, 24px);
+  text-align: center;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.arcade__overlayTitle {
+  margin: 0;
+  font: 500 clamp(28px, 4vw, 40px) / 1.15 var(--font-display);
+}
+
+.arcade__overlayLead,
+.arcade__hint {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--text-muted);
+  font: 500 15px/23px var(--font-body);
+}
+
+.arcade__hint {
+  font-size: 13px;
+}
+
+.arcade__bigScore {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font: 600 32px/1.2 var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.arcade__record {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-champagne);
+  color: var(--color-ebony);
+  font: 700 13px/1.4 var(--font-body);
+  letter-spacing: 0.04em;
+  animation: arcadePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes arcadePulse {
+  50% { transform: scale(1.08); }
+}
+
+.arcade__stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-6, 24px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font: 500 14px/1.4 var(--font-body);
+}
+
+.arcade__stats strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade__milestone,
+  .arcade__record {
+    animation: none;
+  }
+}

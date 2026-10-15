@@ -271,3 +271,14 @@ export function SpeakerIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function ArcadeIcon({ className }: IconProps) {
+  return (
+    <svg {...base} strokeWidth={1.6} className={className}>
+      <path d="M7.5 8.5h9a4.5 4.5 0 0 1 4.4 5.5l-.6 2.7a2.2 2.2 0 0 1-3.8 1l-2-2.2h-5l-2 2.2a2.2 2.2 0 0 1-3.8-1l-.6-2.7A4.5 4.5 0 0 1 7.5 8.5z" />
+      <path d="M8 11.3v2.6M6.7 12.6h2.6" />
+      <circle cx="15.6" cy="11.8" r="0.6" />
+      <circle cx="17.2" cy="13.4" r="0.6" />
+    </svg>
+  );
+}

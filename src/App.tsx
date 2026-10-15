@@ -17,6 +17,7 @@ import PieceFormPage from './pages/PieceFormPage';
 import PiecePage from './pages/PiecePage';
 import StudyPage from './pages/StudyPage';
 import { findSong } from './course';
+import { findArcadeSong } from './arcade/songs';
 import AccountPage from './pages/AccountPage';
 import CalibratePage from './pages/CalibratePage';
 import LoginPage from './pages/LoginPage';
@@ -32,6 +33,8 @@ const ReferencePage = lazy(() => import('./pages/ReferencePage'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage'));
 const NoteReadingPage = lazy(() => import('./pages/NoteReadingPage'));
 const TreinoFocusPage = lazy(() => import('./pages/TreinoFocusPage'));
+const ArcadePage = lazy(() => import('./pages/ArcadePage'));
+const ArcadeGame = lazy(() => import('./arcade/ArcadeGame'));
 // A partitura interativa (OpenSheetMusicDisplay) também só carrega quando você estuda uma peça.
 const ScorePracticePage = lazy(() => import('./pages/ScorePracticePage'));
 
@@ -88,6 +91,19 @@ function TreinoPopup({ label, render }: { label: string; render: (close: () => v
   );
 }
 
+function ArcadePopup() {
+  const close = useCloseImmersive('/arcade');
+  const song = findArcadeSong(useParams().id ?? '');
+  if (!song) return <Navigate to="/arcade" replace />;
+  return (
+    <ImmersiveFrame onClose={close} label={`Arcade: ${song.title}`}>
+      <Suspense fallback={<div className="arcade" />}>
+        <ArcadeGame song={song} onClose={close} />
+      </Suspense>
+    </ImmersiveFrame>
+  );
+}
+
 function FocusPopup() {
   const { n = '', lessonId = '' } = useParams();
   const close = useCloseImmersive(`/estudo/unidade/${n}/${lessonId}`);
@@ -100,7 +116,7 @@ function FocusPopup() {
   );
 }
 
-const IMMERSIVE = ['/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
+const IMMERSIVE = ['/arcade/:id', '/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
 
 export default function App() {
   const location = useLocation();
@@ -109,7 +125,7 @@ export default function App() {
   const focus = matchPath('/curso/foco/:n/:lessonId', location.pathname);
   const fallbackPath = focus
     ? `/estudo/unidade/${focus.params.n}/${focus.params.lessonId}`
-    : location.pathname.startsWith('/partitura') || location.pathname.startsWith('/peca') ? '/repertorio' : '/treino';
+    : location.pathname.startsWith('/partitura') || location.pathname.startsWith('/peca') ? '/repertorio' : location.pathname.startsWith('/arcade') ? '/arcade' : '/treino';
   const background: Location = (location.state as ImmersiveState | null)?.background ??
     (immersive ? { ...location, pathname: fallbackPath, search: '', state: null } : location);
 
@@ -145,6 +161,7 @@ export default function App() {
             <Route path="/estudo/unidade/:n" element={<CourseUnitPage />} />
             <Route path="/estudo/unidade/:n/:lessonId" element={<CourseLessonPage />} />
             <Route path="/progresso" element={<ProgressPage />} />
+            <Route path="/arcade" element={<ArcadePage />} />
             <Route path="/consulta" element={<ReferencePage />} />
             <Route path="/consulta/:secao" element={<ReferencePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -168,6 +185,7 @@ export default function App() {
             <Route path="/peca/:id/estudar" element={<ScorePopup />} />
             <Route path="/curso/musica/:songId" element={<CourseSongPopup />} />
             <Route path="/curso/foco/:n/:lessonId" element={<FocusPopup />} />
+            <Route path="/arcade/:id" element={<ArcadePopup />} />
           </Routes>
         )}
         </MetronomeProvider>
