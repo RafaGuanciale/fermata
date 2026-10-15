@@ -17,7 +17,7 @@ export interface ChartNote {
 export type Difficulty = 'facil' | 'medio' | 'dificil';
 
 export const DIFFICULTIES: { id: Difficulty; label: string; hint: string }[] = [
-  { id: 'facil', label: 'Fácil', hint: 'Só as notas que caem no tempo, com folga para errar.' },
+  { id: 'facil', label: 'Fácil', hint: 'A melodia mais devagar, sem enfeites e com folga para errar.' },
   { id: 'medio', label: 'Médio', hint: 'A melodia inteira.' },
   { id: 'dificil', label: 'Difícil', hint: 'Melodia e baixo, com as duas mãos, e menos folga.' },
 ];
@@ -26,14 +26,134 @@ export const DIFFICULTIES: { id: Difficulty; label: string; hint: string }[] = [
 export interface ArcadeTune {
   id: string;
   title: string;
-  origin: string;
+  /** Compositor, banda ou intérprete. */
+  artist: string;
   /** Andamento do clique; null quando o MIDI muda de andamento (aí o relógio é o do aparelho, sem clique). */
   bpm: number | null;
   beatsPerBar: number;
   /** Se o difícil tem uma segunda mão (senão, é a melodia com menos folga). */
   hasBass: boolean;
   chart: (d: Difficulty) => ChartNote[];
+  /** O fácil toca mais devagar que o original (1 = mesmo andamento). */
+  easySpeed: number;
+  /** Andamento do clique no fácil, quando ele vem de outro arranjo (senão, o mesmo `bpm`). */
+  easyBpm?: number | null;
+  /** Dificuldades que fazem sentido nesta música (o fácil some quando simplificar a descaracteriza). */
+  available: Difficulty[];
 }
+
+// ---------- fácil: a melodia reconhecível ----------
+// Como nos jogos de ritmo, o fácil preserva o ritmo real e os tempos fortes: primeiro tira os enfeites e
+// diminui o andamento; só tira notas se ainda ficar denso demais, e nunca mais de 30% delas. Se precisar
+// tirar mais que isso, a música fica sem fácil (melhor não ter do que ter irreconhecível).
+
+export const EASY = {
+  /** Notas por segundo na parte mais cheia, depois de desacelerar. */
+  target: 2.2,
+  /** Teto depois de desacelerar; acima disso, tira notas. */
+  max: 3.0,
+  /** Mais devagar que isto a música perde o balanço. */
+  floor: 0.5,
+  windowMs: 3000,
+  maxDrop: 0.3,
+  /** Notas mais curtas que isto (ms), coladas na próxima, são enfeites (apojaturas, trinados). */
+  grace: 70,
+};
+
+/** Notas por segundo na janela mais cheia. */
+export function peakDensity(ns: { t: number }[], windowMs = EASY.windowMs): number {
+  let best = 0;
+  let a = 0;
+  for (let b = 0; b < ns.length; b++) {
+    while (ns[b].t - ns[a].t >= windowMs) a++;
+    best = Math.max(best, b - a + 1);
+  }
+  return best / (windowMs / 1000);
+}
+
+export interface EasyPlan {
+  notes: ChartNote[];
+  speed: number;
+  /** Fração de notas tiradas (fora os enfeites). */
+  dropped: number;
+}
+
+const median = (xs: number[]) => {
+  if (!xs.length) return 0;
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)];
+};
+
+export function makeEasy(melody: ChartNote[]): EasyPlan | null {
+  if (!melody.length) return null;
+  const ns = melody.filter((n, i) => !(n.dur < EASY.grace && melody[i + 1] && melody[i + 1].t - n.t < EASY.grace * 1.5));
+  const peak = peakDensity(ns);
+  const speed = peak > 0 ? Math.max(EASY.floor, Math.min(1, EASY.target / peak)) : 1;
+  // Limite de notas por janela, no andamento original.
+  const limit = Math.floor((EASY.max / speed) * (EASY.windowMs / 1000));
+  if (peak * (EASY.windowMs / 1000) <= limit) return { notes: ns, speed, dropped: 0 };
+
+  // Importância de cada nota: longa, ponta do desenho (mais aguda ou mais grave que as vizinhas) e começo de frase.
+  const ioi = median(ns.slice(1).map((n, i) => n.t - ns[i].t));
+  const mdur = median(ns.map((n) => n.dur)) || 1;
+  const imp = ns.map((n, i) => {
+    const prev = ns[i - 1];
+    const next = ns[i + 1];
+    let v = Math.min(3, n.dur / mdur);
+    if (prev && next && ((n.midi > prev.midi && n.midi > next.midi) || (n.midi < prev.midi && n.midi < next.midi))) v += 1;
+    if (!prev || n.t - (prev.t + prev.dur) > ioi * 1.5) v += 5;
+    if (!next) v += 5;
+    return v;
+  });
+  const keep = ns.map(() => true);
+  let removed = 0;
+  for (let guard = 0; guard < ns.length; guard++) {
+    // Janela mais cheia entre as notas que ficaram.
+    const idx = ns.map((_, i) => i).filter((i) => keep[i]);
+    let worst: [number, number] | null = null;
+    let a = 0;
+    for (let b = 0; b < idx.length; b++) {
+      while (ns[idx[b]].t - ns[idx[a]].t >= EASY.windowMs) a++;
+      if (b - a + 1 > limit && (!worst || b - a > worst[1] - worst[0])) worst = [a, b];
+    }
+    if (!worst) break;
+    let pick = -1;
+    for (let k = worst[0]; k <= worst[1]; k++) if (pick < 0 || imp[idx[k]] < imp[idx[pick]]) pick = k;
+    keep[idx[pick]] = false;
+    removed++;
+  }
+  const dropped = removed / ns.length;
+  if (dropped > EASY.maxDrop) return null;
+  return { notes: ns.filter((_, i) => keep[i]), speed, dropped };
+}
+
+// ---------- palcos: a dificuldade de cada música ----------
+
+/** Dificuldade de uma música a partir do médio (melodia) e do difícil (com o baixo), no andamento original. */
+export function difficultyScore(medium: ChartNote[], hard: ChartNote[]): number {
+  if (medium.length < 2) return 0;
+  const secs = Math.max(1, (medium[medium.length - 1].t - medium[0].t) / 1000);
+  const avg = medium.length / secs;
+  const peak = peakDensity(medium);
+  const span = Math.max(...medium.map((n) => n.midi)) - Math.min(...medium.map((n) => n.midi));
+  const leaps = medium.slice(1).reduce((s, n, i) => s + Math.abs(n.midi - medium[i].midi), 0) / (medium.length - 1);
+  const bass = Math.max(0, hard.length - medium.length) / secs;
+  return avg + peak * 0.6 + span * 0.05 + leaps * 0.25 + bass * 0.5;
+}
+
+export type StageId = 'descoberta' | 'alternativo' | 'principal';
+
+/** Os palcos, como num festival: do menor (para começar) ao principal (as mais difíceis). */
+export const STAGES: { id: StageId; name: string; lead: string; upTo: number }[] = [
+  { id: 'descoberta', name: 'Palco Descoberta', lead: 'Melodias calmas, para soltar os dedos.', upTo: 4.5 },
+  { id: 'alternativo', name: 'Palco Alternativo', lead: 'Os temas que todo mundo reconhece, com mais movimento.', upTo: 6.6 },
+  { id: 'principal', name: 'Palco Principal', lead: 'As atrações mais pesadas: rápidas, com saltos e as duas mãos.', upTo: Infinity },
+];
+
+export const stageOf = (score: number): StageId => STAGES.find((s) => score <= s.upTo)!.id;
+
+/** Intensidade de 1 a 5 (as barrinhas do cartão). */
+export const intensityOf = (score: number) => Math.max(1, Math.min(5, Math.round((score - 1.5) / 1.3)));
 
 interface BeatNote { midi: Midi; beat: number; beats: number }
 
@@ -77,14 +197,26 @@ export function mergeHands(a: ChartNote[], b: ChartNote[]): ChartNote[] {
 export function songChart(song: ArcadeSong, d: Difficulty = 'medio'): ChartNote[] {
   const beatMs = 60000 / song.bpm;
   const toChart = (ns: BeatNote[], hand: 'r' | 'l'): ChartNote[] => ns.map((n) => ({ midi: n.midi, t: n.beat * beatMs, dur: n.beats * beatMs, hand }));
-  const melody = beatNotes(song.melody, song.beatsPerBar);
-  if (d === 'facil') return toChart(easyPick(melody), 'r');
-  if (d === 'medio') return toChart(melody, 'r');
-  return mergeHands(toChart(melody, 'r'), toChart(beatNotes(song.bass, song.beatsPerBar), 'l'));
+  const melody = toChart(beatNotes(song.melody, song.beatsPerBar), 'r');
+  if (d === 'facil') return makeEasy(melody)?.notes ?? melody;
+  if (d === 'medio') return melody;
+  return mergeHands(melody, toChart(beatNotes(song.bass, song.beatsPerBar), 'l'));
+}
+
+/** Monta a fase a partir dos três gráficos: decide o andamento do fácil e se ele existe. */
+export function tuneFrom(base: Omit<ArcadeTune, 'chart' | 'easySpeed' | 'available'>, medium: ChartNote[], hard: ChartNote[], easy?: { notes: ChartNote[]; speed: number } | null): ArcadeTune {
+  const plan = easy === undefined ? makeEasy(medium) : easy;
+  const available: Difficulty[] = plan ? ['facil', 'medio', 'dificil'] : ['medio', 'dificil'];
+  const charts: Record<Difficulty, ChartNote[]> = { facil: plan?.notes ?? medium, medio: medium, dificil: hard };
+  return { ...base, easySpeed: plan?.speed ?? 1, available, chart: (d) => charts[d] };
 }
 
 export function songTune(song: ArcadeSong): ArcadeTune {
-  return { id: song.id, title: song.title, origin: song.origin, bpm: song.bpm, beatsPerBar: song.beatsPerBar, hasBass: true, chart: (d) => songChart(song, d) };
+  return tuneFrom(
+    { id: song.id, title: song.title, artist: song.artist, bpm: song.bpm, beatsPerBar: song.beatsPerBar, hasBass: true },
+    songChart(song, 'medio'),
+    songChart(song, 'dificil'),
+  );
 }
 
 /** O gráfico com o andamento multiplicado por `speed` (0,75 = mais devagar). */

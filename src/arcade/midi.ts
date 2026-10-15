@@ -2,7 +2,7 @@
 // O arquivo é do usuário e fica só no aparelho (tabela arcadeMidi, fora da sincronização).
 // Puro e testado (midi.test.ts).
 
-import { easyPick, mergeHands, type ArcadeTune, type ChartNote, type Difficulty } from './arcade';
+import { easyPick, makeEasy, mergeHands, scaleChart, tuneFrom, type ArcadeTune, type ChartNote } from './arcade';
 import type { ChartData } from './songs';
 
 export interface MidiNote {
@@ -266,7 +266,7 @@ export interface MidiChoice {
 }
 
 /** Fase do arcade a partir do MIDI e das partes escolhidas. */
-export function midiTune(file: MidiFile, choice: MidiChoice, meta: { id: string; title: string }): ArcadeTune {
+export function midiTune(file: MidiFile, choice: MidiChoice, meta: { id: string; title: string; artist?: string }): ArcadeTune {
   const mPart = file.parts[choice.melody] ?? file.parts[0];
   const bPart = choice.bass !== null && choice.bass !== mPart.index ? file.parts[choice.bass] : undefined;
   const top = fit(voice(mPart.notes, 'top', file.ppq), 48, 96);
@@ -288,38 +288,42 @@ export function midiTune(file: MidiFile, choice: MidiChoice, meta: { id: string;
       return { midi: n.midi, t, dur: Math.max(60, tickToMs(n.tick + n.durTicks, file) - t0 - t), hand };
     });
 
-  const cache = new Map<Difficulty, ChartNote[]>();
-  const chart = (d: Difficulty): ChartNote[] => {
-    const hit = cache.get(d);
-    if (hit) return hit;
-    let out: ChartNote[];
-    if (d === 'facil') {
-      // Posição no tempo arredondada à semicolcheia, para o "cair no tempo" valer em MIDI tocado ao vivo.
-      const withBeats = top.map((n) => ({ n, beat: Math.round(((n.tick - start) / file.ppq) * 4) / 4, beats: n.durTicks / file.ppq }));
-      out = playable(toChart(easyPick(withBeats).map((x) => x.n), 'r'), 250);
-    } else if (d === 'medio' || !hasBass) {
-      out = playable(toChart(top, 'r'), 90);
-    } else {
-      // No difícil, a esquerda fica com uma nota por tempo (o baixo de cada tempo), não o acompanhamento inteiro.
-      const bassBeats = easyPick(bottom.map((n) => ({ n, beat: Math.round(((n.tick - start) / file.ppq) * 4) / 4, beats: n.durTicks / file.ppq })), 0.95).map((x) => x.n);
-      out = mergeHands(playable(toChart(top, 'r'), 90), playable(toChart(bassBeats, 'l'), 180));
-    }
-    cache.set(d, out);
-    return out;
-  };
-
-  return { id: meta.id, title: meta.title, origin: `MIDI importado · ${partLabel(mPart, file.parts).split(' · ')[0]}`, bpm, beatsPerBar: file.beatsPerBar, hasBass, chart };
+  const medium = playable(toChart(top, 'r'), 90);
+  // No difícil, a esquerda fica com uma nota por tempo (o baixo de cada tempo), não o acompanhamento inteiro.
+  const bassBeats = easyPick(bottom.map((n) => ({ n, beat: Math.round(((n.tick - start) / file.ppq) * 4) / 4, beats: n.durTicks / file.ppq })), 0.95).map((x) => x.n);
+  const hard = hasBass ? mergeHands(medium, playable(toChart(bassBeats, 'l'), 180)) : medium;
+  return tuneFrom({ id: meta.id, title: meta.title, artist: meta.artist ?? '', bpm, beatsPerBar: file.beatsPerBar, hasBass }, medium, hard);
 }
 
-/** Fase de uma música do app guardada em linhas (charts/*.json); o fácil pode vir de um arranjo mais simples. */
-export function chartTune(meta: { id: string; title: string; origin: string }, d: ChartData, easy?: ChartData): ArcadeTune {
+/** Multiplica o andamento de uma fase (0,9 = 10% mais lenta), para bater com as gravações de referência. */
+function slowDown(t: ArcadeTune, scale: number): ArcadeTune {
+  if (scale === 1) return t;
+  const charts = { facil: scaleChart(t.chart('facil'), scale), medio: scaleChart(t.chart('medio'), scale), dificil: scaleChart(t.chart('dificil'), scale) };
+  return { ...t, bpm: t.bpm ? Math.round(t.bpm * scale) : null, easyBpm: t.easyBpm ? Math.round(t.easyBpm * scale) : t.easyBpm, chart: (d) => charts[d] };
+}
+
+/**
+ * Fase de uma música do app guardada em linhas (charts/*.json). O fácil vem do arranjo mais simples quando há
+ * um (feito por gente, costuma ser melhor que a simplificação automática); senão, da própria melodia.
+ */
+export function chartTune(meta: { id: string; title: string; artist: string; tempoScale?: number }, d: ChartData, easy?: ChartData): ArcadeTune {
   const full = midiTune(fileFromChart(d), { melody: 0, bass: 1 }, meta);
-  const simple = easy ? midiTune(fileFromChart(easy), { melody: 0, bass: 1 }, meta) : null;
-  return {
-    ...full,
-    origin: meta.origin,
-    // Com arranjo fácil, o clique segue o andamento dele só quando os dois têm o mesmo; senão, sem clique.
-    bpm: simple && simple.bpm !== full.bpm ? null : full.bpm,
-    chart: (diff) => (diff === 'facil' && simple ? simple.chart('medio') : full.chart(diff)),
-  };
+  if (!easy) return slowDown(full, meta.tempoScale ?? 1);
+  const simple = midiTune(fileFromChart(easy), { melody: 0, bass: 1 }, meta);
+  const plan = makeEasy(simple.chart('medio'));
+  const tune = plan
+    ? tuneFrom({ ...full, easyBpm: simple.bpm }, full.chart('medio'), full.chart('dificil'), plan)
+    : full;
+  return slowDown(tune, meta.tempoScale ?? 1);
+}
+
+/** Nome e artista a partir do nome do arquivo ("Iris - Goo Goo Dolls.mid") ou do título guardado no MIDI. */
+export function guessNames(fileName: string, midiTitle: string | null): { title: string; artist: string } {
+  // Tira a extensão e um código no começo (alguns sites e envios põem um hash: "03fae352-iris.mid").
+  const base = fileName.replace(/\.(mid|midi|kar)$/i, '').replace(/^[0-9a-f]{6,}[-_ ]/i, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const pretty = (x: string) => x.trim().replace(/(^|\s)\p{Ll}/gu, (c) => c.toUpperCase());
+  const parts = base.split(/\s+[-–—]\s+|\s+by\s+|\s+de\s+(?=\p{Lu})/u).filter(Boolean);
+  if (parts.length >= 2) return { title: pretty(parts[0]), artist: pretty(parts.slice(1).join(' ')) };
+  if (midiTitle && midiTitle.length > 2 && !/^(piano|track|untitled|sem título)/i.test(midiTitle)) return { title: pretty(midiTitle), artist: '' };
+  return { title: pretty(base.replace(/-+/g, ' ')), artist: '' };
 }

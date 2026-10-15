@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { parseLine } from '../course/music';
 import { ARCADE_SONGS } from './songs';
 import {
-  DIFFICULTIES, WINDOWS_BY, buildChart, chartRange, comboMilestone, easyPick, expire, gradeOf, hit, isHold, mergeHands, multiplier,
-  multiplierFill, release, songChart, startState, summarize, sustain, waitingAt, type ChartNote,
+  DIFFICULTIES, WINDOWS_BY, buildChart, chartRange, comboMilestone, difficultyScore, easyPick, expire, gradeOf, hit, isHold, makeEasy, mergeHands, multiplier, peakDensity, stageOf,
+  multiplierFill, release, songChart, songTune, startState, summarize, sustain, waitingAt, type ChartNote,
 } from './arcade';
 
 const totalBeats = (line: string) => parseLine(line).reduce((s, n) => s + n.beats, 0);
@@ -18,6 +18,10 @@ describe('arcade', () => {
       const counts = DIFFICULTIES.map((d) => songChart(s, d.id).length);
       expect(counts[0], s.id).toBeGreaterThan(3);
       expect(counts[0], s.id).toBeLessThanOrEqual(counts[1]);
+      // O fácil nunca acelera e nunca tira mais de 30% das notas.
+      const t = songTune(s);
+      expect(t.easySpeed, s.id).toBeLessThanOrEqual(1);
+      if (t.available.includes('facil')) expect(counts[0] / counts[1], s.id).toBeGreaterThanOrEqual(0.7);
       expect(counts[1], s.id).toBeLessThan(counts[2]);
       for (const d of DIFFICULTIES) {
         const chart = songChart(s, d.id);
@@ -40,6 +44,29 @@ describe('arcade', () => {
       { beat: 0, beats: 0.25 }, { beat: 0.25, beats: 0.25 }, { beat: 0.5, beats: 2.5 }, { beat: 3, beats: 0.5 }, { beat: 3.5, beats: 0.5 }, { beat: 4, beats: 1 },
     ];
     expect(easyPick(notes)).toEqual([{ beat: 0.5, beats: 2.5 }, { beat: 3, beats: 0.5 }, { beat: 4, beats: 1 }]);
+  });
+
+  it('fácil: desacelera antes de tirar notas, e desiste se precisar tirar demais', () => {
+    const at = (ms: number[], dur = 200): ChartNote[] => ms.map((t, i) => ({ midi: 60 + (i % 5), t, dur, hand: 'r' }));
+    // Calma (1 nota por segundo): igual ao médio, no mesmo andamento.
+    const calm = makeEasy(at(Array.from({ length: 20 }, (_, i) => i * 1000)))!;
+    expect(calm.speed).toBe(1);
+    expect(calm.notes).toHaveLength(20);
+    // 3 notas por segundo: mesma melodia, mais devagar.
+    const mid = makeEasy(at(Array.from({ length: 30 }, (_, i) => i * 333)))!;
+    expect(mid.notes).toHaveLength(30);
+    expect(mid.speed).toBeCloseTo(2.2 / peakDensity(at(Array.from({ length: 30 }, (_, i) => i * 333))), 2);
+    // Enfeite (nota curtíssima colada na próxima) sai sem contar como corte.
+    const grace = makeEasy([...at([0, 1000, 2000, 3000]), { midi: 72, t: 2950, dur: 40, hand: 'r' as const }].sort((a, b) => a.t - b.t))!;
+    expect(grace.notes.map((n) => n.midi)).not.toContain(72);
+    // 10 notas por segundo: teria de tirar demais, então não tem fácil.
+    expect(makeEasy(at(Array.from({ length: 80 }, (_, i) => i * 100), 80))).toBeNull();
+  });
+
+  it('palcos: músicas calmas no Descoberta, rápidas e com saltos no Principal', () => {
+    const at = (gap: number, leap: number): ChartNote[] => Array.from({ length: 40 }, (_, i) => ({ midi: 60 + (i % 2) * leap, t: i * gap, dur: gap * 0.9, hand: 'r' }));
+    expect(stageOf(difficultyScore(at(1000, 2), at(1000, 2)))).toBe('descoberta');
+    expect(stageOf(difficultyScore(at(150, 12), at(150, 12)))).toBe('principal');
   });
 
   it('junta as mãos sem repetir tecla no mesmo instante', () => {

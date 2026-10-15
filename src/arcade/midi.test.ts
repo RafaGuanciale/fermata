@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MidiError, guessParts, midiTune, parseMidi, steadyBpm, tickToMs, voice } from './midi';
+import { MidiError, guessNames, guessParts, midiTune, parseMidi, steadyBpm, tickToMs, voice } from './midi';
 
 // Monta um .mid pequeno à mão: formato 1, cabeçalho de andamento + faixas de notas.
 const vlq = (n: number): number[] => {
@@ -66,7 +66,7 @@ describe('importar MIDI', () => {
     expect(steadyBpm(f)).toBeNull();
   });
 
-  it('melodia é a voz de cima; o fácil é mais ralo; o difícil tem as duas mãos', () => {
+  it('melodia é a voz de cima; o fácil é a melodia mais lenta; o difícil tem as duas mãos', () => {
     const f = parseMidi(smf(PPQ, [notesTrack('Piano', 0, chords, PPQ), notesTrack('Bass', 1, bass, PPQ)]));
     expect(voice(f.parts[0].notes, 'top', PPQ).map((n) => n.midi)).toEqual(melody.map((m) => m[0]));
     const tune = midiTune(f, { melody: 0, bass: 1 }, { id: 'x', title: 'Teste' });
@@ -74,7 +74,10 @@ describe('importar MIDI', () => {
     const med = tune.chart('medio');
     const hard = tune.chart('dificil');
     expect(med.map((n) => n.midi)).toEqual(melody.map((m) => m[0]));
-    expect(easy.length).toBeLessThan(med.length);
+    // Melodia calma: o fácil não tira nenhuma nota.
+    expect(easy.length).toBe(med.length);
+    expect(tune.easySpeed).toBeLessThanOrEqual(1);
+    expect(tune.available).toContain('facil');
     expect(hard.filter((n) => n.hand === 'l').length).toBe(3);
     // O baixo sobe por oitavas para caber no teclado e ficar perto da melodia.
     expect(Math.min(...hard.map((n) => n.midi))).toBeGreaterThanOrEqual(36);
@@ -99,7 +102,7 @@ describe('importar MIDI', () => {
 });
 
 describe('versões completas do app (domínio público)', () => {
-  it('cada uma abre nas três dificuldades, e o fácil é mais curto', async () => {
+  it('cada uma abre nas três dificuldades; o fácil é mais lento e reconhecível', async () => {
     const { ARCADE_CHARTS } = await import('./songs');
     const { chartTune } = await import('./midi');
     for (const c of ARCADE_CHARTS) {
@@ -107,10 +110,21 @@ describe('versões completas do app (domínio público)', () => {
       const t = chartTune(c, full, easy);
       const [f, m, d] = (['facil', 'medio', 'dificil'] as const).map((x) => t.chart(x));
       expect(f.length, c.id).toBeGreaterThan(10);
-      expect(f.length, c.id).toBeLessThan(m.length);
+      expect(f.length, c.id).toBeLessThanOrEqual(m.length);
+      expect(t.easySpeed, c.id).toBeLessThanOrEqual(1);
+      expect(t.easySpeed, c.id).toBeGreaterThanOrEqual(0.5);
       expect(d.length, c.id).toBeGreaterThan(m.length);
       for (const ch of [f, m, d]) for (let i = 1; i < ch.length; i++) expect(ch[i].t, c.id).toBeGreaterThanOrEqual(ch[i - 1].t);
       expect(Math.min(...d.map((n) => n.midi)), c.id).toBeGreaterThanOrEqual(36);
     }
+  });
+});
+
+describe('nome e artista do arquivo', () => {
+  it('separa "Música - Artista" e limpa o nome', () => {
+    expect(guessNames('Iris - Goo Goo Dolls.mid', null)).toEqual({ title: 'Iris', artist: 'Goo Goo Dolls' });
+    expect(guessNames('The_Final_Countdown_-_Europe.mid', null)).toEqual({ title: 'The Final Countdown', artist: 'Europe' });
+    expect(guessNames('03fae352-iris-goo-goo-dolls.mid', null)).toEqual({ title: 'Iris Goo Goo Dolls', artist: '' });
+    expect(guessNames('track.mid', 'Interstellar')).toEqual({ title: 'Interstellar', artist: '' });
   });
 });

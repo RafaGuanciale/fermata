@@ -1,26 +1,21 @@
-// Arcade: a tela de escolha é um palco, como nos jogos de ritmo. No alto, o seu nível e o próximo show;
-// embaixo, a turnê em três etapas (aquecimento, palco, arena) e as suas músicas importadas.
-// Cada música mostra as estrelas de cada dificuldade.
+// Arcade: a tela de escolha é um festival. No alto, o seu nível e o próximo show; embaixo, os palcos
+// (Descoberta, Alternativo e Principal), do mais leve ao mais pesado. Toda música, do app ou importada,
+// cai no palco pela dificuldade calculada (arcade.ts: difficultyScore). Cada uma mostra nome, artista e as
+// estrelas de cada dificuldade.
 
 import { useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ARCADE_CATALOG, type ArcadeEntry } from '../arcade/songs';
 import { parseArcadeRunId, readArcadeSettings, saveArcadeSettings } from '../arcade/settings';
-import { DIFFICULTIES, type Difficulty } from '../arcade/arcade';
-import { deleteMidi, importMidi, useArcadeMidis } from '../arcade/midiStore';
+import { DIFFICULTIES, STAGES, type Difficulty } from '../arcade/arcade';
+import { importMidi, useArcadeMidis } from '../arcade/midiStore';
+import { useArcadeLibrary, type LibraryEntry } from '../arcade/library';
 import { useRuns } from '../training/runs';
 import { useMastery } from '../achievements/useMastery';
 import Emblem from '../achievements/Emblem';
 import { LEVEL_NAMES } from '../achievements/mastery';
-import { ArcadeIcon, FlameIcon, NoteIcon, PlayIcon, StarIcon, TrashIcon, UploadIcon } from '../components/Icons';
+import { ArcadeIcon, FlameIcon, NoteIcon, PlayIcon, StarIcon, UploadIcon } from '../components/Icons';
 
 type Results = Partial<Record<Difficulty, { stars: number; score: number }>>;
-
-const TIERS: { level: 1 | 2 | 3; name: string; lead: string }[] = [
-  { level: 1, name: 'Aquecimento', lead: 'Para soltar os dedos.' },
-  { level: 2, name: 'Palco', lead: 'Os temas que todo mundo reconhece.' },
-  { level: 3, name: 'Arena', lead: 'Para quem quer suar.' },
-];
 
 const SHORT: Record<Difficulty, string> = { facil: 'F', medio: 'M', dificil: 'D' };
 
@@ -29,10 +24,11 @@ const bestScore = (r: Results | undefined) => Math.max(0, ...DIFFICULTIES.map((d
 
 /** Capa gerada: cor pela etiqueta, a inicial grande e um disco que aparece no passar do mouse. */
 function Cover({ title, tag, size = 'row' }: { title: string; tag: string; size?: 'row' | 'hero' }) {
-  const kind = /rock/i.test(tag) ? 'rock' : /game/i.test(tag) ? 'games' : /cinema/i.test(tag) ? 'cinema' : /elvis/i.test(tag) ? 'elvis' : /midi/i.test(tag) ? 'midi' : /aquec/i.test(tag) ? 'warm' : 'classic';
+  const kind = /rock/i.test(tag) ? 'rock' : /game/i.test(tag) ? 'games' : /cinema/i.test(tag) ? 'cinema' : /elvis/i.test(tag) ? 'elvis' : /sua/i.test(tag) ? 'midi' : /aquec/i.test(tag) ? 'warm' : 'classic';
   const Icon = kind === 'games' ? ArcadeIcon : kind === 'rock' ? FlameIcon : kind === 'midi' ? UploadIcon : NoteIcon;
+  const variant = [...title].reduce((h, c) => h + c.charCodeAt(0), 0) % 3;
   return (
-    <span className={`cover cover-${kind} cover-${size} cover-v${[...title].reduce((h, c) => h + c.charCodeAt(0), 0) % 3}`} aria-hidden>
+    <span className={`cover cover-${kind} cover-${size} cover-v${variant}`} aria-hidden>
       <span className="cover__disc" />
       <span className="cover__sleeve">
         <span className="cover__initial">{title.replace(/^(O|A|The|Na|Tema do)\s+/i, '').charAt(0)}</span>
@@ -42,15 +38,20 @@ function Cover({ title, tag, size = 'row' }: { title: string; tag: string; size?
   );
 }
 
-function DiffStars({ r }: { r: Results | undefined }) {
+function DiffStars({ r, easy }: { r: Results | undefined; easy: boolean }) {
   return (
     <span className="diffStars">
       {DIFFICULTIES.map((d) => {
+        const off = d.id === 'facil' && !easy;
         const n = r?.[d.id]?.stars ?? 0;
         return (
-          <span key={d.id} className={'diffStars__item' + (n ? ' diffStars__item-on' : '')} title={`${d.label}: ${n} de 3 estrelas`}>
+          <span
+            key={d.id}
+            className={'diffStars__item' + (n ? ' diffStars__item-on' : '') + (off ? ' diffStars__item-off' : '')}
+            title={off ? 'Sem modo fácil: simplificada, ela ficaria irreconhecível' : `${d.label}: ${n} de 3 estrelas`}
+          >
             <span className="diffStars__label">{SHORT[d.id]}</span>
-            {[0, 1, 2].map((k) => <StarIcon key={k} className={'diffStars__star' + (k < n ? ' diffStars__star-on' : '')} />)}
+            {off ? <span className="diffStars__none">—</span> : [0, 1, 2].map((k) => <StarIcon key={k} className={'diffStars__star' + (k < n ? ' diffStars__star-on' : '')} />)}
           </span>
         );
       })}
@@ -60,8 +61,8 @@ function DiffStars({ r }: { r: Results | undefined }) {
 
 function Intensity({ level }: { level: number }) {
   return (
-    <span className="intensity" title={`Intensidade ${level} de 3`} aria-label={`Intensidade ${level} de 3`}>
-      {[1, 2, 3].map((k) => <span key={k} className={'intensity__bar' + (k <= level ? ' intensity__bar-on' : '')} />)}
+    <span className="intensity" title={`Intensidade ${level} de 5`} aria-label={`Intensidade ${level} de 5`}>
+      {[1, 2, 3, 4, 5].map((k) => <span key={k} className={'intensity__bar' + (k <= level ? ' intensity__bar-on' : '')} />)}
     </span>
   );
 }
@@ -71,6 +72,7 @@ export default function ArcadePage() {
   const navigate = useNavigate();
   const runs = useRuns();
   const midis = useArcadeMidis();
+  const library = useArcadeLibrary(midis);
   const mastery = useMastery();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -91,22 +93,20 @@ export default function ArcadePage() {
     return out;
   }, [runs]);
 
-  const all: (ArcadeEntry & { midi?: boolean })[] = useMemo(
-    () => [...ARCADE_CATALOG, ...(midis ?? []).map((m) => ({ id: m.id, title: m.title, origin: 'MIDI importado', tag: 'MIDI', level: 2 as const, midi: true }))],
-    [midis],
-  );
+  const all = useMemo(() => [...(library ?? [])].sort((a, b) => a.score - b.score), [library]);
   const totalStars = all.reduce((s, e) => s + starsOf(results.get(e.id)), 0);
-  const maxStars = all.length * 9;
+  const maxStars = all.reduce((s, e) => s + (e.easy ? 9 : 6), 0);
   const cleared = all.filter((e) => starsOf(results.get(e.id)) > 0).length;
   const record = Math.max(0, ...all.map((e) => bestScore(results.get(e.id))));
   const arcadeTrack = mastery?.tracks.find((t) => t.def.id === 'arcade');
 
-  // Próximo show: a primeira música da turnê ainda sem estrela; com tudo estrelado, a de menos estrelas.
-  const featured = ARCADE_CATALOG.find((e) => !starsOf(results.get(e.id))) ?? [...ARCADE_CATALOG].sort((a, b) => starsOf(results.get(a.id)) - starsOf(results.get(b.id)))[0];
-  const hrefOf = (e: { id: string; midi?: boolean }) => (e.midi ? `/arcade/midi/${e.id}` : `/arcade/${e.id}`);
+  // Próximo show: a música mais leve ainda sem estrela; com tudo estrelado, a de menos estrelas.
+  const featured = all.find((e) => !starsOf(results.get(e.id))) ?? [...all].sort((a, b) => starsOf(results.get(a.id)) - starsOf(results.get(b.id)))[0];
+  const heroPick: Difficulty = featured && !featured.easy && heroDiff === 'facil' ? 'medio' : heroDiff;
+  const hrefOf = (e: LibraryEntry) => (e.midi ? `/arcade/midi/${e.id}` : `/arcade/${e.id}`);
 
-  const play = (e: { id: string; midi?: boolean }, d?: Difficulty) => {
-    if (d) saveArcadeSettings({ ...readArcadeSettings(), diff: d });
+  const play = (e: LibraryEntry, d: Difficulty) => {
+    saveArcadeSettings({ ...readArcadeSettings(), diff: d });
     navigate(hrefOf(e), { state: { background: location } });
   };
 
@@ -125,27 +125,25 @@ export default function ArcadePage() {
     }
   };
 
-  const row = (e: ArcadeEntry & { midi?: boolean }) => {
+  const row = (e: LibraryEntry) => {
     const r = results.get(e.id);
     const score = bestScore(r);
     return (
-      <li key={e.id} className={'setRow' + (e.midi ? ' setRow-midi' : '')}>
+      <li key={e.id} className="setRow">
         <Link className="setRow__link" to={hrefOf(e)} state={{ background: location }}>
           <Cover title={e.title} tag={e.tag} />
           <span className="setRow__main">
-            <span className="setRow__title">{e.title}</span>
-            <span className="setRow__origin">{e.origin}</span>
+            <span className="setRow__title">
+              {e.title}
+              {e.midi && <span className="setRow__badge">Sua</span>}
+            </span>
+            <span className={'setRow__origin' + (e.artist ? '' : ' setRow__origin-missing')}>{e.artist || 'Falta o artista: toque para completar'}</span>
           </span>
-          {!e.midi && <Intensity level={e.level} />}
-          <DiffStars r={r} />
+          <Intensity level={e.intensity} />
+          <DiffStars r={r} easy={e.easy} />
           <span className="setRow__score">{score ? `${score.toLocaleString('pt-BR')} pts` : 'Novo'}</span>
           <span className="setRow__play" aria-hidden><PlayIcon className="setRow__playIcon" /></span>
         </Link>
-        {e.midi && (
-          <button className="setRow__delete" type="button" aria-label={`Apagar ${e.title}`} title="Apagar este MIDI" onClick={() => void deleteMidi(e.id)}>
-            <TrashIcon className="setRow__deleteIcon" />
-          </button>
-        )}
       </li>
     );
   };
@@ -161,9 +159,9 @@ export default function ArcadePage() {
         </div>
 
         <div className="arcadeStage__intro">
-          <span className="arcadeStage__eyebrow">Arcade</span>
+          <span className="arcadeStage__eyebrow">Arcade · o festival</span>
           <h1 className="arcadeStage__title">Hora do show</h1>
-          <p className="arcadeStage__lead">As notas caem sobre as teclas. Toque no tempo, segure as longas e encha o multiplicador.</p>
+          <p className="arcadeStage__lead">Três palcos, do mais leve ao mais pesado. Toque no tempo, segure as longas e encha o multiplicador.</p>
           <div className="arcadeStage__stats">
             {arcadeTrack && (
               <span className="arcadeStage__emblem" title={`Maestria do arcade: ${LEVEL_NAMES[arcadeTrack.level]}`}>
@@ -187,18 +185,25 @@ export default function ArcadePage() {
 
         {featured && (
           <div className="arcadeNext">
-            <span className="arcadeNext__eyebrow">Próximo show</span>
+            <span className="arcadeNext__eyebrow">Próximo show · {STAGES.find((s) => s.id === featured.stage)?.name}</span>
             <Cover title={featured.title} tag={featured.tag} size="hero" />
             <span className="arcadeNext__title">{featured.title}</span>
-            <span className="arcadeNext__origin">{featured.origin}</span>
+            <span className="arcadeNext__origin">{featured.artist || 'Artista não informado'}</span>
             <div className="chips arcadeNext__chips" role="group" aria-label="Dificuldade">
               {DIFFICULTIES.map((d) => (
-                <button key={d.id} type="button" className={'chip' + (heroDiff === d.id ? ' chip-active' : '')} aria-pressed={heroDiff === d.id} onClick={() => setHeroDiff(d.id)}>
+                <button
+                  key={d.id}
+                  type="button"
+                  className={'chip' + (heroPick === d.id ? ' chip-active' : '')}
+                  aria-pressed={heroPick === d.id}
+                  disabled={d.id === 'facil' && !featured.easy}
+                  onClick={() => setHeroDiff(d.id)}
+                >
                   {d.label}
                 </button>
               ))}
             </div>
-            <button className="button button-primary arcadeNext__play" type="button" onClick={() => play(featured, heroDiff)}>
+            <button className="button button-primary arcadeNext__play" type="button" onClick={() => play(featured, heroPick)}>
               <PlayIcon className="button__icon" />
               Tocar agora
             </button>
@@ -206,53 +211,43 @@ export default function ArcadePage() {
         )}
       </section>
 
-      {TIERS.map((t) => {
-        const songs = ARCADE_CATALOG.filter((e) => e.level === t.level);
-        const got = songs.reduce((s, e) => s + starsOf(results.get(e.id)), 0);
-        const max = songs.length * 9;
-        return (
-          <section key={t.level} className={`setTier setTier-${t.level}`}>
-            <header className="setTier__head">
-              <span className="setTier__step">Etapa {t.level}</span>
-              <h2 className="setTier__name">{t.name}</h2>
-              <span className="setTier__lead">{t.lead}</span>
-              <span className="setTier__progress" title={`${got} de ${max} estrelas`}>
-                <span className="setTier__bar"><span style={{ width: `${max ? (got / max) * 100 : 0}%` }} /></span>
-                <StarIcon className="setTier__star" />
-                {got}/{max}
-              </span>
-            </header>
-            <ul className="setList">
-              {songs.map(row)}
-            </ul>
-          </section>
-        );
-      })}
-
-      <section className="setTier setTier-midi">
-        <header className="setTier__head">
-          <span className="setTier__step">Bônus</span>
-          <h2 className="setTier__name">Suas músicas</h2>
-          <span className="setTier__lead">MIDIs que você importou. Ficam na sua conta, só para você.</span>
-          <button className="button button-secondary button-small setTier__import" type="button" disabled={busy} onClick={() => fileRef.current?.click()}>
-            <UploadIcon className="button__icon" />
-            {busy ? 'Lendo…' : 'Importar MIDI'}
-          </button>
-          <input ref={fileRef} type="file" accept=".mid,.midi,.kar,audio/midi,audio/x-midi" hidden onChange={(e) => void onFile(e.target.files?.[0])} />
-        </header>
-        {error && <p className="arcadeImport__error" role="alert"><strong>Não deu:</strong> {error}</p>}
-        {midis && midis.length > 0 ? (
-          <ul className="setList">
-            {all.filter((e) => e.midi).map(row)}
-          </ul>
-        ) : (
-          <button className="setEmpty" type="button" onClick={() => fileRef.current?.click()}>
-            <UploadIcon className="setEmpty__icon" />
-            <span className="setEmpty__title">Traga qualquer música em MIDI</span>
-            <span className="setEmpty__lead">No MuseScore, baixe como MIDI. O app monta a fase nas três dificuldades.</span>
-          </button>
-        )}
+      <section className="setImport">
+        <div className="setImport__text">
+          <strong className="setImport__title">Traga as suas músicas</strong>
+          <span className="setImport__lead">Importe um MIDI (no MuseScore, baixe como MIDI). O app calcula a dificuldade e coloca a música no palco certo. Fica na sua conta, só para você.</span>
+        </div>
+        <button className="button button-secondary setImport__button" type="button" disabled={busy} onClick={() => fileRef.current?.click()}>
+          <UploadIcon className="button__icon" />
+          {busy ? 'Lendo…' : 'Importar MIDI'}
+        </button>
+        <input ref={fileRef} type="file" accept=".mid,.midi,.kar,audio/midi,audio/x-midi" hidden onChange={(e) => void onFile(e.target.files?.[0])} />
+        {error && <p className="arcadeImport__error setImport__error" role="alert"><strong>Não deu:</strong> {error}</p>}
       </section>
+
+      {!library && <p className="page__lead">Montando os palcos…</p>}
+
+      {library &&
+        STAGES.map((st, i) => {
+          const songs = all.filter((e) => e.stage === st.id);
+          if (!songs.length) return null;
+          const got = songs.reduce((s, e) => s + starsOf(results.get(e.id)), 0);
+          const max = songs.reduce((s, e) => s + (e.easy ? 9 : 6), 0);
+          return (
+            <section key={st.id} className={`setTier setTier-${i + 1} setTier-${st.id}`}>
+              <header className="setTier__head">
+                <span className="setTier__step">{i === STAGES.length - 1 ? 'Atração principal' : `Palco ${i + 1}`}</span>
+                <h2 className="setTier__name">{st.name}</h2>
+                <span className="setTier__lead">{st.lead}</span>
+                <span className="setTier__progress" title={`${got} de ${max} estrelas`}>
+                  <span className="setTier__bar"><span style={{ width: `${max ? (got / max) * 100 : 0}%` }} /></span>
+                  <StarIcon className="setTier__star" />
+                  {got}/{max}
+                </span>
+              </header>
+              <ul className="setList">{songs.map(row)}</ul>
+            </section>
+          );
+        })}
     </div>
   );
 }

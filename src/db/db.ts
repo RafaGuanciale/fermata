@@ -153,6 +153,8 @@ export interface NoteReadStat extends Synced {
 export interface ArcadeMidi extends Synced {
   id: string;
   title: string;
+  /** Banda, compositor ou intérprete (o app tenta adivinhar pelo nome do arquivo; a pessoa corrige). */
+  artist?: string;
   data: ArrayBuffer;
   /** Partes escolhidas (índices de `parseMidi(data).parts`). */
   melody: number;

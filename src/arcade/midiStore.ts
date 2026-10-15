@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type ArcadeMidi } from '../db/db';
-import { guessParts, midiTune, parseMidi } from './midi';
+import { guessNames, guessParts, midiTune, parseMidi } from './midi';
 import type { ArcadeTune } from './arcade';
 
 /** Maior arquivo aceito (um MIDI de música inteira raramente passa de 100 KB). */
@@ -23,12 +23,12 @@ export async function importMidi(file: File): Promise<string> {
   const parsed = parseMidi(data);
   const { melody, bass } = guessParts(parsed);
   const id = `midi-${crypto.randomUUID().slice(0, 8)}`;
-  const title = (parsed.title && parsed.title.length > 2 ? parsed.title : file.name.replace(/\.(mid|midi|kar)$/i, '')).replace(/[_-]+/g, ' ').trim();
-  await db.arcadeMidi.put({ id, title, data, melody, bass, addedAt: Date.now() });
+  const { title, artist } = guessNames(file.name, parsed.title);
+  await db.arcadeMidi.put({ id, title, artist, data, melody, bass, addedAt: Date.now() });
   return id;
 }
 
-export async function updateMidi(id: string, patch: Partial<Pick<ArcadeMidi, 'title' | 'melody' | 'bass'>>) {
+export async function updateMidi(id: string, patch: Partial<Pick<ArcadeMidi, 'title' | 'artist' | 'melody' | 'bass'>>) {
   await db.arcadeMidi.update(id, patch);
 }
 
@@ -37,5 +37,5 @@ export async function deleteMidi(id: string) {
 }
 
 export function tuneOf(m: ArcadeMidi): ArcadeTune {
-  return midiTune(parseMidi(m.data), { melody: m.melody, bass: m.bass }, { id: m.id, title: m.title });
+  return midiTune(parseMidi(m.data), { melody: m.melody, bass: m.bass }, { id: m.id, title: m.title, artist: m.artist ?? '' });
 }

@@ -20,7 +20,7 @@ import {
   DIFFICULTIES, WINDOWS_BY, chartRange, comboMilestone, expire, hit, isHold, multiplier, multiplierFill, release, scaleChart, startState,
   summarize, sustain, waitingAt, type ArcadeGrade, type ArcadeState, type ArcadeSummary, type ArcadeTune, type ChartNote,
 } from './arcade';
-import { arcadeRunId, readArcadeSettings, saveArcadeSettings, type ArcadeSettings as Settings } from './settings';
+import { SPEEDS, arcadeRunId, readArcadeSettings, saveArcadeSettings, type ArcadeSettings as Settings } from './settings';
 
 /** Tempo que a nota leva do alto da tela até a tecla. */
 const LEAD = 2600;
@@ -101,13 +101,17 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
     saveArcadeSettings(s);
     setSettingsState(s);
   };
-  const diff = settings.diff;
+  // Música sem fácil (ficaria irreconhecível): cai no médio.
+  const diff = tune.available.includes(settings.diff) ? settings.diff : 'medio';
   const runId = arcadeRunId(tune.id, diff);
   const best = useMemo(() => {
     const mine = (runs ?? []).filter((r) => r.treinoId === runId);
     return mine.length ? Math.max(...mine.map((r) => r.score ?? 0)) : null;
   }, [runs, runId]);
-  const speed = settings.slow ? 0.75 : 1;
+  // O fácil já toca mais devagar que o original; o andamento escolhido multiplica por cima (nunca acima de 100%).
+  const speed = settings.speed * (diff === 'facil' ? tune.easySpeed : 1);
+  const baseBpm = diff === 'facil' && tune.easyBpm !== undefined ? tune.easyBpm : tune.bpm;
+  const speedIdx = Math.max(0, SPEEDS.findIndex((x) => Math.abs(x - settings.speed) < 1e-6));
   const chart = useMemo(() => scaleChart(tune.chart(diff), speed), [tune, diff, speed]);
   const maxDur = useMemo(() => chart.reduce((m, n) => Math.max(m, n.dur), 0), [chart]);
   const windows = WINDOWS_BY[diff];
@@ -203,15 +207,15 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
     // No ritmo, com andamento fixo: o clique do metrônomo marca o pulso e é o relógio.
     // Sem pressa, ou MIDI com mudança de andamento: sem clique, o relógio é o do aparelho.
     let track: ScheduledTrack | null = null;
-    if (!watch && !settingsRef.current.wait && tune.bpm) {
-      const bpm = tune.bpm * speed;
+    if (!watch && !settingsRef.current.wait && baseBpm) {
+      const bpm = baseBpm * speed;
       const beatMs = 60000 / bpm;
       track = scheduleTrack({ bpm, countIn: Math.ceil((LEAD + 400) / beatMs), beats: Math.ceil(endMs / beatMs), beatsPerBar: tune.beatsPerBar, volume: 0.3 });
     }
     trackRef.current = track;
     startRef.current = track ? track.firstBeat : performance.now() + LEAD + 400;
     setPhase('playing');
-  }, [chart, tune, speed]);
+  }, [chart, tune, speed, baseBpm]);
 
   const finish = useCallback(() => {
     trackRef.current?.cancel();
@@ -229,11 +233,11 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
     setSummary(s);
     const isRecord = bestRef.current === null || s.score > bestRef.current;
     setRecord(isRecord && s.score > 0);
-    void saveRun({ treinoId: arcadeRunId(tune.id, settingsRef.current.diff), kind: 'timed', accuracy: s.hits, score: s.score, stars: s.stars, passed: s.stars > 0, bpm: tune.bpm ? Math.round(tune.bpm * speed) : 0 });
+    void saveRun({ treinoId: arcadeRunId(tune.id, settingsRef.current.diff), kind: 'timed', accuracy: s.hits, score: s.score, stars: s.stars, passed: s.stars > 0, bpm: baseBpm ? Math.round(baseBpm * speed) : 0 });
     if (s.stars >= 2) playReward(s.stars === 3 ? 'great' : 'pass');
     endedAt.current = performance.now();
     setPhase('done');
-  }, [tune, speed]);
+  }, [tune, speed, baseBpm]);
 
   const stop = useCallback(() => {
     trackRef.current?.cancel();
@@ -737,7 +741,7 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
         </button>
         <div className="arcade__titles">
           <span className="arcade__song">{tune.title}</span>
-          <span className="arcade__origin">{tune.origin}</span>
+          <span className="arcade__origin">{tune.artist || 'Artista não informado'}</span>
         </div>
         <span className={`arcade__diff arcade__diff-${diff}`}>{demo ? 'Assistindo' : diffInfo.label}</span>
         <SoundButton placement="down" className="arcade__sound" />
@@ -801,11 +805,22 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
           <div className="arcade__overlay">
             <h2 className="arcade__overlayTitle">{tune.title}</h2>
             <div className="chips" role="group" aria-label="Dificuldade">
-              {DIFFICULTIES.map((d) => (
-                <button key={d.id} type="button" className={'chip' + (diff === d.id ? ' chip-active' : '')} aria-pressed={diff === d.id} onClick={() => setSettings({ ...settings, diff: d.id })}>
-                  {d.label}
-                </button>
-              ))}
+              {DIFFICULTIES.map((d) => {
+                const off = !tune.available.includes(d.id);
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    className={'chip' + (diff === d.id ? ' chip-active' : '')}
+                    aria-pressed={diff === d.id}
+                    disabled={off}
+                    title={off ? 'Simplificada, esta música fica irreconhecível. Ela fica só no médio e no difícil.' : undefined}
+                    onClick={() => setSettings({ ...settings, diff: d.id })}
+                  >
+                    {d.label}
+                  </button>
+                );
+              })}
             </div>
             <p className="arcade__overlayLead">
               {diff === 'dificil' && !tune.hasBass ? 'A melodia inteira, com menos folga (este MIDI não tem baixo separado).' : diffInfo.hint} Nota longa: segure até o fim para somar pontos.
@@ -813,7 +828,15 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
             <div className="chips" role="group" aria-label="Modo e andamento">
               <button type="button" className={'chip' + (!settings.wait ? ' chip-active' : '')} aria-pressed={!settings.wait} onClick={() => setSettings({ ...settings, wait: false })}>No ritmo</button>
               <button type="button" className={'chip' + (settings.wait ? ' chip-active' : '')} aria-pressed={settings.wait} onClick={() => setSettings({ ...settings, wait: true })}>Sem pressa</button>
-              <button type="button" className={'chip' + (settings.slow ? ' chip-active' : '')} aria-pressed={settings.slow} onClick={() => setSettings({ ...settings, slow: !settings.slow })}>Devagar</button>
+            </div>
+            <div className="arcadeTempo" role="group" aria-label="Andamento">
+              <span className="arcadeTempo__label">Andamento</span>
+              <button className="arcadeTempo__step" type="button" disabled={speedIdx === 0} onClick={() => setSettings({ ...settings, speed: SPEEDS[speedIdx - 1] })} aria-label="Mais devagar">−</button>
+              <span className="arcadeTempo__value">
+                <strong>{Math.round(speed * 100)}%</strong> do original
+                {baseBpm ? <span className="arcadeTempo__bpm">{Math.round(baseBpm * speed)} BPM · original {baseBpm}</span> : null}
+              </span>
+              <button className="arcadeTempo__step" type="button" disabled={speedIdx === SPEEDS.length - 1} onClick={() => setSettings({ ...settings, speed: SPEEDS[speedIdx + 1] })} aria-label="Mais rápido">+</button>
             </div>
             <label className="reading__toggle">
               <input type="checkbox" checked={settings.names} onChange={(e) => setSettings({ ...settings, names: e.target.checked })} />
