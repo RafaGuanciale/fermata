@@ -36,14 +36,14 @@ export default function MidiArcade({ id, onClose }: { id: string; onClose: () =>
       <label className="arcadeParts__field">
         <span className="arcadeParts__label">Melodia</span>
         <select className="arcadeParts__select" value={m.melody} onChange={(e) => void updateMidi(m.id, { melody: Number(e.target.value) })}>
-          {parsed.parts.map((p) => <option key={p.index} value={p.index}>{partLabel(p)}</option>)}
+          {parsed.parts.map((p) => <option key={p.index} value={p.index}>{partLabel(p, parsed.parts)}</option>)}
         </select>
       </label>
       <label className="arcadeParts__field">
         <span className="arcadeParts__label">Baixo do difícil</span>
         <select className="arcadeParts__select" value={m.bass ?? ''} onChange={(e) => void updateMidi(m.id, { bass: e.target.value === '' ? null : Number(e.target.value) })}>
           <option value="">Voz grave da própria melodia</option>
-          {parsed.parts.filter((p) => p.index !== m.melody).map((p) => <option key={p.index} value={p.index}>{partLabel(p)}</option>)}
+          {parsed.parts.filter((p) => p.index !== m.melody).map((p) => <option key={p.index} value={p.index}>{partLabel(p, parsed.parts)}</option>)}
         </select>
       </label>
     </div>

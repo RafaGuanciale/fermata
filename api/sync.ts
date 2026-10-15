@@ -7,7 +7,7 @@ import { MongoBulkWriteError } from 'mongodb';
 import { blobPrefix, requireUser } from './_lib/auth.js';
 import { HttpError, fail, json, readJson } from './_lib/http.js';
 import { getDb, type Counter, type SyncRecord } from './_lib/mongo.js';
-import { PAGE_SIZE, isOwnPathname, parseSyncRequest, recordId } from './_lib/protocol.js';
+import { PAGE_BYTES, PAGE_SIZE, isOwnPathname, parseSyncRequest, recordId } from './_lib/protocol.js';
 
 export const config = { maxDuration: 30 };
 
@@ -63,8 +63,15 @@ export async function POST(request: Request): Promise<Response> {
       .sort({ seq: 1 })
       .limit(PAGE_SIZE + 1)
       .toArray();
-    const more = page.length > PAGE_SIZE;
-    const out = page.slice(0, PAGE_SIZE);
+    let more = page.length > PAGE_SIZE;
+    let out = page.slice(0, PAGE_SIZE);
+    // MIDIs do arcade são maiores: corta a página antes de passar do limite de resposta.
+    let bytes = 0;
+    const cut = out.findIndex((r) => (bytes += JSON.stringify(r.data ?? null).length + 120) > PAGE_BYTES);
+    if (cut > 0) {
+      out = out.slice(0, cut);
+      more = true;
+    }
 
     return json({
       cursor: out.length ? out[out.length - 1].seq : cursor,

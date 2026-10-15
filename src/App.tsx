@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo } from 'react';
+import { lazy, Suspense } from 'react';
 import type React from 'react';
 import { Navigate, Route, Routes, matchPath, useLocation, useParams, type Location } from 'react-router-dom';
 import { ThemeProvider } from './theme/ThemeProvider';
@@ -17,8 +17,8 @@ import PieceFormPage from './pages/PieceFormPage';
 import PiecePage from './pages/PiecePage';
 import StudyPage from './pages/StudyPage';
 import { findSong } from './course';
-import { findArcadeSong } from './arcade/songs';
-import { songTune } from './arcade/arcade';
+import { ARCADE_CATALOG } from './arcade/songs';
+import { useArcadeTune } from './arcade/catalog';
 import AccountPage from './pages/AccountPage';
 import CalibratePage from './pages/CalibratePage';
 import LoginPage from './pages/LoginPage';
@@ -95,13 +95,14 @@ function TreinoPopup({ label, render }: { label: string; render: (close: () => v
 
 function ArcadePopup() {
   const close = useCloseImmersive('/arcade');
-  const song = findArcadeSong(useParams().id ?? '');
-  const tune = useMemo(() => (song ? songTune(song) : null), [song]);
-  if (!song || !tune) return <Navigate to="/arcade" replace />;
+  const id = useParams().id ?? '';
+  const entry = ARCADE_CATALOG.find((s) => s.id === id);
+  const tune = useArcadeTune(id);
+  if (!entry || tune === null) return <Navigate to="/arcade" replace />;
   return (
-    <ImmersiveFrame onClose={close} label={`Arcade: ${song.title}`}>
+    <ImmersiveFrame onClose={close} label={`Arcade: ${entry.title}`}>
       <Suspense fallback={<div className="arcade" />}>
-        <ArcadeGame tune={tune} onClose={close} />
+        {tune ? <ArcadeGame tune={tune} onClose={close} /> : <div className="arcade" />}
       </Suspense>
     </ImmersiveFrame>
   );

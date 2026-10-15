@@ -97,3 +97,20 @@ describe('importar MIDI', () => {
     expect(() => parseMidi(smf(PPQ, [notesTrack('Drums', 9, [[36, 1, 1]], PPQ)]))).toThrow(/notas/);
   });
 });
+
+describe('versões completas do app (domínio público)', () => {
+  it('cada uma abre nas três dificuldades, e o fácil é mais curto', async () => {
+    const { ARCADE_CHARTS } = await import('./songs');
+    const { chartTune } = await import('./midi');
+    for (const c of ARCADE_CHARTS) {
+      const [full, easy] = await Promise.all([c.load(), c.loadEasy?.()]);
+      const t = chartTune(c, full, easy);
+      const [f, m, d] = (['facil', 'medio', 'dificil'] as const).map((x) => t.chart(x));
+      expect(f.length, c.id).toBeGreaterThan(10);
+      expect(f.length, c.id).toBeLessThan(m.length);
+      expect(d.length, c.id).toBeGreaterThan(m.length);
+      for (const ch of [f, m, d]) for (let i = 1; i < ch.length; i++) expect(ch[i].t, c.id).toBeGreaterThanOrEqual(ch[i - 1].t);
+      expect(Math.min(...d.map((n) => n.midi)), c.id).toBeGreaterThanOrEqual(36);
+    }
+  });
+});

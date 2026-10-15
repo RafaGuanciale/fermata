@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it } from 'vitest';
-import { chunk, fromRemoteData, shouldApply, toRemoteData, blobPathname, byTableOrder } from './serialize';
-import { parseSyncRequest, isOwnPathname } from '../../api/_lib/protocol';
+import { chunk, fromRemoteData, shouldApply, toRemoteData, blobPathname, byTableOrder, SYNC_TABLES } from './serialize';
+import { parseSyncRequest, isOwnPathname, SYNC_TABLES as SERVER_TABLES } from '../../api/_lib/protocol';
 import { db } from '../db/db';
 import { installSyncHooks, _applyRemoteForTests as applyRemote } from './engine';
 
@@ -21,6 +21,20 @@ describe('serialização', () => {
     const row = fromRemoteData('files', { uid: 'f1', mt: 9, data: { name: 'a.pdf' } }, { id: 4, blob });
     expect(row).toMatchObject({ id: 4, uid: 'f1', mt: 9, name: 'a.pdf', blob });
     expect(fromRemoteData('lessons', { uid: 'teclado/x', mt: 1, data: { id: 'teclado/x', status: 'learned' } }, undefined)).toMatchObject({ id: 'teclado/x' });
+  });
+
+  it('MIDI do arcade vai em base64 e volta em bytes', () => {
+    const bytes = new Uint8Array([0x4d, 0x54, 0x68, 0x64, 0, 255, 128, 7]);
+    const data = toRemoteData('arcadeMidi', { id: 'midi-1', uid: 'midi-1', mt: 3, title: 'Iris', data: bytes.buffer, melody: 0, bass: 1, addedAt: 2 });
+    expect(data).toEqual({ id: 'midi-1', title: 'Iris', data64: 'TVRoZAD/gAc=', melody: 0, bass: 1, addedAt: 2 });
+    const row = fromRemoteData('arcadeMidi', { uid: 'midi-1', mt: 3, data }, undefined);
+    expect(row.id).toBe('midi-1');
+    expect(row.data64).toBeUndefined();
+    expect([...new Uint8Array(row.data as ArrayBuffer)]).toEqual([...bytes]);
+  });
+
+  it('aparelho e servidor conhecem as mesmas tabelas', () => {
+    expect([...SERVER_TABLES]).toEqual([...SYNC_TABLES]);
   });
 
   it('vale a alteração mais recente', () => {

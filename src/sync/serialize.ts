@@ -1,10 +1,10 @@
 // Conversão entre o registro local (Dexie) e o que vai para a nuvem. Funções puras.
 // Ids numéricos são só deste aparelho; entre aparelhos as referências usam `uid`.
 
-export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice', 'notes'] as const;
+export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice', 'notes', 'arcadeMidi'] as const;
 
 /** Tabelas cuja chave já é global (texto): o uid é a própria chave. */
-export const STRING_KEY_TABLES: readonly string[] = ['lessons', 'practice', 'notes'];
+export const STRING_KEY_TABLES: readonly string[] = ['lessons', 'practice', 'notes', 'arcadeMidi'];
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 export interface Change {
@@ -27,6 +27,8 @@ const LOCAL_ONLY: Record<SyncTable, string[]> = {
   runs: ['id'],
   practice: [],
   notes: [],
+  // O MIDI vai como texto (base64) em `data64`; no aparelho fica em bytes.
+  arcadeMidi: ['data'],
 };
 
 export interface Refs {
@@ -68,6 +70,7 @@ export function toRemoteData(table: SyncTable, row: Row, refs: Refs = {}): Row {
     out.scoreFileUid = refs.scoreFileUid ?? null;
   }
   if (table === 'attempts') out.sessionUid = refs.sessionUid ?? null;
+  if (table === 'arcadeMidi' && row.data instanceof ArrayBuffer) out.data64 = bytesToBase64(new Uint8Array(row.data));
   return out;
 }
 
@@ -82,7 +85,25 @@ export function fromRemoteData(table: SyncTable, change: Pick<Change, 'uid' | 'm
     row.scoreFileId = refs.scoreFileId ?? null;
   }
   if (table === 'attempts') row.sessionId = refs.sessionId ?? 0;
+  if (table === 'arcadeMidi') {
+    const b64 = row.data64;
+    delete row.data64;
+    row.data = typeof b64 === 'string' ? base64ToBytes(b64).buffer : (local?.data ?? new ArrayBuffer(0));
+  }
   return row;
+}
+
+export function bytesToBase64(bytes: Uint8Array): string {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+export function base64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
 }
 
 /** Vale a alteração mais recente. Empate: fica a local (já é a mesma). */

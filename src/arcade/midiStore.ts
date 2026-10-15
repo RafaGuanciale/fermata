@@ -1,12 +1,12 @@
-// MIDIs importados no arcade: guardados só neste aparelho (tabela arcadeMidi, fora da sincronização).
+// MIDIs importados no arcade: tabela arcadeMidi, que sincroniza com a conta (privado: só o próprio usuário vê).
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type ArcadeMidi } from '../db/db';
 import { guessParts, midiTune, parseMidi } from './midi';
 import type { ArcadeTune } from './arcade';
 
-/** Maior arquivo aceito (um MIDI de música inteira raramente passa de 200 KB). */
-export const MIDI_MAX_BYTES = 2 * 1024 * 1024;
+/** Maior arquivo aceito (um MIDI de música inteira raramente passa de 100 KB). */
+export const MIDI_MAX_BYTES = 512 * 1024;
 
 export function useArcadeMidis(): ArcadeMidi[] | undefined {
   return useLiveQuery(() => db.arcadeMidi.orderBy('addedAt').reverse().toArray(), []);
@@ -18,7 +18,7 @@ export function useArcadeMidi(id: string): ArcadeMidi | null | undefined {
 
 /** Lê o arquivo, confere se é MIDI, adivinha melodia e baixo e guarda. Devolve o id. */
 export async function importMidi(file: File): Promise<string> {
-  if (file.size > MIDI_MAX_BYTES) throw new Error('Arquivo grande demais para um MIDI (máximo de 2 MB).');
+  if (file.size > MIDI_MAX_BYTES) throw new Error('Arquivo grande demais para um MIDI (máximo de 512 KB).');
   const data = await file.arrayBuffer();
   const parsed = parseMidi(data);
   const { melody, bass } = guessParts(parsed);

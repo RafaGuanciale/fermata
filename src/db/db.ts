@@ -149,8 +149,8 @@ export interface NoteReadStat extends Synced {
   lastAt: number;
 }
 
-/** MIDI importado no arcade. Fica só neste aparelho (fora da sincronização): o arquivo é do usuário. */
-export interface ArcadeMidi {
+/** MIDI importado no arcade. É do usuário: sincroniza só com a conta dele (o arquivo vai em base64). */
+export interface ArcadeMidi extends Synced {
   id: string;
   title: string;
   data: ArrayBuffer;
@@ -227,6 +227,17 @@ class FermataDB extends Dexie {
     this.version(7).stores({
       arcadeMidi: 'id, addedAt',
     });
+    // MIDIs do arcade passam a sincronizar: os que já existem ganham uid e mt e entram na fila.
+    this.version(8)
+      .stores({ arcadeMidi: 'id, addedAt' })
+      .upgrade(async (tx) => {
+        const rows = (await tx.table('arcadeMidi').toArray()) as ArcadeMidi[];
+        await tx.table('arcadeMidi').toCollection().modify((r: ArcadeMidi) => {
+          r.uid ??= r.id;
+          r.mt ??= r.addedAt;
+        });
+        await tx.table('outbox').bulkPut(rows.map((r, i) => ({ key: `arcadeMidi:${r.id}`, table: 'arcadeMidi', uid: r.id, deleted: false, v: Date.now() + i / 1000 })));
+      });
   }
 }
 

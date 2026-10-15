@@ -26,6 +26,8 @@ import {
 type Row = Record<string, unknown>;
 
 const PUSH_BATCH = 200;
+/** Teto de bytes por envio (as funções da Vercel aceitam até 4,5 MB). */
+const PUSH_BYTES = 3_000_000;
 /** Na primeira sincronização de cada abertura, pede de novo um pouco do que já veio (cobre corridas entre aparelhos). */
 const OVERLAP = 200;
 const DEBOUNCE_MS = 4000;
@@ -300,9 +302,15 @@ async function run() {
       const entries = (await db.outbox.toArray()).sort(byTableOrder).slice(0, PUSH_BATCH);
       const changes: Change[] = [];
       const sent: OutboxEntry[] = [];
+      let bytes = 0;
       for (const e of entries) {
         try {
-          changes.push(await buildChange(e, acc));
+          const ch = await buildChange(e, acc);
+          // Teto de tamanho do pedido (MIDIs do arcade pesam mais): o resto vai na próxima rodada.
+          const size = JSON.stringify(ch).length;
+          if (sent.length && bytes + size > PUSH_BYTES) break;
+          bytes += size;
+          changes.push(ch);
           sent.push(e);
         } catch (err) {
           if (err instanceof AuthError) throw err;

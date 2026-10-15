@@ -106,33 +106,6 @@
   color: var(--text-muted);
 }
 
-.dock__sound {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 34px;
-  padding: 0 var(--space-3);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-muted);
-  font: 500 12px/1 var(--font-body);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.dock__sound-on {
-  border-color: var(--hit);
-  background: var(--hit-soft);
-  color: var(--hit);
-}
-
-.dock__soundIcon {
-  width: 16px;
-  height: 16px;
-  flex: none;
-}
-
 .dock__midi {
   display: inline-flex;
   align-items: center;
@@ -187,7 +160,7 @@
     gap: var(--space-2);
   }
 
-  .dock__soundLabel {
+  .dock__soundButton .soundButton__value {
     display: none;
   }
 }

@@ -1,6 +1,6 @@
 // Formato da troca entre aparelho e servidor. Funções puras, testadas em protocol.test.ts.
 
-export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice', 'notes'] as const;
+export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice', 'notes', 'arcadeMidi'] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 export interface Change {
@@ -18,6 +18,8 @@ export interface SyncRequest {
 
 export const MAX_CHANGES = 500;
 export const PAGE_SIZE = 1000;
+/** Teto de bytes de uma página de resposta (as funções da Vercel aceitam até 4,5 MB). */
+export const PAGE_BYTES = 3_000_000;
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);

@@ -1,10 +1,15 @@
 // O jogo: as notas caem direto sobre as teclas (como no Synthesia) e a tecla acende na cor da nota que chega.
 // Nota longa pede para segurar: ela vai sendo "comida" pela tecla e soma pontos enquanto você segura.
+// Modo assistir: o app toca a música sozinho, com som, e as teclas acendem (para ouvir pelo computador).
 // Desenho em canvas (60 quadros por segundo sem pesar o React); placar e telas por cima, em HTML.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
-import { CloseIcon, RestartIcon } from '../components/Icons';
+import { CloseIcon, ExpandIcon, PlayIcon, RestartIcon } from '../components/Icons';
+import SoundButton from '../components/SoundButton';
+import { useLiveSound } from '../audio/LiveSound';
+import { startLiveNote } from '../audio/synth';
+import { canFullscreen, enterFullscreen, exitFullscreen, useFullscreenState } from '../hooks/useFullscreen';
 import { useNoteInput } from '../input/useNoteInput';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../training/clickTrack';
 import { saveRun, useRuns } from '../training/runs';
@@ -13,43 +18,18 @@ import { Burst, Stars } from '../celebrate/Celebrate';
 import { playReward } from '../celebrate/sound';
 import {
   DIFFICULTIES, WINDOWS_BY, chartRange, comboMilestone, expire, hit, isHold, multiplier, multiplierFill, release, scaleChart, startState,
-  summarize, sustain, waitingAt, type ArcadeGrade, type ArcadeState, type ArcadeSummary, type ArcadeTune, type ChartNote, type Difficulty,
+  summarize, sustain, waitingAt, type ArcadeGrade, type ArcadeState, type ArcadeSummary, type ArcadeTune, type ChartNote,
 } from './arcade';
+import { arcadeRunId, readArcadeSettings, saveArcadeSettings, type ArcadeSettings as Settings } from './settings';
 
-const SETTINGS_KEY = 'fermata-arcade';
 /** Tempo que a nota leva do alto da tela até a tecla. */
 const LEAD = 2600;
-
-interface Settings {
-  wait: boolean;
-  slow: boolean;
-  names: boolean;
-  diff: Difficulty;
-}
-
-function readSettings(): Settings {
-  try {
-    const v = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') as Partial<Settings>;
-    const diff = DIFFICULTIES.some((d) => d.id === v.diff) ? (v.diff as Difficulty) : 'medio';
-    return { wait: !!v.wait, slow: v.slow ?? true, names: v.names ?? true, diff };
-  } catch {
-    return { wait: false, slow: true, names: true, diff: 'medio' };
-  }
-}
 
 type Phase = 'menu' | 'playing' | 'done';
 type RGB = [number, number, number];
 
 interface Particle { x: number; y: number; vx: number; vy: number; life: number; color: RGB; size: number }
 interface Floater { x: number; y: number; text: string; life: number; color: RGB }
-
-/** Recorde por música e dificuldade (o médio mantém o id antigo). */
-export const arcadeRunId = (id: string, d: Difficulty = 'medio') => (d === 'medio' ? `arcade-${id}` : `arcade-${id}~${d}`);
-export function parseArcadeRunId(treinoId: string): { id: string; diff: Difficulty } | null {
-  if (!treinoId.startsWith('arcade-')) return null;
-  const [id, d] = treinoId.slice(7).split('~');
-  return { id, diff: (DIFFICULTIES.some((x) => x.id === d) ? d : 'medio') as Difficulty };
-}
 
 // ---------- cores ----------
 
@@ -116,13 +96,9 @@ function firstVisible(chart: ChartNote[], t: number, maxDur: number): number {
 export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeTune; onClose: () => void; extraMenu?: React.ReactNode }) {
   const { subscribe, press, release: releaseKey } = useNoteInput();
   const runs = useRuns();
-  const [settings, setSettingsState] = useState<Settings>(readSettings);
+  const [settings, setSettingsState] = useState<Settings>(readArcadeSettings);
   const setSettings = (s: Settings) => {
-    try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-    } catch {
-      // vale só agora
-    }
+    saveArcadeSettings(s);
     setSettingsState(s);
   };
   const diff = settings.diff;
@@ -168,6 +144,23 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
   const bestRef = useRef(best);
   bestRef.current = best;
   const paletteRef = useRef<Palette | null>(null);
+  const isFull = useFullscreenState();
+  const sound = useLiveSound();
+  const demoVolume = sound.on ? Math.max(sound.volume, 0.45) : 0.45;
+  const demoVolumeRef = useRef(demoVolume);
+  demoVolumeRef.current = demoVolume;
+  /** Modo assistir: o app toca sozinho. */
+  const [demo, setDemoState] = useState(false);
+  const demoRef = useRef(false);
+  const demoNext = useRef(0);
+  const demoActive = useRef<{ i: number; midi: Midi; end: number; stop: () => void }[]>([]);
+  const stopDemoNotes = () => {
+    for (const a of demoActive.current) {
+      a.stop();
+      heldRef.current.delete(a.midi);
+    }
+    demoActive.current = [];
+  };
 
   // ---------- geometria ----------
   const whites = useMemo(() => whiteKeysBetween(low, high), [low, high]);
@@ -188,8 +181,12 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
   }, [whites]);
 
   // ---------- começar e terminar ----------
-  const start = useCallback(() => {
+  const start = useCallback((watch = false) => {
     trackRef.current?.cancel();
+    stopDemoNotes();
+    demoRef.current = watch;
+    setDemoState(watch);
+    demoNext.current = 0;
     stateRef.current = startState(chart);
     particles.current = [];
     floaters.current = [];
@@ -206,7 +203,7 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
     // No ritmo, com andamento fixo: o clique do metrônomo marca o pulso e é o relógio.
     // Sem pressa, ou MIDI com mudança de andamento: sem clique, o relógio é o do aparelho.
     let track: ScheduledTrack | null = null;
-    if (!settingsRef.current.wait && tune.bpm) {
+    if (!watch && !settingsRef.current.wait && tune.bpm) {
       const bpm = tune.bpm * speed;
       const beatMs = 60000 / bpm;
       track = scheduleTrack({ bpm, countIn: Math.ceil((LEAD + 400) / beatMs), beats: Math.ceil(endMs / beatMs), beatsPerBar: tune.beatsPerBar, volume: 0.3 });
@@ -219,6 +216,15 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
   const finish = useCallback(() => {
     trackRef.current?.cancel();
     trackRef.current = null;
+    if (demoRef.current) {
+      // Fim do modo assistir: volta ao menu, sem recorde.
+      stopDemoNotes();
+      demoRef.current = false;
+      setDemoState(false);
+      endedAt.current = performance.now();
+      setPhase('menu');
+      return;
+    }
     const s = summarize(stateRef.current);
     setSummary(s);
     const isRecord = bestRef.current === null || s.score > bestRef.current;
@@ -232,10 +238,16 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
   const stop = useCallback(() => {
     trackRef.current?.cancel();
     trackRef.current = null;
+    stopDemoNotes();
+    demoRef.current = false;
+    setDemoState(false);
     setPhase('menu');
   }, []);
 
-  useEffect(() => () => trackRef.current?.cancel(), []);
+  useEffect(() => () => {
+    trackRef.current?.cancel();
+    stopDemoNotes();
+  }, []);
   // Trocou a dificuldade ou o andamento no menu: o estado novo acompanha o gráfico novo.
   useEffect(() => {
     if (phaseRef.current !== 'playing') stateRef.current = startState(chart);
@@ -285,7 +297,7 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
   }, [chart, geom, windows, spark]);
 
   const onKeyUp = useCallback((midi: Midi, at: number) => {
-    if (phaseRef.current !== 'playing') return;
+    if (phaseRef.current !== 'playing' || demoRef.current) return;
     stateRef.current = release(chart, stateRef.current, midi, songTime(at) - (getLatency() ?? 0));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chart]);
@@ -297,6 +309,7 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
       return;
     }
     heldRef.current.add(e.midi);
+    if (demoRef.current) return;
     if (phaseRef.current === 'playing') onKeyHit(e.midi, e.at);
     else if (phaseRef.current === 'menu' || performance.now() - endedAt.current > 1500) start();
   }), [subscribe, onKeyHit, onKeyUp, start]);
@@ -311,7 +324,7 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
-        start();
+        start(demoRef.current);
       } else if (e.key === ' ') {
         e.preventDefault();
         if (phaseRef.current === 'playing') stop();
@@ -371,7 +384,27 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
       const playing = phaseRef.current === 'playing';
       if (playing) {
         t = songTime(now);
-        if (settingsRef.current.wait) {
+        if (demoRef.current) {
+          // O app toca: cada nota que chega na tecla soa, acende e é "acertada".
+          while (demoNext.current < chart.length && chart[demoNext.current].t <= t) {
+            const i = demoNext.current++;
+            const n = chart[i];
+            stateRef.current = hit(chart, stateRef.current, n.midi, n.t, windows).state;
+            flashRef.current.set(i, now);
+            const stopNote = startLiveNote(n.midi, 0.7, demoVolumeRef.current);
+            heldRef.current.add(n.midi);
+            demoActive.current.push({ i, midi: n.midi, end: n.t + Math.max(80, n.dur * 0.92), stop: stopNote });
+            const pal = paletteRef.current;
+            if (pal) beams.current.set(n.midi, { s: 0.9, color: n.hand === 'l' ? pal.left : pal.right });
+          }
+          demoActive.current = demoActive.current.filter((a) => {
+            if (t < a.end) return true;
+            a.stop();
+            if (!demoActive.current.some((b) => b !== a && b.midi === a.midi && t < b.end)) heldRef.current.delete(a.midi);
+            stateRef.current = release(chart, stateRef.current, a.midi, chart[a.i].t + chart[a.i].dur);
+            return false;
+          });
+        } else if (settingsRef.current.wait) {
           const waitT = waitingAt(chart, stateRef.current, t);
           if (waitT !== null && t > waitT) {
             offsetRef.current += t - waitT;
@@ -706,9 +739,15 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
           <span className="arcade__song">{tune.title}</span>
           <span className="arcade__origin">{tune.origin}</span>
         </div>
-        <span className={`arcade__diff arcade__diff-${diff}`}>{diffInfo.label}</span>
+        <span className={`arcade__diff arcade__diff-${diff}`}>{demo ? 'Assistindo' : diffInfo.label}</span>
+        <SoundButton placement="down" className="arcade__sound" />
+        {canFullscreen() && (
+          <button className="focus__icon arcade__full" type="button" onClick={() => (isFull ? exitFullscreen() : enterFullscreen())} aria-label={isFull ? 'Sair da tela cheia' : 'Tela cheia'} title={isFull ? 'Sair da tela cheia' : 'Tela cheia'}>
+            <ExpandIcon className="focus__glyph" />
+          </button>
+        )}
         {phase !== 'menu' && (
-          <button className="button button-secondary button-small arcade__restart" type="button" onClick={start} title="Recomeçar (R)">
+          <button className="button button-secondary button-small arcade__restart" type="button" onClick={() => start(demoRef.current)} title="Recomeçar (R)">
             <RestartIcon className="button__icon" />
             <span className="arcade__restartLabel">Recomeçar</span>
           </button>
@@ -736,7 +775,12 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
           }}
         />
 
-        {phase === 'playing' && (
+        {phase === 'playing' && demo && (
+          <div className="arcadeHud arcadeHud-demo">
+            <span className="arcadeHud__demo">Ouvindo {tune.title} · espaço para parar</span>
+          </div>
+        )}
+        {phase === 'playing' && !demo && (
           <div className="arcadeHud" aria-live="off">
             <div className="arcadeHud__score">
               <span className="arcadeHud__label">Pontos</span>
@@ -776,7 +820,13 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
               Nomes nas notas
             </label>
             {extraMenu}
-            <button className="button button-primary" type="button" onClick={start}>Jogar</button>
+            <div className="arcade__menuActions">
+              <button className="button button-primary" type="button" onClick={() => start()}>Jogar</button>
+              <button className="button button-secondary" type="button" onClick={() => start(true)}>
+                <PlayIcon className="button__icon" />
+                Ouvir a música
+              </button>
+            </div>
             <p className="arcade__hint">Ou toque qualquer tecla do piano, ou aperte espaço. R recomeça.{best !== null ? ` Recorde no ${diffInfo.label.toLowerCase()}: ${best.toLocaleString('pt-BR')} pontos.` : ''}</p>
           </div>
         )}
@@ -794,7 +844,7 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
               {summary.held !== null && <li><strong>{Math.round(summary.held * 100)}%</strong> das longas até o fim</li>}
             </ul>
             <div className="runner__actions">
-              <button className="button button-primary" type="button" onClick={start}>Jogar de novo</button>
+              <button className="button button-primary" type="button" onClick={() => start()}>Jogar de novo</button>
               <button className="button button-secondary" type="button" onClick={() => setPhase('menu')}>Mudar dificuldade</button>
               <button className="button button-secondary" type="button" onClick={onClose}>Outra música</button>
             </div>

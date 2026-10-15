@@ -1,84 +1,682 @@
-/* Arcade: escolha de música e o jogo (palco em canvas com placar e telas por cima). */
+/* Arcade: a tela de escolha (um palco com a turnê) e o jogo (canvas com placar e telas por cima). */
 
-.arcadeGrid {
+/* ---------- palco (topo da página) ---------- */
+
+.arcadeHub {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-12);
+  padding-bottom: var(--space-8);
+}
+
+.arcadeStage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 340px;
+  padding: var(--space-8);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  color: var(--color-champagne);
+  background:
+    radial-gradient(90% 120% at 15% 110%, color-mix(in srgb, var(--color-petrol) 70%, transparent), transparent 60%),
+    radial-gradient(60% 90% at 95% -10%, color-mix(in srgb, var(--color-blush) 35%, transparent), transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--color-ebony) 92%, var(--color-petrol)), var(--color-ebony));
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--color-ebony) 45%, transparent);
+}
+
+.arcadeStage__lights {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.arcadeStage__lights span {
+  position: absolute;
+  top: -30%;
+  width: 34%;
+  height: 150%;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-champagne) 34%, transparent), transparent 75%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  filter: blur(6px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  transform-origin: 50% 0;
+  animation: spotSway 7s ease-in-out infinite alternate;
+}
+
+.arcadeStage__lights span:nth-child(1) { left: 2%; animation-delay: -2s; }
+.arcadeStage__lights span:nth-child(2) { left: 33%; background: linear-gradient(180deg, color-mix(in srgb, var(--color-petrol) 60%, var(--color-off-white)), transparent 70%); opacity: 0.35; animation-duration: 9s; }
+.arcadeStage__lights span:nth-child(3) { left: 64%; background: linear-gradient(180deg, color-mix(in srgb, var(--color-blush) 55%, transparent), transparent 70%); opacity: 0.4; animation-delay: -4s; }
+
+@keyframes spotSway {
+  from { transform: rotate(-14deg); }
+  to { transform: rotate(14deg); }
+}
+
+.arcadeStage__eq {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 70px;
+  padding: 0 var(--space-4);
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.arcadeStage__eq span {
+  flex: 1;
+  height: 100%;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(0deg, var(--color-petrol), var(--color-champagne));
+  transform-origin: bottom;
+  animation: eqBounce 900ms ease-in-out infinite alternate;
+}
+
+@keyframes eqBounce {
+  from { transform: scaleY(0.12); }
+  to { transform: scaleY(1); }
+}
+
+.arcadeStage__intro {
+  display: grid;
+  gap: var(--space-3);
+  align-content: center;
+}
+
+.arcadeStage__eyebrow,
+.arcadeNext__eyebrow {
+  font: 700 12px/1 var(--font-body);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-champagne) 75%, var(--color-khaki));
+}
+
+.arcadeStage__title {
+  margin: 0;
+  font: 500 clamp(44px, 7vw, 80px) / 0.95 var(--font-display);
+  color: var(--color-off-white);
+  text-shadow: 0 0 40px color-mix(in srgb, var(--color-petrol) 80%, transparent);
+}
+
+.arcadeStage__lead {
+  max-width: 46ch;
+  margin: 0;
+  font: 500 16px/1.5 var(--font-body);
+  color: color-mix(in srgb, var(--color-champagne) 85%, var(--color-ebony));
+}
+
+.arcadeStage__stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-8);
+  margin-top: var(--space-4);
+}
+
+.arcadeStage__emblem {
+  display: inline-grid;
+}
+
+.arcadeStat {
+  display: grid;
+  gap: 4px;
+}
+
+.arcadeStat__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 30px/1 var(--font-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-off-white);
+}
+
+.arcadeStat__star {
+  width: 22px;
+  height: 22px;
+  color: var(--color-champagne);
+  fill: currentColor;
+}
+
+.arcadeStat__label {
+  font: 500 12px/1.2 var(--font-body);
+  color: color-mix(in srgb, var(--color-champagne) 70%, var(--color-ebony));
+}
+
+.arcadeNext {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--color-champagne) 22%, transparent);
+  border-radius: var(--radius-l);
+  background: color-mix(in srgb, var(--color-ebony) 62%, transparent);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.arcadeNext .cover {
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.arcadeNext__title {
+  font: 500 24px/1.15 var(--font-display);
+  color: var(--color-off-white);
+}
+
+.arcadeNext__origin {
+  font: 500 13px/1.4 var(--font-body);
+  color: color-mix(in srgb, var(--color-champagne) 70%, var(--color-ebony));
+}
+
+.arcadeNext__chips {
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.arcadeNext .chip {
+  border-color: color-mix(in srgb, var(--color-champagne) 35%, transparent);
+  color: var(--color-champagne);
+}
+
+.arcadeNext .chip-active {
+  background: var(--color-champagne);
+  color: var(--color-ebony);
+}
+
+.arcadeNext__play {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+/* ---------- capa gerada ---------- */
+
+.cover {
+  position: relative;
+  flex: none;
+  width: 56px;
+  aspect-ratio: 1;
+}
+
+.cover-hero {
+  width: 150px;
+}
+
+.cover__disc {
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--color-champagne) 0 14%, var(--color-ebony) 15% 17%, transparent 18%),
+    repeating-radial-gradient(circle, var(--color-ebony) 0 2px, color-mix(in srgb, var(--color-ebony) 80%, var(--color-off-white)) 2px 3px);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-ebony) 60%, transparent);
+  transition: transform 420ms var(--ease-out);
+}
+
+.cover-hero .cover__disc {
+  transform: translateX(28%) rotate(30deg);
+  animation: discSpin 6s linear infinite;
+}
+
+@keyframes discSpin {
+  from { transform: translateX(28%) rotate(0deg); }
+  to { transform: translateX(28%) rotate(360deg); }
+}
+
+.cover__sleeve {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-off-white) 16%, transparent), 0 6px 16px color-mix(in srgb, var(--color-ebony) 35%, transparent);
+}
+
+.cover__sleeve::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-off-white) 28%, transparent), transparent 45%);
+}
+
+.cover__initial {
+  font: 500 30px/1 var(--font-display);
+  color: var(--color-off-white);
+  text-shadow: 0 2px 12px color-mix(in srgb, var(--color-ebony) 50%, transparent);
+}
+
+.cover-hero .cover__initial {
+  font-size: 84px;
+}
+
+.cover__icon {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 14px;
+  height: 14px;
+  color: var(--color-off-white);
+  opacity: 0.8;
+}
+
+.cover-hero .cover__icon {
+  right: 12px;
+  bottom: 12px;
+  width: 24px;
+  height: 24px;
+}
+
+.cover-rock .cover__sleeve { background: linear-gradient(135deg, var(--color-blush), color-mix(in srgb, var(--color-blush) 30%, var(--color-ebony))); }
+.cover-games .cover__sleeve { background: linear-gradient(135deg, color-mix(in srgb, var(--color-petrol) 70%, var(--color-off-white)), var(--color-petrol)); }
+.cover-cinema .cover__sleeve { background: linear-gradient(135deg, var(--color-petrol), var(--color-ebony)); }
+.cover-classic .cover__sleeve { background: linear-gradient(135deg, var(--color-khaki), color-mix(in srgb, var(--color-khaki) 40%, var(--color-petrol))); }
+.cover-classic.cover-v1 .cover__sleeve { background: linear-gradient(135deg, color-mix(in srgb, var(--color-petrol) 55%, var(--color-champagne)), color-mix(in srgb, var(--color-petrol) 70%, var(--color-ebony))); }
+.cover-classic.cover-v2 .cover__sleeve { background: linear-gradient(135deg, color-mix(in srgb, var(--color-blush) 55%, var(--color-khaki)), color-mix(in srgb, var(--color-ebony) 70%, var(--color-blush))); }
+.cover-elvis .cover__sleeve { background: linear-gradient(135deg, var(--color-champagne), var(--color-blush)); }
+.cover-warm .cover__sleeve { background: linear-gradient(135deg, var(--color-champagne), var(--color-khaki)); }
+.cover-midi .cover__sleeve { background: linear-gradient(135deg, color-mix(in srgb, var(--color-petrol) 60%, var(--color-blush)), var(--color-ebony)); }
+
+.cover-elvis .cover__initial,
+.cover-warm .cover__initial,
+.cover-elvis .cover__icon,
+.cover-warm .cover__icon {
+  color: var(--color-ebony);
+  text-shadow: none;
+}
+
+/* ---------- turnê (as etapas e a lista) ---------- */
+
+.setTier {
+  display: grid;
   gap: var(--space-4);
 }
 
-.arcadeCard {
+.setTier__head {
   display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  min-height: 150px;
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-l);
-  background:
-    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--color-petrol) 28%, transparent), transparent 60%),
-    var(--surface);
-  color: var(--text);
-  text-decoration: none;
-  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), border-color 160ms;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "step progress" "name progress" "lead progress";
+  align-items: end;
+  gap: 2px var(--space-6);
 }
 
-.arcadeCard:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--hit) 60%, transparent);
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--color-petrol) 30%, transparent);
-}
-
-.arcadeCard__tag {
-  justify-self: start;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-  font: 600 11px/1.4 var(--font-body);
-  letter-spacing: 0.06em;
+.setTier__step {
+  grid-area: step;
+  font: 700 11px/1.4 var(--font-body);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  background: var(--hit-soft);
-  color: var(--text);
+  color: var(--hit);
 }
 
-.arcadeCard__tag-2 {
-  background: color-mix(in srgb, var(--color-khaki) 35%, transparent);
+.setTier-3 .setTier__step { color: var(--miss-ink); }
+.setTier-1 .setTier__step { color: var(--text-muted); }
+
+.setTier__name {
+  grid-area: name;
+  margin: 0;
+  font: 500 32px/1.1 var(--font-display);
 }
 
-.arcadeCard__tag-3 {
-  background: color-mix(in srgb, var(--color-blush) 35%, transparent);
-}
-
-.arcadeCard__title {
-  font: 500 22px/1.2 var(--font-display);
-}
-
-.arcadeCard__origin,
-.arcadeCard__best {
-  font: 500 13px/1.4 var(--font-body);
+.setTier__lead {
+  grid-area: lead;
+  font: 500 14px/1.4 var(--font-body);
   color: var(--text-muted);
 }
 
-.arcadeCard__best {
-  display: flex;
+.setTier__progress,
+.setTier__import {
+  grid-area: progress;
+  align-self: end;
+}
+
+.setTier__progress {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  margin-top: auto;
+  font: 700 14px/1 var(--font-body);
+  font-variant-numeric: tabular-nums;
 }
 
-.arcadeCard__stars {
-  display: inline-flex;
+.setTier__bar {
+  display: block;
+  width: 120px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  overflow: hidden;
 }
 
-.arcadeCard__star {
+.setTier__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-petrol), var(--color-champagne));
+}
+
+.setTier__star {
   width: 16px;
   height: 16px;
+  color: var(--color-champagne);
+  fill: currentColor;
+}
+
+.setList {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.setRow {
+  position: relative;
+}
+
+.setRow__link {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto 7.5rem auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-4);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform 180ms var(--ease-out), border-color 180ms, box-shadow 180ms;
+}
+
+.setRow__link::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--color-khaki);
+}
+
+.setTier-2 .setRow__link::before { background: var(--color-petrol); }
+.setTier-3 .setRow__link::before { background: var(--color-blush); }
+.setTier-midi .setRow__link::before { background: linear-gradient(var(--color-petrol), var(--color-blush)); }
+
+.setRow__link:hover,
+.setRow__link:focus-visible {
+  transform: translateX(4px);
+  border-color: color-mix(in srgb, var(--hit) 70%, transparent);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--color-petrol) 28%, transparent);
+}
+
+.setRow__link:hover .cover__disc,
+.setRow__link:focus-visible .cover__disc {
+  transform: translateX(42%) rotate(60deg);
+}
+
+.setRow__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.setRow__title {
+  font: 500 19px/1.2 var(--font-display);
+}
+
+.setRow__origin {
+  overflow: hidden;
+  font: 500 13px/1.35 var(--font-body);
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.setRow__score {
+  font: 600 13px/1 var(--font-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.setRow__play {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  transition: background 180ms, border-color 180ms, color 180ms;
+}
+
+.setRow__link:hover .setRow__play,
+.setRow__link:focus-visible .setRow__play {
+  border-color: var(--hit);
+  background: var(--hit);
+  color: var(--bg);
+}
+
+.setRow__playIcon {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+}
+
+.setRow-midi .setRow__link {
+  padding-right: 64px;
+}
+
+.setRow__delete {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.setRow__delete:hover,
+.setRow__delete:focus-visible {
+  background: var(--miss-soft);
+  color: var(--miss-ink);
+}
+
+.setRow__deleteIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.diffStars {
+  display: inline-flex;
+  gap: var(--space-3);
+}
+
+.diffStars__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  opacity: 0.55;
+}
+
+.diffStars__item-on {
+  opacity: 1;
+}
+
+.diffStars__label {
+  margin-right: 3px;
+  font: 700 11px/1 var(--font-body);
+  color: var(--text-muted);
+}
+
+.diffStars__star {
+  width: 13px;
+  height: 13px;
   opacity: 0.35;
 }
 
-.arcadeCard__star-on {
+.diffStars__star-on {
   opacity: 1;
   color: var(--color-champagne);
   fill: currentColor;
 }
+
+:root[data-theme="light"] .diffStars__star-on,
+:root[data-theme="light"] .setTier__star {
+  color: var(--color-petrol);
+}
+
+.intensity {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+}
+
+.intensity__bar {
+  width: 5px;
+  border-radius: 2px;
+  background: var(--surface-sunk);
+}
+
+.intensity__bar:nth-child(1) { height: 8px; }
+.intensity__bar:nth-child(2) { height: 13px; }
+.intensity__bar:nth-child(3) { height: 18px; }
+
+.intensity__bar-on {
+  background: var(--hit);
+}
+
+.setTier-3 .intensity__bar-on {
+  background: var(--miss);
+}
+
+.setEmpty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-6);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 180ms, background 180ms;
+}
+
+.setEmpty:hover,
+.setEmpty:focus-visible {
+  border-color: var(--hit);
+  background: var(--hit-soft);
+}
+
+.setEmpty__icon {
+  width: 28px;
+  height: 28px;
+  color: var(--hit);
+}
+
+.setEmpty__title {
+  font: 500 20px/1.2 var(--font-display);
+}
+
+.setEmpty__lead {
+  max-width: 44ch;
+  font: 500 14px/1.45 var(--font-body);
+  color: var(--text-muted);
+}
+
+@media (max-width: 1100px) {
+  .setRow__link {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .setRow__link .intensity,
+  .setRow__score {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .arcadeStage {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-6);
+  }
+
+  .arcadeNext {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    text-align: left;
+    column-gap: var(--space-4);
+  }
+
+  .arcadeNext .cover {
+    grid-row: span 3;
+    width: 96px;
+    margin: 0 30px 0 0;
+  }
+
+  .arcadeNext .cover__initial {
+    font-size: 52px;
+  }
+
+  .arcadeNext__eyebrow {
+    grid-column: 2;
+  }
+
+  .arcadeNext__chips,
+  .arcadeNext__play {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .arcadeHub {
+    gap: var(--space-8);
+  }
+
+  .setTier__head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "step" "name" "lead" "progress";
+  }
+
+  .setTier__progress,
+  .setTier__import {
+    justify-self: start;
+    margin-top: var(--space-2);
+  }
+
+  .setRow__link {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "cover main play" "cover stars play";
+    row-gap: var(--space-2);
+  }
+
+  .setRow__link .cover { grid-area: cover; }
+  .setRow__main { grid-area: main; }
+  .setRow__link .diffStars { grid-area: stars; }
+  .setRow__play { grid-area: play; }
+
+  .diffStars {
+    gap: var(--space-2);
+  }
+}
+
 
 /* ---------- jogo ---------- */
 
@@ -100,6 +698,7 @@
 
 .arcade__titles {
   display: grid;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
@@ -240,53 +839,6 @@
 .arcade__stats strong {
   color: var(--text);
   font-size: 18px;
-}
-
-/* ---------- cartões de MIDI importado ---------- */
-
-.arcadeCard-midi {
-  position: relative;
-  padding: 0;
-}
-
-.arcadeCard__link {
-  display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  height: 100%;
-  padding: var(--space-4);
-  color: inherit;
-  text-decoration: none;
-}
-
-.arcadeCard__delete {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-
-.arcadeCard__delete:hover,
-.arcadeCard__delete:focus-visible {
-  background: var(--miss-soft);
-  color: var(--miss-ink);
-}
-
-.arcadeCard__deleteIcon {
-  width: 18px;
-  height: 18px;
-}
-
-.arcadeImport__lead {
-  margin: 0;
 }
 
 .arcadeImport__error {
@@ -479,8 +1031,23 @@
 }
 
 @media (max-width: 720px) {
-  .arcade__restartLabel {
+  .arcade__restartLabel,
+  .arcade__diff,
+  .arcade__sound .soundButton__value {
     display: none;
+  }
+
+  .arcade__top {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .arcade__titles {
+    flex: 1;
+  }
+
+  .arcade__sound {
+    margin-left: auto;
   }
 
   .arcade__origin {
@@ -492,7 +1059,34 @@
   }
 }
 
+.arcade__menuActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.arcade__sound {
+  flex: none;
+}
+
+.arcadeHud-demo {
+  justify-content: center;
+}
+
+.arcadeHud__demo {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(4px);
+  font: 600 14px/1.3 var(--font-body);
+  color: var(--text);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .arcadeStage__lights span,
+  .arcadeStage__eq span,
+  .cover-hero .cover__disc,
   .arcade__milestone,
   .arcade__record,
   .arcadeHud__x,

@@ -3,6 +3,7 @@
 // Puro e testado (midi.test.ts).
 
 import { easyPick, mergeHands, type ArcadeTune, type ChartNote, type Difficulty } from './arcade';
+import type { ChartData } from './songs';
 
 export interface MidiNote {
   midi: number;
@@ -182,10 +183,17 @@ export function steadyBpm(file: Pick<MidiFile, 'tempos'>): number | null {
 
 const avgPitch = (p: MidiPart) => p.notes.reduce((s, n) => s + n.midi, 0) / p.notes.length;
 
-export function partLabel(p: MidiPart): string {
+export function partLabel(p: MidiPart, all?: MidiPart[]): string {
   const fam = programFamily(p.program);
-  const name = p.name || fam || `Canal ${p.channel + 1}`;
-  return `${name}${fam && p.name && !p.name.toLowerCase().includes(fam.toLowerCase().split('/')[0]) ? ` (${fam.toLowerCase()})` : ''} · ${p.notes.length} notas`;
+  let name = p.name || fam || `Canal ${p.channel + 1}`;
+  // Duas partes com o mesmo nome (comum em piano: "Piano" e "Piano"): diz qual é a aguda e qual é a grave.
+  const twins = all?.filter((q) => (q.name || programFamily(q.program) || `Canal ${q.channel + 1}`) === name) ?? [];
+  if (twins.length > 1) {
+    const higher = twins.every((q) => q === p || avgPitch(q) <= avgPitch(p));
+    const lower = twins.every((q) => q === p || avgPitch(q) >= avgPitch(p));
+    name += higher ? ' (aguda)' : lower ? ' (grave)' : ` ${twins.indexOf(p) + 1}`;
+  }
+  return `${name} · ${p.notes.length} notas`;
 }
 
 /** Palpite de qual parte é a melodia e qual é o baixo. */
@@ -193,13 +201,24 @@ export function guessParts(file: MidiFile): { melody: number; bass: number | nul
   const ps = file.parts;
   const max = Math.max(...ps.map((p) => p.notes.length));
   const named = (re: RegExp) => ps.find((p) => re.test(p.name) && p.notes.length >= 8);
-  const melodyByName = named(/vocal|voice|voz|canto|melod|lead|solo|sing/i);
-  const candidates = ps.filter((p) => p.notes.length >= Math.max(8, max * 0.15) && !/bass|baixo/i.test(p.name));
+  const melodyByName = named(/vocal|voice|voz|canto|melod|lead|solo|sing|right|direita/i);
+  const candidates = ps.filter((p) => p.notes.length >= Math.max(8, max * 0.15) && !/bass|baixo|left|esquerda/i.test(p.name));
   const melody = melodyByName ?? [...(candidates.length ? candidates : ps)].sort((a, c) => avgPitch(c) - avgPitch(a))[0];
-  const bassByName = ps.find((p) => p !== melody && (/bass|baixo/i.test(p.name) || programFamily(p.program) === 'Baixo'));
-  const low = ps.filter((p) => p !== melody && p.notes.length >= 8 && avgPitch(p) < 55).sort((a, c) => avgPitch(a) - avgPitch(c))[0];
+  const bassByName = ps.find((p) => p !== melody && (/bass|baixo|left|esquerda/i.test(p.name) || programFamily(p.program) === 'Baixo'));
+  // Senão, a parte mais grave que fica claramente abaixo da melodia (a mão esquerda de um arquivo de piano).
+  const low = ps
+    .filter((p) => p !== melody && p.notes.length >= 8 && avgPitch(p) < avgPitch(melody) - 5)
+    .sort((a, c) => avgPitch(a) - avgPitch(c))[0];
   const bass = bassByName ?? low ?? null;
   return { melody: melody.index, bass: bass ? bass.index : null };
+}
+
+/** As linhas guardadas de uma música do app (melodia e baixo) no formato de um MIDI lido. */
+export function fileFromChart(d: ChartData, title: string | null = null): MidiFile {
+  const part = (index: number, name: string, ns: [number, number, number][]): MidiPart => ({
+    index, name, channel: index, program: 0, notes: ns.map(([midi, tick, durTicks]) => ({ midi, tick, durTicks, vel: 90 })),
+  });
+  return { ppq: d.ppq, beatsPerBar: d.beatsPerBar, tempos: d.tempos.map(([tick, us]) => ({ tick, us })), parts: [part(0, 'Melodia', d.melody), part(1, 'Baixo', d.bass)], title };
 }
 
 interface TimedNote { midi: number; tick: number; durTicks: number }
@@ -281,11 +300,26 @@ export function midiTune(file: MidiFile, choice: MidiChoice, meta: { id: string;
     } else if (d === 'medio' || !hasBass) {
       out = playable(toChart(top, 'r'), 90);
     } else {
-      out = mergeHands(playable(toChart(top, 'r'), 90), playable(toChart(bottom, 'l'), 140));
+      // No difícil, a esquerda fica com uma nota por tempo (o baixo de cada tempo), não o acompanhamento inteiro.
+      const bassBeats = easyPick(bottom.map((n) => ({ n, beat: Math.round(((n.tick - start) / file.ppq) * 4) / 4, beats: n.durTicks / file.ppq })), 0.95).map((x) => x.n);
+      out = mergeHands(playable(toChart(top, 'r'), 90), playable(toChart(bassBeats, 'l'), 180));
     }
     cache.set(d, out);
     return out;
   };
 
-  return { id: meta.id, title: meta.title, origin: `MIDI importado · ${partLabel(mPart).split(' · ')[0]}`, bpm, beatsPerBar: file.beatsPerBar, hasBass, chart };
+  return { id: meta.id, title: meta.title, origin: `MIDI importado · ${partLabel(mPart, file.parts).split(' · ')[0]}`, bpm, beatsPerBar: file.beatsPerBar, hasBass, chart };
+}
+
+/** Fase de uma música do app guardada em linhas (charts/*.json); o fácil pode vir de um arranjo mais simples. */
+export function chartTune(meta: { id: string; title: string; origin: string }, d: ChartData, easy?: ChartData): ArcadeTune {
+  const full = midiTune(fileFromChart(d), { melody: 0, bass: 1 }, meta);
+  const simple = easy ? midiTune(fileFromChart(easy), { melody: 0, bass: 1 }, meta) : null;
+  return {
+    ...full,
+    origin: meta.origin,
+    // Com arranjo fácil, o clique segue o andamento dele só quando os dois têm o mesmo; senão, sem clique.
+    bpm: simple && simple.bpm !== full.bpm ? null : full.bpm,
+    chart: (diff) => (diff === 'facil' && simple ? simple.chart('medio') : full.chart(diff)),
+  };
 }
