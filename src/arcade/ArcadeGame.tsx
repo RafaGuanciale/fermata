@@ -17,7 +17,7 @@ import { noteInfo, whiteKeysBetween, type Midi } from '../music/notes';
 import { Burst, Stars } from '../celebrate/Celebrate';
 import { playReward } from '../celebrate/sound';
 import {
-  DIFFICULTIES, WINDOWS_BY, chartRange, comboMilestone, expire, hit, isHold, multiplier, multiplierFill, release, scaleChart, startState,
+  DIFFICULTIES, WINDOWS_BY, chartFingers, chartRange, comboMilestone, expire, hit, isHold, multiplier, multiplierFill, release, scaleChart, startState,
   summarize, sustain, waitingAt, type ArcadeGrade, type ArcadeState, type ArcadeSummary, type ArcadeTune, type ChartNote,
 } from './arcade';
 import { SPEEDS, arcadeRunId, readArcadeSettings, saveArcadeSettings, type ArcadeSettings as Settings } from './settings';
@@ -114,6 +114,10 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
   const speedIdx = Math.max(0, SPEEDS.findIndex((x) => Math.abs(x - settings.speed) < 1e-6));
   const chart = useMemo(() => scaleChart(tune.chart(diff), speed), [tune, diff, speed]);
   const maxDur = useMemo(() => chart.reduce((m, n) => Math.max(m, n.dur), 0), [chart]);
+  // Dedilhado calculado no andamento original (as pausas contam para a mão se reposicionar).
+  const fingers = useMemo(() => chartFingers(tune.chart(diff)), [tune, diff]);
+  const fingersRef = useRef(fingers);
+  fingersRef.current = fingers;
   const windows = WINDOWS_BY[diff];
   const [low, high] = useMemo(() => chartRange(chart), [chart]);
   const diffInfo = DIFFICULTIES.find((d) => d.id === diff)!;
@@ -554,11 +558,33 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
         ctx.fillStyle = rgba(p.white, 0.35);
         rr(x + 3, yTop + 3, nw - 6, Math.min(4, len - 6), 3);
         ctx.fill();
+        // Dedo: número num círculo na cabeça da nota. O nome sobe para cima dele (ou para fora da nota, se ela for curta).
+        const finger = settingsRef.current.fingers && res !== 'perdeu' ? fingersRef.current[i] : null;
+        const r = Math.max(7, Math.min(11, lane.width * 0.36));
+        let nameY = yBottom - 7;
+        if (finger) {
+          const cy = yBottom - r - 3;
+          ctx.beginPath();
+          ctx.arc(lane.x, cy, r, 0, Math.PI * 2);
+          ctx.fillStyle = rgba(p.ebony, p.light ? 0.78 : 0.62);
+          ctx.fill();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = rgba(p.white, 0.85);
+          ctx.stroke();
+          ctx.fillStyle = rgba(p.white);
+          ctx.font = `800 ${Math.round(r * 1.25)}px Montserrat, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(String(finger), lane.x, cy + 0.5);
+          ctx.textBaseline = 'alphabetic';
+          nameY = len >= 2 * r + 24 ? cy - r - 5 : yTop - 5;
+        }
         if (settingsRef.current.names && lane.width > 15 && res !== 'perdeu') {
-          ctx.fillStyle = n.hand === 'l' && !p.light ? rgba(p.ebony, 0.85) : rgba(p.white, 0.95);
+          const outside = nameY < yTop;
+          ctx.fillStyle = outside ? rgba(mix(base, p.light ? p.ebony : p.white, 0.35)) : n.hand === 'l' && !p.light ? rgba(p.ebony, 0.85) : rgba(p.white, 0.95);
           ctx.font = `700 ${lane.width > 24 ? 12 : 10}px Montserrat, sans-serif`;
           ctx.textAlign = 'center';
-          ctx.fillText(noteInfo(n.midi).name, lane.x, yBottom - 7);
+          ctx.fillText(noteInfo(n.midi).name, lane.x, nameY);
         }
         ctx.globalAlpha = 1;
       }
@@ -841,6 +867,10 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
             <label className="reading__toggle">
               <input type="checkbox" checked={settings.names} onChange={(e) => setSettings({ ...settings, names: e.target.checked })} />
               Nomes nas notas
+            </label>
+            <label className="reading__toggle">
+              <input type="checkbox" checked={settings.fingers} onChange={(e) => setSettings({ ...settings, fingers: e.target.checked })} />
+              Dedos nas notas (1 é o polegar)
             </label>
             {extraMenu}
             <div className="arcade__menuActions">

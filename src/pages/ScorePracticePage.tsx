@@ -10,6 +10,7 @@ import { OpenSheetMusicDisplay, type Note } from 'opensheetmusicdisplay';
 import { db } from '../db/db';
 import type { SongSpec } from '../course/types';
 import { songXml } from '../course/song';
+import { addScoreFingerings } from '../score/fingering';
 import { songPassed } from '../course/progress';
 import { BigCelebration, celebratedOnce } from '../celebrate/Celebrate';
 import { getFile, setPieceBpm } from '../repertoire/repo';
@@ -131,6 +132,7 @@ function keyGeometry(low: Midi, high: Midi) {
 }
 
 const CLICK_KEY = 'fermata-score-click';
+const FINGERS_KEY = 'fermata-score-fingers';
 
 /** Toca uma música do repertório (pelo id da rota) ou uma música do curso (`song`). */
 export default function ScorePracticePage({ onClose, song }: { onClose: () => void; song?: SongSpec }) {
@@ -166,6 +168,23 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       return true;
     }
   });
+  const [fingers, setFingers] = useState(() => {
+    try {
+      return localStorage.getItem(FINGERS_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const fingersRef = useRef(fingers);
+  fingersRef.current = fingers;
+  const toggleFingers = (on: boolean) => {
+    setFingers(on);
+    try {
+      localStorage.setItem(FINGERS_KEY, on ? '1' : '0');
+    } catch {
+      // sem armazenamento: vale só nesta visita
+    }
+  };
   const toggleClick = (on: boolean) => {
     setClick(on);
     try {
@@ -212,6 +231,11 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       try {
         await osmd.load(source, meta.title);
         if (cancelled) return;
+        // Dedilhado sugerido (só se a partitura não trouxer o de quem escreveu).
+        addScoreFingerings(osmd);
+        osmd.EngravingRules.RenderFingerings = fingersRef.current;
+        // Número de compasso só no começo da linha: no meio, ele se confunde com o número do dedo.
+        osmd.EngravingRules.RenderMeasureNumbersOnlyAtSystemStart = true;
         osmd.render();
       } catch (err) {
         console.error(err);
@@ -277,6 +301,19 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       window.clearTimeout(timer);
     };
   }, [loaded]);
+
+  // Liga e desliga os dedos na partitura: redesenha e relê os elementos.
+  useEffect(() => {
+    const osmd = osmdRef.current;
+    if (!osmd || !loaded || osmd.EngravingRules.RenderFingerings === fingers) return;
+    osmd.EngravingRules.RenderFingerings = fingers;
+    // Os dedos entram nas notas quando o desenho é montado: precisa remontar, não só redesenhar.
+    osmd.updateGraphic();
+    osmd.render();
+    elsRef.current = readScore(osmd).els;
+    paintedRef.current = [];
+    setRenderTick((t) => t + 1);
+  }, [fingers, loaded]);
 
   const order = useMemo(() => (loaded ? playableSteps(loaded.steps, hand, loaded.staffCount, range) : []), [loaded, hand, range]);
   const allNotes = useMemo(() => (loaded ? playNotes(loaded.steps, loaded.staffCount, range, bpm) : []), [loaded, range, bpm]);
@@ -600,6 +637,10 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
                 <label className="metronome__check">
                   <input type="checkbox" checked={guideKeys} onChange={(e) => setGuideKeys(e.target.checked)} />
                   Teclas-guia
+                </label>
+                <label className="metronome__check">
+                  <input type="checkbox" checked={fingers} onChange={(e) => toggleFingers(e.target.checked)} />
+                  Dedos
                 </label>
                 {mode === 'junto' && (
                   <label className="metronome__check">

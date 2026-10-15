@@ -105,6 +105,7 @@ describe('versões completas do app (domínio público)', () => {
   it('cada uma abre nas três dificuldades; o fácil é mais lento e reconhecível', async () => {
     const { ARCADE_CHARTS } = await import('./songs');
     const { chartTune } = await import('./midi');
+    const { chartFingers } = await import('./arcade');
     for (const c of ARCADE_CHARTS) {
       const [full, easy] = await Promise.all([c.load(), c.loadEasy?.()]);
       const t = chartTune(c, full, easy);
@@ -116,6 +117,7 @@ describe('versões completas do app (domínio público)', () => {
       expect(d.length, c.id).toBeGreaterThan(m.length);
       for (const ch of [f, m, d]) for (let i = 1; i < ch.length; i++) expect(ch[i].t, c.id).toBeGreaterThanOrEqual(ch[i - 1].t);
       expect(Math.min(...d.map((n) => n.midi)), c.id).toBeGreaterThanOrEqual(36);
+      for (const ch of [f, m, d]) expect(chartFingers(ch).every((x) => x !== null), c.id).toBe(true);
     }
   });
 });

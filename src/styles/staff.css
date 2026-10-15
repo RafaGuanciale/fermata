@@ -72,6 +72,12 @@
   text-anchor: middle;
 }
 
+.staff__finger {
+  fill: var(--text);
+  font: 700 15px var(--font-body);
+  text-anchor: middle;
+}
+
 .staff__name-chord {
   font-size: 10.5px;
 }

@@ -59,3 +59,16 @@ describe('cascata', () => {
     ]);
   });
 });
+
+describe('dedilhado da partitura', async () => {
+  const { scoreFingers, staffHand } = await import('./fingering');
+  const at = (ms: number[]) => ms.map((m, i) => ({ midi: m, t: i * 500, dur: 450 }));
+  it('pauta dupla: direita em cima, esquerda embaixo; pauta sozinha pela altura', () => {
+    expect(staffHand(0, 2, [])).toBe('r');
+    expect(staffHand(1, 2, at([72]))).toBe('l');
+    expect(staffHand(0, 1, at([48, 50]))).toBe('l');
+    const [r, l] = scoreFingers([at([60, 62, 64, 65, 67]), at([48, 50, 52, 53, 55])]);
+    expect(r.join('')).toBe('12345');
+    expect(l.join('')).toBe('54321');
+  });
+});

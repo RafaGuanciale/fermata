@@ -30,6 +30,8 @@ interface StaffProps {
   chords?: (Midi[] | undefined)[];
   /** Mostra todas as notas de uma vez, encolhendo o quanto precisar (figuras fixas, como na Consulta). */
   fitAll?: boolean;
+  /** Dedilhado: para cada figura, o dedo de cada cabeça (do grave para o agudo). Desenhado numa linha acima da pauta. */
+  fingers?: ((number | null)[] | null)[];
 }
 
 // Medidas em "staff-space" (S): distância entre duas linhas da pauta. Tamanho natural: S = 20px.
@@ -44,9 +46,10 @@ const HEIGHT = BOTTOM + 3 * S + 10;
 const y = (step: number) => BOTTOM - (step * S) / 2;
 
 const KEY_X = 72;
+const FINGER_GAP = 17;
 const KEY_GAP = 13;
 
-export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1, ties, chords, fitAll = false }: StaffProps) {
+export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1, ties, chords, fitAll = false, fingers }: StaffProps) {
   if (width <= 0) return <div className="staff" style={{ height: HEIGHT * 0.62 }} />;
   const keyW = fifths ? Math.abs(fifths) * KEY_GAP + 6 : 0;
   const layout = staffLayout(width, notes.length, keyW);
@@ -79,6 +82,23 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
       lowestHead = Math.max(lowestHead, cy + HEAD_RY);
     }
   });
+  // Dedos: uma linha acima de tudo (hastes, cabeças e o "3" das tercinas), igual em todo o exercício.
+  let fingerY = 0;
+  let fingerRows = 1;
+  if (fingers?.some((f) => f && f.some((x) => x !== null))) {
+    fingerY = TOP - 16;
+    notes.forEach((m, i) => {
+      if (m === null) return;
+      const group = (chords?.[i] && chords[i]!.length > 1 ? chords[i]! : [m]).map((g) => spellOnStaff(g, clef, fifths).step);
+      const lo = Math.min(...group);
+      const hi = Math.max(...group);
+      const up = group.length > 1 ? (lo + hi) / 2 < 4 : group[0] < 4;
+      const highest = up ? y(hi) - STEM - 8 - (isTriplet((durations?.[i] ?? 1) * beatScale) ? 14 : 0) : y(hi) - HEAD_RY;
+      fingerY = Math.min(fingerY, highest - 14);
+      fingerRows = Math.max(fingerRows, fingers[i]?.length ?? 1);
+    });
+    top = Math.min(top, fingerY - (fingerRows - 1) * FINGER_GAP - 18);
+  }
   const nameY = Math.max(BOTTOM + 2.6 * S, lowestHead + 22);
   if (showNames) bottom = Math.max(bottom, nameY + 8);
   const viewH = bottom - top;
@@ -222,6 +242,13 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
                 heads.map((h, k) => (
                   <circle key={`d${k}`} className={`staff__dot${mod ? ` staff__head${mod}` : ''}`} cx={Math.max(...headX) + HEAD_RX + 8} cy={h.step % 2 === 0 ? y(h.step) - S / 2 : y(h.step)} r={3.2} />
                 ))}
+              {fingers?.[start + i]?.map((f, k) =>
+                f === null ? null : (
+                  <text key={`f${k}`} className="staff__finger" x={x} y={fingerY - k * FINGER_GAP} aria-hidden>
+                    {f}
+                  </text>
+                ),
+              )}
               {(showNames || mark) && (
                 <text className={'staff__name' + (state === 'current' ? ' staff__name-current' : '') + (heads.length > 1 ? ' staff__name-chord' : '')} x={x} y={nameY}>
                   {showNames ? (heads.length > 1 ? heads.map((h) => h.name).join(' ') : name) + mark : mark.trim()}

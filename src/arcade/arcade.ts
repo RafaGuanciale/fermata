@@ -3,6 +3,7 @@
 
 import { parseLine } from '../course/music';
 import type { Midi } from '../music/notes';
+import { fingerNotes, type Finger } from '../music/fingering';
 import type { ArcadeSong } from './songs';
 
 export interface ChartNote {
@@ -220,6 +221,18 @@ export function songTune(song: ArcadeSong): ArcadeTune {
 }
 
 /** O gráfico com o andamento multiplicado por `speed` (0,75 = mais devagar). */
+/** Dedo sugerido para cada nota do mapa (as duas mãos separadas), na mesma ordem. */
+export function chartFingers(chart: ChartNote[]): (Finger | null)[] {
+  const out: (Finger | null)[] = chart.map(() => null);
+  for (const hand of ['r', 'l'] as const) {
+    const idx = chart.flatMap((n, i) => (n.hand === hand ? [i] : []));
+    if (!idx.length) continue;
+    const f = fingerNotes(idx.map((i) => chart[i]), hand);
+    idx.forEach((i, k) => (out[i] = f[k]));
+  }
+  return out;
+}
+
 export function scaleChart(chart: ChartNote[], speed: number): ChartNote[] {
   return speed === 1 ? chart : chart.map((n) => ({ ...n, t: n.t / speed, dur: n.dur / speed }));
 }

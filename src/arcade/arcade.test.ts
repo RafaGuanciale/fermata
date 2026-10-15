@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseLine } from '../course/music';
 import { ARCADE_SONGS } from './songs';
 import {
-  DIFFICULTIES, WINDOWS_BY, buildChart, chartRange, comboMilestone, difficultyScore, easyPick, expire, gradeOf, hit, isHold, makeEasy, mergeHands, multiplier, peakDensity, stageOf,
+  DIFFICULTIES, WINDOWS_BY, buildChart, chartFingers, chartRange, comboMilestone, difficultyScore, easyPick, expire, gradeOf, hit, isHold, makeEasy, mergeHands, multiplier, peakDensity, stageOf,
   multiplierFill, release, songChart, songTune, startState, summarize, sustain, waitingAt, type ChartNote,
 } from './arcade';
 
@@ -37,6 +37,18 @@ describe('arcade', () => {
       const hard = songChart(s, 'dificil');
       expect(new Set(hard.map((n) => `${n.midi}@${Math.round(n.t)}`)).size, s.id).toBe(hard.length);
     }
+  });
+
+  it('dedilhado em toda nota, das duas mãos, em toda dificuldade', () => {
+    for (const s of ARCADE_SONGS)
+      for (const d of DIFFICULTIES) {
+        const chart = songChart(s, d.id);
+        const f = chartFingers(chart);
+        expect(f.every((x) => x !== null && x >= 1 && x <= 5), `${s.id} ${d.id}`).toBe(true);
+      }
+    // Ode à alegria começa com o 3 na posição de Dó.
+    const ode = chartFingers(songChart(ARCADE_SONGS.find((s) => s.id === 'ode')!, 'medio'));
+    expect(ode.slice(0, 5)).toEqual([3, 3, 4, 5, 5]);
   });
 
   it('fácil: no máximo uma nota por tempo, e a longa ganha da curta', () => {

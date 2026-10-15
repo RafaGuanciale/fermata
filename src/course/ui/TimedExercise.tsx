@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PianoKeyboard, { type KeyMark } from '../../components/PianoKeyboard';
 import Staff, { type NoteState } from '../../components/Staff';
+import { timedFingers } from '../fingers';
 import { PlayIcon } from '../../components/Icons';
 import { useElementWidth } from '../../hooks/useFullscreen';
 import { useNoteInput } from '../../input/useNoteInput';
@@ -197,6 +198,9 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: 
   const beats = taskBeats(task);
   const lengthMs = (beats * 60000) / bpm;
   const anyKey = task.events.some((e) => e.midi === null);
+  // Dedilhado sugerido junto com as outras dicas (nomes e teclas acesas).
+  const fingers = useMemo(() => timedFingers(task), [task]);
+  const showFingers = hints && !anyKey;
 
   useEffect(() => {
     trackRef.current?.cancel();
@@ -427,6 +431,7 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: 
           durations={task.display.map((d) => d.beats)}
           ties={task.display.map((d) => !!d.tie)}
           chords={task.display.map((d) => d.chord)}
+          fingers={showFingers ? fingers : undefined}
           beatsPerBar={task.beatsPerBar}
           beatScale={task.compound ? 1.5 : 1}
           fifths={task.fifths}
