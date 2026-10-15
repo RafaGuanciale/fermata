@@ -132,7 +132,7 @@ const preludio: SongSpec = {
   id: 'u12-preludio',
   title: 'Prelúdio em Mi menor',
   composer: 'Fermata (original, no estilo romântico)',
-  arrangement: 'peça original: melodia cantada na direita sobre acordes repetidos em colcheias na esquerda, que descem por meio tom (Em, B7/D♯, Em7, C♯ø, C7M, Am, B7, Em)',
+  arrangement: 'peça original: melodia cantada na direita sobre acordes repetidos em colcheias na esquerda, com a voz de cima descendo por meio tom (Em, B7, Em7, C♯ø, C7M, Am, B7, Em)',
   bpm: 50,
   beatsPerBar: 4,
   fifths: 1,
@@ -692,7 +692,7 @@ O Prelúdio Op. 28 nº 4 de Chopin, em Mi menor, é o exemplo perfeito: uma melo
     {
       kind: 'text',
       title: 'O Prelúdio em Mi menor',
-      body: `A esquerda toca **acordes de 3 notas em colcheias**, oito por compasso. A cada compasso uma nota desce meio tom: Em (Sol–Si–Mi), B7/Ré♯ (Fá♯–Lá–Ré♯), Em7 (Sol–Si–Ré), C♯ø (Sol–Si–Dó♯), C7M (Sol–Si–Dó)… É **condução de vozes** em câmera lenta, a da unidade 6.
+      body: `A esquerda toca **acordes de 3 notas em colcheias**, oito por compasso. A cada compasso uma nota desce meio tom: Em (Sol–Si–Mi), B7 (Fá♯–Lá–Ré♯, sem o Si), Em7 (Sol–Si–Ré), C♯ø (Sol–Si–Dó♯), C7M (Sol–Si–Dó)… É **condução de vozes** em câmera lenta, a da unidade 6.
 
 A direita canta notas longas: Si, Dó, Si… A melodia quase não se move; quem dá o movimento é a harmonia por baixo.
 
@@ -701,7 +701,7 @@ Toque a esquerda **pianíssimo** e igual, como uma respiração. A direita fica 
     {
       kind: 'exercise',
       id: 'l95-esquerda',
-      exercise: quickTimed('Os acordes da esquerda', 'Só a esquerda, compassos 1 a 4, a 50 BPM. Acordes iguais e leves.', () => melodyTask(PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 50, fifths: 1, caption: 'Em | B7/D♯ | Em7 | C♯ø: uma nota desce meio tom a cada compasso.' }), { reps: 2 }),
+      exercise: quickTimed('Os acordes da esquerda', 'Só a esquerda, compassos 1 a 4, a 50 BPM. Acordes iguais e leves.', () => melodyTask(PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 50, fifths: 1, caption: 'Em | B7 | Em7 | C♯ø: uma nota desce meio tom a cada compasso.' }), { reps: 2 }),
     },
     {
       kind: 'callout',
@@ -712,7 +712,7 @@ Toque a esquerda **pianíssimo** e igual, como uma respiração. A direita fica 
     {
       kind: 'exercise',
       id: 'l95-maos',
-      exercise: quickTimed('Prelúdio, compassos 1 a 4', 'Mãos juntas, a 46 BPM. A melodia acima dos acordes.', () => twoHandTask(PREL_R.slice(0, 4).join(' | '), PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 46, fifths: 1, caption: 'Esquerda: acordes em colcheias, Em | B7/D♯ | Em7 | C♯ø.' }), { reps: 2, balance: 8 }),
+      exercise: quickTimed('Prelúdio, compassos 1 a 4', 'Mãos juntas, a 46 BPM. A melodia acima dos acordes.', () => twoHandTask(PREL_R.slice(0, 4).join(' | '), PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 46, fifths: 1, caption: 'Esquerda: acordes em colcheias, Em | B7 | Em7 | C♯ø.' }), { reps: 2, balance: 8 }),
     },
     { kind: 'song', songId: 'u12-preludio', why: 'A música da lição: melodia longa sobre acordes repetidos que descem por meio tom.' },
     {
@@ -725,7 +725,7 @@ Treine assim: toque o acorde Sol–Si–Mi na direita, fazendo o Si soar mais qu
     {
       kind: 'text',
       title: 'Impressionismo: o pedal como cor',
-      body: `No fim do século XIX, Debussy e Ravel usaram o piano como pintura: em vez de linhas que conduzem, **manchas de cor**. Três recursos:
+      body: `Na virada para o século XX, Debussy e Ravel usaram o piano como pintura: em vez de linhas que conduzem, **manchas de cor**. Três recursos:
 
 - **Escala de tons inteiros**: seis notas, todas a um tom (Dó, Ré, Mi, Fá♯, Sol♯, Lá♯). Sem semitons, sem sensível: nenhuma nota puxa para casa, e o som flutua.
 - **Acordes paralelos**: o mesmo acorde deslizando junto (C, D, E), sem condução, de propósito. As 5ªs paralelas que o coral evita viram cor.
@@ -1134,7 +1134,7 @@ const FINAL_Q: ChoiceQuestion[] = [
   { q: 'O D♭7 indo para C é o subV7 porque…', options: ['Tem o mesmo trítono (Fá–Si/Dó♭) do G7', 'Tem a mesma fundamental do G7', 'É o IV de Lá♭'], answer: 0, why: 'O trítono é o que resolve. D♭7 e G7 compartilham Fá e Si (Dó♭), e o baixo desce por semitom.' },
   { q: 'A forma AABA tem…', options: ['Uma ponte (B) entre as voltas do A', 'Um refrão que volta cinco vezes', 'Duas partes repetidas'], answer: 0, why: 'É a canção de 32 compassos: 8 + 8 + 8 (ponte) + 8.' },
   { q: 'Na recapitulação de uma sonata em Dó, o tema 2 vem em…', options: ['Dó maior', 'Sol maior', 'Lá menor'], answer: 0, why: 'Na exposição ele estava no V; a recapitulação resolve tudo no I.' },
-  { q: 'O baião na esquerda divide o compasso em…', options: ['3 + 3 + 2 colcheias', '2 + 2 + 2 + 2', '4 + 4'], answer: 0, why: 'O ritmo da zabumba: longa, longa, curta, com a última antecipando o compasso seguinte.' },
+  { q: 'O baião na esquerda divide o compasso em…', options: ['3 + 3 + 2 semicolcheias', '2 + 2 + 2 + 2', '4 + 4'], answer: 0, why: 'O ritmo da zabumba em 2/4: colcheia pontuada, colcheia pontuada, colcheia (longa, longa, curta).' },
 ];
 
 const ROADMAP_Q: ChoiceQuestion[] = [

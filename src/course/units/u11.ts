@@ -332,7 +332,7 @@ const bossa: SongSpec = {
   id: 'u11-bossa',
   title: 'Bossa em Fá',
   composer: 'Fermata (melodia original)',
-  arrangement: 'melodia original com antecipações na direita; esquerda em shells no ritmo da bossa (1 e o "e" do 2). Forma A (8 compassos) e B (8), com o B♭m6 emprestado no compasso 10',
+  arrangement: 'melodia original com antecipações na direita; esquerda em shells no ritmo da bossa (1, "e" do 2 e "e" do 3). Forma A (8 compassos) e B (8), com o B♭m6 emprestado no compasso 10',
   bpm: 72,
   beatsPerBar: 4,
   fifths: -1,
@@ -435,7 +435,7 @@ Ao piano, a **esquerda faz o papel da zabumba**. Ela repete um desenho de um com
     {
       kind: 'text',
       title: 'A figura: 3 + 3 + 2',
-      body: `O baião é escrito em **2/4**: dois tempos de semínima por compasso. Divida o compasso em 8 semicolcheias e conte "**1** e a e **2** e a e". A zabumba toca nas posições 1, 4 e 7, isto é, em grupos de **3 + 3 + 2** semicolcheias:
+      body: `O baião é escrito em **2/4**: dois tempos de semínima por compasso. Divida o compasso em 8 semicolcheias e conte os números: "**1** 2 3 4 **5** 6 7 8" (o 1 e o 5 são os tempos). A zabumba toca nas semicolcheias **1, 4 e 7**, isto é, em grupos de **3 + 3 + 2**:
 
 - ataque no **1** (dura 3 semicolcheias: uma colcheia pontuada);
 - ataque na **última semicolcheia do tempo 1** (dura 3 semicolcheias);
@@ -463,7 +463,7 @@ Na esquerda, o desenho mais usado é **fundamental – 5ª acima – fundamental
     {
       kind: 'exercise',
       id: 'l82-ritmo',
-      exercise: quickTimed('O 3 + 3 + 2 em qualquer tecla', 'Quatro compassos a 70 BPM, em qualquer tecla. Faça 2 passadas boas.', () => rhythmTask(rep('x:0.75 x:0.75 x:0.5', 4), { bpm: 70, beatsPerBar: 2, caption: 'Baião: colcheia pontuada, colcheia pontuada, colcheia. Conte "1 e a e 2 e a e".' }), { reps: 2, window: 60 }),
+      exercise: quickTimed('O 3 + 3 + 2 em qualquer tecla', 'Quatro compassos a 70 BPM, em qualquer tecla. Faça 2 passadas boas.', () => rhythmTask(rep('x:0.75 x:0.75 x:0.5', 4), { bpm: 70, beatsPerBar: 2, caption: 'Baião: colcheia pontuada, colcheia pontuada, colcheia. Conte as semicolcheias "1 2 3 4 5 6 7 8" e toque no 1, no 4 e no 7.' }), { reps: 2, window: 60 }),
     },
     {
       kind: 'exercise',
@@ -510,7 +510,7 @@ Muitas melodias nordestinas vão além e sobem também a 4ª: Dó, Ré, Mi, **F�
       title: 'Mãos juntas',
       body: `No Baião em Dó a esquerda nunca muda de desenho: só muda de casa (Dó, Si♭, Sol, Fá). A direita tem duas figuras: a mesma colcheia pontuada da zabumba (a melodia "conversa" com o baixo) e colcheias retas.
 
-Estude assim: primeiro a esquerda sozinha até não pensar nela; depois a direita sozinha, contando; por fim, juntas e devagar. Os ataques que caem juntos nas duas mãos (o 1 e o "a" do 1, nos compassos com colcheia pontuada) são as âncoras: se eles saírem juntos, o resto encaixa.
+Estude assim: primeiro a esquerda sozinha até não pensar nela; depois a direita sozinha, contando; por fim, juntas e devagar. Os ataques que caem juntos nas duas mãos (as semicolcheias 1, 4 e 7, nos compassos com colcheia pontuada) são as âncoras: se eles saírem juntos, o resto encaixa.
 
 O critério da tabela é tocar os **16 compassos com cada nota em ±50 ms**, a 80 BPM.`,
     },
@@ -566,7 +566,7 @@ A qualidade é a mesma do intervalo simples: se Dó–Ré♭ é 2ª menor, Dó�
       title: 'Tensões: cor por cima da tétrade',
       body: `Uma **tensão** é uma nota além da 7ª, empilhando terças: 9ª, 11ª e 13ª. Ela não muda a função do acorde (o G7(13) continua sendo dominante), só a cor. É o som do jazz, da bossa e da MPB.
 
-Nem toda tensão serve em todo acorde. A regra prática: a tensão não pode ficar **meio tom acima** de uma nota do acorde (forma uma 9ª menor com ela e choca).
+Nem toda tensão serve em todo acorde. A regra prática: a tensão não pode ficar **meio tom acima** de uma nota do acorde (forma uma 9ª menor com ela e choca). O dominante é a exceção: nele, a ♭9 e a ♭13 são justamente o atrito que pede a resolução.
 
 - **7M** (C7M): 9 (Ré), ♯11 (Fá♯) e 13 (Lá). A 11 justa (Fá) choca com o Mi.
 - **m7** (Dm7): 9 (Mi) e 11 (Sol). A 11 fica um tom acima da 3ª menor e soa bem.
@@ -595,7 +595,7 @@ A cifra brasileira põe a tensão entre parênteses: **C7M(9)**, **G7(13)**, **A
       title: 'Chuva de cifras',
       body: `Na roda de bossa ou de choro, ninguém espera você montar o acorde nota por nota. O treino agora é de **velocidade**: a cifra aparece e a mão já vai.
 
-Um método que acelera: leia a cifra em duas camadas. Primeiro a **tétrade** (C7M, G7, Dm7), que você já toca desde a unidade 8. Depois a **tensão**, que é uma nota só, quase sempre perto da fundamental (a 9ª é um tom acima dela; a 13ª, um tom abaixo da 7ª menor). Assim o acorde de 5 notas vira "tétrade + 1".
+Um método que acelera: leia a cifra em duas camadas. Primeiro a **tétrade** (C7M, G7, Dm7), que você já toca desde a unidade 8. Depois a **tensão**, que é uma nota só, quase sempre perto da fundamental (a 9ª é um tom acima dela; a 13ª, um tom acima da 5ª). Assim o acorde de 5 notas vira "tétrade + 1".
 
 Meta da tabela: **85% de acerto**, com média abaixo de **6 s** por acorde. Na unidade 12 a meta aperta.`,
     },
@@ -810,7 +810,7 @@ Os ataques do "e" são síncopes: duram uma semínima pontuada e atravessam o te
 
 Por que a 5ª **abaixo**? Porque assim a esquerda fica grave e não esbarra nos voicings da direita, que começam perto do Fá3.
 
-A colcheia de cada par cai no "e" do 2 e no "e" do 4, junto com... nada: a direita ataca no "e" do 2 só no primeiro compasso do desenho. É essa conversa entre as mãos que dá o balanço.`,
+A colcheia de cada par cai no "e" do 2 e no "e" do 4. No primeiro compasso do desenho, o "e" do 2 coincide com a direita; no segundo, as mãos não atacam juntas nenhuma vez. É essa conversa entre as mãos que dá o balanço.`,
     },
     {
       kind: 'exercise',
@@ -820,7 +820,7 @@ A colcheia de cada par cai no "e" do 2 e no "e" do 4, junto com... nada: a direi
     {
       kind: 'text',
       title: 'Mãos juntas',
-      body: `Junte devagar. Primeiro só o primeiro compasso do desenho, em loop, até as duas mãos "conversarem" sem pensar: o 1 junto, o "e" do 2 só na direita, o 3 só na esquerda, o 4 na direita e o "e" do 4 na esquerda.
+      body: `Junte devagar. Primeiro só o primeiro compasso do desenho, em loop, até as duas mãos "conversarem" sem pensar: o 1 junto, o "e" do 2 junto, o 3 só na esquerda, o 4 só na direita e o "e" do 4 só na esquerda.
 
 O exercício toca o **ii–V–I** num tom sorteado (Dó, Fá, Si♭ ou Sol): ii por 2 compassos, V por 2, I por 4. A direita usa os voicings sem fundamental conduzidos da lição 84. A pauta mostra a direita; a legenda diz a cifra.
 
@@ -943,7 +943,7 @@ const l87: Lesson = {
 
 Saber a forma é metade da leitura: se você sabe que o terceiro A é igual ao primeiro, só precisa ler 16 compassos de verdade.
 
-A **Bossa em Fá** (original do Fermata) é curta: um **A** de 8 compassos e um **B** de 8. O A vai do F7M ao ii–V de Ré menor e volta; o B começa no IV (**B♭7M**) e passa pelo **B♭m6**, o iv emprestado da unidade 10.`,
+A **Bossa em Fá** (original do Fermata) é curta: um **A** de 8 compassos e um **B** de 8. O A vai do F7M ao Am7 – D7 (o D7 leva ao Gm7) e volta pelo ii–V de Fá; o B começa no IV (**B♭7M**) e passa pelo **B♭m6**, o iv emprestado da unidade 10.`,
     },
     {
       kind: 'text',
@@ -1083,14 +1083,14 @@ A regra de ouro: comece a linha **de trás para a frente**. Saiba onde ela tem q
 
 Ao piano, a **esquerda é o surdo**: a fundamental no 1 (colcheia pontuada), a **5ª abaixo** na última semicolcheia do 1 e de novo no **2**, mais longa. Em Dó: Dó, Sol, Sol.
 
-A **direita é o tamborim**: acordes curtos num desenho de semicolcheias. Um desenho típico, contando "1 e a e 2 e a e", ataca no **1**, no **"e"**, no **"a"**, no **"e" do 2** e no **"a" do 2**. Há muitos outros: o importante é que o desenho se repita igual, como numa escola de samba.
+A **direita é o tamborim**: acordes curtos num desenho de semicolcheias. Contando as 8 semicolcheias do compasso ("1 2 3 4 5 6 7 8"), um desenho típico ataca nas semicolcheias **1, 3, 4, 6 e 7**. Há muitos outros: o importante é que o desenho se repita igual, como numa escola de samba.
 
 Toque os acordes da direita **leves e curtos**: o tamborim é agudo e seco. O peso fica na esquerda.`,
     },
     {
       kind: 'exercise',
       id: 'l88-tamborim',
-      exercise: quickTimed('Desenho do tamborim', 'Quatro compassos em qualquer tecla, a 56 BPM, janela de ±50 ms. Duas passadas boas.', () => rhythmTask(rep('x:0.5 x:0.25 x:0.5 x:0.25 x:0.5', 4), { bpm: 56, beatsPerBar: 2, caption: 'Tamborim: 1, "e", "a" | "e" do 2, "a" do 2. Semicolcheias contadas "1 e a e 2 e a e".' }), { reps: 2, window: 50 }),
+      exercise: quickTimed('Desenho do tamborim', 'Quatro compassos em qualquer tecla, a 56 BPM, janela de ±50 ms. Duas passadas boas.', () => rhythmTask(rep('x:0.5 x:0.25 x:0.5 x:0.25 x:0.5', 4), { bpm: 56, beatsPerBar: 2, caption: 'Tamborim: conte as semicolcheias "1 2 3 4 5 6 7 8" e toque no 1, 3, 4, 6 e 7.' }), { reps: 2, window: 50 }),
     },
     { kind: 'exercise', id: 'l88-samba', exercise: quickTimed('Samba com as duas mãos', 'Tamborim na direita e surdo na esquerda, 8 compassos, de 48 até 60 BPM, janela de ±50 ms.', sambaTask(48), { window: 50, ladder: { from: 48, to: 60, step: 4 } }) },
     {
@@ -1176,7 +1176,7 @@ Os voicings sem fundamental entram na intro e no turnaround, onde a direita est�
       title: 'O Tanguinho e a peça do Villa-Lobos',
       body: `O projeto final é o **Tanguinho**, um tango brasileiro original do Fermata no estilo de Nazareth: semicolcheias na direita, habanera na esquerda e as secundárias da unidade 10 (**A7 → Dm** e **G7 → C**). O **Dó♯** que aparece na esquerda (no A7) e na direita (compassos 8 e 12) é a sensível de Ré: ele puxa para o Dm.
 
-Dois trechos pedem atenção: os compassos 5 a 8 (a direita sobe até o Dó6 e desce em arpejo de Ré menor) e 13 a 16 (a cadência final). Treine cada um separado antes de tocar tudo.
+Dois trechos pedem atenção: os compassos 5 a 8 (a direita sobe até o Dó6, desce e fecha num arpejo de Ré menor subindo) e 13 a 16 (a cadência final). Treine cada um separado antes de tocar tudo.
 
 O plano previa também uma peça do *Guia Prático* de Villa-Lobos. Villa-Lobos morreu em 1959, e a obra dele só fica livre em 2030: por isso ela não entra no app. O Odeon, de Nazareth (1909, livre), fica para uma rodada com a partitura de domínio público à mão.`,
     },

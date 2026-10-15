@@ -261,7 +261,7 @@ Qualquer ii–V–I se acha pela escala do tom: o ii é o acorde menor com 7ª s
 
 **Dó → Fá → Si♭ → Mi♭ → Lá♭ → Ré♭ → Fá♯ (Sol♭) → Si → Mi → Lá → Ré → Sol** → e volta a Dó.
 
-É a mesma direção em que as fundamentais andam dentro do ii–V–I. Por isso o ciclo é o caminho natural dos padrões de jazz: depois de resolver em C7M, o próximo ii–V–I começa um tom abaixo do anterior… ou, pensando nas tonalidades, uma 5ª abaixo. Treine nessa ordem: a mão aprende a "próxima casa" junto com o acorde.`,
+É a mesma direção em que as fundamentais andam dentro do ii–V–I. Por isso o ciclo é o caminho natural dos padrões de jazz: depois de resolver em C7M, o próximo ii–V–I é o de Fá (Gm7 – C7 – F7M), e o C7M que acabou de soar pode até virar C7, o V7 da casa nova. Treine nessa ordem: a mão aprende a "próxima casa" junto com o acorde.`,
     },
     { kind: 'exercise', id: 'l75-acordes', exercise: items('ii7, V7 e I7M em qualquer tom', 'O app pede um grau num dos 12 tons. Qualquer posição; no V7, a 5ª pode ficar de fora.', iiVI, 12, 48, 72, 0.85, 'fade') },
     {
@@ -722,7 +722,7 @@ Para rearmonizar uma melodia trocando IV por iv, confira só uma coisa: **a melo
     {
       kind: 'text',
       title: 'Rearmonizar: When the Saints com iv',
-      body: `Na música desta unidade, a frase "Oh Lord, I want to be in that number" fica sobre **Fá** por dois compassos. No segundo, a melodia tem só Mi e Fá: nada de Lá. Então o segundo compasso pode virar **Fm**, e a frase ganha o IV – iv – I.
+      body: `Na música desta unidade, o fim da frase "Oh Lord, I want to be in that number" fica sobre **Fá** por dois compassos: o "number" e a retomada "when the". No segundo, a melodia tem só Mi e Fá: nada de Lá. Então o segundo compasso pode virar **Fm**, e a frase ganha o IV – iv – I.
 
 No exercício abaixo, a direita toca a melodia (Mi–Sol, Sol–Fá, pausa e Mi–Fá, Sol–Mi) e a esquerda faz **C – F – Fm – C**, um acorde por compasso: Dó–Mi–Sol, Fá–Lá–Dó, Fá–Lá♭–Dó, Dó–Mi–Sol. A única diferença entre o 2º e o 3º compasso da esquerda é o dedo que desce do Lá para o Lá♭.`,
     },
