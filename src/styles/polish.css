@@ -1,0 +1,172 @@
+/* Acabamento: brilho nas notas, teclas com relevo e efeitos de sequência. Só cores dos tokens; sem movimento
+   para quem desativou animações no sistema. */
+
+/* ---------- notas na pauta ---------- */
+
+/* As cabeças já vêm giradas por atributo do SVG: os efeitos aqui não usam transform, só brilho e opacidade. */
+
+/* Acertou: a cabeça acende em petróleo com um clarão que assenta num brilho suave. */
+.staff__head-hit {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--hit) 75%, transparent));
+  animation: noteFlash 520ms ease-out;
+}
+
+@keyframes noteFlash {
+  0% { filter: drop-shadow(0 0 0 transparent); }
+  30% { filter: drop-shadow(0 0 14px var(--hit)) drop-shadow(0 0 4px var(--color-off-white)); }
+  100% { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--hit) 75%, transparent)); }
+}
+
+.staff__stem-hit {
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--hit) 55%, transparent));
+}
+
+@keyframes optionPop {
+  40% { transform: scale(1.04); }
+}
+
+/* Errou: blush piscando uma vez. */
+.staff__head-miss {
+  animation: noteMissBlink 420ms ease;
+}
+
+@keyframes noteMissBlink {
+  30% { opacity: 0.35; }
+}
+
+@keyframes noteMiss {
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Fora do tempo: cáqui, sem brilho. */
+.staff__head-late {
+  filter: none;
+}
+
+/* Nota da vez: o halo respira. */
+.staff__halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--key-lit) 60%, transparent));
+  animation: haloBreath 1.4s ease-in-out infinite;
+}
+
+@keyframes haloBreath {
+  0%, 100% { opacity: 0.95; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.08); }
+}
+
+/* Sequência no tempo: a pauta esquenta (8 seguidas) e pega fogo (16). */
+.runner__staff {
+  transition: box-shadow 400ms var(--ease-out);
+}
+
+.runner__staff-hot {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hit) 55%, transparent), 0 0 28px color-mix(in srgb, var(--hit) 30%, transparent);
+}
+
+.runner__staff-blazing {
+  box-shadow: 0 0 0 2px var(--color-champagne), 0 0 36px color-mix(in srgb, var(--color-champagne) 40%, transparent);
+  animation: staffBlaze 1.6s ease-in-out infinite;
+}
+
+@keyframes staffBlaze {
+  50% { box-shadow: 0 0 0 2px var(--color-champagne), 0 0 52px color-mix(in srgb, var(--color-champagne) 55%, transparent); }
+}
+
+/* ---------- teclado dos exercícios ---------- */
+
+.pianoKeyboard__white {
+  background: linear-gradient(to bottom, var(--key-white) 70%, color-mix(in srgb, var(--key-white) 88%, var(--color-ebony)));
+  box-shadow: inset 0 -5px 0 color-mix(in srgb, var(--key-white) 80%, var(--color-ebony));
+}
+
+.pianoKeyboard__black {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--key-black) 75%, var(--color-off-white)), var(--key-black) 30%);
+  box-shadow: 0 0 0 1px var(--key-body), inset 0 -4px 0 color-mix(in srgb, var(--key-black) 80%, var(--color-off-white));
+}
+
+/* Estados com prioridade sobre o relevo de base (acima). */
+.pianoKeyboard .pianoKeyboard__white-lit,
+.pianoKeyboard .pianoKeyboard__black-lit {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--key-lit) 80%, var(--color-off-white)), var(--key-lit));
+}
+
+.pianoKeyboard .pianoKeyboard__white-next {
+  background: color-mix(in srgb, var(--key-lit) 30%, var(--key-white));
+  box-shadow: inset 0 0 0 4px var(--key-lit);
+}
+
+.pianoKeyboard .pianoKeyboard__black-next {
+  background: color-mix(in srgb, var(--key-lit) 55%, var(--key-black));
+  box-shadow: inset 0 0 0 3px var(--key-lit);
+}
+
+.pianoKeyboard .pianoKeyboard__white-miss,
+.pianoKeyboard .pianoKeyboard__black-miss {
+  background: var(--miss);
+}
+
+/* Apertada: afunda, acende e brilha por baixo. */
+.pianoKeyboard .pianoKeyboard__white-down,
+.pianoKeyboard .pianoKeyboard__black-down {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--key-lit) 70%, var(--color-off-white)), var(--key-lit) 60%);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--key-lit) 55%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--key-lit) 70%, var(--color-ebony));
+  z-index: 0;
+}
+
+.pianoKeyboard .pianoKeyboard__black-down {
+  z-index: 2;
+}
+
+/* Dica (onde tocar): o contorno pulsa. */
+.pianoKeyboard .pianoKeyboard__white-next,
+.pianoKeyboard .pianoKeyboard__black-next {
+  animation: keyNext 1.2s ease-in-out infinite;
+}
+
+@keyframes keyNext {
+  50% { box-shadow: inset 0 0 0 4px var(--key-lit), 0 0 16px color-mix(in srgb, var(--key-lit) 45%, transparent); }
+}
+
+.pianoKeyboard .pianoKeyboard__white-miss,
+.pianoKeyboard .pianoKeyboard__black-miss {
+  animation: noteMiss 260ms ease;
+}
+
+/* ---------- teclado de baixo ---------- */
+
+.fullKeyboard__white-on,
+.fullKeyboard__black-on {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--key-lit) 70%, var(--color-off-white)), var(--key-lit) 60%);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--key-lit) 55%, transparent);
+}
+
+/* ---------- botões de resposta ---------- */
+
+.quiz__option-right {
+  animation: optionPop 360ms cubic-bezier(0.2, 1.6, 0.4, 1);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--hit) 35%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .staff__head-hit,
+  .staff__head-miss,
+  .staff__halo,
+  .runner__staff-blazing,
+  .pianoKeyboard__white-next,
+  .pianoKeyboard__black-next,
+  .pianoKeyboard__white-miss,
+  .pianoKeyboard__black-miss,
+  .quiz__option-right {
+    animation: none;
+  }
+}
+
+/* Tecla errada apertada: o erro aparece por cima do "apertada". */
+.pianoKeyboard .pianoKeyboard__white-miss.pianoKeyboard__white-down,
+.pianoKeyboard .pianoKeyboard__black-miss.pianoKeyboard__black-down {
+  background: var(--miss);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--miss) 55%, transparent);
+}

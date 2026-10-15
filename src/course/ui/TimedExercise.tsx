@@ -416,7 +416,7 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: 
   return (
     <>
       {task.caption && <p className="runner__detail">{task.caption}</p>}
-      <div className="runner__staff runner__staff-wide" ref={staffRef}>
+      <div className={'runner__staff runner__staff-wide' + (onTime >= 16 ? ' runner__staff-blazing' : onTime >= 8 ? ' runner__staff-hot' : '')} ref={staffRef}>
         <Staff
           notes={task.display.map((d) => d.midi)}
           states={states}
