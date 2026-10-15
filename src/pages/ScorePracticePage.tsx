@@ -496,7 +496,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   const cascadeTime = elapsed ?? (take === 'idle' && loaded ? -loaded.beatsPerBar * (60000 / bpm) : null);
 
   const total = loaded ? measureCount(loaded.steps) : 1;
-  const countdown = take === 'countin' && track ? Math.max(1, Math.ceil(-(now - track.firstBeat) / track.beatMs)) : null;
+  const countdown = take === 'countin' && track ? Math.min(loaded?.beatsPerBar ?? 4, Math.max(1, Math.ceil(-(now - track.firstBeat) / track.beatMs))) : null;
   const setFrom = (v: number) => setRange((r) => ({ from: Math.min(Math.max(1, v), r.to), to: r.to }));
   const setTo = (v: number) => setRange((r) => ({ from: r.from, to: Math.max(Math.min(total, v), r.from) }));
   const ideal = loaded?.ideal ?? loaded?.scoreTempo ?? null;

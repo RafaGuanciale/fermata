@@ -7,6 +7,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type NoteReadStat } from '../db/db';
 import PianoKeyboard, { type KeyMark } from '../components/PianoKeyboard';
 import { useNoteInput, useNoteOn } from '../input/useNoteInput';
+import { isTypingTarget, useHandsFree } from '../input/handsFree';
 import { saveRun, useRuns } from '../training/runs';
 import { formatSeconds } from '../format';
 import { Combo, PassReward } from '../celebrate/Celebrate';
@@ -72,6 +73,10 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
   onProgress?: (done: number, total: number) => void;
 }) {
   const { held, press, release } = useNoteInput();
+  const handsFree = useHandsFree();
+  // Só existe um destes aberto por vez (popup ou parte do Treino): ele é o exercício ativo ao aparecer.
+  const { claim } = handsFree;
+  useEffect(() => claim(), [claim]);
   const passed = usePassedLevels();
   const rows = useLiveQuery(() => db.notes.toArray(), []);
   const stats = useMemo(() => new Map((rows ?? []).map((r) => [r.id, r as NoteStat])), [rows]);
@@ -91,6 +96,7 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
   const [flash, setFlash] = useState<ReadState>('ask');
   const [results, setResults] = useState<Result[]>([]);
   const shownAt = useRef(0);
+  const endedAt = useRef(0);
   const lock = useRef(false);
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
@@ -118,6 +124,7 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
     const summary = { firstTry, total: all.length, avgMs };
     void saveRun({ treinoId: readRunId(levelN), kind: 'names', accuracy: firstTry / Math.max(1, all.length), firstTry, avgMs: avgMs ?? undefined, passed: roundPassed(summary), level: levelN });
     setPhase('done');
+    endedAt.current = performance.now();
     doneRef.current?.(summary);
   }, [levelN]);
 
@@ -159,14 +166,13 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
   // Piano: no meio da rodada responde; parado, qualquer tecla começa.
   useNoteOn((m, at) => {
     if (phase === 'playing') answer(m, at);
-    else start();
+    else if (handsFree.isActive && performance.now() - endedAt.current > 1500) start();
   });
 
   // Barra de espaço ou Enter começam (fora de campos de texto).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const el = e.target as HTMLElement | null;
-      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.tagName === 'BUTTON')) return;
+      if (isTypingTarget(e.target) || !handsFree.isActive) return;
       if ((e.key === ' ' || e.key === 'Enter') && phase !== 'playing') {
         e.preventDefault();
         start();
@@ -174,7 +180,7 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [phase, start]);
+  }, [phase, start, handsFree.isActive]);
 
   const streak = streakOf(results.map((r) => r.firstTry));
   const firstTry = results.filter((r) => r.firstTry).length;
@@ -196,7 +202,7 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
   const clefs = [...new Set(level.items.map((i) => i.clef))];
 
   return (
-    <div className={'reading' + (compact ? ' reading-compact' : '')}>
+    <div className={'reading' + (compact ? ' reading-compact' : '')} onPointerDownCapture={claim}>
       {phase !== 'playing' && !compact && (
         <div className="reading__setup">
           <label className="reading__field">

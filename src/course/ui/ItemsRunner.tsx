@@ -6,6 +6,7 @@ import PianoKeyboard, { type KeyMark } from '../../components/PianoKeyboard';
 import Staff from '../../components/Staff';
 import { useElementWidth } from '../../hooks/useFullscreen';
 import { useNoteInput } from '../../input/useNoteInput';
+import { isTypingTarget, useHandsFree } from '../../input/handsFree';
 import type { Midi } from '../../music/notes';
 import { formatSeconds } from '../../format';
 import { labelsVisible, meetsShare, needCount, pressItem, scoreItems, startItem, type ItemProgress } from '../judge';
@@ -56,6 +57,9 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
   const stopSound = useStopOnUnmount();
   const finishRef = useRef(onFinish);
   finishRef.current = onFinish;
+  const handsFree = useHandsFree();
+  const endedAt = useRef(0);
+  const startRef = useRef<() => void>(() => undefined);
 
   const item = items[index] as Item | undefined;
 
@@ -80,12 +84,14 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
   }, [stopSound]);
 
   const start = () => {
+    handsFree.claim();
     const list = makeItems();
     setItems(list);
     setResults([]);
     setIndex(0);
     begin(list, 0);
   };
+  startRef.current = start;
 
   const finishItem = useCallback((misses: number, timedOut = false) => {
     if (!item) return;
@@ -101,15 +107,23 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
         const s = scoreItems(all);
         const passed = meetsShare(s.accuracy, all.length, pass.accuracy) && (pass.avgMs === undefined || (s.avgMs ?? Infinity) <= pass.avgMs);
         setPhase('done');
+        endedAt.current = performance.now();
         finishRef.current({ accuracy: s.accuracy, avgMs: s.avgMs, passed, perItem: all.map((x) => ({ ok: x.misses === 0 && !x.timedOut, skill: x.skill })) });
       }
     }, timedOut || misses ? 1400 : 650);
   }, [item, results, index, items, begin, pass]);
 
   // Teclas: mantém o conjunto segurado aqui (acordes precisam dele na hora exata).
+  // Parado ou no resumo: no exercício ativo, qualquer tecla começa a rodada (passado um instante do fim).
+  const canStart = () => handsFree.isActive && (phase === 'idle' || phase === 'done') && performance.now() - endedAt.current > 1500;
+
   useEffect(() => subscribe((e) => {
     if (e.type === 'off') {
       heldRef.current.delete(e.midi);
+      return;
+    }
+    if (canStart()) {
+      startRef.current();
       return;
     }
     heldRef.current.add(e.midi);
@@ -119,7 +133,8 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
     setProg(next);
     if (next.misses > p.misses && hints) setShowHint(true);
     if (next.done && !p.done) finishItem(next.misses);
-  }), [subscribe, phase, item, hints, finishItem]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [subscribe, phase, item, hints, finishItem, handsFree.isActive]);
 
   // Tempo-limite.
   useEffect(() => {
@@ -143,6 +158,17 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
     return () => cancelAnimationFrame(raf);
   }, [phase, item, finishItem]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key === ' ' || e.key === 'Enter') && !isTypingTarget(e.target) && canStart()) {
+        e.preventDefault();
+        startRef.current();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   const recent = useMemo(() => results.map((r) => r.misses === 0 && !r.timedOut), [results]);
   const names = labelsVisible(labels, recent);
 
@@ -161,7 +187,7 @@ export default function ItemsRunner({ makeItems, low, high, labels, hints, pass,
   const remaining = item?.timeLimitMs && phase === 'answer' ? Math.max(0, item.timeLimitMs - (now - startedAt.current)) : null;
 
   return (
-    <div className="runner">
+    <div className="runner" onPointerDownCapture={handsFree.claim}>
       {phase === 'idle' ? (
         <div className="runner__start">
           <button className="button button-primary" type="button" onClick={start}>{startLabel}</button>

@@ -10,6 +10,7 @@ import { CheckIcon, CloseIcon, FlameIcon, NoteIcon, StarIcon } from '../componen
 import type { ImmersiveState } from '../components/ImmersiveFrame';
 import { focusSteps, resumeStep, type FocusStep } from '../course/focus';
 import { markDone } from '../course/progress';
+import { HandsFreeAuto } from '../input/handsFree';
 import { useLesson } from '../course/useLesson';
 import type { Exercise } from '../course/types';
 import { RichText, Verdict, pct } from '../course/ui/shared';
@@ -75,6 +76,7 @@ function Focus({ L, onClose }: { L: Ready; onClose: () => void }) {
   const ok = stepDone(step);
 
   return (
+    <HandsFreeAuto.Provider value>
     <div className="focus">
       <header className="focus__top">
         <button className="focus__icon" type="button" onClick={onClose} aria-label="Fechar o modo foco">
@@ -230,6 +232,7 @@ function Focus({ L, onClose }: { L: Ready; onClose: () => void }) {
         </footer>
       )}
     </div>
+    </HandsFreeAuto.Provider>
   );
 }
 

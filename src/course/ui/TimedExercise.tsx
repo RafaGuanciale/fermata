@@ -8,6 +8,7 @@ import Staff, { type NoteState } from '../../components/Staff';
 import { PlayIcon } from '../../components/Icons';
 import { useElementWidth } from '../../hooks/useFullscreen';
 import { useNoteInput } from '../../input/useNoteInput';
+import { getAutoNext, isTypingTarget, setAutoNext, useHandsFree } from '../../input/handsFree';
 import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
@@ -58,6 +59,10 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
   const target = ex.ladder?.to ?? task.bpm;
   const finishRef = useRef(onFinish);
   finishRef.current = onFinish;
+  const handsFree = useHandsFree();
+  const [autoNext, setAutoNextState] = useState(getAutoNext);
+  // Cada passada terminada (sem concluir o exercício) pede a próxima sozinha, se "Seguir sozinho" estiver ligado.
+  const [autoKick, setAutoKick] = useState(0);
 
   const onTake = (s: TakeScore) => {
     onEachTake?.({ bpm, accuracy: s.r.accuracy, ok: s.ok });
@@ -95,15 +100,24 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
     }
     if (nextBpm !== bpm) setBpm(nextBpm);
     if (fresh) setTask(fresh);
+    const concluded = !!s.ok && !(ex.ladder && bpm < target) && n >= ex.reps;
+    const played = s.r.notes.some((x) => x && x.delta !== null) || s.r.extras > 0;
+    if (autoNext && !concluded && !finished && played) setAutoKick((k) => k + 1);
   };
 
   return (
-    <div className="runner">
+    <div className="runner" onPointerDownCapture={handsFree.claim}>
       <div className="runner__head">
         <span className="runner__count">
           {finished ? 'Concluído' : `Passadas boas seguidas: ${streak} de ${ex.reps}`}
           {ex.ladder && !finished && ` · ${bpm} de ${target} BPM`}
         </span>
+        {!finished && (
+          <label className="timed__auto" title="A próxima passada começa sozinha depois do resultado">
+            <input type="checkbox" checked={autoNext} onChange={(e) => { setAutoNext(e.target.checked); setAutoNextState(e.target.checked); }} />
+            Seguir sozinho
+          </label>
+        )}
         {!finished && best > 0 && (
           <button className="linkButton" type="button" onClick={() => finishRef.current({ accuracy: best, passed: false })}>
             Encerrar por aqui
@@ -138,12 +152,27 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
           <Verdict tone={last.ok ? 'hit' : 'miss'} detail={last.note}>{last.headline}</Verdict>
         </div>
       )}
-      <TimedTake task={task} bpm={bpm} ex={ex} hints={hints} onTake={onTake} onStart={() => setLast(null)} />
+      <TimedTake task={task} bpm={bpm} ex={ex} hints={hints} onTake={onTake} onStart={() => setLast(null)} active={handsFree.isActive && !finished} autoKick={autoKick} />
     </div>
   );
 }
 
-function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask; bpm: number; ex: TimedEx; hints: boolean; onTake: (s: TakeScore) => void; onStart: () => void }) {
+const AUTO_MS = 3500;
+/** Depois de uma passada, notas tocadas por um instante ainda são o fim da música, não o pedido de começar outra. */
+const GRACE_MS = 1500;
+
+function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: {
+  task: TimedTask;
+  bpm: number;
+  ex: TimedEx;
+  hints: boolean;
+  onTake: (s: TakeScore) => void;
+  onStart: () => void;
+  /** Responde ao piano, ao pedal e ao espaço (o exercício ativo da página). */
+  active: boolean;
+  /** Muda a cada passada que deve emendar na próxima ("Seguir sozinho"). */
+  autoKick: number;
+}) {
   const metronome = useMetronome();
   const { held, subscribe, subscribePedal, press, release } = useNoteInput();
   const [staffRef, staffWidth] = useElementWidth<HTMLDivElement>();
@@ -156,6 +185,10 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
   const phaseRef = useRef<Phase>('idle');
   const takeRef = useRef(onTake);
   takeRef.current = onTake;
+  const [autoAt, setAutoAt] = useState<number | null>(null);
+  const endedAt = useRef(0);
+  const activeRef = useRef(active);
+  activeRef.current = active;
   const setPhase = (p: Phase) => {
     phaseRef.current = p;
     setPhaseState(p);
@@ -179,6 +212,7 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
     const track = scheduleTrack({ bpm, countIn: task.beatsPerBar, beats, beatsPerBar: task.beatsPerBar });
     if (!track) return;
     trackRef.current = track;
+    setAutoAt(null);
     onStart();
     eventsRef.current = [];
     pedalRef.current = [];
@@ -206,8 +240,70 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
     const s = { r, artic, dyn, noVelocity, ped, even, bal, gap, checks, ok: takePassed(checks) };
     setScore(s);
     setPhase('done');
+    endedAt.current = performance.now();
     takeRef.current(s);
   }, [task, bpm, ex]);
+
+  const stop = useCallback(() => {
+    trackRef.current?.cancel();
+    trackRef.current = null;
+    endedAt.current = performance.now();
+    setAutoAt(null);
+    setPhase('idle');
+  }, []);
+
+  const startRef = useRef(start);
+  startRef.current = start;
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
+  /** Parado (ou no resultado), no exercício ativo e passado o instante do fim: pode começar. */
+  const canStart = () => activeRef.current && (phaseRef.current === 'idle' || phaseRef.current === 'done') && performance.now() - endedAt.current > GRACE_MS;
+
+  // Seguir sozinho: a próxima passada começa depois de alguns segundos, com contagem visível.
+  useEffect(() => {
+    if (!autoKick) return;
+    setAutoAt(performance.now() + AUTO_MS);
+  }, [autoKick]);
+  useEffect(() => {
+    if (autoAt === null) return;
+    const id = window.setInterval(() => {
+      const t = performance.now();
+      setNow(t);
+      if (t >= autoAt) {
+        window.clearInterval(id);
+        if (activeRef.current) startRef.current();
+        else setAutoAt(null);
+      }
+    }, 200);
+    return () => window.clearInterval(id);
+  }, [autoAt]);
+
+  // Espaço ou Enter começam; espaço durante a passada para; Esc cancela a próxima automática.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!activeRef.current || isTypingTarget(e.target)) return;
+      if (e.key === 'Escape' && autoAtRef.current !== null) {
+        setAutoAt(null);
+        return;
+      }
+      if (e.key !== ' ' && e.key !== 'Enter') return;
+      if (phaseRef.current === 'countin' || phaseRef.current === 'playing') {
+        if (e.key === ' ') {
+          e.preventDefault();
+          stopRef.current();
+        }
+        return;
+      }
+      if (canStart()) {
+        e.preventDefault();
+        startRef.current();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  const autoAtRef = useRef(autoAt);
+  autoAtRef.current = autoAt;
 
   useEffect(() => {
     if (phase !== 'countin' && phase !== 'playing') return;
@@ -236,6 +332,11 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
   }, [phase, lengthMs, bpm, ex.window, finish]);
 
   useEffect(() => subscribe((e) => {
+    // Parado: tocar qualquer tecla começa a contagem (a própria tecla não conta como nota).
+    if (e.type === 'on' && canStart()) {
+      startRef.current();
+      return;
+    }
     const track = trackRef.current;
     if (!track || (phaseRef.current !== 'countin' && phaseRef.current !== 'playing')) return;
     const t = e.at - track.firstBeat - (getLatency() ?? 0);
@@ -249,6 +350,10 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
   }), [subscribe]);
 
   useEffect(() => subscribePedal((e) => {
+    if (e.down && canStart()) {
+      startRef.current();
+      return;
+    }
     const track = trackRef.current;
     if (!track || (phaseRef.current !== 'countin' && phaseRef.current !== 'playing')) return;
     pedalRef.current = [...pedalRef.current, { down: e.down, t: e.at - track.firstBeat - (getLatency() ?? 0) }];
@@ -306,7 +411,7 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
     for (const m of nextToPlay(task, notesNow)) marks[m] = 'next';
   }
 
-  const countdown = phase === 'countin' && track ? Math.max(1, Math.ceil(-elapsed / track.beatMs)) : null;
+  const countdown = phase === 'countin' && track ? Math.min(task.beatsPerBar, Math.max(1, Math.ceil(-elapsed / track.beatMs))) : null;
 
   return (
     <>
@@ -332,7 +437,7 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
         {phase === 'countin' ? (
           <p className="timed__count" aria-live="assertive">{countdown}</p>
         ) : phase === 'playing' ? (
-          <button className="button button-secondary button-small" type="button" onClick={() => { trackRef.current?.cancel(); trackRef.current = null; setPhase('idle'); }}>
+          <button className="button button-secondary button-small" type="button" onClick={stop}>
             Parar
           </button>
         ) : (
@@ -342,12 +447,21 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart }: { task: TimedTask;
           </button>
         )}
         <span className="timed__hint">
-          {phase === 'idle' && `${bpm} BPM · contagem de ${task.beatsPerBar} tempos${anyKey ? ' · qualquer tecla' : ''}`}
+          {phase === 'idle' && autoAt === null && `${bpm} BPM · contagem de ${task.beatsPerBar} tempos${anyKey ? ' · qualquer tecla' : ''}`}
           {phase === 'countin' && 'Prepare a mão, começa no próximo 1'}
-          {phase === 'playing' && `${bpm} BPM`}
+          {phase === 'playing' && `${bpm} BPM${active ? ' · espaço para parar' : ''}`}
         </span>
         {phase === 'playing' && <Combo streak={onTime} label="no tempo" />}
       </div>
+      {autoAt !== null && (phase === 'idle' || phase === 'done') ? (
+        <div className="timed__next" role="status">
+          <span className="timed__nextCount">Próxima passada em {Math.max(1, Math.ceil((autoAt - now) / 1000))} s, a {bpm} BPM</span>
+          <button className="linkButton" type="button" onClick={start}>Começar já</button>
+          <button className="linkButton" type="button" onClick={() => setAutoAt(null)}>Esperar</button>
+        </div>
+      ) : active && (phase === 'idle' || phase === 'done') ? (
+        <p className="timed__handsFree">Para começar sem o mouse: toque qualquer tecla, o pedal ou aperte espaço.</p>
+      ) : null}
       {phase === 'done' && score && (
         <div className="runner__feedback">
           <Verdict tone={score.ok ? 'hit' : 'miss'}>

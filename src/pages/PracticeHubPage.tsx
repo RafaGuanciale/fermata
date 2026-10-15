@@ -1,100 +1,31 @@
 // Treino: a prática diária ligada ao curso. Aquecimento, revisão das lições, técnica com escada
 // de andamento que continua de onde parou, leitura à primeira vista e ouvido, no nível da unidade atual.
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { db } from '../db/db';
-import { CheckIcon, ChevronIcon } from '../components/Icons';
+import { CheckIcon, ChevronIcon, PlayIcon } from '../components/Icons';
 import { getLatency } from '../training/clickTrack';
-import { saveRun, useRuns } from '../training/runs';
-import { dayIndex, dayKey } from '../training/progress';
 import { PLAN, UNITS } from '../course';
-import { afterReview, courseStep, currentUnitN, nextLesson, unitUnlocked, warmupItems, type Position } from '../course/progress';
-import {
-  DAY_PARTS, DAY_PART_LABEL, bestTechBpm, dayRunId, partsDone, techRunId, techStartBpm, techStatus, techniqueForDay, trackFor,
-  type DayPart, type TechItem,
-} from '../course/track';
-import type { Exercise } from '../course/types';
-import ItemsRunner from '../course/ui/ItemsRunner';
-import NoteReadingTrainer from '../reading/NoteReadingTrainer';
-import { ExerciseRunner } from '../course/ui/ExerciseRunner';
+import { unitUnlocked } from '../course/progress';
+import { DAY_PART_LABEL, bestTechBpm, techStatus, type DayPart } from '../course/track';
+import { DayPartBody, partMeta } from '../course/ui/DayParts';
 import { Verdict } from '../course/ui/shared';
-import { useCourseRows } from '../course/useCourseRows';
-
-const KIND: Record<DayPart, 'warmup' | 'review' | 'timed' | 'reading' | 'ear' | 'names'> = {
-  aquecimento: 'warmup', notas: 'names', revisao: 'review', tecnica: 'timed', leitura: 'reading', ouvido: 'ear',
-};
+import { useDayPlan } from '../course/useDayPlan';
 
 export default function PracticeHubPage() {
   const location = useLocation();
-  const runs = useRuns();
-  const rows = useCourseRows();
   const [chosenUnit, setChosenUnit] = useState<number | null>(null);
   const [open, setOpen] = useState<DayPart | null>(null);
-  const [round, setRound] = useState(0);
-  const now = Date.now();
-  const today = dayKey(now);
+  const plan = useDayPlan(chosenUnit);
+  const { ready, runs, rows, next, courseUnit, unitN, title, track, parts, done, count } = plan;
 
-  const next = rows && runs ? nextLesson(UNITS, rows, runs) : null;
-  const courseUnit = rows && runs ? currentUnitN(UNITS, rows, runs) : 1;
-  const unitN = chosenUnit ?? courseUnit;
-  const track = trackFor(unitN);
+  if (!ready || !rows) return null;
 
-  // Revisão: lições antes da atual. Com as lições da unidade feitas (falta a música final) ou o curso no fim, todas contam.
-  const reviewPos: Position | null = useMemo(() => {
-    if (!rows || !runs) return null;
-    if (next) return next;
-    const step = courseStep(UNITS, rows, runs);
-    const ui = step.kind === 'final' ? step.unitIndex : UNITS.length - 1;
-    const unit = UNITS[ui];
-    return unit ? { unit, unitIndex: ui, lesson: unit.lessons[unit.lessons.length - 1], lessonIndex: unit.lessons.length } : null;
-  }, [rows, runs, next]);
-  const review = useMemo(() => {
-    if (!rows || !reviewPos) return [];
-    return warmupItems(UNITS, rows, reviewPos, Math.random, Date.now());
-    // Sorteia de novo só quando pedir outra rodada.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows === undefined, reviewPos?.lesson.id, reviewPos?.lessonIndex, round]);
-
-  if (!runs || !rows) return null;
-
-  const done = partsDone(runs, today);
-  const parts = DAY_PARTS.filter((p) => p !== 'revisao' || review.length > 0);
-  const count = parts.filter((p) => done.has(p)).length;
-  const techToday = techniqueForDay(track, runs, dayIndex(now));
   const unlockedUnits = PLAN.filter((p) => {
     const i = UNITS.findIndex((u) => u.n === p.n);
     return p.n <= courseUnit || (i >= 0 && unitUnlocked(UNITS, i, rows, runs));
   }).map((p) => p.n);
   const latency = getLatency();
-  const title = PLAN.find((p) => p.n === unitN)?.title ?? '';
-
-  const finishPart = (part: DayPart, accuracy?: number) => {
-    void saveRun({ treinoId: dayRunId(part), kind: KIND[part], accuracy, level: unitN });
-  };
-
-  const finishReview = (results: { ok: boolean }[]) => {
-    const bySource = new Map<string, { ok: boolean }[]>();
-    review.forEach((w, i) => bySource.set(w.key, [...(bySource.get(w.key) ?? []), results[i] ?? { ok: false }]));
-    void db.transaction('rw', db.lessons, async () => {
-      for (const [k, rs] of bySource) {
-        const r = await db.lessons.get(k);
-        if (r) await db.lessons.put(afterReview(r, rs, Date.now()));
-      }
-    });
-    finishPart('revisao', results.filter((r) => r.ok).length / Math.max(1, results.length));
-  };
-
-  const partMeta = (part: DayPart): string => {
-    switch (part) {
-      case 'aquecimento': return `${track.warmup.length} exercícios curtos, devagar`;
-      case 'notas': return '10 notas para reconhecer na pauta, no seu nível de leitura';
-      case 'revisao': return `${review.length} perguntas das lições já concluídas`;
-      case 'tecnica': return techToday.map((t) => t.title).join(' · ') || 'Toda a técnica da unidade está no alvo';
-      case 'leitura': return track.reading.how;
-      case 'ouvido': return track.ear.how;
-    }
-  };
 
   return (
     <>
@@ -102,6 +33,12 @@ export default function PracticeHubPage() {
         <span className="page__eyebrow">Unidade {unitN} · {title}</span>
         <h1 className="page__title">Treino</h1>
         <p className="page__lead">Todo dia, cerca de 20 minutos, no nível da unidade em que você está no curso. A lição nova fica no Estudo; aqui é onde a mão e o ouvido fixam.</p>
+        <div className="page__actions">
+          <Link className="button button-primary" to={chosenUnit ? `/treino/foco?unidade=${chosenUnit}` : '/treino/foco'} state={{ background: location }}>
+            <PlayIcon className="button__icon" />
+            Treinar em tela de foco
+          </Link>
+        </div>
       </header>
 
       <section className="page__section">
@@ -120,43 +57,13 @@ export default function PracticeHubPage() {
                 <span className="dayPlan__num" aria-hidden>{done.has(part) ? <CheckIcon className="dayPlan__check" /> : i + 1}</span>
                 <span className="dayPlan__titles">
                   <span className="dayPlan__title">{DAY_PART_LABEL[part]}</span>
-                  <span className="dayPlan__meta">{partMeta(part)}</span>
+                  <span className="dayPlan__meta">{partMeta(part, plan)}</span>
                 </span>
                 <ChevronIcon className={'path__chevron' + (open === part ? ' path__chevron-open' : '')} />
               </button>
               {open === part && (
                 <div className="dayPlan__body">
-                  {part === 'aquecimento' && <Sequence exercises={track.warmup} onDone={() => finishPart('aquecimento')} />}
-                  {part === 'notas' && (
-                    <div className="dayPlan__stack">
-                      <NoteReadingTrainer compact count={10} onDone={(r) => finishPart('notas', r.firstTry / Math.max(1, r.total))} />
-                      <Link className="linkButton" to="/treino/notas" state={{ background: location }}>Abrir a leitura de notas completa (níveis e mapa)</Link>
-                    </div>
-                  )}
-                  {part === 'revisao' && (
-                    <>
-                      <p className="lesson__p">Perguntas das lições que você já concluiu, misturadas. O que você erra volta mais vezes.</p>
-                      <ItemsRunner
-                        key={round}
-                        makeItems={() => review.map((r) => r.item)}
-                        low={36}
-                        high={84}
-                        labels="off"
-                        hints={false}
-                        pass={{ accuracy: 0 }}
-                        startLabel="Começar a revisão"
-                        onFinish={(r) => finishReview(r.perItem)}
-                      />
-                      {done.has('revisao') && <button className="linkButton" type="button" onClick={() => setRound(round + 1)}>Outra rodada</button>}
-                    </>
-                  )}
-                  {part === 'tecnica' && (
-                    <div className="dayPlan__stack">
-                      {techToday.map((item) => <TechCard key={item.id} item={item} startBpm={techStartBpm(item, runs)} best={bestTechBpm(item, runs)} />)}
-                    </div>
-                  )}
-                  {part === 'leitura' && <Single exercise={track.reading} onDone={(a) => finishPart('leitura', a)} />}
-                  {part === 'ouvido' && <Single exercise={track.ear} onDone={(a) => finishPart('ouvido', a)} />}
+                  <DayPartBody part={part} plan={plan} />
                 </div>
               )}
             </li>
@@ -214,80 +121,5 @@ export default function PracticeHubPage() {
         </div>
       </section>
     </>
-  );
-}
-
-/** Exercícios em sequência; chama `onDone` quando o último termina. */
-function Sequence({ exercises, onDone }: { exercises: Exercise[]; onDone: () => void }) {
-  const [i, setI] = useState(0);
-  const [finished, setFinished] = useState(false);
-  const ex = exercises[i];
-  return (
-    <div className="dayPlan__stack">
-      <p className="runner__count">{exercises.length > 1 ? `Exercício ${i + 1} de ${exercises.length}: ${ex.title}` : ex.title}</p>
-      <ExerciseRunner
-        key={i}
-        ex={ex}
-        hints
-        onFinish={() => {
-          if (i + 1 < exercises.length) setI(i + 1);
-          else if (!finished) {
-            setFinished(true);
-            onDone();
-          }
-        }}
-      />
-      {finished && <Verdict tone="hit">Aquecido. Pode seguir para a próxima parte.</Verdict>}
-    </div>
-  );
-}
-
-function Single({ exercise, onDone }: { exercise: Exercise; onDone: (accuracy: number) => void }) {
-  const [last, setLast] = useState<{ accuracy: number; passed: boolean } | null>(null);
-  return (
-    <div className="dayPlan__stack">
-      <ExerciseRunner
-        ex={exercise}
-        hints={false}
-        onFinish={(o) => {
-          setLast(o);
-          onDone(o.accuracy);
-        }}
-      />
-      {last && !last.passed && <p className="runner__note">Abaixo da meta, mas conta como feito: o importante é fazer todo dia.</p>}
-    </div>
-  );
-}
-
-/** Um item de técnica: escada que começa onde você parou e guarda cada passada. */
-function TechCard({ item, startBpm, best }: { item: TechItem; startBpm: number; best: number | null }) {
-  const [from] = useState(startBpm);
-  // Mesmo objeto entre renderizações: a passada em andamento não reinicia o relógio quando a página atualiza.
-  const ex: Exercise = useMemo(() => ({
-    kind: 'timed',
-    title: item.title,
-    how: item.how,
-    gen: item.gen,
-    reps: 2,
-    window: 80,
-    pass: { accuracy: 0.85 },
-    evenness: item.evenness,
-    articulation: item.articulation,
-    ladder: { from, to: item.target, step: item.step },
-  }), [item, from]);
-  return (
-    <div className="exerciseCard">
-      <div className="exerciseCard__head">
-        <h3 className="exerciseCard__title">{item.title}</h3>
-        <span className="page__link">{best ? `melhor: ${best} BPM` : 'primeira vez'} · alvo {item.target} BPM</span>
-      </div>
-      <p className="exerciseCard__how">{item.how}</p>
-      <ExerciseRunner
-        ex={ex}
-        hints
-        onFinish={() => undefined}
-        onTake={(t) => void saveRun({ treinoId: techRunId(item), kind: 'timed', bpm: t.bpm, accuracy: t.accuracy, clean: t.ok })}
-      />
-    </div>
   );
 }

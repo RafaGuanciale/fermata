@@ -50,7 +50,7 @@ export default function TodayPage() {
               : 'Aquecimento, revisão, técnica, leitura e ouvido, no nível da sua unidade.'}
         </span>
         <span className="photoCard__actions">
-          <Link className="button button-primary" to="/treino">
+          <Link className="button button-primary" to="/treino/foco" state={{ background: location }}>
             <PlayIcon className="button__icon" />
             Treinar
           </Link>

@@ -29,6 +29,7 @@ const CourseFocusPage = lazy(() => import('./pages/CourseFocusPage'));
 const ReferencePage = lazy(() => import('./pages/ReferencePage'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage'));
 const NoteReadingPage = lazy(() => import('./pages/NoteReadingPage'));
+const TreinoFocusPage = lazy(() => import('./pages/TreinoFocusPage'));
 // A partitura interativa (OpenSheetMusicDisplay) também só carrega quando você estuda uma peça.
 const ScorePracticePage = lazy(() => import('./pages/ScorePracticePage'));
 
@@ -97,7 +98,7 @@ function FocusPopup() {
   );
 }
 
-const IMMERSIVE = ['/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
+const IMMERSIVE = ['/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
 
 export default function App() {
   const location = useLocation();
@@ -141,6 +142,10 @@ export default function App() {
         {immersive && (
           <Routes>
             <Route path="/treino/sessao" element={<SessionPopup />} />
+            <Route
+              path="/treino/foco"
+              element={<TreinoPopup label="Treino em tela de foco" render={(c) => <Suspense fallback={<div className="focus" />}><TreinoFocusPage onClose={c} /></Suspense>} />}
+            />
             <Route
               path="/treino/notas"
               element={<TreinoPopup label="Leitura de notas" render={(c) => <Suspense fallback={<div className="focus" />}><NoteReadingPage onClose={c} /></Suspense>} />}

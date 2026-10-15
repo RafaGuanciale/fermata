@@ -157,6 +157,13 @@ button,
   max-width: 60ch;
 }
 
+.page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
 .page__sectionHead {
   display: flex;
   align-items: baseline;

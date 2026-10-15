@@ -118,7 +118,7 @@ export function ImprovRunner({ ex, onFinish }: { ex: ImprovEx; onFinish: (o: Out
     <div className="runner">
       <div className="runner__actions">
         {phase === 'countin' ? (
-          <p className="timed__count">{Math.max(1, Math.ceil(-elapsed / beatMs))}</p>
+          <p className="timed__count">{Math.min(ex.beatsPerBar, Math.max(1, Math.ceil(-elapsed / beatMs)))}</p>
         ) : phase === 'playing' ? (
           <span className="runner__count">Compasso {bar} de {ex.bars}</span>
         ) : (
