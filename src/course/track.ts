@@ -508,11 +508,12 @@ export function techniqueForDay(track: DailyTrack, runs: TrainingRun[], dayIndex
 
 // ---------- o dia de treino ----------
 
-export const DAY_PARTS = ['aquecimento', 'revisao', 'tecnica', 'leitura', 'ouvido'] as const;
+export const DAY_PARTS = ['aquecimento', 'notas', 'revisao', 'tecnica', 'leitura', 'ouvido'] as const;
 export type DayPart = (typeof DAY_PARTS)[number];
 
 export const DAY_PART_LABEL: Record<DayPart, string> = {
   aquecimento: 'Aquecimento',
+  notas: 'Notas na pauta',
   revisao: 'Revisão do curso',
   tecnica: 'Técnica',
   leitura: 'Leitura à primeira vista',

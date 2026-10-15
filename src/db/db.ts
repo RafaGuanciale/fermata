@@ -134,6 +134,17 @@ export interface PracticeDay extends Synced {
   device: string;
 }
 
+/** Leitura de notas: como você vai em cada nota, em cada clave (`${clave}:${midi}`). */
+export interface NoteReadStat extends Synced {
+  id: string;
+  clef: 'treble' | 'bass';
+  midi: number;
+  seen: number;
+  acc: number;
+  ms: number | null;
+  lastAt: number;
+}
+
 /** Fila do que mudou neste aparelho e ainda não subiu. */
 export interface OutboxEntry {
   /** `${table}:${uid}` */
@@ -149,6 +160,7 @@ class FermataDB extends Dexie {
   outbox!: Table<OutboxEntry, string>;
   runs!: Table<TrainingRun, number>;
   practice!: Table<PracticeDay, string>;
+  notes!: Table<NoteReadStat, string>;
   sessions!: Table<Session, number>;
   attempts!: Table<Attempt, number>;
   pieces!: Table<Piece, number>;
@@ -192,6 +204,9 @@ class FermataDB extends Dexie {
     });
     this.version(5).stores({
       practice: 'id, day',
+    });
+    this.version(6).stores({
+      notes: 'id',
     });
   }
 }

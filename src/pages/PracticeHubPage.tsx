@@ -16,12 +16,13 @@ import {
 } from '../course/track';
 import type { Exercise } from '../course/types';
 import ItemsRunner from '../course/ui/ItemsRunner';
+import NoteReadingTrainer from '../reading/NoteReadingTrainer';
 import { ExerciseRunner } from '../course/ui/ExerciseRunner';
 import { Verdict } from '../course/ui/shared';
 import { useCourseRows } from '../course/useCourseRows';
 
-const KIND: Record<DayPart, 'warmup' | 'review' | 'timed' | 'reading' | 'ear'> = {
-  aquecimento: 'warmup', revisao: 'review', tecnica: 'timed', leitura: 'reading', ouvido: 'ear',
+const KIND: Record<DayPart, 'warmup' | 'review' | 'timed' | 'reading' | 'ear' | 'names'> = {
+  aquecimento: 'warmup', notas: 'names', revisao: 'review', tecnica: 'timed', leitura: 'reading', ouvido: 'ear',
 };
 
 export default function PracticeHubPage() {
@@ -87,6 +88,7 @@ export default function PracticeHubPage() {
   const partMeta = (part: DayPart): string => {
     switch (part) {
       case 'aquecimento': return `${track.warmup.length} exercícios curtos, devagar`;
+      case 'notas': return '10 notas para reconhecer na pauta, no seu nível de leitura';
       case 'revisao': return `${review.length} perguntas das lições já concluídas`;
       case 'tecnica': return techToday.map((t) => t.title).join(' · ') || 'Toda a técnica da unidade está no alvo';
       case 'leitura': return track.reading.how;
@@ -125,6 +127,12 @@ export default function PracticeHubPage() {
               {open === part && (
                 <div className="dayPlan__body">
                   {part === 'aquecimento' && <Sequence exercises={track.warmup} onDone={() => finishPart('aquecimento')} />}
+                  {part === 'notas' && (
+                    <div className="dayPlan__stack">
+                      <NoteReadingTrainer compact count={10} onDone={(r) => finishPart('notas', r.firstTry / Math.max(1, r.total))} />
+                      <Link className="linkButton" to="/treino/notas" state={{ background: location }}>Abrir a leitura de notas completa (níveis e mapa)</Link>
+                    </div>
+                  )}
                   {part === 'revisao' && (
                     <>
                       <p className="lesson__p">Perguntas das lições que você já concluiu, misturadas. O que você erra volta mais vezes.</p>
@@ -198,7 +206,7 @@ export default function PracticeHubPage() {
       <section className="page__section" aria-label="Treino livre">
         <h2 className="page__sectionTitle">Treino livre</h2>
         <div className="chips">
-          <Link className="chip chip-large" to="/treino/sessao?modo=notas" state={{ background: location }}>Ler notas soltas</Link>
+          <Link className="chip chip-large" to="/treino/notas" state={{ background: location }}>Leitura de notas na pauta</Link>
           {next && <Link className="chip chip-large" to={`/estudo/unidade/${next.unit.n}/${next.lesson.id}`}>Lição de hoje: {next.lesson.title}</Link>}
           <Link className="chip chip-large" to="/treino/calibrar" state={{ background: location }}>
             {latency === null ? 'Ajustar o atraso do piano' : `Atraso do piano: ${latency} ms`}
