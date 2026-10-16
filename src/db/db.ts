@@ -121,6 +121,9 @@ export interface TrainingRun extends Synced {
   /** Música: trecho com mais erro na passada */
   weakFrom?: number;
   weakTo?: number;
+  /** Música: compassos tocados na passada (para saber se um trecho difícil foi revisto) */
+  from?: number;
+  to?: number;
   /** Mudança de nível (kind 'level') ou nível em que foi feito */
   level?: number;
   /** Pontos (modo arcade). */

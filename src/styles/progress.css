@@ -331,3 +331,37 @@
 :root[data-theme="light"] .bars__bar {
   fill: color-mix(in srgb, var(--color-petrol) 28%, var(--color-off-white));
 }
+
+/* Trechos para rever (Hoje e Progresso) */
+.reviewSpots {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reviewSpots__link {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.reviewSpots__link:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-raised);
+}
+
+.reviewSpots__title {
+  font: 600 15px/22px var(--font-body);
+}
+
+.reviewSpots__meta {
+  font: 500 13px/18px var(--font-body);
+  color: var(--text-muted);
+}

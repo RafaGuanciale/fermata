@@ -15,6 +15,8 @@ import { finalPassedAt, isPassed, lessonKey, unitComplete, unitUnlocked } from '
 import { ALL_TRACKS, bestTechBpm, techRunId, techStatus } from '../course/track';
 import { useCourseRows } from '../course/useCourseRows';
 import { useRuns } from '../training/runs';
+import ReviewSpots from '../progress/ReviewSpots';
+import { weakSpots } from '../progress/weakSpots';
 import { bestByTreino, freeMinutes, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyReading, weeklyTotals, type HeatCell, type WeekReading, type WeekTotal } from '../progress/stats';
 
 const shortDate = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short' });
@@ -78,7 +80,7 @@ export default function ProgressPage() {
   const pieceByKey = new Map<string, Piece>();
   for (const p of data.pieces) pieceByKey.set(`peca-${p.uid ?? p.id}`, p);
   const songs = [...best.entries()].filter(([id]) => id.startsWith('peca-') && pieceByKey.has(id)).map(([id, b]) => ({ piece: pieceByKey.get(id)!, ...b })).sort((a, b) => b.last - a.last);
-  const songWeak = songs.filter((s) => s.lastWeak);
+  const songWeak = weakSpots(runs);
 
   const learnedAt = data.pieces.filter((p) => p.status === 'learned' || p.status === 'repertoire').map((p) => p.updatedAt);
   const marks = milestones(runs, byDay, learnedAt, courseMarks).sort((a, b) => (a.at === null ? 1 : 0) - (b.at === null ? 1 : 0) || (a.at ?? 0) - (b.at ?? 0));
@@ -202,16 +204,8 @@ export default function ProgressPage() {
                 {songWeak.length > 0 && (
                   <div className="progress__card">
                     <h3 className="progress__cardTitle">Trechos difíceis das músicas</h3>
-                    <p className="progress__muted">Da última vez que você tocou junto.</p>
-                    <ul className="progress__list">
-                      {songWeak.map((s) => (
-                        <li key={s.piece.id}>
-                          <Link to={`/peca/${s.piece.id}/estudar`} state={{ background: location, from: s.lastWeak![0], to: s.lastWeak![1] }}>
-                            {s.piece.title}: compassos {s.lastWeak![0]} a {s.lastWeak![1]}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="progress__muted">Cada um volta para revisão em 1, 3, 7 e 14 dias, até sair bem.</p>
+                    <ReviewSpots mode="todos" />
                   </div>
                 )}
               </div>

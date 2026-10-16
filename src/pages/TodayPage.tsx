@@ -11,6 +11,9 @@ import WeeklyGoal from '../progress/WeeklyGoal';
 import StreakLine from '../progress/StreakLine';
 import { PlayIcon } from '../components/Icons';
 import { useTrainingToday } from '../course/useTrainingToday';
+import ReviewSpots from '../progress/ReviewSpots';
+import { useRuns } from '../training/runs';
+import { dueSpots } from '../progress/weakSpots';
 
 export default function TodayPage() {
   const location = useLocation();
@@ -26,6 +29,8 @@ export default function TodayPage() {
   }, []);
 
   const training = useTrainingToday();
+  const runs = useRuns();
+  const hasDue = !!runs && dueSpots(runs, now).length > 0;
   const lessonTitle = training?.next?.lesson.title;
 
   return (
@@ -67,6 +72,16 @@ export default function TodayPage() {
         </span>
       </PhotoCard>
       <StreakLine />
+
+      {hasDue && (
+        <section className="page__section">
+          <div className="page__sectionHead">
+            <h2 className="page__sectionTitle">Trechos para rever hoje</h2>
+          </div>
+          <p className="page__lead">Onde você mais errou no Tocar junto. Estude devagar e depois passe o trecho no tempo: se sair bem, ele volta mais espaçado.</p>
+          <ReviewSpots mode="hoje" />
+        </section>
+      )}
 
       {data && data.learning.length > 0 && (
         <section className="page__section">

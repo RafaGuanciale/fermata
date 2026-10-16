@@ -424,7 +424,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
         setResult({ r, weak, plan });
         setTake('done');
         const passed = loaded.song ? songPassed(loaded.song, { bpm, accuracy: r.accuracy, hand, from: range.from, to: range.to, bars: measureCount(loaded.steps) }) : undefined;
-        void saveRun({ treinoId: loaded.runId, kind: 'timed', bpm, accuracy: r.accuracy, clean: r.clean, weakFrom: weak?.from, weakTo: weak?.to, passed });
+        void saveRun({ treinoId: loaded.runId, kind: 'timed', bpm, accuracy: r.accuracy, clean: r.clean, weakFrom: weak?.from, weakTo: weak?.to, from: range.from, to: range.to, passed });
         if (passed && loaded.song && celebratedOnce(`musica-${loaded.song.id}`)) setSongParty({ bpm, accuracy: r.accuracy });
         return;
       }
