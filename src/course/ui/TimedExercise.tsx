@@ -107,7 +107,7 @@ export default function TimedExercise({ ex, hints, rng, onFinish, onTake: onEach
   };
 
   return (
-    <div className="runner" onPointerDownCapture={handsFree.claim}>
+    <div className="runner runner-timed" onPointerDownCapture={handsFree.claim}>
       <div className="runner__head">
         <span className="runner__count">
           {finished ? 'Concluído' : `Passadas boas seguidas: ${streak} de ${ex.reps}`}

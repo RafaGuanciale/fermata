@@ -31,7 +31,7 @@ App web pessoal de estudo de piano do Rafael. Marca endossada: "Fermata, um proj
 - Na interface, a palavra é "música", não "peça" (o código ainda usa `Piece`).
 - Repertório: telas nunca mexem no banco direto, passam por `src/repertoire/repo.ts` (é onde a nuvem vai entrar).
 - Fotos: Unsplash, ids em `src/media/photos.ts`, sempre via `PhotoCard` (tem fallback se a foto não carregar).
-- Responsivo de verdade: notebook, tablet (Rafael vai comprar um) e celular. Testar 1440, 820 e 390 px.
+- Responsivo de verdade: notebook, tablet (Rafael vai usar deitado) e celular. Testar 1440, 820 e 390 px de largura e também telas baixas: notebook 1366×657 e 1536×730, tablet deitado 1180×760 e 1024×700. Regras de altura ficam em `@media (max-height: 960px)` (e 700px) em cada bloco; popups de treino não podem rolar nesses tamanhos.
 - Safari/iPad não tem Web MIDI: tudo precisa funcionar sem MIDI.
 - Texto da interface: "você", frases curtas, sentença (não Title Case), vírgula decimal, número sempre com unidade. Sem emoji.
 - Rafael achou as telas do design com informação demais: prefira menos elementos por tela.

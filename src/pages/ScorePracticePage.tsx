@@ -132,6 +132,7 @@ function keyGeometry(low: Midi, high: Midi) {
 }
 
 const CLICK_KEY = 'fermata-score-click';
+const shortScreen = () => typeof window !== 'undefined' && window.innerHeight < 860;
 const FINGERS_KEY = 'fermata-score-fingers';
 
 /** Toca uma música do repertório (pelo id da rota) ou uma música do curso (`song`). */
@@ -224,7 +225,11 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       const osmd = new OpenSheetMusicDisplay(hostRef.current, {
         autoResize: false,
         backend: 'svg',
-        drawTitle: true,
+        // Notebook de tela baixa: o título já está no topo do popup; a partitura fica com o espaço.
+        drawTitle: !shortScreen(),
+        drawSubtitle: !shortScreen(),
+        drawComposer: !shortScreen(),
+        drawLyricist: !shortScreen(),
         drawPartNames: false,
         followCursor: false,
       });

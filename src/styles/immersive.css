@@ -67,3 +67,11 @@
     border-radius: 20px;
   }
 }
+
+/* Notebook de tela baixa: a moldura encosta mais nas bordas de cima e de baixo */
+@media (max-height: 960px) and (min-width: 720px) {
+  .immersive {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+}

@@ -297,3 +297,30 @@
   font: 500 15px/23px var(--font-body);
   color: var(--text);
 }
+
+/* Tela baixa: a pauta grande da leitura encolhe pela altura */
+@media (max-height: 1000px) {
+  .readStaff {
+    max-height: 30vh;
+  }
+
+  .readStaff-map {
+    max-height: 34vh;
+  }
+}
+
+@media (max-height: 760px) {
+  .reading__name {
+    min-height: 52px;
+  }
+
+  .readStaff-map {
+    max-height: 27vh;
+  }
+}
+
+@media (max-height: 760px) {
+  .reading {
+    gap: var(--space-3);
+  }
+}

@@ -864,14 +864,16 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
               </span>
               <button className="arcadeTempo__step" type="button" disabled={speedIdx === SPEEDS.length - 1} onClick={() => setSettings({ ...settings, speed: SPEEDS[speedIdx + 1] })} aria-label="Mais rápido">+</button>
             </div>
-            <label className="reading__toggle">
-              <input type="checkbox" checked={settings.names} onChange={(e) => setSettings({ ...settings, names: e.target.checked })} />
-              Nomes nas notas
-            </label>
-            <label className="reading__toggle">
-              <input type="checkbox" checked={settings.fingers} onChange={(e) => setSettings({ ...settings, fingers: e.target.checked })} />
-              Dedos nas notas (1 é o polegar)
-            </label>
+            <div className="arcade__toggles">
+              <label className="reading__toggle">
+                <input type="checkbox" checked={settings.names} onChange={(e) => setSettings({ ...settings, names: e.target.checked })} />
+                Nomes nas notas
+              </label>
+              <label className="reading__toggle">
+                <input type="checkbox" checked={settings.fingers} onChange={(e) => setSettings({ ...settings, fingers: e.target.checked })} />
+                Dedos (1 é o polegar)
+              </label>
+            </div>
             {extraMenu}
             <div className="arcade__menuActions">
               <button className="button button-primary" type="button" onClick={() => start()}>Jogar</button>

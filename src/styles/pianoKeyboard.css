@@ -137,3 +137,28 @@
     visibility: hidden;
   }
 }
+
+/* Tela baixa: teclas mais curtas (a largura fica igual) */
+@media (max-height: 960px) {
+  .pianoKeyboard {
+    --key-h: 128px;
+    --black-h: 80px;
+  }
+
+  .pianoKeyboard-small {
+    --key-h: 112px;
+    --black-h: 70px;
+  }
+}
+
+@media (max-height: 700px) {
+  .pianoKeyboard {
+    --key-h: 112px;
+    --black-h: 70px;
+  }
+
+  .pianoKeyboard-small {
+    --key-h: 96px;
+    --black-h: 60px;
+  }
+}
