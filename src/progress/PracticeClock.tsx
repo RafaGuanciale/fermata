@@ -34,22 +34,26 @@ export default function PracticeClock() {
     const device = deviceId();
     let lastMinute = -1;
     let pending = 0;
+    let pendingFree = 0;
     let timer: number | null = null;
 
     const flush = async () => {
       timer = null;
       if (!pending) return;
       const add = pending;
+      const addFree = pendingFree;
       pending = 0;
+      pendingFree = 0;
       const day = dayKey(Date.now());
       const id = `${day}:${device}`;
       try {
         await db.transaction('rw', db.practice, async () => {
           const cur = await db.practice.get(id);
-          await db.practice.put({ ...(cur ?? {}), id, day, device, minutes: (cur?.minutes ?? 0) + add });
+          await db.practice.put({ ...(cur ?? {}), id, day, device, minutes: (cur?.minutes ?? 0) + add, ...(addFree || cur?.free ? { free: (cur?.free ?? 0) + addFree } : {}) });
         });
       } catch (err) {
         pending += add;
+        pendingFree += addFree;
         console.error('[Fermata] Não foi possível salvar o tempo de prática', err);
       }
     };
@@ -59,6 +63,7 @@ export default function PracticeClock() {
       if (minute === lastMinute) return;
       lastMinute = minute;
       pending++;
+      if (kindRef.current === 'livre') pendingFree++;
       if (timer === null) timer = window.setTimeout(() => void flush(), 8000);
     };
 

@@ -135,6 +135,8 @@ export interface PracticeDay extends Synced {
   id: string;
   day: string;
   minutes: number;
+  /** Quantos desses minutos foram no Tocar livre. */
+  free?: number;
   device: string;
 }
 
@@ -162,6 +164,32 @@ export interface ArcadeMidi extends Synced {
   addedAt: number;
 }
 
+/**
+ * Gravação do que você tocou (MIDI, não áudio). "livre": no Tocar livre; "marco": uma passada boa no Tocar junto,
+ * guardada para comparar com as próximas. Sincroniza com a conta.
+ */
+export interface Recording extends Synced {
+  id: string;
+  title: string;
+  kind: 'livre' | 'marco';
+  createdAt: number;
+  durationMs: number;
+  /** notas compactadas: midi, início (ms), duração (ms), força (0 = sem força), uma após a outra (take.ts) */
+  notes: number[];
+  /** pedal compactado: momento (ms), 1 = desce / 0 = sobe */
+  pedal: number[];
+  /** De onde veio o marco: o mesmo id dos registros de treino da música (`curso-…` ou `peca-…`). */
+  sourceId?: string;
+  sourceTitle?: string;
+  bpm?: number;
+  accuracy?: number;
+  timing?: { mean: number; spread: number } | null;
+  /** Trecho e mão do marco. */
+  from?: number;
+  to?: number;
+  hand?: string;
+}
+
 /** Fila do que mudou neste aparelho e ainda não subiu. */
 export interface OutboxEntry {
   /** `${table}:${uid}` */
@@ -184,6 +212,7 @@ class FermataDB extends Dexie {
   files!: Table<StoredFile, number>;
   lessons!: Table<LessonProgress, string>;
   arcadeMidi!: Table<ArcadeMidi, string>;
+  recordings!: Table<Recording, string>;
 
   constructor() {
     super('fermata');
@@ -240,6 +269,9 @@ class FermataDB extends Dexie {
         });
         await tx.table('outbox').bulkPut(rows.map((r, i) => ({ key: `arcadeMidi:${r.id}`, table: 'arcadeMidi', uid: r.id, deleted: false, v: Date.now() + i / 1000 })));
       });
+    this.version(9).stores({
+      recordings: 'id, createdAt, sourceId',
+    });
   }
 }
 

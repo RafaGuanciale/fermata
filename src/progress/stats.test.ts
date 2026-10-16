@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Attempt, PracticeDay, TrainingRun } from '../db/db';
-import { bestByTreino, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyTotals } from './stats';
+import { bestByTreino, freeMinutes, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyTotals } from './stats';
 
 const at = (iso: string) => new Date(iso + 'T12:00').getTime();
 const pd = (day: string, minutes: number, device = 'a'): PracticeDay => ({ id: `${day}:${device}`, day, minutes, device });
@@ -58,5 +58,9 @@ describe('meta semanal', () => {
     const byDay = minutesByDay([pd('2026-10-06', 30), pd('2026-10-07', 40), pd('2026-10-08', 25), pd('2026-10-04', 60)], []);
     expect(goalProgress(byDay, now, { minutes: 90, days: 3 })).toEqual({ minutes: 95, days: 3, met: true });
     expect(goalProgress(byDay, now, { minutes: 120, days: 3 }).met).toBe(false);
+  });
+
+  it('separa o tempo do Tocar livre', () => {
+    expect(freeMinutes([{ ...pd('2026-10-06', 10), free: 4 }, pd('2026-10-07', 20), { ...pd('2026-10-08', 5), free: 5 }])).toBe(9);
   });
 });

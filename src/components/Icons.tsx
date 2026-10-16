@@ -291,3 +291,27 @@ export function RestartIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function RecordIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <circle cx="12" cy="12" r="6.5" />
+    </svg>
+  );
+}
+
+export function StopIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <rect x="6.5" y="6.5" width="11" height="11" rx="2" />
+    </svg>
+  );
+}
+
+export function DownloadIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14" />
+    </svg>
+  );
+}

@@ -8,6 +8,11 @@ import { dayKey } from '../training/progress';
 const DAY = 24 * 60 * 60 * 1000;
 
 /** Minutos tocados por dia. Soma os aparelhos; dias antigos sem relógio usam a duração das sessões. */
+/** Minutos no Tocar livre (já estão dentro do total). */
+export function freeMinutes(practice: PracticeDay[]): number {
+  return practice.reduce((sum, p) => sum + (p.free ?? 0), 0);
+}
+
 export function minutesByDay(practice: PracticeDay[], sessions: Session[]): Map<string, number> {
   const out = new Map<string, number>();
   for (const p of practice) out.set(p.day, (out.get(p.day) ?? 0) + p.minutes);

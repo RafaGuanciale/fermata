@@ -34,6 +34,7 @@ const ReferencePage = lazy(() => import('./pages/ReferencePage'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage'));
 const NoteReadingPage = lazy(() => import('./pages/NoteReadingPage'));
 const TreinoFocusPage = lazy(() => import('./pages/TreinoFocusPage'));
+const FreePlayPage = lazy(() => import('./pages/FreePlayPage'));
 const ArcadePage = lazy(() => import('./pages/ArcadePage'));
 const ArcadeGame = lazy(() => import('./arcade/ArcadeGame'));
 const MidiArcade = lazy(() => import('./arcade/MidiArcade'));
@@ -132,7 +133,7 @@ function FocusPopup() {
   );
 }
 
-const IMMERSIVE = ['/arcade/midi/:id', '/arcade/:id', '/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
+const IMMERSIVE = ['/tocar', '/arcade/midi/:id', '/arcade/:id', '/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
 
 export default function App() {
   const location = useLocation();
@@ -196,6 +197,7 @@ export default function App() {
               path="/treino/notas"
               element={<TreinoPopup label="Leitura de notas" render={(c) => <Suspense fallback={<div className="focus" />}><NoteReadingPage onClose={c} /></Suspense>} />}
             />
+            <Route path="/tocar" element={<TreinoPopup label="Tocar livre" render={(c) => <Suspense fallback={<div className="session" />}><FreePlayPage onClose={c} /></Suspense>} />} />
             <Route path="/treino/calibrar" element={<TreinoPopup label="Ajustar atraso" render={(c) => <CalibratePage onClose={c} />} />} />
             <Route path="/partitura/:id" element={<SheetPopup />} />
             <Route path="/peca/:id/estudar" element={<ScorePopup />} />

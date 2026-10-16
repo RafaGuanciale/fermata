@@ -11,12 +11,18 @@ import { db } from '../db/db';
 import type { SongSpec } from '../course/types';
 import { songXml } from '../course/song';
 import { addScoreFingerings } from '../score/fingering';
+import { useRecorder, type Take as RecTake } from '../recording/useRecorder';
+import { saveRecording } from '../recording/repo';
+import { timingStats } from '../recording/take';
+import RecordingsPanel from '../recording/RecordingsPanel';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { songPassed } from '../course/progress';
 import { BigCelebration, celebratedOnce } from '../celebrate/Celebrate';
 import { getFile, setPieceBpm } from '../repertoire/repo';
 import { useNoteInput, useNoteOn, midiStatusLabel } from '../input/useNoteInput';
 import { useMetronome } from '../metronome/MetronomeProvider';
-import { whiteKeysBetween, type Midi } from '../music/notes';
+import { type Midi } from '../music/notes';
+import { keyGeometry } from '../components/keyGeometry';
 import {
   createWait,
   expectedFor,
@@ -119,19 +125,9 @@ function readScore(osmd: OpenSheetMusicDisplay): { steps: ScoreStep[]; els: Note
   return { steps, els, staffCount: Math.max(1, staves.length) };
 }
 
-/** Teclas da cascata: posição e largura em %, na mesma geometria do teclado. */
-function keyGeometry(low: Midi, high: Midi) {
-  const whites = whiteKeysBetween(low, high);
-  const W = whites.length;
-  const map = new Map<Midi, { left: number; width: number; black: boolean }>();
-  whites.forEach((m, i) => {
-    map.set(m, { left: (i / W) * 100, width: (1 / W) * 100, black: false });
-    if (m + 1 <= high && !whites.includes(m + 1)) map.set(m + 1, { left: ((i + 1 - 0.31) / W) * 100, width: (0.62 / W) * 100, black: true });
-  });
-  return map;
-}
-
 const CLICK_KEY = 'fermata-score-click';
+/** A partir de quanto acerto o app oferece guardar a passada como marco. */
+const MARCO_FROM = 0.8;
 const shortScreen = () => typeof window !== 'undefined' && window.innerHeight < 860;
 const FINGERS_KEY = 'fermata-score-fingers';
 
@@ -288,7 +284,8 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
     let last = paper.clientWidth;
     let timer = 0;
     const ro = new ResizeObserver(() => {
-      if (Math.abs(paper.clientWidth - last) < 24) return;
+      // Escondida (os marcos no lugar) não redesenha: volta do mesmo tamanho.
+      if (paper.clientWidth === 0 || Math.abs(paper.clientWidth - last) < 24) return;
       last = paper.clientWidth;
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
@@ -342,11 +339,18 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   const trackRef = useRef<ScheduledTrack | null>(null);
   const planRef = useRef<TimedPlan | null>(null);
   const eventsRef = useRef<PlayedEvent[]>([]);
+  const recorder = useRecorder();
+  const recRef = useRef(recorder);
+  recRef.current = recorder;
+  const [lastTake, setLastTake] = useState<RecTake | null>(null);
+  const [marcoSaved, setMarcoSaved] = useState(false);
+  const [showMarcos, setShowMarcos] = useState(false);
   const stopSoundRef = useRef<(() => void) | null>(null);
   const takeRef = useRef<Take>(take);
   takeRef.current = take;
 
   const stopTake = useCallback(() => {
+    recRef.current.cancel();
     trackRef.current?.cancel();
     trackRef.current = null;
     stopSoundRef.current?.();
@@ -382,6 +386,9 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
     trackRef.current = track;
     eventsRef.current = [];
     setResult(null);
+    setLastTake(null);
+    setMarcoSaved(false);
+    if (!listenOnly) recRef.current.start(track.firstBeat);
     setListening(listenOnly);
     setTake('countin');
   };
@@ -412,6 +419,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
           return;
         }
         const r = judgeExpected(plan.expected, eventsRef.current, windowsFor(1), reach);
+        setLastTake(recRef.current.stop());
         const weak = weakestRange(measureAccuracy(plan, r.notes.map((n) => n?.grade)));
         setResult({ r, weak, plan });
         setTake('done');
@@ -425,6 +433,30 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [take, loaded, bpm, listening, hand, range]);
+
+  // ---------- marcos: a passada boa fica gravada para comparar depois ----------
+  const marcoCount = useLiveQuery(() => (loaded ? db.recordings.where('sourceId').equals(loaded.runId).count() : 0), [loaded?.runId]) ?? 0;
+  const saveMarco = async () => {
+    if (!loaded || !result || !lastTake?.notes.length) return;
+    const total = measureCount(loaded.steps);
+    const where = range.from === 1 && range.to === total ? '' : `, compassos ${range.from} a ${range.to}`;
+    await saveRecording({
+      title: `${loaded.title}${where}: ${Math.round(result.r.accuracy * 100)}% a ${bpm} BPM`,
+      kind: 'marco',
+      durationMs: lastTake.durationMs,
+      notes: lastTake.notes,
+      pedal: lastTake.pedal,
+      sourceId: loaded.runId,
+      sourceTitle: loaded.title,
+      bpm,
+      accuracy: result.r.accuracy,
+      timing: timingStats(result.r.notes.map((n) => n?.delta)),
+      from: range.from,
+      to: range.to,
+      hand,
+    });
+    setMarcoSaved(true);
+  };
 
   // ---------- entrada de notas ----------
   useNoteOn((m, at) => {
@@ -581,6 +613,11 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
             {midi.kind === 'connected' ? <span className="pill__dot pill__dot-on" aria-hidden /> : <PlugIcon className="pill__icon" />}
             <span className="session__midiLabel">{midiStatusLabel(midi)}</span>
           </button>
+          {loaded && (
+            <button className={'pill' + (showMarcos ? ' pill-active' : '')} type="button" onClick={() => setShowMarcos((v) => !v)} aria-pressed={showMarcos} title="Passadas guardadas para comparar">
+              {showMarcos ? 'Voltar à partitura' : `Marcos${marcoCount ? ` (${marcoCount})` : ''}`}
+            </button>
+          )}
           {canFullscreen() && !isFull && (
             <button className="pill pill-icon" type="button" onClick={enterFullscreen} aria-label="Tela cheia" title="Tela cheia">
               <ExpandIcon className="pill__icon" />
@@ -668,7 +705,12 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
               </div>
             </div>
 
-            <div className="scorePaper" ref={paperRef}>
+            {showMarcos && loaded && (
+              <div className="scorePaper scorePaper-marcos">
+                <RecordingsPanel sourceId={loaded.runId} empty="Nenhum marco ainda. No Tocar junto, quando uma passada passar de 80% de acerto, aparece o botão para guardar. Depois de uns dias, guarde outra e compare." />
+              </div>
+            )}
+            <div className="scorePaper" ref={paperRef} hidden={showMarcos}>
               {!loaded && <p className="scorePaper__msg">Abrindo a música…</p>}
               <div ref={hostRef} />
             </div>
@@ -714,6 +756,16 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
                             <button className="linkButton" type="button" onClick={() => { setRange(result.weak!); setMode('estudar'); }}>
                               Estudar os compassos {result.weak.from === result.weak.to ? result.weak.from : `${result.weak.from} a ${result.weak.to}`}
                             </button>
+                          </>
+                        )}
+                        {result.r.accuracy >= MARCO_FROM && !!lastTake?.notes.length && (
+                          <>
+                            {' · '}
+                            {marcoSaved ? (
+                              <button className="linkButton" type="button" onClick={() => setShowMarcos(true)}>Marco guardado: ver e comparar</button>
+                            ) : (
+                              <button className="linkButton" type="button" onClick={() => void saveMarco()}>Guardar esta passada como marco</button>
+                            )}
                           </>
                         )}
                       </span>

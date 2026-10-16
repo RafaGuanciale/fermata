@@ -15,7 +15,7 @@ import { finalPassedAt, isPassed, lessonKey, unitComplete, unitUnlocked } from '
 import { ALL_TRACKS, bestTechBpm, techRunId, techStatus } from '../course/track';
 import { useCourseRows } from '../course/useCourseRows';
 import { useRuns } from '../training/runs';
-import { bestByTreino, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyReading, weeklyTotals, type HeatCell, type WeekReading, type WeekTotal } from '../progress/stats';
+import { bestByTreino, freeMinutes, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyReading, weeklyTotals, type HeatCell, type WeekReading, type WeekTotal } from '../progress/stats';
 
 const shortDate = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short' });
 const dayMonth = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
@@ -104,7 +104,7 @@ export default function ProgressPage() {
             <div className="progress__tiles">
               <WeeklyGoal />
               <StatTile label="Dias seguidos" value={String(days)} unit={days === 1 ? 'dia' : 'dias'} delta={playedToday ? 'você já tocou hoje' : days ? 'toque hoje para manter' : 'comece hoje'} />
-              <StatTile label="Total no piano" value={minutesText(totalMinutes)} delta={`${[...byDay.values()].filter((m) => m > 0).length} dias com prática`} />
+              <StatTile label="Total no piano" value={minutesText(totalMinutes)} delta={`${[...byDay.values()].filter((m) => m > 0).length} dias com prática${freeMinutes(data.practice) ? `, ${minutesText(freeMinutes(data.practice))} tocando livre` : ''}`} />
             </div>
             <div className="progress__charts">
               <figure className="progress__figure">

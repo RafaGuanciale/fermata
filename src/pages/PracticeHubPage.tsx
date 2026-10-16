@@ -113,6 +113,7 @@ export default function PracticeHubPage() {
       <section className="page__section" aria-label="Treino livre">
         <h2 className="page__sectionTitle">Treino livre</h2>
         <div className="chips">
+          <Link className="chip chip-large" to="/tocar" state={{ background: location }}>Tocar livre e gravar</Link>
           <Link className="chip chip-large" to="/treino/notas" state={{ background: location }}>Leitura de notas na pauta</Link>
           {next && <Link className="chip chip-large" to={`/estudo/unidade/${next.unit.n}/${next.lesson.id}`}>Lição de hoje: {next.lesson.title}</Link>}
           <Link className="chip chip-large" to="/treino/calibrar" state={{ background: location }}>

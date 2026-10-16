@@ -11,6 +11,10 @@ describe('onde o tempo de piano conta', () => {
     for (const p of ['/estudo/unidade/3/l20', '/consulta', '/consulta/simbolos', '/curso/foco/3/l20']) expect(practiceKind(p), p).toBe('estudar');
   });
 
+  it('tocar livre conta separado', () => {
+    expect(practiceKind('/tocar')).toBe('livre');
+  });
+
   it('não conta nas outras páginas', () => {
     for (const p of ['/', '/progresso', '/conta', '/arcade', '/estudo', '/estudo/unidade/3', '/repertorio', '/repertorio/peca/2', '/treino/calibrar'])
       expect(practiceKind(p), p).toBeNull();
