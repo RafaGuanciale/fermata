@@ -115,6 +115,7 @@ export default function PracticeHubPage() {
         <div className="chips">
           <Link className="chip chip-large" to="/tocar" state={{ background: location }}>Tocar livre e gravar</Link>
           <Link className="chip chip-large" to="/treino/notas" state={{ background: location }}>Leitura de notas na pauta</Link>
+          <Link className="chip chip-large" to="/treino/eco" state={{ background: location }}>Ouvir e tocar de volta</Link>
           {next && <Link className="chip chip-large" to={`/estudo/unidade/${next.unit.n}/${next.lesson.id}`}>Lição de hoje: {next.lesson.title}</Link>}
           <Link className="chip chip-large" to="/treino/calibrar" state={{ background: location }}>
             {latency === null ? 'Ajustar o atraso do piano' : `Atraso do piano: ${latency} ms`}

@@ -6,6 +6,7 @@ import { NoteInputProvider } from './input/NoteInputProvider';
 import { MetronomeProvider } from './metronome/MetronomeProvider';
 import { LiveSoundProvider } from './audio/LiveSound';
 import PracticeClock from './progress/PracticeClock';
+import BreakReminder from './progress/BreakReminder';
 import AppLayout from './components/AppLayout';
 import ImmersiveFrame, { useCloseImmersive, type ImmersiveState } from './components/ImmersiveFrame';
 import TodayPage from './pages/TodayPage';
@@ -35,6 +36,7 @@ const ProgressPage = lazy(() => import('./pages/ProgressPage'));
 const NoteReadingPage = lazy(() => import('./pages/NoteReadingPage'));
 const TreinoFocusPage = lazy(() => import('./pages/TreinoFocusPage'));
 const FreePlayPage = lazy(() => import('./pages/FreePlayPage'));
+const EchoPage = lazy(() => import('./pages/EchoPage'));
 const ArcadePage = lazy(() => import('./pages/ArcadePage'));
 const ArcadeGame = lazy(() => import('./arcade/ArcadeGame'));
 const MidiArcade = lazy(() => import('./arcade/MidiArcade'));
@@ -133,7 +135,7 @@ function FocusPopup() {
   );
 }
 
-const IMMERSIVE = ['/tocar', '/arcade/midi/:id', '/arcade/:id', '/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
+const IMMERSIVE = ['/tocar', '/treino/eco', '/arcade/midi/:id', '/arcade/:id', '/treino/foco', '/treino/notas', '/treino/sessao', '/partitura/:id', '/treino/calibrar', '/peca/:id/estudar', '/curso/musica/:songId', '/curso/foco/:n/:lessonId'];
 
 export default function App() {
   const location = useLocation();
@@ -163,6 +165,7 @@ export default function App() {
         <LiveSoundProvider>
         <MetronomeProvider>
           <PracticeClock />
+          <BreakReminder />
         <Routes location={background}>
           <Route element={<AppLayout />}>
             <Route index element={<TodayPage />} />
@@ -198,6 +201,7 @@ export default function App() {
               element={<TreinoPopup label="Leitura de notas" render={(c) => <Suspense fallback={<div className="focus" />}><NoteReadingPage onClose={c} /></Suspense>} />}
             />
             <Route path="/tocar" element={<TreinoPopup label="Tocar livre" render={(c) => <Suspense fallback={<div className="session" />}><FreePlayPage onClose={c} /></Suspense>} />} />
+            <Route path="/treino/eco" element={<TreinoPopup label="Ouvir e tocar de volta" render={(c) => <Suspense fallback={<div className="session" />}><EchoPage onClose={c} /></Suspense>} />} />
             <Route path="/treino/calibrar" element={<TreinoPopup label="Ajustar atraso" render={(c) => <CalibratePage onClose={c} />} />} />
             <Route path="/partitura/:id" element={<SheetPopup />} />
             <Route path="/peca/:id/estudar" element={<ScorePopup />} />

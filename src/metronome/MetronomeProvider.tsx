@@ -4,18 +4,26 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { bpmFromTaps, clampBpm, secondsPerBeat } from './tempo';
+import { isSilentBar, type BeatMark } from './pulse';
 
 interface MetronomeSettings {
   bpm: number;
   beats: number;
   accent: boolean;
   volume: number;
+  /** Metrônomo que some: N compassos com clique e N em silêncio (0 = sempre toca). */
+  gap: number;
 }
 
 export interface MetronomeApi extends MetronomeSettings {
   running: boolean;
   /** Tempo atual dentro do compasso (0 = primeiro), ou -1 parado. */
   beat: number;
+  /** O compasso atual está no silêncio (metrônomo que some). */
+  silent: boolean;
+  setGap: (gap: number) => void;
+  /** Os últimos tempos, no relógio do aparelho, para medir o pulso. */
+  beatLog: () => BeatMark[];
   start: () => void;
   stop: () => void;
   toggle: () => void;
@@ -31,7 +39,7 @@ const LOOKAHEAD_S = 0.12;
 const TICK_MS = 25;
 
 function readSettings(): MetronomeSettings {
-  const fallback = { bpm: 72, beats: 4, accent: true, volume: 0.7 };
+  const fallback = { bpm: 72, beats: 4, accent: true, volume: 0.7, gap: 0 };
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<MetronomeSettings> | null;
     return raw ? { ...fallback, ...raw, bpm: clampBpm(raw.bpm ?? fallback.bpm) } : fallback;
@@ -46,6 +54,9 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState(readSettings);
   const [running, setRunning] = useState(false);
   const [beat, setBeat] = useState(-1);
+  const [silent, setSilent] = useState(false);
+  const totalRef = useRef(0);
+  const logRef = useRef<BeatMark[]>([]);
 
   const settingsRef = useRef(settings);
   const ctxRef = useRef<AudioContext | null>(null);
@@ -83,12 +94,16 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
     const ctx = ctxRef.current;
     if (!ctx) return;
     while (nextTimeRef.current < ctx.currentTime + LOOKAHEAD_S) {
-      const { beats, accent, bpm } = settingsRef.current;
+      const { beats, accent, bpm, gap } = settingsRef.current;
       const index = beatRef.current % beats;
       const at = nextTimeRef.current;
-      click(ctx, at, accent && index === 0);
+      const quiet = isSilentBar(totalRef.current, beats, gap);
+      totalRef.current++;
+      if (!quiet) click(ctx, at, accent && index === 0);
       const delay = Math.max(0, (at - ctx.currentTime) * 1000);
-      visualTimers.current.push(window.setTimeout(() => setBeat(index), delay));
+      logRef.current.push({ t: performance.now() + delay, silent: quiet });
+      if (logRef.current.length > 512) logRef.current.splice(0, 256);
+      visualTimers.current.push(window.setTimeout(() => { setBeat(index); setSilent(quiet); }, delay));
       if (visualTimers.current.length > 32) visualTimers.current.splice(0, 16);
       nextTimeRef.current += secondsPerBeat(bpm);
       beatRef.current = index + 1;
@@ -102,6 +117,7 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
     visualTimers.current = [];
     setRunning(false);
     setBeat(-1);
+    setSilent(false);
   }, []);
 
   const start = useCallback(() => {
@@ -112,6 +128,8 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
     ctxRef.current = ctx;
     void ctx.resume();
     beatRef.current = 0;
+    totalRef.current = 0;
+    logRef.current = [];
     nextTimeRef.current = ctx.currentTime + 0.06;
     schedule();
     timerRef.current = window.setInterval(schedule, TICK_MS);
@@ -125,6 +143,8 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
     beatRef.current = 0;
     setSettings((s) => ({ ...s, beats }));
   }, []);
+  const setGap = useCallback((gap: number) => setSettings((s) => ({ ...s, gap })), []);
+  const beatLog = useCallback(() => logRef.current.slice(), []);
   const setAccent = useCallback((accent: boolean) => setSettings((s) => ({ ...s, accent })), []);
   const setVolume = useCallback((volume: number) => setSettings((s) => ({ ...s, volume: Math.min(1, Math.max(0, volume)) })), []);
   const tap = useCallback(() => {
@@ -135,8 +155,8 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
   }, [setBpm]);
 
   const api = useMemo<MetronomeApi>(
-    () => ({ ...settings, running, beat, start, stop, toggle: () => (timerRef.current === null ? start() : stop()), setBpm, setBeats, setAccent, setVolume, tap }),
-    [settings, running, beat, start, stop, setBpm, setBeats, setAccent, setVolume, tap],
+    () => ({ ...settings, running, beat, silent, start, stop, toggle: () => (timerRef.current === null ? start() : stop()), setBpm, setBeats, setAccent, setVolume, setGap, beatLog, tap }),
+    [settings, running, beat, silent, start, stop, setBpm, setBeats, setAccent, setVolume, setGap, beatLog, tap],
   );
 
   return <MetronomeContext.Provider value={api}>{children}</MetronomeContext.Provider>;

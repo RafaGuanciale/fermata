@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMetronome } from '../metronome/MetronomeProvider';
 import { BEAT_OPTIONS, MAX_BPM, MIN_BPM, tempoName } from '../metronome/tempo';
+import { GAP_OPTIONS } from '../metronome/pulse';
 import { MetronomeIcon, MinusIcon, PlusIcon } from './Icons';
 
 /**
@@ -87,7 +88,7 @@ export default function MetronomeButton({ placement = 'up', className = '' }: { 
 
           <div className="metronome__beats" aria-hidden>
             {Array.from({ length: m.beats }, (_, i) => (
-              <span key={i} className={'metronome__dot' + (i === 0 && m.accent ? ' metronome__dot-accent' : '') + (m.beat === i ? ' metronome__dot-on' : '')} />
+              <span key={i} className={'metronome__dot' + (i === 0 && m.accent ? ' metronome__dot-accent' : '') + (m.beat === i ? ' metronome__dot-on' : '') + (m.silent ? ' metronome__dot-silent' : '')} />
             ))}
           </div>
 
@@ -108,6 +109,18 @@ export default function MetronomeButton({ placement = 'up', className = '' }: { 
               Acentuar o primeiro tempo
             </label>
           </div>
+
+          <div className="metronome__row">
+            <span className="metronome__label" title="Toca alguns compassos e cala outros, para você segurar o pulso sozinho">Some</span>
+            <div className="segmented" role="group" aria-label="Metrônomo que some">
+              {GAP_OPTIONS.map((g) => (
+                <button key={g} type="button" className={'segmented__option' + (m.gap === g ? ' segmented__option-active' : '')} aria-pressed={m.gap === g} onClick={() => m.setGap(g)}>
+                  {g === 0 ? 'Não' : `${g}+${g}`}
+                </button>
+              ))}
+            </div>
+          </div>
+          {m.gap > 0 && <p className="metronome__note">{m.gap} {m.gap === 1 ? 'compasso' : 'compassos'} com clique, {m.gap} em silêncio. No Tocar livre o app mede se você adianta ou atrasa sem o clique.</p>}
 
           <div className="metronome__row">
             <span className="metronome__label">Volume</span>

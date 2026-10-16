@@ -19,6 +19,10 @@ import { dayKey } from '../training/progress';
 import { useRecorder } from '../recording/useRecorder';
 import { saveRecording } from '../recording/repo';
 import RecordingsPanel from '../recording/RecordingsPanel';
+import { useMetronome } from '../metronome/MetronomeProvider';
+import { pulseReport, pulseText } from '../metronome/pulse';
+import { BACKING_STYLES } from '../backing/backing';
+import { useBacking } from '../backing/useBacking';
 
 /** Quanto tempo o rolo mostra, do teclado até o alto. */
 const WINDOW_MS = 6000;
@@ -47,12 +51,19 @@ export default function FreePlayPage({ onClose }: { onClose: () => void }) {
 
   // ----- o rolo: notas recentes, cada uma com início e fim (fim null = ainda segurada) -----
   const notesRef = useRef<{ midi: Midi; start: number; end: number | null }[]>([]);
+  /** Inícios das notas dos últimos minutos, para medir o pulso com o metrônomo que some. */
+  const onsetsRef = useRef<number[]>([]);
+  const metronome = useMetronome();
+  const [backingId, setBackingId] = useState<string | null>(null);
+  const backing = BACKING_STYLES.find((b) => b.id === backingId) ?? null;
+  const backingBar = useBacking(backing, metronome.bpm);
   useEffect(
     () =>
       subscribe((e) => {
         const list = notesRef.current;
         if (e.type === 'on') {
           list.push({ midi: e.midi, start: e.at, end: null });
+          onsetsRef.current = [...onsetsRef.current.filter((t) => t > e.at - 120_000), e.at];
           setCount((c) => c + 1);
         } else {
           for (let i = list.length - 1; i >= 0; i--) if (list[i].midi === e.midi && list[i].end === null) { list[i].end = e.at; break; }
@@ -104,6 +115,9 @@ export default function FreePlayPage({ onClose }: { onClose: () => void }) {
   const heldList = [...held].sort((a, b) => a - b);
   const chord = heldList.length >= 3 ? identifyChord(heldList) : null;
   const names = heldList.length ? heldList.map((m) => noteInfo(m).name).filter((n, i, a) => a.indexOf(n) === i) : [];
+
+  // Pulso: com o metrônomo que some ligado, quanto você adianta ou atrasa com e sem o clique.
+  const pulse = metronome.running && metronome.gap > 0 ? pulseReport(onsetsRef.current, metronome.beatLog().filter((b) => b.t > performance.now() - 120_000), 60000 / metronome.bpm) : null;
 
   const today = dayKey(Date.now());
   const freeToday = useLiveQuery(async () => (await db.practice.where('day').equals(today).toArray()).reduce((s, p) => s + (p.free ?? 0), 0), [today]) ?? 0;
@@ -175,6 +189,37 @@ export default function FreePlayPage({ onClose }: { onClose: () => void }) {
               <>Hoje, tocando livre: {freeToday} min · {count} {count === 1 ? 'nota' : 'notas'} agora</>
             )}
           </p>
+          <div className="freePlay__backing">
+            <div className="segmented" role="group" aria-label="Acompanhamento">
+              <button type="button" className={'segmented__option' + (!backing ? ' segmented__option-active' : '')} aria-pressed={!backing} onClick={() => setBackingId(null)}>
+                Sem acompanhamento
+              </button>
+              {BACKING_STYLES.map((b) => (
+                <button key={b.id} type="button" className={'segmented__option' + (backingId === b.id ? ' segmented__option-active' : '')} aria-pressed={backingId === b.id} onClick={() => setBackingId(b.id)}>
+                  {b.label}
+                </button>
+              ))}
+            </div>
+            {backing && (
+              <p className="freePlay__backingNow">
+                {backingBar >= 0 ? (
+                  <>
+                    <strong>{backing.bars[backingBar].symbol}</strong>, depois {backing.bars[(backingBar + 1) % backing.bars.length].symbol}
+                  </>
+                ) : (
+                  'Começando…'
+                )}
+                {' · '}improvise na {backing.scale.name} ({backing.scale.names}) · {metronome.bpm} BPM, mude no metrônomo
+              </p>
+            )}
+          </div>
+          {pulse && (
+            <p className="freePlay__pulse" aria-live="polite">
+              {pulse.silent
+                ? <>Sem o clique: <strong>{pulseText(pulse.silent)}</strong>{pulse.click ? <> · com o clique: {pulseText(pulse.click)}</> : null}</>
+                : 'Metrônomo que some ligado: toque semínimas junto com o clique e continue quando ele calar.'}
+            </p>
+          )}
         </main>
       )}
 
