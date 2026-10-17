@@ -7,6 +7,7 @@ import { MetronomeProvider } from './metronome/MetronomeProvider';
 import { LiveSoundProvider } from './audio/LiveSound';
 import PracticeClock from './progress/PracticeClock';
 import BreakReminder from './progress/BreakReminder';
+import KeepAwake from './components/KeepAwake';
 import AppLayout from './components/AppLayout';
 import ImmersiveFrame, { useCloseImmersive, type ImmersiveState } from './components/ImmersiveFrame';
 import TodayPage from './pages/TodayPage';
@@ -166,6 +167,7 @@ export default function App() {
         <MetronomeProvider>
           <PracticeClock />
           <BreakReminder />
+          <KeepAwake />
         <Routes location={background}>
           <Route element={<AppLayout />}>
             <Route index element={<TodayPage />} />
