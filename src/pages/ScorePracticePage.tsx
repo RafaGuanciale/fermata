@@ -275,7 +275,10 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       const lastRuns = await db.runs.where('treinoId').equals(meta.runId).sortBy('at');
       const lastBpm = [...lastRuns].reverse().find((r) => r.kind === 'timed' && r.bpm)?.bpm;
       if (cancelled) return;
-      setBpm(startBpm ?? lastBpm ?? (meta.song ? Math.round(meta.song.bpm * 0.8) : (meta.ideal ?? scoreTempo ?? 80)));
+      // Primeira vez: começa a 60% do andamento ideal (o ideal é a meta, não o ponto de partida).
+      const target = meta.ideal ?? scoreTempo;
+      const firstBpm = meta.song ? Math.round(meta.song.bpm * 0.8) : target ? Math.max(40, Math.round((target * 0.6) / 2) * 2) : 80;
+      setBpm(startBpm ?? lastBpm ?? firstBpm);
       if (startMode) setMode(startMode);
       setHand('direita');
       setLoaded({ ...meta, steps, staffCount, beatsPerBar, clickEvery, low, high, scoreTempo });
