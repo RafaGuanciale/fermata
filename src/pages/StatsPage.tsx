@@ -118,6 +118,7 @@ function Dashboard({ data, period, onPeriod, onDay, onSong }: { data: StatsData;
       <div className="stats__grid">
         <section className="stats__card" aria-labelledby="st-area">
           <h2 className="stats__cardTitle" id="st-area">Onde foi o tempo</h2>
+          <p className="stats__hint">Só o tempo útil: tocando, ou lendo uma lição. Página aberta parada não conta.</p>
           {areas.length ? (
             <ul className="hbars">
               {areas.map((a) => (
@@ -129,7 +130,7 @@ function Dashboard({ data, period, onPeriod, onDay, onSong }: { data: StatsData;
               ))}
             </ul>
           ) : (
-            <p className="stats__hint">O app passou a medir o tempo por área hoje. Depois da próxima prática, ele aparece aqui.</p>
+            <p className="stats__hint">O app passou a medir o tempo útil por área hoje. Depois da próxima prática, ele aparece aqui.</p>
           )}
         </section>
 
@@ -222,9 +223,10 @@ function viewLabel(v: AppEvent): string | null {
   const name = viewName(v.path ?? '');
   const subject = v.title ? ` (${v.title})` : '';
   const dur = v.dur ?? 0;
-  if (v.area === 'livre' && v.notes) return `Tocou livre: ${v.notes} notas em ${durText(dur)}`;
-  if ((v.area === 'curso' || v.area === 'consulta') && dur >= 30_000) return `${name}: ${durText(dur)}${v.notes ? `, ${v.notes} notas` : ''}`;
-  if (['musicas', 'leitura', 'ouvido', 'tecnica', 'arcade', 'livre'].includes(v.area ?? '') && !v.notes && dur >= 3000) return `Abriu ${name}${subject} e saiu sem tocar (${durText(dur)})`;
+  const active = v.active ?? 0;
+  if (v.area === 'livre' && v.notes) return `Tocou livre: ${v.notes} notas em ${durText(active || dur)} tocando`;
+  if ((v.area === 'curso' || v.area === 'consulta') && active >= 30_000) return `${name}: ${durText(active)} lendo${v.notes ? `, ${v.notes} notas` : ''}`;
+  if (['musicas', 'leitura', 'ouvido', 'tecnica', 'arcade', 'livre'].includes(v.area ?? '') && !v.notes && !active && dur >= 3000) return `Abriu ${name}${subject} e saiu sem tocar (ficou ${durText(dur)})`;
   return null;
 }
 
@@ -275,7 +277,7 @@ function DayView({ data, day, onDay, onSong }: { data: StatsData; day: string; o
         sessions.map((s, i) => (
           <section key={s.start} className="daySession" aria-label={`Sessão ${i + 1}`}>
             <h3 className="sessionHead">
-              Sessão {i + 1} <span>{clock(s.start)}–{clock(s.end)} · {durText(s.end - s.start)}{s.notes ? ` · ${s.notes} notas` : ''}</span>
+              Sessão {i + 1} <span>{clock(s.start)}–{clock(s.end)} · {s.activeMs ? `${durText(s.activeMs)} de tempo útil` : durText(s.end - s.start)}{s.notes ? ` · ${s.notes} notas` : ''}</span>
             </h3>
             <div className="timeline">
               {s.items.map((it, k) =>

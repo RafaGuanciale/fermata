@@ -12,7 +12,7 @@ import type { SongSpec } from '../course/types';
 import { songXml } from '../course/song';
 import { addScoreFingerings, stepFingers } from '../score/fingering';
 import { logStudyLap, logTake } from '../analysis/takesRepo';
-import { logEvent, setViewSubject } from '../analysis/activity';
+import { logEvent, markViewActive, setViewSubject } from '../analysis/activity';
 import type { StudyStep } from '../analysis/takeLog';
 import { useRecorder, type Take as RecTake } from '../recording/useRecorder';
 import { saveRecording } from '../recording/repo';
@@ -464,6 +464,8 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       if (t - lastPaint >= 40) {
         lastPaint = t;
         setNow(t);
+        // Ouvindo o trecho ou na contagem: tempo útil mesmo sem nota.
+        markViewActive();
       }
       const elapsed = t - track.firstBeat;
       if (elapsed >= 0 && takeRef.current === 'countin') setTake('playing');

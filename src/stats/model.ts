@@ -366,8 +366,8 @@ export interface Session {
   start: number;
   end: number;
   items: TimelineItem[];
-  /** minutos com a aba visível nas páginas visitadas (quando há registro de visitas) */
-  visibleMs: number;
+  /** tempo útil nas páginas visitadas (tocando ou lendo uma lição); 0 em dias antes do registro de visitas */
+  activeMs: number;
   notes: number;
 }
 
@@ -398,25 +398,27 @@ export function buildTimeline(blocks: Block[], runs: TrainingRun[], views: AppEv
     lastId = r.treinoId;
     items.push(last);
   }
+  // A visita só estica a sessão pelo trecho em que houve atividade útil: página aberta parada não conta.
+  const usefulSpan = (v: AppEvent) => (v.active && v.activeFrom !== undefined && v.activeTo !== undefined ? { at: v.activeFrom, end: v.activeTo } : { at: v.at, end: v.at });
   for (const v of views) {
     const label = viewLabel(v);
-    if (label) items.push({ type: 'view', at: v.at, end: v.at + (v.dur ?? 0), label, notes: v.notes ?? 0, dur: v.dur ?? 0, area: v.area ?? '' });
+    if (label) items.push({ type: 'view', ...usefulSpan(v), label, notes: v.notes ?? 0, dur: v.dur ?? 0, area: v.area ?? '' });
   }
   items.sort((a, b) => a.at - b.at);
 
   const sessions: Session[] = [];
-  const all = [...items.map((i) => ({ at: i.at, end: i.end })), ...views.map((v) => ({ at: v.at, end: v.at + (v.dur ?? 0) }))].sort((a, b) => a.at - b.at);
+  const all = [...items.map((i) => ({ at: i.at, end: i.end })), ...views.filter((v) => v.active).map(usefulSpan)].sort((a, b) => a.at - b.at);
   for (const x of all) {
     const s = sessions[sessions.length - 1];
     if (s && x.at - s.end <= SESSION_GAP) s.end = Math.max(s.end, x.end);
-    else sessions.push({ start: x.at, end: x.end, items: [], visibleMs: 0, notes: 0 });
+    else sessions.push({ start: x.at, end: x.end, items: [], activeMs: 0, notes: 0 });
   }
   const find = (at: number) => sessions.find((s) => at >= s.start && at <= s.end) ?? sessions[sessions.length - 1];
   for (const it of items) find(it.at)?.items.push(it);
   for (const v of views) {
     const s = find(v.at);
     if (!s) continue;
-    s.visibleMs += v.dur ?? 0;
+    s.activeMs += v.active ?? 0;
     s.notes += v.notes ?? 0;
   }
   return sessions;

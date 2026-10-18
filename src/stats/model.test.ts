@@ -80,12 +80,20 @@ describe('passadas e blocos', () => {
   it('linha do tempo: sessões separadas por mais de 30 minutos, treinos seguidos viram um item', () => {
     const blocks = buildBlocks(buildPasses([take({ at: T0 }), take({ at: T0 + 60_000 })], [], () => null));
     const runs: TrainingRun[] = [run({ treinoId: 'leitura', kind: 'names', at: T0 + 5 * MIN }), run({ treinoId: 'leitura', kind: 'names', at: T0 + 7 * MIN }), run({ treinoId: 'eco', kind: 'ear', at: T0 + 3 * 3_600_000 })];
-    const views: AppEvent[] = [{ id: 'v', at: T0 + 90 * MIN, day: '2026-10-18', type: 'view', path: '/peca/1/estudar', area: 'musicas', dur: 40_000, notes: 0, title: 'Ode to Joy' }];
+    const views: AppEvent[] = [
+      { id: 'v', at: T0 + 90 * MIN, day: '2026-10-18', type: 'view', path: '/peca/1/estudar', area: 'musicas', dur: 40_000, notes: 0, title: 'Ode to Joy' },
+      // Hoje aberto 2 horas sem fazer nada: não cria nem estica sessão
+      { id: 'h', at: T0 + 100 * MIN, day: '2026-10-18', type: 'view', path: '/', area: 'navegacao', dur: 2 * 3_600_000, active: 0, notes: 0 },
+      // Tocar livre: 5 min tocando e a página ficou aberta mais 3 horas
+      { id: 'l', at: T0 + 190 * MIN, day: '2026-10-18', type: 'view', path: '/tocar', area: 'livre', dur: 3 * 3_600_000, active: 5 * MIN, activeFrom: T0 + 190 * MIN, activeTo: T0 + 195 * MIN, notes: 400 },
+    ];
     const sessions = buildTimeline(blocks, runs, views, (r) => (r.kind === 'names' ? { label: 'Leitura', detail: 'x' } : r.kind === 'ear' ? { label: 'Ouvido', detail: 'y' } : null), (v) => (v.notes ? null : `Abriu ${v.title} e saiu sem tocar`));
     expect(sessions.length).toBe(3);
     expect(sessions[0].items.map((i) => i.type)).toEqual(['block', 'activity']);
     expect(sessions[0].items[1].type === 'activity' && sessions[0].items[1].count).toBe(2);
     expect(sessions[1].items[0].type).toBe('view');
+    expect(sessions[2].end).toBe(T0 + 195 * MIN);
+    expect(sessions[2].activeMs).toBe(5 * MIN);
   });
 });
 
@@ -104,9 +112,10 @@ describe('painel, música, padrões e mudanças', () => {
     expect(songNow(passes)).toMatchObject({ bpm: 60, from: 1, to: 8, recent: 2, mean: 0.95 });
   });
 
-  it('tempo por área só conta visitas em que você tocou (ou leu uma lição)', () => {
-    const v = (area: string, dur: number, notes: number): AppEvent => ({ id: area + dur, at: T0, day: '', type: 'view', area, dur, notes });
-    expect(timeByArea([v('musicas', 600_000, 300), v('musicas', 30_000, 0), v('curso', 120_000, 0), v('navegacao', 50_000, 0)])).toEqual([
+  it('tempo por área só conta o tempo útil, não a página aberta', () => {
+    const v = (area: string, dur: number, active: number): AppEvent => ({ id: area + dur, at: T0, day: '', type: 'view', area, dur, active });
+    // 40 min com a música aberta, só 10 min tocando: contam 10
+    expect(timeByArea([v('musicas', 2_400_000, 600_000), v('musicas', 30_000, 0), v('curso', 300_000, 120_000), v('navegacao', 7_200_000, 0)])).toEqual([
       { area: 'musicas', ms: 600_000 },
       { area: 'curso', ms: 120_000 },
     ]);

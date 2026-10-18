@@ -244,6 +244,11 @@ export interface AppEvent extends Synced {
   path?: string;
   area?: string;
   dur?: number;
+  /** tempo útil (ms): pedaços de 30 s em que você tocou (ou, numa lição, leu mexendo na página) */
+  active?: number;
+  /** primeiro e último momento com atividade útil na visita */
+  activeFrom?: number;
+  activeTo?: number;
   notes?: number;
   /** música ou exercício (mesmo id dos runs e takes) */
   sourceId?: string;

@@ -15,14 +15,12 @@ export interface AreaTime {
   ms: number;
 }
 
-/** Onde foi o tempo: visitas em que você tocou (ou leu uma lição), por área. */
+/** Onde foi o tempo útil (tocando, ou lendo uma lição mexendo na página), por área. Página aberta parada não conta. */
 export function timeByArea(views: AppEvent[]): AreaTime[] {
   const by = new Map<string, number>();
   for (const v of views) {
-    if (v.type !== 'view' || !v.area || !v.dur) continue;
-    const reading = v.area === 'curso' || v.area === 'consulta';
-    if (!v.notes && !reading) continue;
-    by.set(v.area, (by.get(v.area) ?? 0) + v.dur);
+    if (v.type !== 'view' || !v.area || !v.active) continue;
+    by.set(v.area, (by.get(v.area) ?? 0) + v.active);
   }
   return [...by.entries()].map(([area, ms]) => ({ area, ms })).sort((a, b) => b.ms - a.ms);
 }
