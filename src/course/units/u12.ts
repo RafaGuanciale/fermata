@@ -95,7 +95,7 @@ function arp8(rng: Rng, bpm: number): TimedTask {
 
 // ---------- músicas ----------
 
-// Ode à Alegria (Beethoven, 9ª Sinfonia, 1824; domínio público). Arranjo solo do Fermata: melodia no topo da direita,
+// Ode to Joy (Beethoven, 9ª Sinfonia, 1824; domínio público). Arranjo solo do Fermata: melodia no topo da direita,
 // uma nota do acorde por baixo nos tempos fortes e décimas na esquerda.
 const ODE_R = [
   'C5+E5 E5 F5 G5', 'B4+G5 F5 E5 D5', 'G4+C5 C5 D5 E5', 'B4+E5:1.5 D5:0.5 G4+D5:2',
@@ -112,7 +112,7 @@ const ODE_L = [
 
 const odeArr: SongSpec = {
   id: 'u12-ode-solo',
-  title: 'Ode à Alegria, arranjo solo',
+  title: 'Ode to Joy, arranjo solo',
   composer: 'Ludwig van Beethoven',
   arrangement: 'arranjo do Fermata: melodia uma oitava acima, no topo da direita, com uma nota do acorde por baixo nos tempos fortes; esquerda em décimas (Dó–Mi, Sol–Si)',
   bpm: 84,
@@ -124,13 +124,13 @@ const odeArr: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-// Prelúdio em Mi menor: original do Fermata no estilo romântico. Melodia longa na direita; acordes repetidos em colcheias
+// Prelude in E minor: original do Fermata no estilo romântico. Melodia longa na direita; acordes repetidos em colcheias
 // na esquerda, descendo por cromatismo.
 const PREL_LH = ['G3+B3+E4', 'F#3+A3+D#4', 'G3+B3+D4', 'G3+B3+C#4', 'G3+B3+C4', 'A3+C4+E4', 'F#3+A3+D#4'];
 const PREL_R = ['B4:3 C5', 'B4:4', 'B4:2 A4 G4', 'A4:3 B4', 'C5:2 B4 A4', 'E5:2 C5:2', 'D#5:2 C5 A4', 'G4:4'];
 const preludio: SongSpec = {
   id: 'u12-preludio',
-  title: 'Prelúdio em Mi menor',
+  title: 'Prelude in E minor',
   composer: 'Fermata (original, no estilo romântico)',
   arrangement: 'peça original: melodia cantada na direita sobre acordes repetidos em colcheias na esquerda, com a voz de cima descendo por meio tom (Em, B7, Em7, C♯ø, C7M, Am, B7, Em)',
   bpm: 50,
@@ -225,7 +225,7 @@ const endings = playChord({ symbols: ['C6(9)', 'F6(9)', 'G6(9)', 'C7M(9)', 'F7M(
 const FORM_Q: ChoiceQuestion[] = [
   { q: 'Na canção pop, a parte que repete com a mesma letra é…', options: ['O refrão', 'O verso', 'A ponte'], answer: 0, why: 'O verso muda de letra a cada vez; o refrão repete letra e melodia.' },
   { q: 'O pré-refrão…', options: ['Prepara o refrão, quase sempre terminando no V', 'É a introdução', 'É o solo'], answer: 0, why: 'Ele cria tensão (muitas vezes parando no V) para o refrão chegar como resolução.' },
-  { q: 'Forma binária é…', options: ['A e B, em geral cada parte repetida (AABB)', 'A, B e A de novo', 'A, B, A, C, A'], answer: 0, why: 'O Minueto em Sol da unidade 9 é binário: duas partes, cada uma com ritornelo.' },
+  { q: 'Forma binária é…', options: ['A e B, em geral cada parte repetida (AABB)', 'A, B e A de novo', 'A, B, A, C, A'], answer: 0, why: 'O Minuet in G da unidade 9 é binário: duas partes, cada uma com ritornelo.' },
   { q: 'Forma ternária é…', options: ['A, B e a volta do A', 'Três partes diferentes', 'Uma parte repetida três vezes'], answer: 0, why: 'ABA: o contraste no meio faz a volta do A soar como chegada.' },
   { q: 'O rondó alterna…', options: ['Um refrão (A) com episódios diferentes: ABACA', 'Duas partes iguais', 'Só variações do A'], answer: 0, why: 'O A volta sempre igual (ou quase); B e C são os episódios.' },
   { q: 'A ponte de uma canção…', options: ['Traz contraste antes da última volta do refrão ou do A', 'É sempre igual ao verso', 'Fica no fim da música'], answer: 0, why: 'Na AABA, a ponte é o B; na canção pop, aparece uma vez, perto do fim.' },
@@ -272,7 +272,7 @@ Na canção de 32 compassos da lição 87, a ponte é o **B** da forma **AABA**.
       title: 'As formas da música clássica',
       body: `Na música clássica a mesma ideia ganha nomes de letras:
 
-- **Binária (AB)**: duas partes, cada uma repetida (AABB). A primeira costuma ir para o V (ou para a relativa maior) e a segunda volta para o I. O Minueto em Sol da unidade 9 é binário.
+- **Binária (AB)**: duas partes, cada uma repetida (AABB). A primeira costuma ir para o V (ou para a relativa maior) e a segunda volta para o I. O Minuet in G da unidade 9 é binário.
 - **Ternária (ABA)**: uma parte, um contraste e a volta da primeira. Muitas peças românticas curtas são assim.
 - **Rondó (ABACA)**: um refrão (A) que volta sempre, entre episódios diferentes (B, C).
 
@@ -325,7 +325,7 @@ const l91: Lesson = {
   objectives: [
     'Consigo tocar a melodia na voz de cima da direita, com uma nota do acorde por baixo nos tempos fortes.',
     'Consigo tocar décimas (fundamental e 3ª uma oitava acima) na esquerda.',
-    'Consigo tocar a Ode à Alegria em arranjo solo com 90% das notas e a direita acima da esquerda.',
+    'Consigo tocar a Ode to Joy em arranjo solo com 90% das notas e a direita acima da esquerda.',
   ],
   blocks: [
     {
@@ -339,7 +339,7 @@ A regra prática para começar:
 - nos tempos fracos e nas notas de passagem, deixe a melodia sozinha;
 - o polegar e o indicador fazem as notas de baixo; os dedos 4 e 5 ficam com a melodia.
 
-Na Ode à Alegria, o primeiro Mi ganha um Dó embaixo (uma 3ª abaixo); o primeiro Sol do compasso 2 ganha um Si (uma 6ª abaixo).`,
+Na Ode to Joy, o primeiro Mi ganha um Dó embaixo (uma 3ª abaixo); o primeiro Sol do compasso 2 ganha um Si (uma 6ª abaixo).`,
     },
     {
       kind: 'text',
@@ -382,12 +382,12 @@ Se a sua mão não alcança (16 semitons), há duas saídas: **arpejar** rápido
 
 Para chegar lá, toque a esquerda **piano** e com o peso do braço solto, e a direita **mezzo forte**. A décima grave soa muito: ela não precisa de força.`,
     },
-    { kind: 'song', songId: 'u12-ode-solo', why: 'A música da lição: a Ode à Alegria com a melodia no topo e décimas na esquerda.' },
+    { kind: 'song', songId: 'u12-ode-solo', why: 'A música da lição: a Ode to Joy com a melodia no topo e décimas na esquerda.' },
     { kind: 'exercise', id: 'l91-quiz', exercise: quiz('Arranjo solo', 'Responda sem tocar.', ARR_Q.slice(0, 3)) },
   ],
   review: [choice(ARR_Q.slice(0, 3), 'arranjo'), sections],
   checkpoint: [
-    quickTimed('Ode à Alegria, arranjo solo', 'Os 16 compassos a 80 BPM, sem dicas. Meta: 90% das notas e a direita acima da esquerda em 80% dos compassos.', () => twoHandTask(ODE_R.join(' | '), ODE_L.join(' | '), { bpm: 80 }), { pass: { accuracy: 0.9 }, balance: 6 }),
+    quickTimed('Ode to Joy, arranjo solo', 'Os 16 compassos a 80 BPM, sem dicas. Meta: 90% das notas e a direita acima da esquerda em 80% dos compassos.', () => twoHandTask(ODE_R.join(' | '), ODE_L.join(' | '), { bpm: 80 }), { pass: { accuracy: 0.9 }, balance: 6 }),
   ],
   exit: [choice(ARR_Q.slice(0, 3), 'arranjo')],
 };
@@ -455,7 +455,7 @@ Desacelerar no fim (*ritardando*) vale para os três. O app não mede o ritardan
       exercise: {
         kind: 'checklist',
         title: 'Intro, turnaround e final da Ode',
-        how: 'Escreva e toque, para a Ode à Alegria em arranjo solo: uma intro, um turnaround que volte ao começo e um final. Grave.',
+        how: 'Escreva e toque, para a Ode to Joy em arranjo solo: uma intro, um turnaround que volte ao começo e um final. Grave.',
         items: ['A intro tem 4 compassos (os últimos 4 da música ou o turnaround duas vezes).', 'O turnaround (I–vi–ii–V ou I–VI7–ii–V) entra no compasso 16 e devolve a música ao começo.', 'A segunda vez sobe um tom, preparada pelo A7.', 'O final usa tônica com tensão, tag ou IV–iv–I.', 'A forma inteira tem começo, meio e fim claros na gravação.'],
       },
     },
@@ -673,7 +673,7 @@ const l95: Lesson = {
   title: 'Romântico e impressionista',
   minutes: 60,
   objectives: [
-    'Consigo tocar o Prelúdio em Mi menor com a melodia acima dos acordes da esquerda e 95% das notas.',
+    'Consigo tocar o Prelude in E minor com a melodia acima dos acordes da esquerda e 95% das notas.',
     'Consigo explicar rubato, voicing de melodia interna e pedal como cor.',
     'Consigo tocar a escala de tons inteiros e acordes paralelos.',
   ],
@@ -691,7 +691,7 @@ O Prelúdio Op. 28 nº 4 de Chopin, em Mi menor, é o exemplo perfeito: uma melo
     },
     {
       kind: 'text',
-      title: 'O Prelúdio em Mi menor',
+      title: 'O Prelude in E minor',
       body: `A esquerda toca **acordes de 3 notas em colcheias**, oito por compasso. A cada compasso uma nota desce meio tom: Em (Sol–Si–Mi), B7 (Fá♯–Lá–Ré♯, sem o Si), Em7 (Sol–Si–Ré), C♯ø (Sol–Si–Dó♯), C7M (Sol–Si–Dó)… É **condução de vozes** em câmera lenta, a da unidade 6.
 
 A direita canta notas longas: Si, Dó, Si… A melodia quase não se move; quem dá o movimento é a harmonia por baixo.
@@ -739,7 +739,7 @@ Satie (Gymnopédies, Gnossiennes) fica no meio do caminho: harmonias paradas, se
   ],
   review: [wholeToneGen, choice(ROMANTIC_Q, 'romantico')],
   checkpoint: [
-    quickTimed('Prelúdio em Mi menor inteiro', 'Os 8 compassos, mãos juntas, a 50 BPM, sem dicas. Meta: 95% das notas e a melodia acima da esquerda.', () => twoHandTask(PREL_R.join(' | '), [...PREL_LH.map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')), 'G3+B3+E4:4'].join(' | '), { bpm: 50, fifths: 1 }), { pass: { accuracy: 0.95 }, balance: 8 }),
+    quickTimed('Prelude in E minor inteiro', 'Os 8 compassos, mãos juntas, a 50 BPM, sem dicas. Meta: 95% das notas e a melodia acima da esquerda.', () => twoHandTask(PREL_R.join(' | '), [...PREL_LH.map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')), 'G3+B3+E4:4'].join(' | '), { bpm: 50, fifths: 1 }), { pass: { accuracy: 0.95 }, balance: 8 }),
   ],
   exit: [wholeToneGen, choice(ROMANTIC_Q, 'romantico')],
 };
@@ -1290,7 +1290,7 @@ const l100: Lesson = {
       body: `Os Marcos 1 e 2 tinham um checkpoint e um recital. O **capstone** é só portfólio: quatro entregas, de consulta livre.
 
 1. **Recital** de 3 músicas, gravado em sequência:
-   - **clássica**: a **Gymnopédie nº 1** (abertura, nesta lição) ou, se preferir, o Prelúdio em Mi menor (lição 95) ou o Minueto em Sol (unidade 9);
+   - **clássica**: a **Gymnopédie nº 1** (abertura, nesta lição) ou, se preferir, o Prelude in E minor (lição 95) ou o Minuet in G (unidade 9);
    - **trilha**: o **Tema de jogo** (lição 97) ou a trilha que você transcreveu;
    - **brasileira**: o **Tanguinho** ou a **Bossa em Fá** (unidade 11).
 2. **Arranjo próprio** de uma melodia, com intro e final.
@@ -1332,7 +1332,7 @@ Ela é lenta, mas não é fácil: a lista de níveis do PLANO a põe no fim do i
     {
       kind: 'text',
       title: 'O arranjo próprio',
-      body: `Escolha uma melodia: a **Valsa lenta** do app (abaixo), uma folclórica (Greensleeves, Brilha brilha, When the Saints) ou a trilha que você transcreveu. Monte o arranjo com as ferramentas da unidade:
+      body: `Escolha uma melodia: a **Valsa lenta** do app (abaixo), uma folclórica (Greensleeves, Twinkle, Twinkle, When the Saints) ou a trilha que você transcreveu. Monte o arranjo com as ferramentas da unidade:
 
 - **Forma**: decida as seções (A, B, volta do A) e escreva o mapa antes de tocar.
 - **Melodia no topo** da direita, com uma nota do acorde por baixo nos tempos fortes (lição 91).

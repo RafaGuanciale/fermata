@@ -1,4 +1,4 @@
-// Unidade 7 — Campo harmônico, funções e cadências (lições 50 a 57). Projeto final: Prelúdio em Dó, BWV 846 (Bach), 8 primeiros compassos simplificados.
+// Unidade 7 — Campo harmônico, funções e cadências (lições 50 a 57). Projeto final: Prelude in C, BWV 846 (Bach), 8 primeiros compassos simplificados.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
@@ -577,7 +577,7 @@ const l56: Lesson = {
   - o **antecedente** começa a ideia e termina **aberto**, quase sempre numa **meia cadência** (no V): é a pergunta;
   - o **consequente** começa igual (ou parecido) e termina **fechado**, numa **cadência perfeita** (V–I): é a resposta.
 
-A Ode à Alegria, que você tocou na primeira unidade, é exatamente isso: a primeira frase termina no Ré (suspensa), a segunda começa igual e termina no Dó.
+A Ode to Joy, que você tocou na primeira unidade, é exatamente isso: a primeira frase termina no Ré (suspensa), a segunda começa igual e termina no Dó.
 
 Dois períodos seguidos formam um **período duplo** (16 compassos), a forma do projeto desta unidade.`,
     },
@@ -668,8 +668,8 @@ Depois de pronta, **analise**: escreva os graus embaixo de cada compasso e as ca
     },
     {
       kind: 'text',
-      title: 'A música final: o Prelúdio em Dó de Bach',
-      body: `Além do projeto, a unidade termina com uma música: os 8 primeiros compassos do **Prelúdio em Dó**, BWV 846, de Johann Sebastian Bach (1722). Cada compasso é **um acorde quebrado**, sempre com o mesmo desenho: a esquerda toca o baixo e a nota seguinte e segura; a direita repete três notas de cima, duas vezes.
+      title: 'A música final: o Prelude in C de Bach',
+      body: `Além do projeto, a unidade termina com uma música: os 8 primeiros compassos do **Prelude in C**, BWV 846, de Johann Sebastian Bach (1722). Cada compasso é **um acorde quebrado**, sempre com o mesmo desenho: a esquerda toca o baixo e a nota seguinte e segura; a direita repete três notas de cima, duas vezes.
 
 Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7/B, C, Am/C, D7/C, G/B e C7M/B. Repare no baixo descendo por grau conjunto (Dó, Dó, Si, Dó, Dó, Dó, Si, Si) enquanto os acordes passeiam pelo campo de Dó. Troque o **pedal** a cada compasso, logo depois do baixo.`,
     },
@@ -721,7 +721,7 @@ Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7
 
 // ---------- músicas ----------
 
-// Prelúdio em Dó, BWV 846 (J. S. Bach, Cravo Bem Temperado I, 1722): 8 primeiros compassos.
+// Prelude in C, BWV 846 (J. S. Bach, Cravo Bem Temperado I, 1722): 8 primeiros compassos.
 // Arranjo do Fermata: o desenho de cada compasso aparece uma vez (não duas), em colcheias.
 const PRELUDE: [string, string, string[]][] = [
   ['C4', 'E4', ['G4', 'C5', 'E5']],
@@ -740,7 +740,7 @@ const PRELUDE_L2 = PRELUDE_L.split(' | ').slice(0, 2).join(' | ');
 
 const prelude: SongSpec = {
   id: 'u07-preludio',
-  title: 'Prelúdio em Dó, BWV 846 (8 compassos)',
+  title: 'Prelude in C, BWV 846 (8 compassos)',
   composer: 'Johann Sebastian Bach',
   arrangement: 'arranjo do Fermata: os 8 primeiros compassos, com o desenho de cada compasso uma vez em colcheias (no original ele se repete em semicolcheias) e um acorde final em Dó; pedal a cada compasso',
   bpm: 66,
@@ -762,7 +762,7 @@ const unit: Unit = {
   songs: [prelude],
   final: {
     songId: 'u07-preludio',
-    brief: 'Os 8 primeiros compassos do Prelúdio em Dó de Bach: cada compasso é um acorde quebrado, e a harmonia anda pelo campo de Dó (I – ii7 – V7 – I – vi – Ré com Fá♯ – V – I7M) com o baixo quase parado. O Ré com Fá♯ é uma "dominante da dominante", que a Unidade 10 explica. É a música perfeita para ouvir funções e cadências, e para treinar o pedal a cada compasso.',
+    brief: 'Os 8 primeiros compassos do Prelude in C de Bach: cada compasso é um acorde quebrado, e a harmonia anda pelo campo de Dó (I – ii7 – V7 – I – vi – Ré com Fá♯ – V – I7M) com o baixo quase parado. O Ré com Fá♯ é uma "dominante da dominante", que a Unidade 10 explica. É a música perfeita para ouvir funções e cadências, e para treinar o pedal a cada compasso.',
   },
 };
 

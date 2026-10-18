@@ -33,15 +33,15 @@ Cada unidade tem `songs` (todas as músicas usadas) e `final` (o projeto final: 
 
 | Unidade | Projeto final |
 |---|---|
-| 1 | Ode à Alegria (pronto) |
-| 2 | Ode à Alegria com mão esquerda, ou uma peça de método de 16 compassos (Reinagle/Beyer) |
+| 1 | Ode to Joy (pronto) |
+| 2 | Ode to Joy com mão esquerda, ou uma peça de método de 16 compassos (Reinagle/Beyer) |
 | 3 | Amazing Grace com acordes (cifra I–IV–V7) |
-| 4 | Cânone em Ré (Pachelbel), simplificado com baixo e acordes |
+| 4 | Canon in D (Pachelbel), simplificado com baixo e acordes |
 | 5 | Für Elise, tema A (Lá menor) |
 | 6 | Uma canção em I–V–vi–IV pela cifra (arranjo próprio, melodia original ou folclórica) |
-| 7 | Prelúdio em Dó, BWV 846 (Bach), primeiros 8 compassos simplificados |
+| 7 | Prelude in C, BWV 846 (Bach), primeiros 8 compassos simplificados |
 | 8 | The Entertainer (Joplin) simplificado + blues de 12 compassos |
-| 9 | Minueto em Sol, BWV Anh. 114 |
+| 9 | Minuet in G, BWV Anh. 114 |
 | 10 | Clementi, Sonatina Op. 36 nº 1, 1º movimento (trecho) |
 | 11 | Odeon (Ernesto Nazareth, 1909), simplificado, com groove brasileiro na mão esquerda. Não use músicas protegidas (Asa Branca e bossa nova são protegidas) |
 | 12 | Gymnopédie nº 1 (Satie) + arranjo próprio |

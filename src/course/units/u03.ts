@@ -103,7 +103,7 @@ const SWITCH_CG = [
 const MARY_R = 'E4 D4 C4 D4 | E4 E4 E4:2 | D4 D4 D4:2 | E4 G4 G4:2 | E4 D4 C4 D4 | E4 E4 E4 E4 | D4 D4 E4 D4 | C4:4';
 const MARY_L = `${I}:4 | ${I}:4 | ${V7}:4 | ${I}:4 | ${I}:4 | ${I}:4 | ${V7}:4 | ${I}:4`;
 
-// Brilha, brilha, estrelinha (melodia folclórica francesa, "Ah! vous dirai-je, maman"): I, IV e V7, um acorde a cada 2 tempos.
+// Twinkle, Twinkle, Little Star (melodia folclórica francesa, "Ah! vous dirai-je, maman"): I, IV e V7, um acorde a cada 2 tempos.
 const TWINKLE_R = 'C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2';
 const TW_A = `${I}:4 | ${IV}:2 ${I}:2 | ${IV}:2 ${I}:2 | ${V7}:2 ${I}:2`;
 const TW_B = `${I}:2 ${V7}:2 | ${I}:2 ${V7}:2 | ${I}:2 ${V7}:2 | ${I}:2 ${V7}:2`;
@@ -125,7 +125,7 @@ const mary: SongSpec = {
 
 const twinkleC: SongSpec = {
   id: 'u03-brilha-c',
-  title: 'Brilha, brilha, estrelinha (em Dó)',
+  title: 'Twinkle, Twinkle, Little Star (em Dó)',
   composer: 'melodia folclórica francesa',
   arrangement: 'arranjo do Fermata: I, IV e V7 em bloco na mão esquerda, um acorde a cada 2 tempos',
   bpm: 76,
@@ -415,14 +415,14 @@ Uma segunda regra: termine no **I**. E antes dele, o V7 soa melhor do que o IV.`
       body: 'A primeira nota de um trecho pode ser só uma nota de passagem. Decida pelo conjunto: se aparecem Si ou Ré, é G7; se aparece Lá, é F; se aparece Mi, é C.',
     },
     { kind: 'exercise', id: 'l19-harmonizar', exercise: { kind: 'items', title: 'Que acorde cabe aqui?', how: 'A pauta mostra um trecho de melodia em Dó. Toque o acorde (C, F ou G7) que contém essas notas.', gen: HARM_C, count: 12, low: 36, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l19-brilha-me', exercise: quickTimed('Brilha, brilha: só a esquerda', 'Os 4 primeiros compassos da progressão: C, F–C, F–C, G7–C, a 66 BPM. Duas passadas boas.', () => melodyTask(TW_A, { bpm: 66, clef: 'bass' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l19-brilha-me', exercise: quickTimed('Twinkle, Twinkle: só a esquerda', 'Os 4 primeiros compassos da progressão: C, F–C, F–C, G7–C, a 66 BPM. Duas passadas boas.', () => melodyTask(TW_A, { bpm: 66, clef: 'bass' }), { reps: 2 }) },
     {
       kind: 'callout',
       tone: 'dica',
-      title: 'dedilhado de Brilha, brilha',
+      title: 'dedilhado de Twinkle, Twinkle',
       body: 'A melodia vai do Dó ao Lá: seis notas para cinco dedos. Comece com o polegar no Dó e abra a mão para o 4 cair no Sol e o 5 no Lá: 1 1 4 4 5 5 4. Na frase seguinte a mão escorrega de volta para a posição de Dó: 4 4 3 3 2 2 1 (Fá, Mi, Ré, Dó). Na parte do meio (Sol, Sol, Fá, Fá, Mi, Mi, Ré), fica nessa posição: 5 5 4 4 3 3 2.',
     },
-    { kind: 'exercise', id: 'l19-brilha', exercise: quickTimed('Brilha, brilha, estrelinha', 'Melodia folclórica francesa, 12 compassos, duas mãos. Começa a 56 BPM e sobe até 72 BPM.', () => twoHandTask(TWINKLE_R, TWINKLE_L, { bpm: 56, caption: 'Esquerda: C, F e G7 em posição próxima, um acorde a cada 2 tempos, como no exercício anterior.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'exercise', id: 'l19-brilha', exercise: quickTimed('Twinkle, Twinkle, Little Star', 'Melodia folclórica francesa, 12 compassos, duas mãos. Começa a 56 BPM e sobe até 72 BPM.', () => twoHandTask(TWINKLE_R, TWINKLE_L, { bpm: 56, caption: 'Esquerda: C, F e G7 em posição próxima, um acorde a cada 2 tempos, como no exercício anterior.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-brilha-c', why: 'A partitura completa com os acordes: confira na clave de Fá onde cada um entra.' },
     { kind: 'exercise', id: 'l19-quiz', exercise: quiz('Funções e cifra', 'Seis perguntas rápidas.', FUNCTIONS) },
   ],
@@ -479,7 +479,7 @@ const TWINKLE_G_L = shift(TWINKLE_L, -5);
 
 const twinkleG: SongSpec = {
   id: 'u03-brilha-g',
-  title: 'Brilha, brilha, estrelinha (em Sol)',
+  title: 'Twinkle, Twinkle, Little Star (em Sol)',
   composer: 'melodia folclórica francesa',
   arrangement: 'arranjo do Fermata: a versão em Dó transposta para Sol, com G, C e D7 em posição próxima',
   bpm: 76,
@@ -557,7 +557,7 @@ Toque cada padrão sobre **I–IV–V–I** até ele sair sem olhar. Os três tr
       title: 'o salto da mão esquerda',
       body: 'Nos padrões de raiz, a mão salta (Dó → Fá → Sol). Olhe para a próxima raiz um tempo antes e deixe o braço levar a mão, com o pulso solto. O dedo 5 chega primeiro; os outros vêm junto.',
     },
-    { kind: 'exercise', id: 'l20-junto', exercise: quickTimed('Raiz e 5ª com a melodia', 'Brilha, brilha (4 compassos) na direita; raiz e 5ª na esquerda, a 60 BPM. Duas passadas boas.', () => twoHandTask('C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2', 'C3 G3 C3 G3 | F2 C3 C3 G3 | F2 C3 C3 G3 | G2 D3 C3 G3', { bpm: 60, caption: 'Esquerda: Dó–Sol, Fá–Dó + Dó–Sol, Fá–Dó + Dó–Sol, Sol–Ré + Dó–Sol.' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l20-junto', exercise: quickTimed('Raiz e 5ª com a melodia', 'Twinkle, Twinkle (4 compassos) na direita; raiz e 5ª na esquerda, a 60 BPM. Duas passadas boas.', () => twoHandTask('C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2', 'C3 G3 C3 G3 | F2 C3 C3 G3 | F2 C3 C3 G3 | G2 D3 C3 G3', { bpm: 60, caption: 'Esquerda: Dó–Sol, Fá–Dó + Dó–Sol, Fá–Dó + Dó–Sol, Sol–Ré + Dó–Sol.' }), { reps: 2 }) },
     { kind: 'exercise', id: 'l20-quiz', exercise: quiz('Colcheias e padrões', 'Cinco perguntas rápidas.', EIGHTHS) },
   ],
   review: [choice(EIGHTHS, 'colcheias'), chordsCFG7],
@@ -576,7 +576,7 @@ const l21: Lesson = {
   objectives: [
     'Consigo tocar I, IV e V7 de Sol maior pelo grau.',
     'Consigo transpor uma progressão de Dó para Sol pensando nos graus.',
-    'Consigo tocar Brilha, brilha em Sol com acompanhamento.',
+    'Consigo tocar Twinkle, Twinkle em Sol com acompanhamento.',
   ],
   blocks: [
     {
@@ -637,7 +637,7 @@ C – F – G7 – C em Dó é **I – IV – V7 – I**. Em Sol, I – IV – V
       body: 'O D7 com Fá natural é outro acorde (Ré menor com sétima) e soa sem direção. Em Sol maior, todo Fá é Fá♯. Se o acorde de tensão soar triste, confira o Fá.',
     },
     { kind: 'exercise', id: 'l21-transpor', exercise: { kind: 'items', title: 'Transponha para Sol', how: 'A cifra vem em Dó. Pense nos graus e toque os acordes de Sol maior, em ordem.', gen: toG, count: 8, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l21-brilha', exercise: quickTimed('Brilha, brilha em Sol', '12 compassos, duas mãos: melodia a partir do Sol4, G, C e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_G_R, TWINKLE_G_L, { bpm: 56, fifths: 1, caption: 'Um acorde a cada 2 tempos: G, C e D7 na esquerda, como na partitura do "Tocar a música".' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'exercise', id: 'l21-brilha', exercise: quickTimed('Twinkle, Twinkle em Sol', '12 compassos, duas mãos: melodia a partir do Sol4, G, C e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_G_R, TWINKLE_G_L, { bpm: 56, fifths: 1, caption: 'Um acorde a cada 2 tempos: G, C e D7 na esquerda, como na partitura do "Tocar a música".' }), { ladder: { from: 56, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-brilha-g', why: 'A versão em Sol na pauta dupla. O sustenido no começo de cada linha é a armadura: vale para todos os Fá da música. Você estuda armaduras a fundo na Unidade 4.' },
     { kind: 'exercise', id: 'l21-quiz', exercise: quiz('Sol maior', 'Cinco perguntas rápidas.', KEY_G) },
   ],
@@ -759,7 +759,7 @@ const tonic = tonicByEar({ keys: ['C', 'G', 'F', 'D'] });
 const fChords = primaryChord({ keys: ['F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
 const allKeys = primaryChord({ keys: ['C', 'G', 'F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
 
-// Brilha, brilha com raiz e 5ª na esquerda (C: Dó–Sol, F: Fá–Dó, G7: Sol–Ré), e as versões em Fá.
+// Twinkle, Twinkle com raiz e 5ª na esquerda (C: Dó–Sol, F: Fá–Dó, G7: Sol–Ré), e as versões em Fá.
 const TWF_A = 'C3 G3 C3 G3 | F2 C3 C3 G3 | F2 C3 C3 G3 | G2 D3 C3 G3';
 const TWF_B = 'C3 G3 G2 D3 | C3 G3 G2 D3 | C3 G3 G2 D3 | C3 G3 G2 D3';
 const TWINKLE_FIFTH = `${TWF_A} | ${TWF_B} | ${TWF_A}`;
@@ -769,7 +769,7 @@ const TWINKLE_F_FIFTH = shift(TWINKLE_FIFTH, 5, true);
 
 const twinkleF: SongSpec = {
   id: 'u03-brilha-f',
-  title: 'Brilha, brilha, estrelinha (em Fá)',
+  title: 'Twinkle, Twinkle, Little Star (em Fá)',
   composer: 'melodia folclórica francesa',
   arrangement: 'arranjo do Fermata: a versão em Dó transposta para Fá, com F, B♭ e C7 em posição próxima',
   bpm: 76,
@@ -893,7 +893,7 @@ Em posição próxima na mão esquerda: **F** = Fá2, Lá2, Dó3; **B♭** = Fá
       body: 'Em Fá maior o Si é sempre Si♭, inclusive no acorde de B♭ e no C7. Antes de tocar, diga em voz alta: Fá maior, um bemol, Si♭.',
     },
     { kind: 'exercise', id: 'l24-fa', exercise: { kind: 'items', title: 'Graus em Fá', how: 'I, IV ou V7 de Fá maior. Lembre do Si♭.', gen: fChords, count: 12, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l24-brilha-fa', exercise: quickTimed('Brilha, brilha em Fá', 'Duas mãos, F, B♭ e C7 em bloco. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_F_R, TWINKLE_F_L, { bpm: 56, fifths: -1, caption: 'Um acorde a cada 2 tempos: F, B♭ e C7 na esquerda. Todo Si é Si♭.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'exercise', id: 'l24-brilha-fa', exercise: quickTimed('Twinkle, Twinkle em Fá', 'Duas mãos, F, B♭ e C7 em bloco. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_F_R, TWINKLE_F_L, { bpm: 56, fifths: -1, caption: 'Um acorde a cada 2 tempos: F, B♭ e C7 na esquerda. Todo Si é Si♭.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-brilha-f', why: 'A versão em Fá na pauta dupla, com o bemol na armadura.' },
     { kind: 'exercise', id: 'l24-quiz', exercise: quiz('Fá maior', 'Quatro perguntas rápidas.', KEY_F, 0.75) },
     {
@@ -922,11 +922,11 @@ Estude primeiro a esquerda sozinha, no exercício abaixo. Depois a direita, e s�
       pass: { accuracy: 0.85 },
     },
     quickTimed('Colcheias', '4 compassos sorteados a 80 BPM, ±60 ms.', randomRhythm(RHY_8, 4, 80), { window: 60 }),
-    quickTimed('Raiz e 5ª com a melodia', 'Brilha, brilha em Dó, 12 compassos, a 72 BPM. Meta: 90%.', () => twoHandTask(TWINKLE_R, TWINKLE_FIFTH, { bpm: 72, caption: 'Esquerda, raiz e 5ª: Dó–Sol no C, Fá–Dó no F, Sol–Ré no G7. Um par a cada 2 tempos.' }), { pass: { accuracy: 0.9 } }),
+    quickTimed('Raiz e 5ª com a melodia', 'Twinkle, Twinkle em Dó, 12 compassos, a 72 BPM. Meta: 90%.', () => twoHandTask(TWINKLE_R, TWINKLE_FIFTH, { bpm: 72, caption: 'Esquerda, raiz e 5ª: Dó–Sol no C, Fá–Dó no F, Sol–Ré no G7. Um par a cada 2 tempos.' }), { pass: { accuracy: 0.9 } }),
   ],
   project: {
     title: 'Folclore em três tons',
-    brief: `Acompanhe **Brilha, brilha, estrelinha** em **Dó, Sol e Fá**, usando **dois padrões** de mão esquerda: bloco e raiz com 5ª. A mesma progressão (I, IV e V7) em três casas, com a melodia por cima. Se quiser, faça o mesmo com outra canção folclórica que você conheça (cantiga de roda, por exemplo), descobrindo os acordes pelo ouvido.`,
+    brief: `Acompanhe **Twinkle, Twinkle, Little Star** em **Dó, Sol e Fá**, usando **dois padrões** de mão esquerda: bloco e raiz com 5ª. A mesma progressão (I, IV e V7) em três casas, com a melodia por cima. Se quiser, faça o mesmo com outra canção folclórica que você conheça (cantiga de roda, por exemplo), descobrindo os acordes pelo ouvido.`,
     steps: [
       'Escreva a progressão da música em graus (I, IV, V7), compasso por compasso.',
       'Toque em Dó com o padrão de bloco e depois com raiz e 5ª.',

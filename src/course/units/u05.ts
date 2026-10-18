@@ -373,7 +373,7 @@ Essa disciplina parece detalhe, mas é ela que faz a partitura ser legível: um 
 - **3ª maior** (Dó–Mi) é doce e cheia, a cor do acorde maior. **5ª justa** (Dó–Sol) é aberta, "oca", estável, sem cor de maior nem de menor.
 - **4ª justa** (Dó–Fá) soa como um chamado, suspensa. **8ª** (Dó–Dó) soa como a mesma nota repetida mais aguda.
 
-Uma âncora que ajuda: **Amazing Grace** começa com uma 4ª justa (na versão da Unidade 3, Sol → Dó), e **Brilha, brilha** com uma 5ª justa no salto do 2º para o 3º som (Dó → Sol). Cante o começo da música por dentro e compare.
+Uma âncora que ajuda: **Amazing Grace** começa com uma 4ª justa (na versão da Unidade 3, Sol → Dó), e **Twinkle, Twinkle** com uma 5ª justa no salto do 2º para o 3º som (Dó → Sol). Cante o começo da música por dentro e compare.
 
 Neste exercício o app toca a partir de uma nota e você toca as duas notas do intervalo que ouviu.`,
     },
@@ -768,7 +768,7 @@ const triplets: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-// Brilha, brilha (melodia folclórica francesa, "Ah! vous dirai-je, maman"): a mesma melodia em Dó maior e em Dó menor (lição 41).
+// Twinkle, Twinkle (melodia folclórica francesa, "Ah! vous dirai-je, maman"): a mesma melodia em Dó maior e em Dó menor (lição 41).
 const TW_MAJ = 'C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2';
 const TW_MIN = 'C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2 | G4 G4 F4 F4 | Eb4 Eb4 D4:2 | G4 G4 F4 F4 | Eb4 Eb4 D4:2 | C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2';
 type Fn = 'T' | 'S' | 'D';
@@ -779,7 +779,7 @@ const twLeft = (v: Record<Fn, string>) => TW_HARM.map(([a, b]) => `${v[a]}:2 ${v
 
 const twMajor: SongSpec = {
   id: 'u05-brilha-maior',
-  title: 'Brilha, brilha em Dó maior',
+  title: 'Twinkle, Twinkle em Dó maior',
   composer: 'melodia folclórica francesa',
   arrangement: 'arranjo do Fermata: I, IV e V7 em mínimas na mão esquerda, posição próxima',
   bpm: 72,
@@ -793,7 +793,7 @@ const twMajor: SongSpec = {
 
 const twMinor: SongSpec = {
   id: 'u05-brilha-menor',
-  title: 'Brilha, brilha em Dó menor',
+  title: 'Twinkle, Twinkle em Dó menor',
   composer: 'melodia folclórica francesa',
   arrangement: 'arranjo do Fermata: a mesma melodia no homônimo menor (harmônica), com i, iv e V7 em mínimas',
   bpm: 66,
@@ -974,13 +974,13 @@ Gustav Mahler fez exatamente isso no 3º movimento da Sinfonia nº 1 (1888): peg
     },
     {
       kind: 'example',
-      title: 'Brilha, brilha nos dois modos',
+      title: 'Twinkle, Twinkle nos dois modos',
       steps: [
         { say: 'Em Dó maior, com C e F na esquerda.', play: { bpm: 96, steps: [[60, 48, 52, 55], [60], [67, 48, 52, 55], [67], [69, 53, 57, 60], [69], [67, 48, 52, 55]].map((midis, i) => ({ midis, beats: i === 6 ? 2 : 1 })) } },
         { say: 'Em Dó menor: Lá♭ no lugar de Lá, Cm e Fm no lugar de C e F. O Mi♭ aparece logo depois, no compasso 3.', keys: [63, 68], play: { bpm: 88, steps: [[60, 48, 51, 55], [60], [67, 48, 51, 55], [67], [68, 53, 56, 60], [68], [67, 48, 51, 55]].map((midis, i) => ({ midis, beats: i === 6 ? 2 : 1 })) } },
       ],
     },
-    { kind: 'exercise', id: 'l41-maior', exercise: quickTimed('A melodia em Dó maior', 'Os 4 primeiros compassos de Brilha, brilha, mão direita, a 72 BPM.', () => melodyTask(TW_MAJ_A, { bpm: 72 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l41-maior', exercise: quickTimed('A melodia em Dó maior', 'Os 4 primeiros compassos de Twinkle, Twinkle, mão direita, a 72 BPM.', () => melodyTask(TW_MAJ_A, { bpm: 72 }), { reps: 2 }) },
     { kind: 'exercise', id: 'l41-menor', exercise: quickTimed('A mesma melodia em Dó menor', 'Agora com Mi♭ e Lá♭, a 72 BPM. A pauta já tem a armadura de 3 bemóis.', () => melodyTask(TW_MIN_A, { bpm: 72, fifths: -3 }), { reps: 2 }) },
     {
       kind: 'callout',
@@ -1037,7 +1037,7 @@ Os dois exercícios abaixo treinam exatamente esses trechos, devagar.`,
   ],
   project: {
     title: 'Mesma melodia, dois modos',
-    brief: `Toque **Brilha, brilha** inteira (12 compassos) em **Dó maior** com I, IV e V7, e depois em **Dó menor** (harmônica) com i, iv e V7, **com pedal legato** a cada acorde. As duas versões seguidas, como uma pequena música em duas partes.`,
+    brief: `Toque **Twinkle, Twinkle** inteira (12 compassos) em **Dó maior** com I, IV e V7, e depois em **Dó menor** (harmônica) com i, iv e V7, **com pedal legato** a cada acorde. As duas versões seguidas, como uma pequena música em duas partes.`,
     steps: [
       'Toque a versão maior no "Tocar a música" até passar a 72 BPM.',
       'Escreva (ou diga) as notas que mudam na versão menor: Mi → Mi♭, Lá → Lá♭; o Si do G7 fica natural.',
@@ -1053,7 +1053,7 @@ Os dois exercícios abaixo treinam exatamente esses trechos, devagar.`,
       'Dá para ouvir a diferença de cor entre as versões, não só de notas.',
       'A escala de Lá menor harmônica em 2 oitavas passou a 52 BPM ou mais.',
     ],
-    exercise: { kind: 'timed', title: 'Brilha, brilha em Dó menor com pedal', how: 'Os 12 compassos, duas mãos, a 60 BPM, pedal legato.', gen: () => twoHandTask(twMinor.right, twMinor.left!, { bpm: 60, fifths: -3 }), reps: 1, window: 100, pass: { accuracy: 0.85 }, pedal: 'legato' },
+    exercise: { kind: 'timed', title: 'Twinkle, Twinkle em Dó menor com pedal', how: 'Os 12 compassos, duas mãos, a 60 BPM, pedal legato.', gen: () => twoHandTask(twMinor.right, twMinor.left!, { bpm: 60, fifths: -3 }), reps: 1, window: 100, pass: { accuracy: 0.85 }, pedal: 'legato' },
   },
   exit: [earMinor, ivBelow, choice([...RELATIVE, ...FORMS, ...AUG_DIM, ...EAR_MINOR, ...HOMONYMS])],
 };

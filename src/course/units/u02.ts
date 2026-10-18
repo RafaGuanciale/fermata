@@ -1,4 +1,4 @@
-// Unidade 2 — Pauta dupla, leitura e intervalos (lições 9 a 16). Projeto final: Ode à Alegria com mão esquerda.
+// Unidade 2 — Pauta dupla, leitura e intervalos (lições 9 a 16). Projeto final: Ode to Joy com mão esquerda.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { choice, intervalAbove, intervalByEar, mix, readInterval, readNote, toneOrSemitone, type ChoiceQuestion } from '../gens';
@@ -334,7 +334,7 @@ Uma regra rápida: **intervalo ímpar** (3ª, 5ª) liga linha com linha ou espa�
       title: 'Ouvir 2ª e 5ª',
       body: `Para começar a ouvir intervalos, compare os dois mais contrastantes: a **2ª** (um passo, a nota quase não sai do lugar) e a **5ª** (um salto largo e estável).
 
-Uma ajuda é associar cada intervalo ao começo de uma melodia conhecida. A 2ª subindo é o começo de uma escala: Dó, Ré. A 5ª subindo é o salto do início de "Brilha, brilha, estrelinha" (Dó, Dó, **Sol**, Sol). Cante por dentro antes de responder.
+Uma ajuda é associar cada intervalo ao começo de uma melodia conhecida. A 2ª subindo é o começo de uma escala: Dó, Ré. A 5ª subindo é o salto do início de "Twinkle, Twinkle, Little Star" (Dó, Dó, **Sol**, Sol). Cante por dentro antes de responder.
 
 No exercício o app diz a nota de partida e toca o intervalo. Você toca as duas notas. Depois, entra a 3ª na mistura.`,
     },
@@ -576,7 +576,7 @@ Como o polegar faz as duas notas, do Fá♯ para o Sol ele escorrega da preta pa
   exit: [toneSemi, choice(ACCIDENTALS, 'acidentes')],
 };
 
-// Ode à Alegria (Beethoven, 9ª sinfonia), versão de método na posição de Dó, agora com a mão esquerda.
+// Ode to Joy (Beethoven, 9ª sinfonia), versão de método na posição de Dó, agora com a mão esquerda.
 const ODE_A = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4 D4 D4:2';
 const ODE_A2 = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4 C4 C4:2';
 const ODE_B = 'D4 D4 E4 C4 | D4 F4 E4 C4 | D4 F4 E4 D4 | C4 D4 r:2';
@@ -598,7 +598,7 @@ const l14: Lesson = {
   objectives: [
     'Consigo tocar um bordão na mão esquerda enquanto a direita lê uma melodia.',
     'Consigo trocar o bordão de Dó para Sol no tempo certo.',
-    'Consigo tocar os 8 primeiros compassos da Ode à Alegria com as duas mãos a 80 BPM.',
+    'Consigo tocar os 8 primeiros compassos da Ode to Joy com as duas mãos a 80 BPM.',
   ],
   blocks: [
     {
@@ -643,13 +643,13 @@ O momento crítico é o **tempo 1**: as duas mãos descem **juntas**. Nos outros
     {
       kind: 'text',
       title: 'O bordão muda com a harmonia',
-      body: `Um bordão parado no Dó funciona por um tempo, mas logo soa estranho quando a melodia "pede" outra base. Na Ode à Alegria, alguns compassos descansam (a melodia gira em torno de Dó, Mi e Sol) e outros pedem continuação (a melodia passa por Ré, Fá e Si). Para os primeiros, o bordão é **Dó**; para os outros, **Sol**.
+      body: `Um bordão parado no Dó funciona por um tempo, mas logo soa estranho quando a melodia "pede" outra base. Na Ode to Joy, alguns compassos descansam (a melodia gira em torno de Dó, Mi e Sol) e outros pedem continuação (a melodia passa por Ré, Fá e Si). Para os primeiros, o bordão é **Dó**; para os outros, **Sol**.
 
 Na posição de Dó da mão esquerda isso não exige movimento nenhum: o Dó3 é o dedo 5 e o Sol3 é o dedo 1. A mão fica parada e só troca o dedo. Na Unidade 3, esses dois bordões vão virar os acordes de **Dó** e de **Sol**: o I e o V.`,
     },
     {
       kind: 'example',
-      title: 'Ode à Alegria com bordão',
+      title: 'Ode to Joy com bordão',
       steps: [
         { say: 'A esquerda sozinha: Dó, Sol, Dó, Sol, uma semibreve por compasso.', keys: [48, 55], play: { bpm: 80, steps: [48, 55, 48, 55].map((m) => ({ midis: [m], beats: 4 })) } },
         {
@@ -661,13 +661,13 @@ Na posição de Dó da mão esquerda isso não exige movimento nenhum: o Dó3 é
     {
       kind: 'exercise',
       id: 'l14-ode-escada',
-      exercise: quickTimed('Ode à Alegria, 8 compassos, duas mãos', 'Bordão de Dó e Sol na esquerda. Começa a 60 BPM e sobe 5 BPM a cada passada boa, até 80 BPM.', () => twoHandTask(ODE_8_R, ODE_8_L, { bpm: 60, caption: 'Mão esquerda: Dó3, Sol3, Dó3, Sol3, uma semibreve por compasso; depois Dó3, Sol3, Dó3 e, no compasso 8, Sol3 no 1 e Dó3 no 3.' }), { ladder: { from: 60, to: 80, step: 5 } }),
+      exercise: quickTimed('Ode to Joy, 8 compassos, duas mãos', 'Bordão de Dó e Sol na esquerda. Começa a 60 BPM e sobe 5 BPM a cada passada boa, até 80 BPM.', () => twoHandTask(ODE_8_R, ODE_8_L, { bpm: 60, caption: 'Mão esquerda: Dó3, Sol3, Dó3, Sol3, uma semibreve por compasso; depois Dó3, Sol3, Dó3 e, no compasso 8, Sol3 no 1 e Dó3 no 3.' }), { ladder: { from: 60, to: 80, step: 5 } }),
     },
     { kind: 'song', songId: 'u02-ode-me-8', why: 'Os mesmos 8 compassos com a pauta dupla de verdade: aqui você vê as duas claves juntas. O modo Estudar espera cada nota das duas mãos.' },
   ],
   review: [readBoth, intervalUp],
   checkpoint: [
-    quickTimed('Ode à Alegria, 8 compassos, duas mãos', 'A 80 BPM, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(ODE_8_R, ODE_8_L, { bpm: 80 }), { window: 80, pass: { accuracy: 0.9 } }),
+    quickTimed('Ode to Joy, 8 compassos, duas mãos', 'A 80 BPM, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(ODE_8_R, ODE_8_L, { bpm: 80 }), { window: 80, pass: { accuracy: 0.9 } }),
   ],
   exit: [readBoth, choice([...METER_3, ...ACCIDENTALS])],
 };
@@ -785,7 +785,7 @@ const l16: Lesson = {
   objectives: [
     'Consigo passar no checkpoint misto da unidade 2, sem dicas.',
     'Consigo transpor uma melodia da posição de Dó para a de Sol, lendo a original.',
-    'Consigo tocar a Ode à Alegria com as duas mãos na pauta dupla.',
+    'Consigo tocar a Ode to Joy com as duas mãos na pauta dupla.',
   ],
   blocks: [
     {
@@ -808,7 +808,7 @@ Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de S
     },
     {
       kind: 'example',
-      title: 'Ode à Alegria em Dó e em Sol',
+      title: 'Ode to Joy em Dó e em Sol',
       steps: [
         { say: 'Em Dó: polegar no Dó4. Começa no dedo 3 (Mi).', keys: [60, 64], play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62].map((m, i) => ({ midis: [m], beats: i === 14 ? 2 : 1 })) } },
         { say: 'Em Sol: polegar no Sol4, mesmos dedos. Começa no dedo 3 (Si).', keys: [67, 71], play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62].map((m, i) => ({ midis: [m + 7], beats: i === 14 ? 2 : 1 })) } },
@@ -826,7 +826,7 @@ Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de S
       exercise: quickTimed('Transponha para Sol', 'A pauta mostra uma melodia na posição de Dó. Toque-a na posição de Sol, polegar no Sol4, com os mesmos dedos. 60 BPM, duas passadas boas.', (rng) => transposedTask(pick(rng, READ_R), 7, { bpm: 60, caption: 'Escrito em Dó. Toque em Sol: cada nota uma 5ª acima.' }), { reps: 2 }),
     },
     { kind: 'exercise', id: 'l16-quiz', exercise: quiz('Transposição', 'Quatro perguntas rápidas.', TRANSPOSE, 0.75) },
-    { kind: 'song', songId: 'u02-ode-me', why: 'O projeto final da unidade: a Ode à Alegria inteira na pauta dupla, com as duas mãos.' },
+    { kind: 'song', songId: 'u02-ode-me', why: 'O projeto final da unidade: a Ode to Joy inteira na pauta dupla, com as duas mãos.' },
   ],
   review: [readBoth, intervalUp, toneSemi, intervalEar25, choice([...PAUTA, ...CLAVE_FA, ...INTERVALS, ...METER_3, ...ACCIDENTALS, ...PHRASE, ...TRANSPOSE])],
   checkpoint: [
@@ -842,26 +842,26 @@ Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de S
       pass: { accuracy: 0.85 },
     },
     quickTimed('Ritmo em 3/4', '4 compassos sorteados a 76 BPM.', rhythm3(4, 76)),
-    quickTimed('Ode à Alegria completa, duas mãos', '16 compassos a 80 BPM. Meta: 85% das notas, ±80 ms.', () => twoHandTask(odeRight, odeLeftLine, { bpm: 80, caption: 'Mão esquerda na parte do meio (compassos 9 a 12): Sol, Dó | Sol, Dó | Sol | Dó, Sol, em mínimas. No resto, como nos 8 primeiros compassos.' }), { window: 80, pass: { accuracy: 0.85 } }),
-    quickTimed('Transposição', 'Ode à Alegria, primeira frase, escrita em Dó. Toque em Sol, a 72 BPM. Meta: 90%.', () => transposedTask(ODE_4, 7, { bpm: 72 }), { pass: { accuracy: 0.9 } }),
+    quickTimed('Ode to Joy completa, duas mãos', '16 compassos a 80 BPM. Meta: 85% das notas, ±80 ms.', () => twoHandTask(odeRight, odeLeftLine, { bpm: 80, caption: 'Mão esquerda na parte do meio (compassos 9 a 12): Sol, Dó | Sol, Dó | Sol | Dó, Sol, em mínimas. No resto, como nos 8 primeiros compassos.' }), { window: 80, pass: { accuracy: 0.85 } }),
+    quickTimed('Transposição', 'Ode to Joy, primeira frase, escrita em Dó. Toque em Sol, a 72 BPM. Meta: 90%.', () => transposedTask(ODE_4, 7, { bpm: 72 }), { pass: { accuracy: 0.9 } }),
   ],
   project: {
     title: 'Leia e transponha',
-    brief: `Duas entregas. Primeiro, toque a **Ode à Alegria inteira com as duas mãos** (16 compassos, a 80 BPM) no "Tocar a música", lendo a pauta dupla. Depois, **transponha a melodia para Sol**: mão direita na posição de Sol, lendo a partitura em Dó. Se quiser ir além, transponha também o bordão: Sol2 e Ré3 na mão esquerda.`,
+    brief: `Duas entregas. Primeiro, toque a **Ode to Joy inteira com as duas mãos** (16 compassos, a 80 BPM) no "Tocar a música", lendo a pauta dupla. Depois, **transponha a melodia para Sol**: mão direita na posição de Sol, lendo a partitura em Dó. Se quiser ir além, transponha também o bordão: Sol2 e Ré3 na mão esquerda.`,
     steps: [
-      'Toque a Ode à Alegria com as duas mãos no modo Estudar até não errar notas.',
+      'Toque a Ode to Joy com as duas mãos no modo Estudar até não errar notas.',
       'Passe para o "Tocar junto" a 70 BPM e suba para 80 BPM.',
       'Na posição de Sol, toque só a mão direita da primeira frase, olhando a partitura em Dó.',
       'Faça a transposição dos 8 compassos no exercício abaixo.',
       'Opcional: some o bordão transposto (Sol2 no lugar de Dó3, Ré3 no lugar de Sol3).',
     ],
     rubric: [
-      'A Ode à Alegria passou a 80 BPM com 85% ou mais das notas.',
+      'A Ode to Joy passou a 80 BPM com 85% ou mais das notas.',
       'A transposição saiu no tempo, sem parar para traduzir nota por nota.',
       'As mãos desceram juntas no 1 de cada compasso.',
       'As frases terminaram leves, com respiração entre elas.',
     ],
-    exercise: { kind: 'timed', title: 'Transposição, 8 compassos', how: 'Ode à Alegria escrita em Dó; toque em Sol, a 72 BPM.', gen: () => transposedTask(ODE_8_R, 7, { bpm: 72, caption: 'Escrito em Dó. Toque em Sol, com os mesmos dedos.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
+    exercise: { kind: 'timed', title: 'Transposição, 8 compassos', how: 'Ode to Joy escrita em Dó; toque em Sol, a 72 BPM.', gen: () => transposedTask(ODE_8_R, 7, { bpm: 72, caption: 'Escrito em Dó. Toque em Sol, com os mesmos dedos.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
   },
   exit: [readBoth, intervalUp, choice(TRANSPOSE, 'transposicao')],
 };
@@ -870,7 +870,7 @@ Melodias que ficam dentro de Dó a Sol não precisam de Fá♯ na posição de S
 
 const odeLeft: SongSpec = {
   id: 'u02-ode-me',
-  title: 'Ode à Alegria com mão esquerda',
+  title: 'Ode to Joy com mão esquerda',
   composer: 'Ludwig van Beethoven',
   arrangement: 'arranjo do Fermata: melodia de método na posição de Dó e bordão de Dó3 e Sol3 na mão esquerda (I e V)',
   bpm: 80,
@@ -884,7 +884,7 @@ const odeLeft: SongSpec = {
 
 const ode8: SongSpec = {
   id: 'u02-ode-me-8',
-  title: 'Ode à Alegria com mão esquerda, 8 primeiros compassos',
+  title: 'Ode to Joy com mão esquerda, 8 primeiros compassos',
   composer: 'Ludwig van Beethoven',
   arrangement: 'arranjo do Fermata: melodia de método e bordão de Dó3 e Sol3',
   bpm: 80,
@@ -921,7 +921,7 @@ const unit: Unit = {
   songs: [odeLeft, ode8, valsa],
   final: {
     songId: 'u02-ode-me',
-    brief: 'A Ode à Alegria inteira (16 compassos), agora lida na pauta dupla e com as duas mãos: a direita na melodia, a esquerda num bordão que alterna Dó3 (dedo 5) e Sol3 (dedo 1). Repare que o bordão muda junto com a harmonia: Dó quando a melodia descansa, Sol quando ela pede continuação.',
+    brief: 'A Ode to Joy inteira (16 compassos), agora lida na pauta dupla e com as duas mãos: a direita na melodia, a esquerda num bordão que alterna Dó3 (dedo 5) e Sol3 (dedo 1). Repare que o bordão muda junto com a harmonia: Dó quando a melodia descansa, Sol quando ela pede continuação.',
   },
 };
 

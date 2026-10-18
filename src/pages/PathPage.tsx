@@ -1,12 +1,12 @@
 // Caminho de repertório: dez músicas em cinco fases (src/repertoire/path.ts). Cada uma diz o que ensina; as de
 // domínio público entram no repertório com a partitura para tocar junto, as outras entram como meta.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { PATH_PHASES, nextOnPath, pathItems, type PathItem } from '../repertoire/path';
-import { addPathSong } from '../repertoire/repo';
+import { addPathSong, syncPath } from '../repertoire/repo';
 import { STATUS_LABEL } from '../repertoire/catalog';
 import { BackIcon, CheckIcon, PlayIcon, PlusIcon } from '../components/Icons';
 
@@ -15,6 +15,9 @@ export default function PathPage() {
   const pieces = useLiveQuery(() => db.pieces.toArray(), []);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    void syncPath();
+  }, []);
   if (!pieces) return null;
 
   const items = pathItems(pieces);
@@ -53,41 +56,42 @@ export default function PathPage() {
           </button>
         )}
       </header>
-      <p className="page__lead path__lead">
+      <p className="page__lead songPath__lead">
         Cada música ensina uma ou duas coisas novas sobre as anteriores. Avance quando a atual estiver firme no andamento ideal, não pela data.
         As de domínio público já vêm com a partitura para tocar junto; nas outras, importe a partitura em Editar.
       </p>
-      {error && <p className="path__error" role="alert">{error}</p>}
+      {error && <p className="songPath__error" role="alert">{error}</p>}
 
-      <div className="path">
+      <div className="songPath">
         {PATH_PHASES.map((phase) => (
-          <section key={phase.n} className="path__phase" aria-labelledby={`fase-${phase.n}`}>
-            <h2 className="path__phaseTitle" id={`fase-${phase.n}`}>
-              <span className="path__phaseN">Fase {phase.n}</span> {phase.title} <span className="path__when">· {phase.when}</span>
+          <section key={phase.n} className="songPath__phase" aria-labelledby={`fase-${phase.n}`}>
+            <h2 className="songPath__phaseTitle" id={`fase-${phase.n}`}>
+              <span className="songPath__phaseN">Fase {phase.n} · {phase.when}</span>
+              {phase.title}
             </h2>
-            <ol className="path__list">
+            <ol className="songPath__list">
               {items.filter((i) => i.song.phase === phase.n).map((i) => {
                 const n = items.indexOf(i) + 1;
                 const isNext = next?.song.id === i.song.id;
                 const playTo = i.piece?.id && i.playable ? `/peca/${i.piece.id}/estudar` : !i.piece && i.song.courseSong ? `/curso/musica/${i.song.courseSong}` : null;
                 return (
-                  <li key={i.song.id} className={'path__item' + (isNext ? ' path__item-next' : '') + (i.state === 'aprendida' ? ' path__item-done' : '')}>
-                    <span className="path__n" aria-hidden>{i.state === 'aprendida' ? <CheckIcon className="path__check" /> : n}</span>
-                    <div className="path__body">
-                      <p className="path__title">
+                  <li key={i.song.id} className={'songPath__item' + (isNext ? ' songPath__item-next' : '') + (i.state === 'aprendida' ? ' songPath__item-done' : '')}>
+                    <span className="songPath__n" aria-hidden>{i.state === 'aprendida' ? <CheckIcon className="songPath__check" /> : n}</span>
+                    <div className="songPath__body">
+                      <p className="songPath__title">
                         {i.piece ? <Link to={`/repertorio/peca/${i.piece.id}`}>{i.song.title}</Link> : i.song.title}
-                        <span className="path__by"> · {i.song.people.join(', ')}</span>
+                        <span className="songPath__by"> · {i.song.people.join(', ')}</span>
                       </p>
-                      <p className="path__teaches">{i.song.teaches}</p>
-                      <p className="path__why">{i.song.why}</p>
-                      <p className="path__state">
-                        {isNext && <strong className="path__nextTag">Agora</strong>}
+                      <p className="songPath__teaches">{i.song.teaches}</p>
+                      <p className="songPath__why">{i.song.why}</p>
+                      <p className="songPath__state">
+                        {isNext && <strong className="songPath__nextTag">Agora</strong>}
                         {i.piece ? STATUS_LABEL[i.piece.status] : 'Fora do repertório'}
                         {i.piece && !i.playable && ' · sem partitura para tocar junto ainda'}
                         {i.song.file && ` · ${i.song.file.source}`}
                       </p>
                     </div>
-                    <div className="path__actions">
+                    <div className="songPath__actions">
                       {playTo && (
                         <Link className="button button-secondary button-small" to={playTo} state={{ background: location }}>
                           <PlayIcon className="button__icon" />

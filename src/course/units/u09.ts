@@ -1,4 +1,4 @@
-// Unidade 9 — Leitura clássica intermediária, textura e polifonia (lições 66 a 73). Projeto final: Minueto em Sol, BWV Anh. 114.
+// Unidade 9 — Leitura clássica intermediária, textura e polifonia (lições 66 a 73). Projeto final: Minuet in G, BWV Anh. 114.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { chordSequence, choice, mix, nonChordTones, type ChoiceQuestion, type StrangeKind } from '../gens';
@@ -98,7 +98,7 @@ Em tempo fraco, as mais comuns:
 
 E uma especial:
 
-- **Nota pedal**: uma nota longa ou repetida (quase sempre no **baixo**) que fica parada enquanto os acordes mudam por cima. O exemplo clássico é o Sol grave preso nos compassos 24 a 31 do Prelúdio em Dó de Bach, enquanto a harmonia muda por cima.`,
+- **Nota pedal**: uma nota longa ou repetida (quase sempre no **baixo**) que fica parada enquanto os acordes mudam por cima. O exemplo clássico é o Sol grave preso nos compassos 24 a 31 do Prelude in C de Bach, enquanto a harmonia muda por cima.`,
     },
     {
       kind: 'example',
@@ -315,7 +315,7 @@ const sonatina: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-// Minueto em Sol, BWV Anh. 114 (Christian Petzold, atribuído; do Caderno de Anna Magdalena Bach, 1725).
+// Minuet in G, BWV Anh. 114 (Christian Petzold, atribuído; do Caderno de Anna Magdalena Bach, 1725).
 const MINUET_R = [
   'D5 G4:0.5 A4:0.5 B4:0.5 C5:0.5', 'D5 G4 G4', 'E5 C5:0.5 D5:0.5 E5:0.5 F#5:0.5', 'G5 G4 G4',
   'C5 D5:0.5 C5:0.5 B4:0.5 A4:0.5', 'B4 C5:0.5 B4:0.5 A4:0.5 G4:0.5', 'F#4 G4:0.5 A4:0.5 B4:0.5 G4:0.5', 'A4:3',
@@ -329,7 +329,7 @@ const MINUET_L = [
 
 const minuet: SongSpec = {
   id: 'u09-minueto',
-  title: 'Minueto em Sol, BWV Anh. 114',
+  title: 'Minuet in G, BWV Anh. 114',
   composer: 'Christian Petzold (atribuído; Caderno de Anna Magdalena Bach)',
   arrangement: 'arranjo do Fermata: só a primeira parte (16 compassos), sem repetição; mão esquerda simplificada em notas longas, com o desenho do original nos compassos 7, 8 e 15',
   bpm: 96,
@@ -426,7 +426,7 @@ const l70: Lesson = {
   objectives: [
     'Consigo ler e tocar mordente, trinado, grupeto, apojatura e acciaccatura.',
     'Consigo tocar um trinado de pelo menos 6 notas com variação abaixo de 30 ms.',
-    'Consigo tocar a primeira parte do Minueto em Sol com 90% das notas.',
+    'Consigo tocar a primeira parte do Minuet in G com 90% das notas.',
   ],
   blocks: [
     {
@@ -477,8 +477,8 @@ Comece devagar, em semicolcheias medidas, e só acelere quando ficar igual. O ex
     { kind: 'exercise', id: 'l70-mordentes', exercise: quickTimed('Mordentes e grupeto', 'Escritos por extenso, a 60 BPM. Os enfeites rápidos e leves, a nota principal cantando.', () => melodyTask(MORDENT, { bpm: 60 }), { reps: 2, window: 80 }) },
     {
       kind: 'text',
-      title: 'O Minueto em Sol',
-      body: `O **Minueto em Sol** é provavelmente a música mais tocada por estudantes de piano no mundo. Ele está no **Caderno de Anna Magdalena Bach** (1725), uma coleção doméstica da família Bach, e por muito tempo foi atribuído a Johann Sebastian. Hoje é atribuído a **Christian Petzold**, organista de Dresden.
+      title: 'O Minuet in G',
+      body: `O **Minuet in G** é provavelmente a música mais tocada por estudantes de piano no mundo. Ele está no **Caderno de Anna Magdalena Bach** (1725), uma coleção doméstica da família Bach, e por muito tempo foi atribuído a Johann Sebastian. Hoje é atribuído a **Christian Petzold**, organista de Dresden.
 
 O minueto é uma **dança em 3/4**, elegante, com o primeiro tempo apoiado. A forma é de período: o compasso 8 termina no **V** (Ré, meia cadência) e o 16 no **I** (Sol, cadência perfeita). Repare nas notas estranhas da lição 66: passagens em quase todo compasso, e as bordaduras do compasso 6.
 
@@ -655,7 +655,7 @@ const l73: Lesson = {
   minutes: 60,
   objectives: [
     'Consigo passar no checkpoint misto da unidade 9, sem dicas.',
-    'Consigo tocar o Minueto em Sol com 95% das notas no andamento escolhido e escrever sua análise de forma e harmonia.',
+    'Consigo tocar o Minuet in G com 95% das notas no andamento escolhido e escrever sua análise de forma e harmonia.',
   ],
   blocks: [
     {
@@ -663,7 +663,7 @@ const l73: Lesson = {
       title: 'Tocar e entender',
       body: `Esta unidade foi sobre ler e tocar como um pianista clássico: as notas estranhas que dão vida à melodia, o equilíbrio entre melodia e acompanhamento, a condução a quatro vozes, a primeira vista com as duas mãos, os ornamentos, o contraponto e as polirritmias.
 
-O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma música é responder:
+O projeto é o **Minuet in G**, tocado e **analisado**. Analisar uma música é responder:
 
 - **Forma**: quantas frases? Onde estão as cadências e de que tipo são? Há repetição?
 - **Harmonia**: que acorde está embaixo de cada compasso (em graus)?
@@ -697,7 +697,7 @@ O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma música 
   ],
   project: {
     title: 'Música clássica com análise',
-    brief: `Toque a primeira parte do **Minueto em Sol** (16 compassos, duas mãos) com 95% das notas, a 84 BPM ou mais (a referência é 96 BPM). Grave, e escreva a análise: forma, graus, cadências e notas estranhas.`,
+    brief: `Toque a primeira parte do **Minuet in G** (16 compassos, duas mãos) com 95% das notas, a 84 BPM ou mais (a referência é 96 BPM). Grave, e escreva a análise: forma, graus, cadências e notas estranhas.`,
     steps: [
       'Estude mãos separadas no modo Estudar até não errar.',
       'Junte as mãos devagar (72 BPM) e suba até o seu andamento.',
@@ -711,7 +711,7 @@ O projeto é o **Minueto em Sol**, tocado e **analisado**. Analisar uma música 
       'Articulação: colcheias ligadas, semínimas levemente destacadas, como numa dança.',
       'A análise de forma e de harmonia está correta.',
     ],
-    exercise: { kind: 'timed', title: 'Minueto, duas mãos', how: 'Os 16 compassos a 84 BPM.', gen: () => twoHandTask(MINUET_R, MINUET_L, { bpm: 84, beatsPerBar: 3, fifths: 1 }), reps: 1, window: 90, pass: { accuracy: 0.95 } },
+    exercise: { kind: 'timed', title: 'Minuet in G, duas mãos', how: 'Os 16 compassos a 84 BPM.', gen: () => twoHandTask(MINUET_R, MINUET_L, { bpm: 84, beatsPerBar: 3, fifths: 1 }), reps: 1, window: 90, pass: { accuracy: 0.95 } },
   },
   exit: [strangeName, choice([...STRANGE_Q, ...ORN_Q])],
 };
@@ -740,7 +740,7 @@ const unit: Unit = {
   songs: [minuet, sonatina, canon],
   final: {
     songId: 'u09-minueto',
-    brief: 'O Minueto em Sol do Caderno de Anna Magdalena Bach (hoje atribuído a Christian Petzold): dança em 3/4, melodia com notas de passagem e bordaduras, frases de 4 compassos, cadência no V no compasso 8 e no I no 16. Toque leve, com o primeiro tempo de cada compasso um pouco mais apoiado, como numa dança.',
+    brief: 'O Minuet in G do Caderno de Anna Magdalena Bach (hoje atribuído a Christian Petzold): dança em 3/4, melodia com notas de passagem e bordaduras, frases de 4 compassos, cadência no V no compasso 8 e no I no 16. Toque leve, com o primeiro tempo de cada compasso um pouco mais apoiado, como numa dança.',
   },
 };
 

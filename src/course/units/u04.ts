@@ -1,4 +1,4 @@
-// Unidade 4 — Escala maior, armaduras e pedal legato (lições 25 a 33). Projeto final: Cânone em Ré (Pachelbel), simplificado.
+// Unidade 4 — Escala maior, armaduras e pedal legato (lições 25 a 33). Projeto final: Canon in D (Pachelbel), simplificado.
 // A lição 33 é o Marco 1: checkpoint das unidades 1 a 4 e mini-recital.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
@@ -298,7 +298,7 @@ Regra geral que você vai usar muito: **o polegar evita as teclas pretas**. O de
 
 // ---------- músicas ----------
 
-// Cânone em Ré (Johann Pachelbel, c. 1680): o baixo de 8 notas e três das variações sobre ele, simplificadas.
+// Canon in D (Johann Pachelbel, c. 1680): o baixo de 8 notas e três das variações sobre ele, simplificadas.
 const CANON_BASS = 'D3:2 A2:2 | B2:2 F#2:2 | G2:2 D2:2 | G2:2 A2:2';
 const CANON_FIFTHS = 'D3+A3:2 A2+E3:2 | B2+F#3:2 F#2+C#3:2 | G2+D3:2 D2+A2:2 | G2+D3:2 A2+E3:2';
 const CANON_V1 = 'F#5:2 E5:2 | D5:2 C#5:2 | B4:2 A4:2 | B4:2 C#5:2';
@@ -307,7 +307,7 @@ const CANON_V3 = 'D5 F#5 A5 G5 | F#5 D5 F#5 E5 | D5 B4 D5 A4 | G4 B4 A4 G4';
 
 const canon: SongSpec = {
   id: 'u04-canone',
-  title: 'Cânone em Ré',
+  title: 'Canon in D',
   composer: 'Johann Pachelbel',
   arrangement: 'arranjo do Fermata, simplificado: o baixo de 8 notas na mão esquerda (sozinho, depois com a 5ª) e três variações da melodia na direita, em mínimas e semínimas; acorde final de Ré',
   bpm: 60,
@@ -351,7 +351,7 @@ const ear16 = degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6] });
 const RHY_DOT = ['x:1.5 x:0.5 x x', 'x:1.5 x:0.5 x:2', 'x x:1.5 x:0.5 x', 'x:1.5 x:0.5 x:1.5 x:0.5', 'x x x:1.5 x:0.5'];
 const RHY_SYNC = ['x:0.5 x x:0.5 x:2', 'x x:0.5 x x:0.5 x', 'x:0.5 x x x x:0.5', 'r:0.5 x:0.5 r:0.5 x:0.5 x:2', 'x:0.5 x x:0.5 x x', 'x:2 x:0.5 x x:0.5'];
 
-// Ode à Alegria com o ritmo original de Beethoven nos fins de frase (semínima pontuada e colcheia).
+// Ode to Joy com o ritmo original de Beethoven nos fins de frase (semínima pontuada e colcheia).
 const ODE_DOT_R = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4:1.5 D4:0.5 D4:2 | E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4:1.5 C4:0.5 C4:2';
 const ODE_DOT_L = 'C3:4 | G3:4 | C3:4 | G3:4 | C3:4 | G3:4 | C3:4 | G3:2 C3:2';
 // A Ode inteira, como Beethoven escreveu a melodia (pontuadas, colcheias nos compassos 10 e 11, Sol grave no 12),
@@ -364,7 +364,7 @@ const SYNC_L = 'C3:4 | C3:4 | G3:4 | C3:4 | C3:4 | C3:4 | G3:4 | C3:4';
 
 const odeDotted: SongSpec = {
   id: 'u04-ode-pontuada',
-  title: 'Ode à Alegria completa',
+  title: 'Ode to Joy completa',
   composer: 'Ludwig van Beethoven',
   arrangement: 'arranjo do Fermata: a melodia inteira com o ritmo original (pontuadas e colcheias) e a mão esquerda em intervalos de I e V',
   bpm: 76,
@@ -479,14 +479,14 @@ const l29: Lesson = {
 
 Conte as colcheias: "**1** e 2 **e**". A semínima pontuada começa no 1 e segura pelo "e" e pelo 2; a colcheia cai no "e" do 2. O ritmo resultante é longo–curto, como um passo manco.
 
-Você já ouviu esse ritmo: no fim da primeira frase da Ode à Alegria, Beethoven escreveu "Mi (pontuada), Ré (colcheia), Ré (mínima)". A versão de método que você tocou até agora simplificou isso para semínimas.`,
+Você já ouviu esse ritmo: no fim da primeira frase da Ode to Joy, Beethoven escreveu "Mi (pontuada), Ré (colcheia), Ré (mínima)". A versão de método que você tocou até agora simplificou isso para semínimas.`,
     },
     {
       kind: 'example',
       title: 'Pontuada e colcheia',
       steps: [
         { say: 'Semínima pontuada e colcheia, duas vezes: longo, curto.', play: { bpm: 72, steps: [1.5, 0.5, 1.5, 0.5].map((b) => ({ midis: [60], beats: b })) } },
-        { say: 'Na Ode à Alegria, o fim da frase com o ritmo original.', play: { bpm: 80, steps: [[60, 1], [60, 1], [62, 1], [64, 1], [64, 1.5], [62, 0.5], [62, 2]].map(([m, b]) => ({ midis: [m], beats: b })) } },
+        { say: 'Na Ode to Joy, o fim da frase com o ritmo original.', play: { bpm: 80, steps: [[60, 1], [60, 1], [62, 1], [64, 1], [64, 1.5], [62, 0.5], [62, 2]].map(([m, b]) => ({ midis: [m], beats: b })) } },
       ],
     },
     { kind: 'exercise', id: 'l29-pontuada', exercise: quickTimed('Ritmo pontuado', 'Dois compassos sorteados a 66 BPM, em qualquer tecla. Conte as colcheias. Duas passadas boas.', randomRhythm(RHY_DOT, 2, 66), { reps: 2, window: 80 }) },
@@ -514,9 +514,9 @@ Síncope é o tempero de quase toda música popular brasileira, do choro ao samb
       ],
     },
     { kind: 'exercise', id: 'l29-sincope', exercise: quickTimed('Síncope e contratempo', 'Dois compassos sorteados a 66 BPM. Duas passadas boas.', randomRhythm(RHY_SYNC, 2, 66), { reps: 2, window: 80 }) },
-    { kind: 'exercise', id: 'l29-ode', exercise: quickTimed('Ode à Alegria com o ritmo original', '8 compassos, duas mãos, a 66 BPM. Atenção aos compassos 4 e 8.', () => twoHandTask(ODE_DOT_R, ODE_DOT_L, { bpm: 66 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l29-ode', exercise: quickTimed('Ode to Joy com o ritmo original', '8 compassos, duas mãos, a 66 BPM. Atenção aos compassos 4 e 8.', () => twoHandTask(ODE_DOT_R, ODE_DOT_L, { bpm: 66 }), { reps: 2 }) },
     { kind: 'song', songId: 'u04-sincopado', why: 'Uma música curta com síncope em quase todo compasso, para tocar no estúdio com a partitura e o modo Estudar.' },
-    { kind: 'song', songId: 'u04-ode-pontuada', why: 'A Ode à Alegria inteira, com o ritmo original e a mão esquerda em intervalos: a versão completa, depois das simplificadas das unidades 1 e 2.' },
+    { kind: 'song', songId: 'u04-ode-pontuada', why: 'A Ode to Joy inteira, com o ritmo original e a mão esquerda em intervalos: a versão completa, depois das simplificadas das unidades 1 e 2.' },
     { kind: 'exercise', id: 'l29-quiz', exercise: quiz('Pontuada e síncope', 'Quatro perguntas rápidas.', RHYTHM_DOT, 0.75) },
   ],
   review: [choice(RHYTHM_DOT, 'sincope'), degreeNames],
@@ -818,9 +818,9 @@ Depois toque no andamento, lendo o desenho (sobe, desce, passo, salto) e não no
       title: 'O recital',
       body: `Monte o seu recital com estas quatro músicas, nesta ordem:
 
-1. **Clássica**: o **Cânone em Ré** de Pachelbel (o projeto final desta unidade).
+1. **Clássica**: o **Canon in D** de Pachelbel (o projeto final desta unidade).
 2. **Popular fácil**: **Amazing Grace** com acordes (Unidade 3).
-3. **Cifra em 2 tons**: **Brilha, brilha** em Dó e em Sol, com dois padrões de mão esquerda.
+3. **Cifra em 2 tons**: **Twinkle, Twinkle** em Dó e em Sol, com dois padrões de mão esquerda.
 4. **Primeira vista**: uma melodia gerada no exercício do projeto.
 
 Toque tudo seguido, sem recomeçar: apresentação é isso. Grave com o celular e compare com a gravação (ou a lembrança) da lição 1. Depois escreva três frases: o que melhorou, o que ainda trava, o que você quer tocar a seguir.`,
@@ -845,7 +845,7 @@ Toque tudo seguido, sem recomeçar: apresentação é isso. Grave com o celular 
   ],
   project: {
     title: 'Mini-recital nº 1',
-    brief: `Toque em sequência, sem recomeçar: o **Cânone em Ré**, **Amazing Grace** com acordes, **Brilha, brilha** em Dó e em Sol pela cifra, e uma **leitura à primeira vista** (exercício abaixo). Grave tudo e compare com a lição 1. Termine com uma autoavaliação escrita de três frases.`,
+    brief: `Toque em sequência, sem recomeçar: o **Canon in D**, **Amazing Grace** com acordes, **Twinkle, Twinkle** em Dó e em Sol pela cifra, e uma **leitura à primeira vista** (exercício abaixo). Grave tudo e compare com a lição 1. Termine com uma autoavaliação escrita de três frases.`,
     steps: [
       'Passe cada música no "Tocar a música" até ela sair com 90% das notas no andamento.',
       'Escolha um horário sem pressa, ajuste o banco e faça um aquecimento de 5 minutos.',
@@ -875,7 +875,7 @@ const unit: Unit = {
   songs: [canon, odeDotted, syncopated, blues],
   final: {
     songId: 'u04-canone',
-    brief: 'O Cânone em Ré de Pachelbel, simplificado: a mão esquerda repete o baixo de 8 notas (Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá) e a direita toca três das variações que se empilham sobre ele. Junta a armadura de 2 sustenidos (Fá♯ e Dó♯), o pedal legato (troque a cada mínima, logo depois do baixo) e a leitura em duas claves.',
+    brief: 'O Canon in D de Pachelbel, simplificado: a mão esquerda repete o baixo de 8 notas (Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá) e a direita toca três das variações que se empilham sobre ele. Junta a armadura de 2 sustenidos (Fá♯ e Dó♯), o pedal legato (troque a cada mínima, logo depois do baixo) e a leitura em duas claves.',
   },
 };
 

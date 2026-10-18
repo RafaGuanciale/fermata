@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type LearnStatus } from '../db/db';
 import { CATEGORIES, STATUS_LABEL, STATUS_ORDER, countLabel, matchesQuery, musiciansOf } from '../repertoire/catalog';
 import PhotoCard from '../components/PhotoCard';
 import { nextOnPath, pathItems } from '../repertoire/path';
+import { syncPath } from '../repertoire/repo';
 import PieceList from '../components/PieceList';
 import { PlusIcon, SearchIcon } from '../components/Icons';
 
@@ -12,6 +13,10 @@ export default function RepertoirePage() {
   const pieces = useLiveQuery(() => db.pieces.orderBy('updatedAt').reverse().toArray(), []);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<LearnStatus | 'all'>('all');
+  // As músicas do caminho entram no repertório sozinhas (uma vez), como se você tivesse importado.
+  useEffect(() => {
+    void syncPath();
+  }, []);
 
   const all = pieces ?? [];
   const searching = query.trim().length > 0;
@@ -40,7 +45,7 @@ export default function RepertoirePage() {
         <input
           id="busca-repertorio"
           type="search"
-          placeholder="Ode à Alegria, Gonzaga, filmes"
+          placeholder="Ode to Joy, Gonzaga, filmes"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label="Buscar por título, músico ou categoria"

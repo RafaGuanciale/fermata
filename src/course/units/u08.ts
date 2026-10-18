@@ -747,7 +747,7 @@ O Marco 2 tem as mesmas duas partes do primeiro:
 
 1. **Blues de 12 compassos**: shells na esquerda, **dois chorus** (duas voltas) de improviso na direita com a escala blues e notas-alvo. Exercício abaixo.
 2. **Canção pop pela cifra**: a **Canção em quatro acordes** (Unidade 6), com o seu arranjo.
-3. **Música clássica**: o **Prelúdio em Dó** de Bach (Unidade 7), com pedal a cada compasso.
+3. **Música clássica**: o **Prelude in C** de Bach (Unidade 7), com pedal a cada compasso.
 4. **Ragtime**: **The Entertainer**, o projeto final desta unidade.
 
 Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de cada compasso, as cadências e as funções (T, S, D). Para o Prelúdio, por exemplo: I – ii7 – V7 – I – vi – ... Compare a gravação com a do Marco 1.`,
@@ -778,7 +778,7 @@ Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de c
   ],
   project: {
     title: 'Recital nº 2: blues e canção',
-    brief: `Toque em sequência, sem recomeçar: o **blues** com dois chorus improvisados (exercício abaixo), a **Canção em quatro acordes** pelo seu arranjo, o **Prelúdio em Dó** e **The Entertainer**. Grave tudo e escreva a análise harmônica de uma das músicas.`,
+    brief: `Toque em sequência, sem recomeçar: o **blues** com dois chorus improvisados (exercício abaixo), a **Canção em quatro acordes** pelo seu arranjo, o **Prelude in C** e **The Entertainer**. Grave tudo e escreva a análise harmônica de uma das músicas.`,
     steps: [
       'Passe The Entertainer e o Prelúdio no "Tocar a música" com 85% ou mais no andamento.',
       'Ensaie o blues: dois ciclos de shells sem errar a forma, depois com o improviso.',

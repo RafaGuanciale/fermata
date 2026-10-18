@@ -1,4 +1,4 @@
-// Unidade 1 — Teclado, pulso e postura (lições 1 a 8). Projeto final: Ode à Alegria.
+// Unidade 1 — Teclado, pulso e postura (lições 1 a 8). Projeto final: Ode to Joy.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { choice, degreeByEar, direction, echo, findAll, findExact, findNote, fingerNote, mix, stepOrLeap, type ChoiceQuestion } from '../gens';
@@ -451,7 +451,7 @@ Ouvir pela função, e não pelo nome absoluto, é o jeito que músicos prático
   exit: [degreeByEar({ tonic: 60, degrees: [1, 3, 5] }), direction({ low: 55, high: 79 }), echo({ motifs: cMotifs })],
 };
 
-// Ode à Alegria (Beethoven, 9ª sinfonia), versão de método na posição de Dó.
+// Ode to Joy (Beethoven, 9ª sinfonia), versão de método na posição de Dó.
 const ODE_A = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4 D4 D4:2';
 const ODE_A2 = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4 C4 C4:2';
 
@@ -463,7 +463,7 @@ const l06: Lesson = {
   objectives: [
     'Consigo ler o compasso 4/4 e sentir o tempo forte.',
     'Consigo segurar uma nota longa numa mão enquanto a outra toca semínimas.',
-    'Consigo tocar os 8 primeiros compassos da Ode à Alegria a 72 BPM.',
+    'Consigo tocar os 8 primeiros compassos da Ode to Joy a 72 BPM.',
   ],
   blocks: [
     {
@@ -492,18 +492,18 @@ O truque é **contar antes de tocar**: diga "1, 2, 3, 4" uma vez em voz alta e s
     { kind: 'exercise', id: 'l06-duas', exercise: quickTimed('Semibreve na esquerda, semínimas na direita', 'A pauta mostra a mão direita. A esquerda toca Dó3 no tempo 1 de cada compasso e segura.', (rng) => twoHandTask(pick(rng, PENTA_PATTERNS_R), 'C3:4 | C3:4 | C3:4', { bpm: 66, caption: 'Mão esquerda: Dó3 de semibreve em cada compasso.' }), { reps: 2 }) },
     {
       kind: 'example',
-      title: 'Ode à Alegria, primeira frase',
+      title: 'Ode to Joy, primeira frase',
       steps: [
         { say: 'A melodia mais famosa da 9ª sinfonia de Beethoven cabe inteira na posição de Dó. Ouça a primeira frase (4 compassos). Repare que ela termina no **Ré**: soa como pergunta.', play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64].map((m) => ({ midis: [m], beats: 1 })).concat([{ midis: [64], beats: 1 }, { midis: [62], beats: 1 }, { midis: [62], beats: 2 }]) } },
         { say: 'A segunda frase começa igual e termina no **Dó**: a resposta, em casa.', play: { bpm: 80, steps: [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64].map((m) => ({ midis: [m], beats: 1 })).concat([{ midis: [62], beats: 1 }, { midis: [60], beats: 1 }, { midis: [60], beats: 2 }]) } },
       ],
     },
-    { kind: 'exercise', id: 'l06-ode', exercise: quickTimed('Ode à Alegria, 8 compassos', 'Mão direita, a 60 BPM. Duas passadas boas.', () => melodyTask(`${ODE_A} | ${ODE_A2}`, { bpm: 60 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l06-ode', exercise: quickTimed('Ode to Joy, 8 compassos', 'Mão direita, a 60 BPM. Duas passadas boas.', () => melodyTask(`${ODE_A} | ${ODE_A2}`, { bpm: 60 }), { reps: 2 }) },
     { kind: 'song', songId: 'u01-ode-8', why: 'Os mesmos 8 compassos com a partitura de verdade, a cascata e o modo Estudar (o app espera cada nota). Bom para repetir até soltar.' },
   ],
   review: [choice(METER, 'compasso'), fingerNote({ hands: ['direita'] })],
   checkpoint: [
-    quickTimed('Ode à Alegria a 72 BPM', '8 compassos, mão direita, sem dicas. Meta: 90% das notas, ±80 ms.', () => melodyTask(`${ODE_A} | ${ODE_A2}`, { bpm: 72 }), { window: 80, pass: { accuracy: 0.9 } }),
+    quickTimed('Ode to Joy a 72 BPM', '8 compassos, mão direita, sem dicas. Meta: 90% das notas, ±80 ms.', () => melodyTask(`${ODE_A} | ${ODE_A2}`, { bpm: 72 }), { window: 80, pass: { accuracy: 0.9 } }),
     quickTimed('Duas mãos a 72 BPM', 'Semibreve na esquerda e semínimas na direita.', (rng) => twoHandTask(pick(rng, PENTA_PATTERNS_R), 'C3:4 | C3:4 | C3:4', { bpm: 72, caption: 'Mão esquerda: Dó3 em cada compasso.' })),
   ],
   exit: [choice(METER, 'compasso'), fingerNote({ hands: ['direita', 'esquerda'] })],
@@ -631,7 +631,7 @@ Comece só com a esquerda até ela ficar automática. Depois entre com a direita
 
 const odeFull: SongSpec = {
   id: 'u01-ode',
-  title: 'Ode à Alegria',
+  title: 'Ode to Joy',
   composer: 'Ludwig van Beethoven',
   arrangement: 'versão de método na posição de Dó, com o Sol grave na mão esquerda',
   bpm: 72,
@@ -645,7 +645,7 @@ const odeFull: SongSpec = {
 
 const ode8: SongSpec = {
   id: 'u01-ode-8',
-  title: 'Ode à Alegria, 8 primeiros compassos',
+  title: 'Ode to Joy, 8 primeiros compassos',
   composer: 'Ludwig van Beethoven',
   arrangement: 'versão de método, mão direita',
   bpm: 72,

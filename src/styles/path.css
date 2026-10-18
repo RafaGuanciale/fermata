@@ -37,46 +37,42 @@
   color: var(--text-muted);
 }
 
-.path__lead {
+.songPath__lead {
   max-width: 70ch;
 }
 
-.path__error {
+.songPath__error {
   margin: 0;
   color: var(--miss-ink);
   font: 500 14px/20px var(--font-body);
 }
 
-.path {
+.songPath {
   display: grid;
   gap: var(--space-8);
   margin-top: var(--space-6);
 }
 
-.path__phase {
+.songPath__phase {
   display: grid;
   gap: var(--space-3);
 }
 
-.path__phaseTitle {
+.songPath__phaseTitle {
+  display: grid;
+  gap: 2px;
   margin: 0;
-  font: 600 17px/24px var(--font-body);
+  font: 600 20px/28px var(--font-display);
 }
 
-.path__phaseN {
-  margin-right: var(--space-2);
+.songPath__phaseN {
   font: 600 11px/14px var(--font-body);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
-.path__when {
-  font: 400 14px/20px var(--font-body);
-  color: var(--text-muted);
-}
-
-.path__list {
+.songPath__list {
   display: grid;
   gap: var(--space-3);
   margin: 0;
@@ -84,7 +80,7 @@
   list-style: none;
 }
 
-.path__item {
+.songPath__item {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr) auto;
   gap: var(--space-4);
@@ -95,16 +91,20 @@
   border: 1px solid var(--line);
 }
 
-.path__item-next {
-  border-color: var(--hit);
-  box-shadow: inset 3px 0 0 var(--hit);
+.songPath__item-next {
+  border-color: color-mix(in srgb, var(--hit) 60%, var(--line));
+  background: color-mix(in srgb, var(--color-petrol) 14%, var(--surface));
 }
 
-.path__item-done {
+:root[data-theme="light"] .songPath__item-next {
+  background: color-mix(in srgb, var(--color-petrol) 6%, var(--color-off-white));
+}
+
+.songPath__item-done {
   opacity: 0.75;
 }
 
-.path__n {
+.songPath__n {
   display: grid;
   place-items: center;
   width: 32px;
@@ -115,49 +115,54 @@
   font-variant-numeric: tabular-nums;
 }
 
-.path__item-done .path__n {
+.songPath__item-done .songPath__n {
   background: var(--hit-soft);
   color: var(--hit);
 }
 
-.path__check {
+.songPath__check {
   width: 16px;
   height: 16px;
 }
 
-.path__body {
+.songPath__body {
   display: grid;
   gap: 4px;
   min-width: 0;
 }
 
-.path__title {
+.songPath__title {
   margin: 0;
   font: 600 16px/22px var(--font-body);
 }
 
-.path__title a {
+.songPath__title a {
   color: inherit;
+  text-decoration: none;
 }
 
-.path__by {
+.songPath__title a:hover {
+  text-decoration: underline;
+}
+
+.songPath__by {
   font-weight: 400;
   color: var(--text-muted);
 }
 
-.path__teaches {
+.songPath__teaches {
   margin: 0;
   font: 400 14px/20px var(--font-body);
 }
 
-.path__why,
-.path__state {
+.songPath__why,
+.songPath__state {
   margin: 0;
   font: 400 13px/18px var(--font-body);
   color: var(--text-muted);
 }
 
-.path__nextTag {
+.songPath__nextTag {
   margin-right: var(--space-2);
   padding: 1px 8px;
   border-radius: var(--radius-pill);
@@ -166,23 +171,24 @@
   font: 600 11px/16px var(--font-body);
 }
 
-:root:not([data-theme="light"]) .path__nextTag {
+:root:not([data-theme="light"]) .songPath__nextTag {
   color: var(--color-ebony);
 }
 
-.path__actions {
+.songPath__actions {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-2);
+  white-space: nowrap;
 }
 
 @media (max-width: 640px) {
-  .path__item {
+  .songPath__item {
     grid-template-columns: 32px minmax(0, 1fr);
   }
 
-  .path__actions {
+  .songPath__actions {
     grid-column: 2;
     flex-direction: row;
     flex-wrap: wrap;

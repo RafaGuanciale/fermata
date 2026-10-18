@@ -15,7 +15,7 @@ export interface Exercise {
 /** Posição de Dó: Dó4 a Sol4, um dedo por tecla. */
 export const C_POSITION: Midi[] = [60, 62, 64, 65, 67];
 
-/** Ode à Alegria, primeiros quatro compassos (posição de Dó). */
+/** Ode to Joy, primeiros quatro compassos (posição de Dó). */
 export const ODE_TO_JOY: Midi[] = [64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62];
 
 /** Gerador pseudoaleatório determinístico (mulberry32), para testes reproduzíveis. */
@@ -66,7 +66,7 @@ export function makeExercise(kind: ExerciseKind, rand: () => number = Math.rando
     return {
       id: 'ode-to-joy-1',
       kind,
-      title: 'Ode à Alegria, primeiros compassos',
+      title: 'Ode to Joy, primeiros compassos',
       subtitle: 'Beethoven · posição de Dó',
       notes: ODE_TO_JOY,
       range: C_POSITION,

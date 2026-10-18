@@ -116,6 +116,58 @@ export async function addPathSong(song: PathSong): Promise<number> {
   );
 }
 
+const SEED_KEY = 'fermata-path-seeded-v1';
+
+/** Já trouxe os dados da nuvem pelo menos uma vez neste aparelho? (senão o caminho poderia duplicar músicas) */
+function syncedOnce(): boolean {
+  try {
+    const acc = JSON.parse(localStorage.getItem('fermata-account') ?? 'null') as { user?: { id?: string } } | null;
+    return Boolean(acc?.user?.id && localStorage.getItem(`fermata-sync-cursor:${acc.user.id}`) !== null);
+  } catch {
+    return false;
+  }
+}
+
+let syncing: Promise<void> | null = null;
+
+/**
+ * Deixa o caminho no repertório: põe as músicas que faltam (uma vez por aparelho, depois da primeira
+ * sincronização; se você apagar uma depois, ela não volta) e troca os títulos antigos traduzidos pelo original,
+ * com a partitura nova junto.
+ */
+export function syncPath(): Promise<void> {
+  syncing ??= (async () => {
+    const { PATH_SONGS, OLD_PATH_TITLES, findPathPiece } = await import('./path');
+    const pieces = await db.pieces.toArray();
+    for (const song of PATH_SONGS) {
+      const piece = findPathPiece(song, pieces);
+      if (piece?.id && piece.pathId === song.id && OLD_PATH_TITLES[song.id]?.includes(piece.title)) {
+        let score: File | undefined;
+        if (song.file) {
+          const res = await fetch(song.file.path).catch(() => null);
+          if (res?.ok) score = new File([await res.blob()], song.file.name, { type: 'application/vnd.recordare.musicxml' });
+        }
+        await savePiece({ ...piece, title: song.title }, score ? { score } : {}, piece.id);
+      }
+    }
+    let seeded = false;
+    try {
+      seeded = localStorage.getItem(SEED_KEY) === '1';
+    } catch {
+      return;
+    }
+    if (seeded || !syncedOnce()) return;
+    const now = await db.pieces.toArray();
+    for (const song of PATH_SONGS) if (!findPathPiece(song, now)) await addPathSong(song);
+    localStorage.setItem(SEED_KEY, '1');
+  })()
+    .catch((err) => console.error('[Fermata] Não foi possível montar o caminho no repertório', err))
+    .finally(() => {
+      syncing = null;
+    });
+  return syncing;
+}
+
 /** Devolve a partitura com o arquivo. Se ela veio de outro aparelho, baixa da nuvem na primeira vez. */
 export async function getFile(id: number): Promise<(StoredFile & { blob: Blob }) | undefined> {
   const file = await db.files.get(id);

@@ -15,7 +15,7 @@ export interface PathPhase {
 export const PATH_PHASES: PathPhase[] = [
   { n: 1, title: 'Primeiros passos', when: 'primeiras semanas' },
   { n: 2, title: 'As duas mãos', when: 'de 2 a 6 meses' },
-  { n: 3, title: 'Primeiras peças de verdade', when: 'de 6 a 12 meses' },
+  { n: 3, title: 'Primeiros clássicos de verdade', when: 'de 6 a 12 meses' },
   { n: 4, title: 'Fluência e som', when: 'de 1 a 2 anos' },
   { n: 5, title: 'A meta', when: 'de 2 a 4 anos' },
 ];
@@ -45,14 +45,14 @@ export const PATH_SONGS: PathSong[] = [
   {
     id: 'ode',
     phase: 1,
-    title: 'Ode à Alegria',
+    title: 'Ode to Joy',
     people: ['Ludwig van Beethoven'],
     categories: ['classico'],
     level: 'facil',
     teaches: 'Mão parada nas cinco notas, ler na clave de sol, tempo constante.',
     why: 'É onde você já está. Melodia que todo mundo conhece.',
     courseSong: 'u01-ode-8',
-    aliases: ['ode to joy', 'ode an die freude', 'hino a alegria'],
+    aliases: ['ode a alegria', 'ode an die freude', 'hino a alegria'],
   },
   {
     id: 'let-it-be',
@@ -67,13 +67,13 @@ export const PATH_SONGS: PathSong[] = [
   {
     id: 'sorriso',
     phase: 2,
-    title: 'Sorriso Resplandecente',
+    title: 'DAN DAN Kokoro Hikareteku',
     people: ['Field of View'],
     categories: ['filmes'],
     level: 'facil',
     teaches: 'Síncopa (nota que entra antes do tempo), mudar a mão de posição, ritmo mais rápido.',
     why: 'A sua música. Primeiro um arranjo fácil; na fase 4, o arranjo completo.',
-    aliases: ['dan dan kokoro hikareteku', 'dan dan', 'dragon ball gt'],
+    aliases: ['sorriso resplandecente', 'dan dan', 'dragon ball gt'],
   },
   {
     id: 'interstellar',
@@ -89,7 +89,7 @@ export const PATH_SONGS: PathSong[] = [
   {
     id: 'gymnopedie',
     phase: 3,
-    title: 'Gymnopédie nº 1',
+    title: 'Gymnopédie No. 1',
     people: ['Erik Satie'],
     categories: ['classico'],
     level: 'intermediario',
@@ -97,7 +97,7 @@ export const PATH_SONGS: PathSong[] = [
     why: 'Lenta e fácil de ler, mas pede controle. A primeira peça clássica de verdade.',
     file: { path: '/library/gymnopedie-1.mxl', name: 'gymnopedie-1.mxl', source: 'Edição Mutopia Project, domínio público' },
     bpm: 66,
-    aliases: ['gymnopedie 1', 'gymnopedie no 1', 'gymnopedie n 1'],
+    aliases: ['gymnopedie 1', 'gymnopedie no 1', 'gymnopedie n 1', 'gymnopedie no. 1'],
   },
   {
     id: 'comptine',
@@ -136,13 +136,13 @@ export const PATH_SONGS: PathSong[] = [
   {
     id: 'moonlight',
     phase: 4,
-    title: 'Sonata ao Luar, 1º movimento',
+    title: 'Moonlight Sonata, 1º movimento',
     people: ['Ludwig van Beethoven'],
     categories: ['classico'],
     level: 'intermediario',
     teaches: 'Tercinas contínuas na direita com a melodia cantada pelo mínimo por cima, oitavas graves, pedal a cada acorde.',
     why: 'A que você mais quer. Lenta: o desafio não é velocidade, é som.',
-    file: { path: '/library/sonata-ao-luar-1.mxl', name: 'sonata-ao-luar-1.mxl', source: 'Edição DCML (EPFL), CC BY-NC-SA 4.0' },
+    file: { path: '/library/moonlight-sonata-1.mxl', name: 'moonlight-sonata-1.mxl', source: 'Edição DCML (EPFL), CC BY-NC-SA 4.0' },
     bpm: 108,
     aliases: ['moonlight sonata', 'sonata ao luar', 'mondscheinsonate', 'sonata 14'],
   },
@@ -160,6 +160,14 @@ export const PATH_SONGS: PathSong[] = [
     aliases: ['clair de lune', 'suite bergamasque'],
   },
 ];
+
+/** Títulos antigos (traduzidos) de músicas que já entraram no repertório pelo caminho: viram o original. */
+export const OLD_PATH_TITLES: Record<string, string[]> = {
+  ode: ['Ode à Alegria'],
+  sorriso: ['Sorriso Resplandecente'],
+  gymnopedie: ['Gymnopédie nº 1'],
+  moonlight: ['Sonata ao Luar, 1º movimento'],
+};
 
 export type PathState = 'aprendida' | 'aprendendo' | 'meta' | 'fora';
 
