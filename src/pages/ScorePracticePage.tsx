@@ -10,7 +10,8 @@ import { OpenSheetMusicDisplay, type Note } from 'opensheetmusicdisplay';
 import { db } from '../db/db';
 import type { SongSpec } from '../course/types';
 import { songXml } from '../course/song';
-import { addScoreFingerings } from '../score/fingering';
+import { addScoreFingerings, stepFingers } from '../score/fingering';
+import { logTake } from '../analysis/takesRepo';
 import { useRecorder, type Take as RecTake } from '../recording/useRecorder';
 import { saveRecording } from '../recording/repo';
 import { timingStats } from '../recording/take';
@@ -339,6 +340,10 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   const trackRef = useRef<ScheduledTrack | null>(null);
   const planRef = useRef<TimedPlan | null>(null);
   const eventsRef = useRef<PlayedEvent[]>([]);
+  // Dedo sugerido de cada nota, para o registro da passada (o que você trocou, com qual dedo).
+  const fingerMap = useMemo(() => (loaded ? stepFingers(loaded.steps, loaded.staffCount) : null), [loaded]);
+  const fingerMapRef = useRef(fingerMap);
+  fingerMapRef.current = fingerMap;
   const recorder = useRecorder();
   const recRef = useRef(recorder);
   recRef.current = recorder;
@@ -420,6 +425,21 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
         }
         const r = judgeExpected(plan.expected, eventsRef.current, windowsFor(1), reach);
         setLastTake(recRef.current.stop());
+        void logTake({
+          kind: 'musica',
+          sourceId: loaded.runId,
+          title: loaded.title,
+          bpm,
+          target: loaded.song?.bpm ?? loaded.ideal ?? undefined,
+          hand,
+          from: range.from,
+          to: range.to,
+          accuracy: r.accuracy,
+          expected: plan.expected.map((e) => ({ midi: e.midi, t: e.t, measure: e.measure, ...fingerMapRef.current?.get(`${e.step}:${e.midi}`) })),
+          played: eventsRef.current,
+          judged: r.notes,
+          reachMs: reach,
+        });
         const weak = weakestRange(measureAccuracy(plan, r.notes.map((n) => n?.grade)));
         setResult({ r, weak, plan });
         setTake('done');

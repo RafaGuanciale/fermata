@@ -193,6 +193,37 @@ export interface Recording extends Synced {
   hand?: string;
 }
 
+/**
+ * Uma passada registrada nota a nota (Tocar junto, exercícios com tempo, arcade): só os erros e alguns totais
+ * (src/analysis/takeLog.ts). É o material da análise semanal.
+ */
+export interface TakeLog extends Synced {
+  id: string;
+  at: number;
+  day: string;
+  kind: 'musica' | 'exercicio' | 'arcade';
+  /** mesmo id dos runs da música ou do exercício */
+  sourceId: string;
+  title: string;
+  /** n-ésima passada desta música ou exercício */
+  n: number;
+  bpm: number;
+  target?: number;
+  hand?: string;
+  from?: number;
+  to?: number;
+  accuracy: number;
+  /** notas que contavam */
+  total: number;
+  /** erros compactados (packErrors) */
+  errors: number[];
+  /** notas esperadas por dedo sugerido: direita 1–5, esquerda 1–5 */
+  fingers: number[];
+  extras: number;
+  meanDelta: number | null;
+  drift: number | null;
+}
+
 /** Fila do que mudou neste aparelho e ainda não subiu. */
 export interface OutboxEntry {
   /** `${table}:${uid}` */
@@ -216,6 +247,7 @@ class FermataDB extends Dexie {
   lessons!: Table<LessonProgress, string>;
   arcadeMidi!: Table<ArcadeMidi, string>;
   recordings!: Table<Recording, string>;
+  takes!: Table<TakeLog, string>;
 
   constructor() {
     super('fermata');
@@ -274,6 +306,9 @@ class FermataDB extends Dexie {
       });
     this.version(9).stores({
       recordings: 'id, createdAt, sourceId',
+    });
+    this.version(10).stores({
+      takes: 'id, at, day, sourceId',
     });
   }
 }

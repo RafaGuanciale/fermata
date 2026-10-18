@@ -1,91 +1,99 @@
-// Progresso: responde quatro perguntas — você está tocando com constância? está evoluindo?
-// onde trava? o que já conquistou? Os números vêm de src/progress/stats.ts (puro e testado).
+// Progresso: responde "estou melhorando, e onde eu travo?". Hoje é o "o que eu faço agora".
+// No topo, a análise da semana (IA); depois constância, evolução por habilidade e onde você trava.
+// Os números vêm de src/progress/stats.ts e skills.ts (puros e testados).
 
 import { Link, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Piece } from '../db/db';
 import { DAY } from '../db/stats';
 import { noteLabel } from '../music/notes';
-import { formatPercent, formatSeconds } from '../format';
+import { formatPercent } from '../format';
 import StatTile from '../components/StatTile';
+import { CheckIcon, CrossIcon } from '../components/Icons';
 import WeeklyGoal from '../progress/WeeklyGoal';
+import WeeklyInsight from '../insight/WeeklyInsight';
 import { dayKey } from '../training/progress';
-import { PLAN, UNITS } from '../course';
-import { finalPassedAt, isPassed, lessonKey, unitComplete, unitUnlocked } from '../course/progress';
+import { findSong } from '../course';
 import { ALL_TRACKS, bestTechBpm, techRunId, techStatus } from '../course/track';
-import { useCourseRows } from '../course/useCourseRows';
 import { useRuns } from '../training/runs';
 import ReviewSpots from '../progress/ReviewSpots';
 import { weakSpots } from '../progress/weakSpots';
-import { bestByTreino, freeMinutes, heatLevel, heatmap, milestones, minutesByDay, streak, weakNotes, weeklyReading, weeklyTotals, type HeatCell, type WeekReading, type WeekTotal } from '../progress/stats';
+import { bestByTreino, freeMinutes, heatLevel, heatmap, minutesByDay, streak, weakNotes, type HeatCell } from '../progress/stats';
+import { earSummary, readingSummary, songsProgress, trend, weakReading } from '../progress/skills';
 
-const shortDate = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short' });
-const dayMonth = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
 const fullDate = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 const WEEKDAYS = ['seg', '', 'qua', '', 'sex', '', ''];
 
 const minutesText = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${String(Math.round(m % 60)).padStart(2, '0')} min` : `${Math.round(m)} min`);
+const seconds = (ms: number) => `${(ms / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} s`;
+
+/** "melhor" / "pior" com ícone e palavra (nunca só cor). */
+function Trend({ t, before }: { t: ReturnType<typeof trend>; before: string }) {
+  if (!t) return null;
+  return (
+    <span className={'skill__trend' + (t === 'melhor' ? ' skill__trend-up' : t === 'pior' ? ' skill__trend-down' : '')}>
+      {t === 'melhor' && <CheckIcon className="skill__trendIcon" />}
+      {t === 'pior' && <CrossIcon className="skill__trendIcon" />}
+      {t === 'igual' ? 'igual' : t} que nas 4 semanas antes ({before})
+    </span>
+  );
+}
 
 export default function ProgressPage() {
   const location = useLocation();
   const now = Date.now();
   const runs = useRuns();
-  const rows = useCourseRows();
   const data = useLiveQuery(async () => {
     const since = Date.now() - 120 * DAY;
-    const [practice, sessions, attempts, pieces] = await Promise.all([
+    const [practice, sessions, attempts, pieces, notes] = await Promise.all([
       db.practice.toArray(),
       db.sessions.where('startedAt').above(since).toArray(),
       db.attempts.where('at').above(since).toArray(),
       db.pieces.toArray(),
+      db.notes.toArray(),
     ]);
-    return { practice, sessions, attempts, pieces };
+    return { practice, sessions, attempts, pieces, notes };
   }, []);
 
-  if (!data || !runs || !rows) return null;
+  if (!data || !runs) return null;
 
   const byDay = minutesByDay(data.practice, data.sessions);
-  const weeks = weeklyTotals(byDay, now, 8);
   const days = streak(byDay, now);
   const playedToday = (byDay.get(dayKey(now)) ?? 0) > 0;
   const totalMinutes = [...byDay.values()].reduce((a, b) => a + b, 0);
+  const free = freeMinutes(data.practice);
   const cells = heatmap(byDay, now, 16);
-  const reading = weeklyReading(data.attempts, data.sessions, now, 8);
-  const lastReading = [...reading].reverse().find((w) => w.findMs !== null) ?? null;
-  const recentAttempts = data.attempts.filter((a) => a.at >= now - 30 * DAY);
-  const weak = weakNotes(recentAttempts);
+  const weak = weakReading(data.notes, weakNotes(data.attempts.filter((a) => a.at >= now - 30 * DAY)), now);
   const best = bestByTreino(runs);
+  const reading = readingSummary(runs, now);
+  const ear = earSummary(runs, now);
 
-  // Técnica do Treino: cada item com registro, o melhor BPM e se está parado há mais de 7 dias.
+  // Técnica: quantos exercícios começados já estão no alvo, e os que estão subindo.
   const techItems = ALL_TRACKS.flatMap((t) => t.technique.map((item) => ({ item, unit: t.unit })));
-  const techMeters = techItems.filter(({ item }) => best.has(techRunId(item))).map(({ item, unit }) => ({ item, unit, best: bestTechBpm(item, runs), status: techStatus(item, runs), last: best.get(techRunId(item))!.last }));
-  const stale = techMeters.filter((t) => t.status !== 'no alvo' && now - t.last > 7 * DAY);
+  const techMeters = techItems
+    .filter(({ item }) => best.has(techRunId(item)))
+    .map(({ item, unit }) => ({ item, unit, best: bestTechBpm(item, runs), status: techStatus(item, runs), last: best.get(techRunId(item))!.last }));
+  const onTarget = techMeters.filter((t) => t.status === 'no alvo').length;
+  const climbing = techMeters.filter((t) => t.status !== 'no alvo').sort((a, b) => b.last - a.last);
+  const stale = climbing.filter((t) => now - t.last > 7 * DAY);
 
-  // Curso: estado de cada unidade e os marcos.
-  const passedAts = [...rows.values()].flatMap((r) => (r.passedAt ? [r.passedAt] : []));
-  const courseMarks = [
-    { title: 'Primeira lição do curso concluída', at: passedAts.length ? Math.min(...passedAts) : null },
-    ...UNITS.slice(0, 3).map((u) => {
-      const lessonsAt = u.lessons.map((l) => rows.get(lessonKey(u, l))?.passedAt ?? null);
-      const fin = finalPassedAt(u, runs);
-      const done = unitComplete(u, rows, runs) && fin !== null && lessonsAt.every((x) => x !== null);
-      return { title: `Unidade ${u.n} concluída`, at: done ? Math.max(fin!, ...(lessonsAt as number[])) : null };
-    }),
-    { title: 'Primeira técnica no andamento alvo', at: (() => {
-      const hits = techItems.flatMap(({ item }) => runs.filter((r) => r.treinoId === techRunId(item) && r.clean && (r.bpm ?? 0) >= item.target).map((r) => r.at));
-      return hits.length ? Math.min(...hits) : null;
-    })() },
-  ];
-
+  // Músicas: do repertório e do curso.
   const pieceByKey = new Map<string, Piece>();
   for (const p of data.pieces) pieceByKey.set(`peca-${p.uid ?? p.id}`, p);
-  const songs = [...best.entries()].filter(([id]) => id.startsWith('peca-') && pieceByKey.has(id)).map(([id, b]) => ({ piece: pieceByKey.get(id)!, ...b })).sort((a, b) => b.last - a.last);
+  const songs = songsProgress(runs, now)
+    .map((s) => {
+      if (s.id.startsWith('curso-')) {
+        const song = findSong(s.id.slice(6));
+        return song ? { ...s, title: song.title, target: song.bpm, to: `/curso/musica/${song.id}` } : null;
+      }
+      const piece = pieceByKey.get(s.id);
+      return piece ? { ...s, title: piece.title, target: piece.bpm ?? null, to: `/peca/${piece.id}/estudar` } : null;
+    })
+    .filter((s): s is NonNullable<typeof s> => !!s)
+    .slice(0, 6);
   const songWeak = weakSpots(runs);
 
-  const learnedAt = data.pieces.filter((p) => p.status === 'learned' || p.status === 'repertoire').map((p) => p.updatedAt);
-  const marks = milestones(runs, byDay, learnedAt, courseMarks).sort((a, b) => (a.at === null ? 1 : 0) - (b.at === null ? 1 : 0) || (a.at ?? 0) - (b.at ?? 0));
-
-  const empty = totalMinutes === 0 && runs.length === 0 && data.attempts.length === 0;
+  const empty = totalMinutes === 0 && runs.length === 0 && data.attempts.length === 0 && data.notes.length === 0;
 
   return (
     <>
@@ -101,70 +109,113 @@ export default function ProgressPage() {
         </section>
       ) : (
         <div className="progress">
+          <WeeklyInsight />
+
           <section className="page__section" aria-labelledby="pg-const">
             <h2 className="page__sectionTitle" id="pg-const">Constância</h2>
             <div className="progress__tiles">
               <WeeklyGoal />
               <StatTile label="Dias seguidos" value={String(days)} unit={days === 1 ? 'dia' : 'dias'} delta={playedToday ? 'você já tocou hoje' : days ? 'toque hoje para manter' : 'comece hoje'} />
-              <StatTile label="Total no piano" value={minutesText(totalMinutes)} delta={`${[...byDay.values()].filter((m) => m > 0).length} dias com prática${freeMinutes(data.practice) ? `, ${minutesText(freeMinutes(data.practice))} tocando livre` : ''}`} />
+              <StatTile label="Total no piano" value={minutesText(totalMinutes)} delta={`${[...byDay.values()].filter((m) => m > 0).length} dias com prática${free ? `, ${minutesText(free)} tocando livre` : ''}`} />
             </div>
-            <div className="progress__charts">
-              <figure className="progress__figure">
-                <figcaption className="progress__caption">Minutos por dia, últimas 16 semanas</figcaption>
-                <Heatmap cols={cells} />
-              </figure>
-              <figure className="progress__figure">
-                <figcaption className="progress__caption">Minutos por semana</figcaption>
-                <WeekBars weeks={weeks} />
-              </figure>
-            </div>
+            <figure className="progress__figure progress__figure-wide">
+              <figcaption className="progress__caption">
+                Dias com piano, últimas 16 semanas
+                <span className="progress__hint">quanto mais escuro, mais minutos naquele dia</span>
+              </figcaption>
+              <Heatmap cols={cells} />
+            </figure>
           </section>
 
           <section className="page__section" aria-labelledby="pg-evol">
             <h2 className="page__sectionTitle" id="pg-evol">Evolução</h2>
-            <div className="progress__charts">
-              <figure className="progress__figure">
-                <figcaption className="progress__caption">
-                  Tempo para achar a nota na leitura
-                  <span className="progress__hint">menor é melhor{lastReading?.firstTry != null ? ` · acerto de primeira na última semana: ${formatPercent(lastReading.firstTry)}` : ''}</span>
-                </figcaption>
-                <ReadingLine weeks={reading} />
-              </figure>
-              <div className="progress__figure">
-                <h3 className="progress__caption">Melhor andamento limpo</h3>
-                {techMeters.length === 0 && songs.length === 0 ? (
-                  <p className="progress__muted">Faça um treino no tempo ou toque junto uma música para ver o andamento subir.</p>
+            <p className="page__lead">Cada cartão responde uma pergunta e compara as últimas 4 semanas com as 4 anteriores.</p>
+            <div className="skills">
+              <article className="skill">
+                <h3 className="skill__name">Leitura</h3>
+                <p className="skill__question">Quanto tempo você leva para tocar a nota que aparece na pauta?</p>
+                {reading.now ? (
+                  <>
+                    <p className="skill__value">{seconds(reading.now.ms)}</p>
+                    <p className="skill__detail">Acerto de primeira: {formatPercent(reading.now.firstTry)} · {reading.now.rounds} {reading.now.rounds === 1 ? 'rodada' : 'rodadas'}</p>
+                    <Trend t={trend(reading.now.ms, reading.before?.ms ?? null, true)} before={reading.before ? seconds(reading.before.ms) : ''} />
+                  </>
                 ) : (
-                  <ul className="progress__meters">
-                    {techMeters.map(({ item, unit, best: b, status }) => (
-                      <li key={item.id} className="progress__meter">
-                        <span className="progress__meterName">{item.title}</span>
-                        <span className="progress__meterValue">{b ? `${b} de ${item.target} BPM` : `sem passada boa · alvo ${item.target} BPM`} · unidade {unit}</span>
-                        <span className="progress__bar" role="img" aria-label={`${b ?? 0} de ${item.target} BPM`}>
-                          <span className="progress__barFill" style={{ width: `${Math.min(100, ((b ?? 0) / item.target) * 100)}%` }} />
+                  <p className="skill__empty">
+                    Sem leitura nas últimas 4 semanas. <Link to="/treino/notas" state={{ background: location }}>Fazer uma leitura de notas</Link>
+                  </p>
+                )}
+              </article>
+
+              <article className="skill">
+                <h3 className="skill__name">Técnica</h3>
+                <p className="skill__question">Quantos exercícios de técnica já estão no andamento alvo?</p>
+                {techMeters.length ? (
+                  <>
+                    <p className="skill__value">
+                      {onTarget} <span className="skill__unit">de {techMeters.length}</span>
+                    </p>
+                    {climbing.length > 0 && (
+                      <ul className="progress__meters">
+                        {climbing.slice(0, 4).map(({ item, unit, best: b }) => (
+                          <li key={item.id} className="progress__meter">
+                            <span className="progress__meterName">{item.title}</span>
+                            <span className="progress__meterValue">{b ? `${b} de ${item.target} BPM` : `começa em ${item.from} BPM, alvo ${item.target} BPM`} · unidade {unit}</span>
+                            <span className="progress__bar" role="img" aria-label={`${b ?? 0} de ${item.target} BPM`}>
+                              <span className="progress__barFill" style={{ width: `${Math.min(100, ((b ?? 0) / item.target) * 100)}%` }} />
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {climbing.length === 0 && <p className="skill__detail">Todos os exercícios começados estão no alvo.</p>}
+                  </>
+                ) : (
+                  <p className="skill__empty">
+                    Nenhum exercício de técnica ainda. <Link to="/treino">Ir para o treino</Link>
+                  </p>
+                )}
+              </article>
+
+              <article className="skill">
+                <h3 className="skill__name">Ouvido</h3>
+                <p className="skill__question">Qual a maior frase que você repete de ouvido?</p>
+                {ear.now ? (
+                  <>
+                    <p className="skill__value">
+                      {ear.now} <span className="skill__unit">notas</span>
+                    </p>
+                    <Trend t={trend(ear.now, ear.before)} before={ear.before ? `${ear.before} notas` : ''} />
+                  </>
+                ) : (
+                  <p className="skill__empty">
+                    Ainda sem medida. <Link to="/treino/eco" state={{ background: location }}>Ouvir e tocar de volta</Link>
+                  </p>
+                )}
+              </article>
+
+              <article className="skill skill-wide">
+                <h3 className="skill__name">Músicas</h3>
+                <p className="skill__question">Como estão as músicas que você toca junto?</p>
+                {songs.length ? (
+                  <ul className="skill__songs">
+                    {songs.map((s) => (
+                      <li key={s.id} className="skill__song">
+                        <Link className="skill__songTitle" to={s.to} state={{ background: location }}>{s.title}</Link>
+                        <span className="skill__songMeta">
+                          {s.accuracy.now !== null ? `acerto médio ${formatPercent(s.accuracy.now)}` : `melhor acerto ${formatPercent(s.bestAccuracy)}`}
+                          {s.bestClean ? ` · limpa até ${s.bestClean}${s.target ? ` de ${s.target}` : ''} BPM` : ''}
+                          {s.week ? ` · ${s.week} ${s.week === 1 ? 'passada' : 'passadas'} nesta semana` : ''}
                         </span>
-                        <span className="progress__meterStatus">{status === 'no alvo' ? 'No alvo' : 'Subindo'}</span>
+                        <Trend t={trend(s.accuracy.now, s.accuracy.before)} before={s.accuracy.before !== null ? formatPercent(s.accuracy.before) : ''} />
                       </li>
                     ))}
-                    {songs.map((s) => {
-                      const target = s.piece.bpm ?? null;
-                      const value = s.bestClean ?? 0;
-                      return (
-                        <li key={s.piece.id} className="progress__meter">
-                          <span className="progress__meterName">{s.piece.title}</span>
-                          <span className="progress__meterValue">
-                            {s.bestClean ? `${s.bestClean}${target ? ` de ${target}` : ''} BPM` : 'sem passada limpa'} · melhor acerto {formatPercent(s.bestAccuracy)}
-                          </span>
-                          <span className="progress__bar" role="img" aria-label={`acerto ${formatPercent(s.bestAccuracy)}`}>
-                            <span className="progress__barFill" style={{ width: `${target && value ? Math.min(100, (value / target) * 100) : s.bestAccuracy * 100}%` }} />
-                          </span>
-                          <span className="progress__meterStatus">Música</span>
-                        </li>
-                      );
-                    })}
                   </ul>
+                ) : (
+                  <p className="skill__empty">Toque uma música no "Tocar junto" para ver o acerto e o andamento aqui.</p>
                 )}
-              </div>
+              </article>
+
             </div>
           </section>
 
@@ -174,10 +225,17 @@ export default function ProgressPage() {
               <p className="progress__muted">Nada travando agora. Quando uma nota, um treino ou um trecho de música começar a falhar, ele aparece aqui.</p>
             ) : (
               <div className="progress__stuck progress__stuck-auto">
+                {songWeak.length > 0 && (
+                  <div className="progress__card">
+                    <h3 className="progress__cardTitle">Trechos difíceis das músicas</h3>
+                    <p className="progress__muted">Cada um volta para revisão em 1, 3, 7 e 14 dias, até sair bem.</p>
+                    <ReviewSpots mode="todos" />
+                  </div>
+                )}
                 {weak.length > 0 && (
                   <div className="progress__card">
-                    <h3 className="progress__cardTitle">Notas que você mais erra</h3>
-                    <p className="progress__muted">Últimos 30 dias de leitura.</p>
+                    <h3 className="progress__cardTitle">Notas que você mais erra na leitura</h3>
+                    <p className="progress__muted">Últimos 30 dias.</p>
                     <ul className="progress__chips">
                       {weak.map((w) => (
                         <li key={w.midi} className="progress__chip">
@@ -185,7 +243,7 @@ export default function ProgressPage() {
                         </li>
                       ))}
                     </ul>
-                    <Link className="page__link" to="/treino/sessao" state={{ background: location }}>Treinar leitura</Link>
+                    <Link className="page__link" to="/treino/notas" state={{ background: location }}>Treinar leitura</Link>
                   </div>
                 )}
                 {stale.length > 0 && (
@@ -201,57 +259,8 @@ export default function ProgressPage() {
                     </ul>
                   </div>
                 )}
-                {songWeak.length > 0 && (
-                  <div className="progress__card">
-                    <h3 className="progress__cardTitle">Trechos difíceis das músicas</h3>
-                    <p className="progress__muted">Cada um volta para revisão em 1, 3, 7 e 14 dias, até sair bem.</p>
-                    <ReviewSpots mode="todos" />
-                  </div>
-                )}
               </div>
             )}
-          </section>
-
-          <section className="page__section" aria-labelledby="pg-conq">
-            <h2 className="page__sectionTitle" id="pg-conq">Conquistas</h2>
-            <div className="progress__stuck">
-              <div className="progress__card">
-                <h3 className="progress__cardTitle">Unidades do curso</h3>
-                <ol className="progress__phases">
-                  {PLAN.map((p) => {
-                    const i = UNITS.findIndex((u) => u.n === p.n);
-                    const unit = i >= 0 ? UNITS[i] : null;
-                    const open = unit ? unitUnlocked(UNITS, i, rows, runs) : false;
-                    const complete = unit ? unitComplete(unit, rows, runs) : false;
-                    const passed = unit ? unit.lessons.filter((l) => isPassed(rows.get(lessonKey(unit, l)))).length : 0;
-                    const current = open && !complete;
-                    const label = !unit ? 'Em construção' : complete ? 'Concluída' : open ? `${passed} de ${unit.lessons.length} lições` : 'Bloqueada';
-                    return (
-                      <li key={p.n} className={`progress__phase${complete ? ' progress__phase-done' : current ? ' progress__phase-current' : ''}`}>
-                        <span className="progress__phaseN">{p.n}</span>
-                        <span className="progress__phaseText">
-                          {unit ? <Link className="progress__phaseTitle" to={`/estudo/unidade/${p.n}`}>{p.title}</Link> : <span className="progress__phaseTitle">{p.title}</span>}
-                          <span className="progress__muted">{label}</span>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </div>
-              <div className="progress__card">
-                <h3 className="progress__cardTitle">Marcos</h3>
-                <Link className="page__link" to="/conta">Ver suas maestrias e emblemas</Link>
-                <ul className="progress__marks">
-                  {marks.map((m) => (
-                    <li key={m.title} className={`progress__mark${m.at ? ' progress__mark-done' : ''}`}>
-                      <span className="progress__markDot" aria-hidden="true" />
-                      <span className="progress__markTitle">{m.title}</span>
-                      <span className="progress__muted">{m.at ? shortDate.format(m.at) : 'ainda não'}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
           </section>
         </div>
       )}
@@ -287,77 +296,6 @@ function Heatmap({ cols }: { cols: HeatCell[][] }) {
           ),
         ),
       )}
-    </svg>
-  );
-}
-
-function WeekBars({ weeks }: { weeks: WeekTotal[] }) {
-  const W = 320;
-  const H = 150;
-  const base = H - 22;
-  const max = Math.max(30, ...weeks.map((w) => w.minutes));
-  const slot = W / weeks.length;
-  const bw = Math.min(22, slot * 0.5);
-  return (
-    <svg className="bars" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Minutos por semana">
-      <line className="chart__axis" x1={0} x2={W} y1={base} y2={base} />
-      {weeks.map((w, i) => {
-        const h = (w.minutes / max) * (base - 18);
-        const x = i * slot + (slot - bw) / 2;
-        const current = i === weeks.length - 1;
-        return (
-          <g key={w.start}>
-            <rect className="bars__hit" x={i * slot} y={0} width={slot} height={base}>
-              <title>{`Semana de ${shortDate.format(w.start)}: ${minutesText(w.minutes)} em ${w.days} ${w.days === 1 ? 'dia' : 'dias'}`}</title>
-            </rect>
-            {w.minutes > 0 && <path className={`bars__bar${current ? ' bars__bar-current' : ''}`} d={roundedTop(x, base, bw, Math.max(h, 3))} pointerEvents="none" />}
-            {(current || w.minutes === max) && w.minutes > 0 && (
-              <text className="chart__value" x={x + bw / 2} y={base - h - 5} textAnchor="middle">{Math.round(w.minutes)}</text>
-            )}
-            <text className="chart__tick" x={x + bw / 2} y={H - 6} textAnchor="middle">{dayMonth.format(w.start)}</text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-function roundedTop(x: number, base: number, w: number, h: number): string {
-  const r = Math.min(4, w / 2, h);
-  return `M${x},${base} V${base - h + r} Q${x},${base - h} ${x + r},${base - h} H${x + w - r} Q${x + w},${base - h} ${x + w},${base - h + r} V${base} Z`;
-}
-
-function ReadingLine({ weeks }: { weeks: WeekReading[] }) {
-  const pts = weeks.map((w, i) => ({ i, v: w.findMs, w })).filter((p): p is { i: number; v: number; w: WeekReading } => p.v !== null);
-  if (pts.length === 0) return <p className="progress__muted">Faça leituras no treino para ver este gráfico.</p>;
-  const W = 320;
-  const H = 150;
-  const base = H - 22;
-  const topY = 16;
-  const vals = pts.map((p) => p.v);
-  const max = Math.max(...vals) * 1.1;
-  const min = Math.max(0, Math.min(...vals) * 0.8);
-  const slot = W / weeks.length;
-  const x = (i: number) => i * slot + slot / 2;
-  const y = (v: number) => (max === min ? (base + topY) / 2 : topY + (1 - (v - min) / (max - min)) * (base - topY));
-  const line = pts.map((p) => `${x(p.i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
-  const last = pts[pts.length - 1];
-  return (
-    <svg className="line" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Tempo médio para achar a nota por semana">
-      <line className="chart__axis" x1={0} x2={W} y1={base} y2={base} />
-      {pts.length > 1 && <polyline className="line__path" points={line} />}
-      {pts.map((p) => (
-        <g key={p.i}>
-          <circle className="line__dot" cx={x(p.i)} cy={y(p.v)} r={4} />
-          <rect className="bars__hit" x={p.i * slot} y={0} width={slot} height={base}>
-            <title>{`Semana de ${shortDate.format(p.w.start)}: ${formatSeconds(p.v)}${p.w.firstTry != null ? `, ${formatPercent(p.w.firstTry)} de primeira` : ''}`}</title>
-          </rect>
-        </g>
-      ))}
-      <text className="chart__value" x={x(last.i)} y={y(last.v) - 9} textAnchor="middle">{formatSeconds(last.v)}</text>
-      {weeks.map((w, i) => (
-        <text key={w.start} className="chart__tick" x={x(i)} y={H - 6} textAnchor="middle">{dayMonth.format(w.start)}</text>
-      ))}
     </svg>
   );
 }

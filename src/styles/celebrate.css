@@ -256,3 +256,8 @@
   height: 18px;
   color: var(--hit);
 }
+
+.streakLine__link {
+  color: inherit;
+  font-weight: 600;
+}

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import Milestones from '../progress/Milestones';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { login, logout, takeSignOutReason, useAccount } from '../sync/account';
@@ -76,6 +77,8 @@ function SignedIn() {
       </header>
 
       <Profile account={account} />
+
+      <Milestones />
 
       <section className="page__section">
         <h2 className="page__sectionTitle">Sincronização</h2>

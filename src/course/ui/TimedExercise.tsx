@@ -5,7 +5,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PianoKeyboard, { type KeyMark } from '../../components/PianoKeyboard';
 import Staff, { type NoteState } from '../../components/Staff';
-import { timedFingers } from '../fingers';
+import { timedExpected, timedFingers } from '../fingers';
+import { logTake } from '../../analysis/takesRepo';
 import { PlayIcon } from '../../components/Icons';
 import { useElementWidth } from '../../hooks/useFullscreen';
 import { useNoteInput } from '../../input/useNoteInput';
@@ -246,6 +247,20 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: 
     setPhase('done');
     endedAt.current = performance.now();
     takeRef.current(s);
+    // Registro nota a nota (exercícios só de ritmo, em qualquer tecla, ficam de fora).
+    if (!task.events.some((e) => e.midi === null)) {
+      void logTake({
+        kind: 'exercicio',
+        sourceId: `ex:${ex.title}`,
+        title: ex.title,
+        bpm,
+        accuracy: r.accuracy,
+        expected: timedExpected(task, bpm),
+        played: events.map((e) => ({ midi: e.midi, t: e.t })),
+        judged: r.notes,
+        reachMs: Math.max(ex.window * 1.5, 150, 60000 / bpm / 2),
+      });
+    }
   }, [task, bpm, ex]);
 
   const stop = useCallback(() => {

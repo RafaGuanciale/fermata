@@ -1,10 +1,10 @@
 // Conversão entre o registro local (Dexie) e o que vai para a nuvem. Funções puras.
 // Ids numéricos são só deste aparelho; entre aparelhos as referências usam `uid`.
 
-export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice', 'notes', 'arcadeMidi', 'recordings'] as const;
+export const SYNC_TABLES = ['files', 'pieces', 'lessons', 'sessions', 'attempts', 'runs', 'practice', 'notes', 'arcadeMidi', 'recordings', 'takes'] as const;
 
 /** Tabelas cuja chave já é global (texto): o uid é a própria chave. */
-export const STRING_KEY_TABLES: readonly string[] = ['lessons', 'practice', 'notes', 'arcadeMidi', 'recordings'];
+export const STRING_KEY_TABLES: readonly string[] = ['lessons', 'practice', 'notes', 'arcadeMidi', 'recordings', 'takes'];
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
 export interface Change {
@@ -30,6 +30,7 @@ const LOCAL_ONLY: Record<SyncTable, string[]> = {
   // O MIDI vai como texto (base64) em `data64`; no aparelho fica em bytes.
   arcadeMidi: ['data'],
   recordings: [],
+  takes: [],
 };
 
 export interface Refs {

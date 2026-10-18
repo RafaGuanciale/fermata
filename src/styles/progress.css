@@ -398,3 +398,303 @@
   font-size: 13px;
   color: var(--text-muted);
 }
+
+.progress__figure-wide {
+  margin-top: var(--space-4);
+}
+
+.progress__figure-wide .heat {
+  max-width: 480px;
+}
+
+/* ---------- Evolução por habilidade ---------- */
+
+.skills {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.skill {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  min-width: 0;
+}
+
+.skill-wide {
+  grid-column: 1 / -1;
+}
+
+.skill__name {
+  margin: 0;
+  font: 600 12px/16px var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.skill__question {
+  margin: 0;
+  font: 500 16px/23px var(--font-body);
+}
+
+.skill__value {
+  margin: var(--space-1) 0 0;
+  font: 500 34px/1.1 var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.skill__unit {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.skill__detail,
+.skill__empty {
+  margin: 0;
+  font: 500 13px/19px var(--font-body);
+  color: var(--text-muted);
+}
+
+.skill__empty a {
+  color: var(--text);
+}
+
+.skill__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 500 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.skill__trend-up {
+  color: var(--hit);
+}
+
+.skill__trend-down {
+  color: var(--color-blush);
+}
+
+.skill__trendIcon {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.skill__songs {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill__song {
+  display: grid;
+  gap: 2px;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+.skill__song:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.skill__songTitle {
+  font: 600 15px/21px var(--font-body);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.skill__songTitle:hover {
+  text-decoration: underline;
+}
+
+.skill__songMeta {
+  font: 500 13px/19px var(--font-body);
+  color: var(--text-muted);
+}
+
+/* ---------- Análise da semana (IA) ---------- */
+
+.insight {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border-radius: var(--radius-l);
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-petrol) 22%, var(--surface)), var(--surface));
+}
+
+.insight-quiet,
+.insight-loading {
+  padding: var(--space-4) var(--space-6);
+  background: var(--surface);
+}
+
+.insight .page__eyebrow {
+  margin: 0;
+}
+
+.insight__title {
+  margin: 0;
+  font: 500 28px/34px var(--font-display);
+}
+
+.insight__summary {
+  margin: 0;
+  max-width: 760px;
+  font: 500 16px/25px var(--font-body);
+}
+
+.insight__muted {
+  margin: 0;
+  font: 500 14px/21px var(--font-body);
+  color: var(--text-muted);
+}
+
+.insight__cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.insight__head {
+  margin: var(--space-2) 0 var(--space-1);
+  font: 600 13px/18px var(--font-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.insight__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 18px;
+  font: 500 14px/21px var(--font-body);
+}
+
+.insight__actions {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.insight__action {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  border: 1px solid var(--line);
+}
+
+.insight__actionN {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-champagne);
+  color: var(--color-ebony);
+  font: 700 14px/1 var(--font-body);
+}
+
+.insight__actionBody {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.insight__actionTitle {
+  font: 600 15px/21px var(--font-body);
+}
+
+.insight__actionHow {
+  font: 500 14px/21px var(--font-body);
+}
+
+.insight__actionMeta {
+  font: 500 13px/19px var(--font-body);
+  color: var(--text-muted);
+}
+
+.insight__actionMeta a {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.insight__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font: 500 12px/17px var(--font-body);
+  color: var(--text-muted);
+}
+
+.insight__noteIcon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  margin-top: 2px;
+}
+
+/* Foco da semana, no Hoje */
+.insightFocus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font: 500 14px/21px var(--font-body);
+}
+
+.insightFocus__label {
+  font: 600 12px/16px var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.insightFocus__link {
+  color: var(--text);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .skills {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 719px) {
+  .skills,
+  .insight__cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .insight {
+    padding: var(--space-4);
+  }
+
+  .insight__title {
+    font-size: 24px;
+    line-height: 30px;
+  }
+}

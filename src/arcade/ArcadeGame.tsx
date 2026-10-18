@@ -20,6 +20,7 @@ import {
   DIFFICULTIES, WINDOWS_BY, chartFingers, chartRange, comboMilestone, expire, hit, isHold, multiplier, multiplierFill, release, scaleChart, startState,
   summarize, sustain, waitingAt, type ArcadeGrade, type ArcadeState, type ArcadeSummary, type ArcadeTune, type ChartNote,
 } from './arcade';
+import { logTake } from '../analysis/takesRepo';
 import { SPEEDS, arcadeRunId, readArcadeSettings, saveArcadeSettings, type ArcadeSettings as Settings } from './settings';
 
 /** Tempo que a nota leva do alto da tela até a tecla. */
@@ -238,10 +239,25 @@ export default function ArcadeGame({ tune, onClose, extraMenu }: { tune: ArcadeT
     const isRecord = bestRef.current === null || s.score > bestRef.current;
     setRecord(isRecord && s.score > 0);
     void saveRun({ treinoId: arcadeRunId(tune.id, settingsRef.current.diff), kind: 'timed', accuracy: s.hits, score: s.score, stars: s.stars, passed: s.stars > 0, bpm: baseBpm ? Math.round(baseBpm * speed) : 0 });
+    // Registro nota a nota: no arcade só se sabe se a nota foi acertada (sem trocas nem cedo/tarde).
+    const results = stateRef.current.results;
+    const barMs = (60000 / (tune.bpm || 100)) * tune.beatsPerBar;
+    const fingerList = fingersRef.current;
+    void logTake({
+      kind: 'arcade',
+      sourceId: arcadeRunId(tune.id, settingsRef.current.diff),
+      title: `${tune.title} (arcade)`,
+      bpm: baseBpm ? Math.round(baseBpm * speed) : 0,
+      accuracy: s.hits,
+      expected: chart.map((n, i) => ({ midi: n.midi, t: n.t, measure: Math.floor((n.t * speed) / barMs) + 1, finger: fingerList[i], hand: n.hand })),
+      played: [],
+      judged: results.map((g) => (g === null ? null : g === 'perdeu' ? { grade: 'miss' as const, delta: null } : { grade: 'good' as const, delta: 0 })),
+      reachMs: 0,
+    });
     if (s.stars >= 2) playReward(s.stars === 3 ? 'great' : 'pass');
     endedAt.current = performance.now();
     setPhase('done');
-  }, [tune, speed, baseBpm]);
+  }, [tune, speed, baseBpm, chart]);
 
   const stop = useCallback(() => {
     trackRef.current?.cancel();

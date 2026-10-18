@@ -66,3 +66,24 @@ export function addScoreFingerings(osmd: OpenSheetMusicDisplay): number {
   });
   return added;
 }
+
+/**
+ * Dedo sugerido e mão de cada nota dos passos da partitura (para o registro da passada), pela chave `passo:midi`.
+ * Usa o dedilhado automático, mesmo quando o arquivo traz o de quem escreveu.
+ */
+export function stepFingers(steps: { beat: number; notes: { midi: number; staff: number; beats?: number; tied?: boolean }[] }[], staffCount: number): Map<string, { finger: Finger | null; hand: Hand }> {
+  const per: { key: string; fn: FingerNote }[][] = Array.from({ length: Math.max(1, staffCount) }, () => []);
+  steps.forEach((s, i) => {
+    for (const n of s.notes) {
+      if (n.tied) continue;
+      per[Math.min(n.staff, per.length - 1)].push({ key: `${i}:${n.midi}`, fn: { midi: n.midi, t: s.beat * 500, dur: (n.beats ?? 1) * 500 } });
+    }
+  });
+  const out = new Map<string, { finger: Finger | null; hand: Hand }>();
+  per.forEach((list, staff) => {
+    const hand = staffHand(staff, per.length, list.map((x) => x.fn));
+    const f = list.length ? fingerNotes(list.map((x) => x.fn), hand) : [];
+    list.forEach((x, k) => out.set(x.key, { finger: f[k], hand }));
+  });
+  return out;
+}

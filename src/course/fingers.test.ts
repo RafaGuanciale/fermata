@@ -19,3 +19,13 @@ describe('dedos na pauta dos exercícios', () => {
     expect(timedFingers({ display: scale, clef: 'treble', bpm: 80, transpose: 5 }).map((f) => f![0]).join('')).toBe('12341234');
   });
 });
+
+describe('notas esperadas para o registro', async () => {
+  const { timedExpected } = await import('./fingers');
+  it('compasso, dedo e mão de cada nota', () => {
+    const events = [60, 62, 64, 65, 67].map((m, i) => ({ midi: m, beat: i, beats: 1 }));
+    const e = timedExpected({ events, clef: 'treble', beatsPerBar: 4 }, 60);
+    expect(e.map((x) => [x.measure, x.finger, x.hand])).toEqual([[1, 1, 'r'], [1, 2, 'r'], [1, 3, 'r'], [1, 4, 'r'], [2, 5, 'r']]);
+    expect(e[4].t).toBe(4000);
+  });
+});
