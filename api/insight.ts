@@ -28,7 +28,10 @@ const MAX_PER_DAY = 3;
 export async function GET(request: Request): Promise<Response> {
   try {
     const user = await requireUser(request);
-    const week = new URL(request.url).searchParams.get('week');
+    const params = new URL(request.url).searchParams;
+    // Teste da configuração: a chave existe e a Anthropic aceita (uma chamada mínima).
+    if (params.get('check') === '1') return json(await checkKey());
+    const week = params.get('week');
     if (!isWeekId(week)) throw new HttpError(400, 'Semana inválida.');
     const db = await getDb();
     const found = await db.collection<StoredInsight>('insights').findOne({ _id: `${user.id}:${week}` });
@@ -36,6 +39,26 @@ export async function GET(request: Request): Promise<Response> {
     return json({ insight: found.insight, createdAt: found.createdAt });
   } catch (err) {
     return fail(err);
+  }
+}
+
+async function checkKey(): Promise<{ ok: boolean; message: string; model: string }> {
+  const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return { ok: false, message: 'Falta a variável ANTHROPIC_API_KEY na Vercel (ou falta fazer o Redeploy depois de adicionar).', model };
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model, max_tokens: 1, messages: [{ role: 'user', content: 'ok' }] }),
+    });
+    if (res.ok) return { ok: true, message: 'Chave e modelo funcionando.', model };
+    if (res.status === 401) return { ok: false, message: 'A Anthropic recusou a chave: confira se copiou inteira.', model };
+    if (res.status === 404) return { ok: false, message: `O modelo ${model} não foi encontrado: confira ANTHROPIC_MODEL.`, model };
+    if (res.status === 402 || res.status === 403) return { ok: false, message: 'A conta da Anthropic não tem crédito ou permissão para este modelo.', model };
+    return { ok: false, message: `A Anthropic respondeu com erro ${res.status}.`, model };
+  } catch {
+    return { ok: false, message: 'Não deu para falar com a Anthropic agora.', model };
   }
 }
 

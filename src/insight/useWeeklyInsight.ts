@@ -39,15 +39,19 @@ async function readMessage(res: Response): Promise<string> {
   return data?.message ?? 'Não deu para buscar a análise agora.';
 }
 
-async function songRoutes(): Promise<(id: string) => string | null> {
+async function songLookup(): Promise<{ route: (id: string) => string | null; title: (id: string) => string | null }> {
   const pieces = await db.pieces.toArray();
-  const byKey = new Map(pieces.map((p) => [`peca-${p.uid ?? p.id}`, `/peca/${p.id}/estudar`]));
-  return (id) => {
-    if (id.startsWith('curso-')) {
-      const s = findSong(id.slice(6));
-      return s ? `/curso/musica/${s.id}` : null;
-    }
-    return byKey.get(id) ?? null;
+  const byKey = new Map(pieces.map((p) => [`peca-${p.uid ?? p.id}`, p]));
+  return {
+    route: (id) => {
+      if (id.startsWith('curso-')) {
+        const s = findSong(id.slice(6));
+        return s ? `/curso/musica/${s.id}` : null;
+      }
+      const p = byKey.get(id);
+      return p ? `/peca/${p.id}/estudar` : null;
+    },
+    title: (id) => (id.startsWith('curso-') ? (findSong(id.slice(6))?.title ?? null) : (byKey.get(id)?.title ?? null)),
   };
 }
 
@@ -65,9 +69,9 @@ async function load(): Promise<InsightState> {
     db.practice.toArray(),
     db.recordings.toArray(),
     db.notes.toArray(),
-    songRoutes(),
+    songLookup(),
   ]);
-  const built = buildDigest({ now, takes, runs, practice, recordings, notes, goal: getGoal(), songRoute: route });
+  const built = buildDigest({ now, takes, runs, practice, recordings, notes, goal: getGoal(), songRoute: route.route, songTitle: route.title });
   const targets = built.digest.alvos;
 
   let res = await fetch(`/api/insight?week=${week.id}`, { headers: authHeaders() }).catch(() => null);

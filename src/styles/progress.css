@@ -698,3 +698,23 @@
     line-height: 30px;
   }
 }
+
+.insightCheck {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.insightCheck__result {
+  margin: 0;
+  font: 500 14px/21px var(--font-body);
+}
+
+.insightCheck__result-ok {
+  color: var(--hit);
+}
+
+.insightCheck__result-bad {
+  color: var(--color-blush);
+}

@@ -50,6 +50,8 @@ export interface DigestInput {
   goal: { minutes: number; days: number };
   /** rota de cada música pelo id dos registros (curso ou repertório) */
   songRoute: (sourceId: string) => string | null;
+  /** nome de cada música pelo id dos registros */
+  songTitle?: (sourceId: string) => string | null;
 }
 
 function fingerTable(takes: TakeLog[]) {
@@ -130,6 +132,15 @@ export interface WeekDigest {
   semana: { de: string; ate: string };
   constancia: { minutos: number; dias: number; minutosTocandoLivre: number; meta: { minutos: number; dias: number }; semanaAnterior: { minutos: number; dias: number } };
   musicas: ReturnType<typeof takeGroupSummary>[];
+  /** músicas com só o registro resumido de cada passada (sem nota a nota) */
+  musicasSemDetalhe: {
+    titulo: string;
+    passadas: number;
+    acerto: { primeira: number; ultima: number; media: number; melhor: number };
+    acertoPorAndamento: { bpm: number; passadas: number; acertoMedio: number }[];
+    trechosTocados: string[];
+    trechoComMaisErroPorPassada: string[];
+  }[];
   exercicios: (ReturnType<typeof takeGroupSummary> | { titulo: string; bpmInicio: number; bpmFim: number; passadas: number })[];
   arcade: { titulo: string; passadas: number; acertoMedio: number }[];
   dedosEmTudo: ReturnType<typeof fingerTable>;
@@ -179,6 +190,34 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
     } else if (kind === 'exercicio') exercicios.push(takeGroupSummary(list));
     else arcade.push({ titulo: list[0].title, passadas: list.length, acertoMedio: pct(list.reduce((a, t) => a + t.accuracy, 0) / list.length) });
   }
+  // Músicas tocadas só com o registro resumido (antes do registro nota a nota): acerto, andamento e trecho fraco.
+  const songRuns = new Map<string, TrainingRun[]>();
+  for (const r of input.runs)
+    if (inWeek(r.at) && r.kind === 'timed' && (r.treinoId.startsWith('peca-') || r.treinoId.startsWith('curso-')) && !groups.has(r.treinoId))
+      songRuns.set(r.treinoId, [...(songRuns.get(r.treinoId) ?? []), r]);
+  const songsFromRuns: WeekDigest['musicasSemDetalhe'] = [];
+  for (const [id, list] of songRuns) {
+    list.sort((a, b) => a.at - b.at);
+    const titulo = input.songTitle?.(id) ?? id;
+    const accs = list.map((r) => r.accuracy ?? 0);
+    const byBpm = new Map<number, number[]>();
+    for (const r of list) if (r.bpm) byBpm.set(r.bpm, [...(byBpm.get(r.bpm) ?? []), r.accuracy ?? 0]);
+    const weak = new Map<string, number>();
+    for (const r of list) if (r.weakFrom) weak.set(r.weakFrom === (r.weakTo ?? r.weakFrom) ? `compasso ${r.weakFrom}` : `compassos ${r.weakFrom} a ${r.weakTo}`, (weak.get(r.weakFrom === (r.weakTo ?? r.weakFrom) ? `compasso ${r.weakFrom}` : `compassos ${r.weakFrom} a ${r.weakTo}`) ?? 0) + 1);
+    const trechos = new Map<string, number>();
+    for (const r of list) if (r.from && r.to) trechos.set(`compassos ${r.from} a ${r.to}`, (trechos.get(`compassos ${r.from} a ${r.to}`) ?? 0) + 1);
+    songsFromRuns.push({
+      titulo,
+      passadas: list.length,
+      acerto: { primeira: pct(accs[0]), ultima: pct(accs[accs.length - 1]), media: pct(accs.reduce((a, b) => a + b, 0) / accs.length), melhor: pct(Math.max(...accs)) },
+      acertoPorAndamento: [...byBpm.entries()].sort((a, b) => a[0] - b[0]).map(([bpm, a]) => ({ bpm, passadas: a.length, acertoMedio: pct(a.reduce((x, y) => x + y, 0) / a.length) })),
+      trechosTocados: [...trechos.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([t, n]) => `${t} (${n} passadas)`),
+      trechoComMaisErroPorPassada: [...weak.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([t, n]) => `${t} (o mais fraco em ${n} passadas)`),
+    });
+    const rota = input.songRoute(id);
+    if (rota) alvos.push({ id, titulo, rota });
+  }
+
   // Escada de técnica (registros tec-*): de onde saiu e aonde chegou o andamento.
   const tech = new Map<string, TrainingRun[]>();
   for (const r of input.runs) if (r.treinoId.startsWith('tec-') && inWeek(r.at) && r.bpm) tech.set(r.treinoId, [...(tech.get(r.treinoId) ?? []), r]);
@@ -199,6 +238,7 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
     semana: { de: key(start), ate: key(end - DAY) },
     constancia: { minutos: week.minutos, dias: week.dias, minutosTocandoLivre: week.free, meta: { minutos: input.goal.minutes, dias: input.goal.days }, semanaAnterior: { minutos: prev.minutos, dias: prev.dias } },
     musicas: musicas.sort((a, b) => b.passadas - a.passadas).slice(0, 6),
+    musicasSemDetalhe: songsFromRuns.sort((a, b) => b.passadas - a.passadas).slice(0, 6),
     exercicios: exercicios.slice(0, 10),
     arcade: arcade.sort((a, b) => b.passadas - a.passadas).slice(0, 4),
     dedosEmTudo: fingerTable(takes),
