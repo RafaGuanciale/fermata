@@ -1,30 +1,26 @@
-// Progresso: responde "estou melhorando, e onde eu travo?". Hoje é o "o que eu faço agora".
-// No topo, a análise da semana (IA); depois constância, evolução por habilidade e onde você trava.
-// Os números vêm de src/progress/stats.ts e skills.ts (puros e testados).
+// Progresso: responde "estou melhorando, e onde eu travo?". Hoje é o "o que eu faço agora"; Estatísticas é o
+// lugar de investigar (painel, dia a dia, cada música, constância).
+// Aqui: a análise da semana (IA), o que melhorou e o que piorou, a evolução por habilidade e o que pode melhorar.
+// Os números vêm de src/stats/summary.ts e src/progress/skills.ts (puros e testados).
 
 import { Link, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Piece } from '../db/db';
+import { db } from '../db/db';
 import { DAY } from '../db/stats';
 import { noteLabel } from '../music/notes';
 import { formatPercent } from '../format';
-import StatTile from '../components/StatTile';
 import { CheckIcon, CrossIcon } from '../components/Icons';
-import WeeklyGoal from '../progress/WeeklyGoal';
 import WeeklyInsight from '../insight/WeeklyInsight';
-import { dayKey } from '../training/progress';
-import { findSong } from '../course';
 import { ALL_TRACKS, bestTechBpm, techRunId, techStatus } from '../course/track';
-import { useRuns } from '../training/runs';
 import ReviewSpots from '../progress/ReviewSpots';
 import { weakSpots } from '../progress/weakSpots';
-import { bestByTreino, freeMinutes, heatLevel, heatmap, minutesByDay, streak, weakNotes, type HeatCell } from '../progress/stats';
-import { earSummary, readingSummary, songsProgress, trend, weakReading } from '../progress/skills';
+import { bestByTreino, weakNotes } from '../progress/stats';
+import { earSummary, readingSummary, trend, weakReading } from '../progress/skills';
+import { useStatsData } from '../stats/useStatsData';
+import { findPatterns, progressChanges, skillChanges, songNow, type Change } from '../stats/summary';
+import { FIRM } from '../stats/model';
+import { handText, rangeText } from '../stats/format';
 
-const fullDate = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-const WEEKDAYS = ['seg', '', 'qua', '', 'sex', '', ''];
-
-const minutesText = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${String(Math.round(m % 60)).padStart(2, '0')} min` : `${Math.round(m)} min`);
 const seconds = (ms: number) => `${(ms / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} s`;
 
 /** "melhor" / "pior" com ícone e palavra (nunca só cor). */
@@ -39,34 +35,43 @@ function Trend({ t, before }: { t: ReturnType<typeof trend>; before: string }) {
   );
 }
 
+function ChangeList({ items, dir }: { items: Change[]; dir: 'melhor' | 'pior' }) {
+  return (
+    <ul className="changes__list">
+      {items.map((c) => (
+        <li key={c.id} className={'changes__item changes__item-' + (dir === 'melhor' ? 'up' : 'down')}>
+          {dir === 'melhor' ? <CheckIcon className="changes__icon" /> : <CrossIcon className="changes__icon" />}
+          <span className="changes__text">
+            <strong>{c.sourceId ? <Link to={`/estatisticas?ver=musica&id=${encodeURIComponent(c.sourceId)}`}>{c.title}</Link> : c.title}</strong>
+            <span>{c.detail}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function ProgressPage() {
   const location = useLocation();
   const now = Date.now();
-  const runs = useRuns();
-  const data = useLiveQuery(async () => {
-    const since = Date.now() - 120 * DAY;
-    const [practice, sessions, attempts, pieces, notes] = await Promise.all([
-      db.practice.toArray(),
-      db.sessions.where('startedAt').above(since).toArray(),
-      db.attempts.where('at').above(since).toArray(),
-      db.pieces.toArray(),
-      db.notes.toArray(),
-    ]);
-    return { practice, sessions, attempts, pieces, notes };
+  const stats = useStatsData();
+  const extra = useLiveQuery(async () => {
+    const [attempts, notes] = await Promise.all([db.attempts.where('at').above(Date.now() - 30 * DAY).toArray(), db.notes.toArray()]);
+    return { attempts, notes };
   }, []);
 
-  if (!data || !runs) return null;
+  if (!stats || !extra) return null;
+  const { runs, passes } = stats;
 
-  const byDay = minutesByDay(data.practice, data.sessions);
-  const days = streak(byDay, now);
-  const playedToday = (byDay.get(dayKey(now)) ?? 0) > 0;
-  const totalMinutes = [...byDay.values()].reduce((a, b) => a + b, 0);
-  const free = freeMinutes(data.practice);
-  const cells = heatmap(byDay, now, 16);
-  const weak = weakReading(data.notes, weakNotes(data.attempts.filter((a) => a.at >= now - 30 * DAY)), now);
+  const weak = weakReading(extra.notes, weakNotes(extra.attempts), now);
   const best = bestByTreino(runs);
   const reading = readingSummary(runs, now);
   const ear = earSummary(runs, now);
+
+  // O que mudou: últimos 7 dias contra os 21 antes.
+  const changes = [...progressChanges(passes, now), ...skillChanges(runs, now, stats.titleOf)].sort((a, b) => b.weight - a.weight);
+  const better = changes.filter((c) => c.dir === 'melhor').slice(0, 4);
+  const worse = changes.filter((c) => c.dir === 'pior').slice(0, 4);
 
   // Técnica: quantos exercícios começados já estão no alvo, e os que estão subindo.
   const techItems = ALL_TRACKS.flatMap((t) => t.technique.map((item) => ({ item, unit: t.unit })));
@@ -77,67 +82,108 @@ export default function ProgressPage() {
   const climbing = techMeters.filter((t) => t.status !== 'no alvo').sort((a, b) => b.last - a.last);
   const stale = climbing.filter((t) => now - t.last > 7 * DAY);
 
-  // Músicas: do repertório e do curso.
-  const pieceByKey = new Map<string, Piece>();
-  for (const p of data.pieces) pieceByKey.set(`peca-${p.uid ?? p.id}`, p);
-  const songs = songsProgress(runs, now)
-    .map((s) => {
-      if (s.id.startsWith('curso-')) {
-        const song = findSong(s.id.slice(6));
-        return song ? { ...s, title: song.title, target: song.bpm, to: `/curso/musica/${song.id}` } : null;
-      }
-      const piece = pieceByKey.get(s.id);
-      return piece ? { ...s, title: piece.title, target: piece.bpm ?? null, to: `/peca/${piece.id}/estudar` } : null;
+  // Músicas: onde você está agora em cada uma (última configuração do Tocar junto) e o andamento firme.
+  const songIds = [...new Set(passes.filter((p) => p.kind === 'musica').map((p) => p.sourceId))];
+  const songs = songIds
+    .map((id) => {
+      const ps = passes.filter((p) => p.sourceId === id);
+      const at = songNow(ps);
+      if (!at) return null;
+      const recent = ps.filter((p) => p.mode === 'junto' && p.at > now - 28 * DAY);
+      const byBpm = new Map<number, number[]>();
+      for (const p of recent) byBpm.set(p.bpm, [...(byBpm.get(p.bpm) ?? []), p.accuracy]);
+      const firm = [...byBpm.entries()].filter(([, a]) => a.length >= 3 && a.reduce((x, y) => x + y, 0) / a.length >= FIRM).map(([b]) => b);
+      const same = ps.filter((p) => p.mode === 'junto' && p.bpm === at.bpm && p.from === at.from && p.to === at.to);
+      const prev = same.slice(0, -10);
+      const prevMean = prev.length >= 3 ? prev.slice(-10).reduce((a, p) => a + p.accuracy, 0) / Math.min(10, prev.length) : null;
+      return { id, title: ps[ps.length - 1].title, at, firm: firm.length ? Math.max(...firm) : null, prevMean, week: ps.filter((p) => p.at > now - 7 * DAY).length, route: stats.routeOf(id) };
     })
     .filter((s): s is NonNullable<typeof s> => !!s)
+    .sort((a, b) => b.at.last - a.at.last)
     .slice(0, 6);
-  const songWeak = weakSpots(runs);
 
-  const empty = totalMinutes === 0 && runs.length === 0 && data.attempts.length === 0 && data.notes.length === 0;
+  const patterns = findPatterns(passes.filter((p) => p.at > now - 14 * DAY)).slice(0, 3);
+  const songWeak = weakSpots(runs);
+  const empty = runs.length === 0 && passes.length === 0 && extra.attempts.length === 0 && extra.notes.length === 0;
 
   return (
     <>
       <header className="page__header">
         <span className="page__eyebrow">Sua evolução</span>
         <h1 className="page__title">Progresso</h1>
+        <Link className="page__link" to="/estatisticas">Ver as estatísticas: dia a dia, cada música e o calendário</Link>
       </header>
 
       {empty ? (
         <section className="progress__empty">
-          <p>Ainda não há nada para mostrar. Toque um pouco no piano conectado, faça o treino do dia ou uma leitura: a partir daí esta página mostra sua constância, sua evolução e onde você trava.</p>
+          <p>Ainda não há nada para mostrar. Toque um pouco no piano conectado, faça o treino do dia ou uma leitura: a partir daí esta página mostra o que melhorou, o que piorou e onde você trava.</p>
           <Link className="button button-primary" to="/treino">Ir para o treino</Link>
         </section>
       ) : (
         <div className="progress">
           <WeeklyInsight />
 
-          <section className="page__section" aria-labelledby="pg-const">
-            <h2 className="page__sectionTitle" id="pg-const">Constância</h2>
-            <div className="progress__tiles">
-              <WeeklyGoal />
-              <StatTile label="Dias seguidos" value={String(days)} unit={days === 1 ? 'dia' : 'dias'} delta={playedToday ? 'você já tocou hoje' : days ? 'toque hoje para manter' : 'comece hoje'} />
-              <StatTile label="Total no piano" value={minutesText(totalMinutes)} delta={`${[...byDay.values()].filter((m) => m > 0).length} dias com prática${free ? `, ${minutesText(free)} tocando livre` : ''}`} />
-            </div>
-            <figure className="progress__figure progress__figure-wide">
-              <figcaption className="progress__caption">
-                Dias com piano, últimas 16 semanas
-                <span className="progress__hint">quanto mais escuro, mais minutos naquele dia</span>
-              </figcaption>
-              <Heatmap cols={cells} />
-            </figure>
+          <section className="page__section" aria-labelledby="pg-mudou">
+            <h2 className="page__sectionTitle" id="pg-mudou">O que mudou</h2>
+            <p className="page__lead">Últimos 7 dias comparados com as 3 semanas antes.</p>
+            {better.length || worse.length ? (
+              <div className="changes">
+                <div className="progress__card">
+                  <h3 className="progress__cardTitle">Melhorou</h3>
+                  {better.length ? <ChangeList items={better} dir="melhor" /> : <p className="progress__muted">Nada subiu de forma clara nesta semana.</p>}
+                </div>
+                <div className="progress__card">
+                  <h3 className="progress__cardTitle">Piorou</h3>
+                  {worse.length ? <ChangeList items={worse} dir="pior" /> : <p className="progress__muted">Nada caiu. Bom sinal.</p>}
+                </div>
+              </div>
+            ) : (
+              <p className="progress__muted">Ainda não dá para comparar: precisa de pelo menos 3 passadas do mesmo trecho e andamento nesta semana e nas anteriores, ou leitura, ouvido e técnica nos dois períodos.</p>
+            )}
           </section>
 
           <section className="page__section" aria-labelledby="pg-evol">
             <h2 className="page__sectionTitle" id="pg-evol">Evolução</h2>
-            <p className="page__lead">Cada cartão responde uma pergunta e compara as últimas 4 semanas com as 4 anteriores.</p>
+            <p className="page__lead">Cada cartão responde uma pergunta.</p>
             <div className="skills">
+              <article className="skill skill-wide">
+                <h3 className="skill__name">Músicas</h3>
+                <p className="skill__question">Onde você está em cada música?</p>
+                {songs.length ? (
+                  <ul className="skill__songs">
+                    {songs.map((s) => (
+                      <li key={s.id} className="skill__song">
+                        <Link className="skill__songTitle" to={`/estatisticas?ver=musica&id=${encodeURIComponent(s.id)}`}>{s.title}</Link>
+                        <span className="skill__songMeta">
+                          Agora: {[rangeText(s.at), `${s.at.bpm} BPM`, handText(s.at.hand)].filter(Boolean).join(', ')} · {formatPercent(s.at.mean)} nas últimas {s.at.recent} {s.at.recent === 1 ? 'passada' : 'passadas'}
+                          {s.firm ? ` · firme a ${s.firm} BPM` : ''}
+                          {s.week ? ` · ${s.week} ${s.week === 1 ? 'passada' : 'passadas'} nesta semana` : ''}
+                        </span>
+                        {s.prevMean !== null && (
+                          <span className={'skill__trend' + (s.at.mean - s.prevMean >= 0.03 ? ' skill__trend-up' : s.at.mean - s.prevMean <= -0.03 ? ' skill__trend-down' : '')}>
+                            {s.at.mean - s.prevMean >= 0.03 && <CheckIcon className="skill__trendIcon" />}
+                            {s.at.mean - s.prevMean <= -0.03 && <CrossIcon className="skill__trendIcon" />}
+                            {s.at.mean - s.prevMean >= 0.03 ? 'melhor' : s.at.mean - s.prevMean <= -0.03 ? 'pior' : 'igual'} que nas 10 passadas antes no mesmo trecho e andamento ({formatPercent(s.prevMean)})
+                          </span>
+                        )}
+                        {s.route && (
+                          <Link className="page__link skill__play" to={s.route} state={{ background: location, from: s.at.from, to: s.at.to, bpm: s.at.bpm, mode: 'junto' }}>Continuar daqui</Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="skill__empty">Toque uma música no "Tocar junto" para ver aqui onde você está nela.</p>
+                )}
+              </article>
+
               <article className="skill">
                 <h3 className="skill__name">Leitura</h3>
                 <p className="skill__question">Quanto tempo você leva para tocar a nota que aparece na pauta?</p>
                 {reading.now ? (
                   <>
                     <p className="skill__value">{seconds(reading.now.ms)}</p>
-                    <p className="skill__detail">Acerto de primeira: {formatPercent(reading.now.firstTry)} · {reading.now.rounds} {reading.now.rounds === 1 ? 'rodada' : 'rodadas'}</p>
+                    <p className="skill__detail">Acerto de primeira: {formatPercent(reading.now.firstTry)} · {reading.now.rounds} {reading.now.rounds === 1 ? 'rodada' : 'rodadas'} em 4 semanas</p>
                     <Trend t={trend(reading.now.ms, reading.before?.ms ?? null, true)} before={reading.before ? seconds(reading.before.ms) : ''} />
                   </>
                 ) : (
@@ -157,7 +203,7 @@ export default function ProgressPage() {
                     </p>
                     {climbing.length > 0 && (
                       <ul className="progress__meters">
-                        {climbing.slice(0, 4).map(({ item, unit, best: b }) => (
+                        {climbing.slice(0, 3).map(({ item, unit, best: b }) => (
                           <li key={item.id} className="progress__meter">
                             <span className="progress__meterName">{item.title}</span>
                             <span className="progress__meterValue">{b ? `${b} de ${item.target} BPM` : `começa em ${item.from} BPM, alvo ${item.target} BPM`} · unidade {unit}</span>
@@ -193,38 +239,29 @@ export default function ProgressPage() {
                   </p>
                 )}
               </article>
-
-              <article className="skill skill-wide">
-                <h3 className="skill__name">Músicas</h3>
-                <p className="skill__question">Como estão as músicas que você toca junto?</p>
-                {songs.length ? (
-                  <ul className="skill__songs">
-                    {songs.map((s) => (
-                      <li key={s.id} className="skill__song">
-                        <Link className="skill__songTitle" to={s.to} state={{ background: location }}>{s.title}</Link>
-                        <span className="skill__songMeta">
-                          {s.accuracy.now !== null ? `acerto médio ${formatPercent(s.accuracy.now)}` : `melhor acerto ${formatPercent(s.bestAccuracy)}`}
-                          {s.bestClean ? ` · limpa até ${s.bestClean}${s.target ? ` de ${s.target}` : ''} BPM` : ''}
-                          {s.week ? ` · ${s.week} ${s.week === 1 ? 'passada' : 'passadas'} nesta semana` : ''}
-                        </span>
-                        <Trend t={trend(s.accuracy.now, s.accuracy.before)} before={s.accuracy.before !== null ? formatPercent(s.accuracy.before) : ''} />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="skill__empty">Toque uma música no "Tocar junto" para ver o acerto e o andamento aqui.</p>
-                )}
-              </article>
-
             </div>
           </section>
 
           <section className="page__section" aria-labelledby="pg-trava">
-            <h2 className="page__sectionTitle" id="pg-trava">Onde você trava</h2>
-            {weak.length === 0 && stale.length === 0 && songWeak.length === 0 ? (
-              <p className="progress__muted">Nada travando agora. Quando uma nota, um treino ou um trecho de música começar a falhar, ele aparece aqui.</p>
+            <h2 className="page__sectionTitle" id="pg-trava">O que pode melhorar</h2>
+            {patterns.length === 0 && weak.length === 0 && stale.length === 0 && songWeak.length === 0 ? (
+              <p className="progress__muted">Nada travando agora. Quando um erro começar a se repetir, ele aparece aqui.</p>
             ) : (
               <div className="progress__stuck progress__stuck-auto">
+                {patterns.length > 0 && (
+                  <div className="progress__card">
+                    <h3 className="progress__cardTitle">Erros que se repetem</h3>
+                    <p className="progress__muted">Últimas 2 semanas, em todas as músicas e exercícios.</p>
+                    <ul className="patterns">
+                      {patterns.map((p) => (
+                        <li key={p.id} className="patterns__item">
+                          <strong>{p.title}</strong>
+                          <span>{p.detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {songWeak.length > 0 && (
                   <div className="progress__card">
                     <h3 className="progress__cardTitle">Trechos difíceis das músicas</h3>
@@ -265,37 +302,5 @@ export default function ProgressPage() {
         </div>
       )}
     </>
-  );
-}
-
-// ---------- gráficos (SVG simples, uma cor) ----------
-
-function Heatmap({ cols }: { cols: HeatCell[][] }) {
-  const C = 14;
-  const G = 3;
-  const left = 28;
-  const top = 16;
-  const W = left + cols.length * (C + G);
-  const H = top + 7 * (C + G);
-  return (
-    <svg className="heat" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Calendário de prática">
-      {cols.map((col, x) =>
-        col[0].time && new Date(col[0].time).getDate() <= 7 ? (
-          <text key={`m${x}`} className="heat__label" x={left + x * (C + G)} y={10}>
-            {new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(col[0].time).replace('.', '')}
-          </text>
-        ) : null,
-      )}
-      {WEEKDAYS.map((d, y) => (d ? <text key={d} className="heat__label" x={0} y={top + y * (C + G) + C - 3}>{d}</text> : null))}
-      {cols.map((col, x) =>
-        col.map((c, y) =>
-          c.future ? null : (
-            <rect key={c.day} className={`heat__cell heat__cell-${heatLevel(c.minutes)}`} x={left + x * (C + G)} y={top + y * (C + G)} width={C} height={C} rx={3}>
-              <title>{`${fullDate.format(c.time)}: ${c.minutes ? minutesText(c.minutes) : 'sem prática'}`}</title>
-            </rect>
-          ),
-        ),
-      )}
-    </svg>
   );
 }

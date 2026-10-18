@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import Logo from '../brand/Logo';
-import { ArcadeIcon, BookIcon, ProgressIcon, PracticeIcon, RepertoireIcon, StudyIcon, TodayIcon } from './Icons';
+import { ArcadeIcon, BookIcon, ProgressIcon, PracticeIcon, RepertoireIcon, StatsIcon, StudyIcon, TodayIcon } from './Icons';
 import ThemeToggle from './ThemeToggle';
 import KeyboardDock from './KeyboardDock';
 import AccountChip from './AccountChip';
@@ -15,6 +15,8 @@ const LINKS = [
   { to: '/arcade', label: 'Arcade', Icon: ArcadeIcon, end: false },
   { to: '/consulta', label: 'Consulta', Icon: BookIcon, end: false },
   { to: '/progresso', label: 'Progresso', Icon: ProgressIcon, end: false },
+  // No celular a barra de baixo não cabe oito: Estatísticas abre pelo Progresso.
+  { to: '/estatisticas', label: 'Estatísticas', Icon: StatsIcon, end: false, desktop: true },
 ];
 
 /**
@@ -31,8 +33,8 @@ export default function AppLayout() {
           <span className="sideNav__endorse">um projeto Permana</span>
         </NavLink>
         <ul className="sideNav__list">
-          {LINKS.map(({ to, label, Icon, end }) => (
-            <li key={to}>
+          {LINKS.map(({ to, label, Icon, end, desktop }) => (
+            <li key={to} className={desktop ? 'sideNav__item-desktop' : undefined}>
               <NavLink
                 to={to}
                 end={end}

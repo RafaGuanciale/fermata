@@ -22,8 +22,9 @@ export interface LogPlayed {
   t: number;
 }
 
-export type Outcome = 'ok' | 'cedo' | 'tarde' | 'trocou' | 'faltou';
-export const OUTCOMES: Outcome[] = ['ok', 'cedo', 'tarde', 'trocou', 'faltou'];
+/** "hesitou": só no modo Estudar, demorou bem mais que o normal para achar a nota (delta = ms). */
+export type Outcome = 'ok' | 'cedo' | 'tarde' | 'trocou' | 'faltou' | 'hesitou';
+export const OUTCOMES: Outcome[] = ['ok', 'cedo', 'tarde', 'trocou', 'faltou', 'hesitou'];
 
 export interface NoteError {
   measure: number;
@@ -147,10 +148,64 @@ export function analyzeTake(expected: LogExpected[], played: LogPlayed[], judged
   };
 }
 
+// ---------- modo Estudar (a partitura espera) ----------
+
+export interface StudyStep {
+  measure: number;
+  /** notas que o ponto pede, com o dedo sugerido */
+  expected: { midi: Midi; finger?: number | null; hand?: 'r' | 'l' }[];
+  /** quanto levou para completar o ponto (ms); null no primeiro da volta */
+  ms: number | null;
+  /** teclas erradas tocadas antes de acertar */
+  wrong: Midi[];
+}
+
+/** Demorou "bem mais que o normal": 2,5 vezes a mediana da volta e pelo menos 1,5 s. */
+const HESITATE_MIN = 1500;
+
+const median = (xs: number[]) => {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  return Math.round(s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2);
+};
+
+/**
+ * Uma volta no modo Estudar vira o mesmo registro das passadas: cada tecla errada é uma troca (contra a nota
+ * esperada mais perto dela) e cada ponto em que você demorou demais é "hesitou". Acerto = pontos sem erro.
+ */
+export function analyzeStudyLap(steps: StudyStep[]): TakeAnalysis & { accuracy: number; stepMs: number | null } {
+  const errors: NoteError[] = [];
+  const fingerTotals = Array<number>(10).fill(0);
+  let total = 0;
+  const times = steps.map((s) => s.ms).filter((m): m is number => m !== null);
+  const typical = median(times);
+  const slow = typical === null ? Infinity : Math.max(HESITATE_MIN, typical * 2.5);
+  let clean = 0;
+  for (const st of steps) {
+    if (!st.expected.length) continue;
+    total += st.expected.length;
+    for (const e of st.expected) {
+      const fi = fingerIndex(e.finger, e.hand);
+      if (fi >= 0) fingerTotals[fi]++;
+    }
+    if (!st.wrong.length) clean++;
+    for (const w of st.wrong) {
+      const near = st.expected.reduce((a, b) => (Math.abs(b.midi - w) < Math.abs(a.midi - w) ? b : a));
+      errors.push({ measure: st.measure, midi: near.midi, finger: near.finger ?? 0, hand: near.hand ?? 'r', outcome: 'trocou', delta: 0, played: w });
+    }
+    if (st.ms !== null && st.ms >= slow) {
+      const e = st.expected[0];
+      errors.push({ measure: st.measure, midi: e.midi, finger: e.finger ?? 0, hand: e.hand ?? 'r', outcome: 'hesitou', delta: Math.round(st.ms), played: 0 });
+    }
+  }
+  const counted = steps.filter((s) => s.expected.length).length;
+  return { total, errors, fingerTotals, extras: 0, meanDelta: null, drift: null, accuracy: counted ? clean / counted : 0, stepMs: typical };
+}
+
 // ---------- guardar compacto ----------
 
-const OUT_CODE: Record<NoteError['outcome'], number> = { cedo: 1, tarde: 2, trocou: 3, faltou: 4 };
-const CODE_OUT: Record<number, NoteError['outcome']> = { 1: 'cedo', 2: 'tarde', 3: 'trocou', 4: 'faltou' };
+const OUT_CODE: Record<NoteError['outcome'], number> = { cedo: 1, tarde: 2, trocou: 3, faltou: 4, hesitou: 5 };
+const CODE_OUT: Record<number, NoteError['outcome']> = { 1: 'cedo', 2: 'tarde', 3: 'trocou', 4: 'faltou', 5: 'hesitou' };
 
 /** Erros lado a lado: compasso, tecla, dedo (mão esquerda = 5 + dedo), tipo, ms, tecla tocada. */
 export function packErrors(errors: NoteError[]): number[] {

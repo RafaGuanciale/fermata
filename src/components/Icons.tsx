@@ -60,6 +60,17 @@ export function ProgressIcon({ className }: IconProps) {
   );
 }
 
+export function StatsIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 20h16" />
+      <path d="M7 16v-5" />
+      <path d="M12 16V6" />
+      <path d="M17 16v-8" />
+    </svg>
+  );
+}
+
 export function MoonIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

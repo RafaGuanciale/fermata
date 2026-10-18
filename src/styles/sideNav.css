@@ -172,6 +172,10 @@
     min-width: 0;
   }
 
+  .sideNav__item-desktop {
+    display: none;
+  }
+
   /* Seis destinos: cada um divide a largura por igual, sem cortar o último no celular. */
   .sideNav__list > li {
     flex: 1 1 0;

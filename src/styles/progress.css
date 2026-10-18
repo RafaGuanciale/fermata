@@ -4,6 +4,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-12);
+}
+
+.progress,
+.stats {
   /* Rampa sequencial do calendário: do fundo afundado até o azul de acerto. */
   --heat-0: var(--surface-sunk);
   --heat-1: color-mix(in srgb, var(--hit) 22%, var(--surface-sunk));
@@ -12,7 +16,8 @@
   --heat-4: var(--hit);
 }
 
-:root[data-theme="light"] .progress {
+:root[data-theme="light"] .progress,
+:root[data-theme="light"] .stats {
   --heat-0: color-mix(in srgb, var(--color-khaki) 22%, var(--color-off-white));
   --heat-1: color-mix(in srgb, var(--color-petrol) 22%, var(--color-off-white));
   --heat-2: color-mix(in srgb, var(--color-petrol) 45%, var(--color-off-white));
@@ -717,4 +722,67 @@
 
 .insightCheck__result-bad {
   color: var(--color-blush);
+}
+
+/* O que mudou: melhorou (azul, com ícone) e piorou (blush, com ícone). */
+.changes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.changes__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.changes__item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+
+.changes__icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.changes__item-up .changes__icon {
+  color: var(--hit);
+}
+
+.changes__item-down .changes__icon {
+  color: var(--miss);
+}
+
+.changes__text {
+  display: grid;
+  gap: 2px;
+  font: 400 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.changes__text strong {
+  font: 600 14px/20px var(--font-body);
+  color: var(--text);
+}
+
+.changes__text a {
+  color: inherit;
+}
+
+.skill__play {
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .changes {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

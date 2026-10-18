@@ -222,6 +222,40 @@ export interface TakeLog extends Synced {
   extras: number;
   meanDelta: number | null;
   drift: number | null;
+  /** "estudo": uma volta no modo Estudar (a partitura espera; bpm 0, sem tempo). Sem o campo: Tocar junto. */
+  mode?: 'junto' | 'estudo';
+  /** Estudar: false quando você saiu antes de terminar a volta. */
+  complete?: boolean;
+  /** Estudar: tempo típico (mediana, ms) para achar cada nota ou acorde. */
+  stepMs?: number | null;
+}
+
+/**
+ * Tudo o que acontece no app, como um rastreador: cada página visitada (quanto tempo, quantas notas), cada
+ * mudança de andamento, trecho, mão ou modo, cada vez que ouviu o trecho, parou no meio ou guardou um marco.
+ * As passadas completas ficam em `takes`; aqui fica o resto (src/analysis/activity.ts). Sincroniza.
+ */
+export interface AppEvent extends Synced {
+  id: string;
+  at: number;
+  day: string;
+  type: 'view' | 'config' | 'listen' | 'abort' | 'marco';
+  /** visita: endereço, área ("musicas", "leitura"…), duração com a aba visível (ms) e notas tocadas */
+  path?: string;
+  area?: string;
+  dur?: number;
+  notes?: number;
+  /** música ou exercício (mesmo id dos runs e takes) */
+  sourceId?: string;
+  title?: string;
+  mode?: 'junto' | 'estudo';
+  bpm?: number;
+  hand?: string;
+  from?: number;
+  to?: number;
+  /** parou no meio: acerto até ali e quanto tempo tocou (ms) */
+  accuracy?: number;
+  ms?: number;
 }
 
 /** Fila do que mudou neste aparelho e ainda não subiu. */
@@ -248,6 +282,7 @@ class FermataDB extends Dexie {
   arcadeMidi!: Table<ArcadeMidi, string>;
   recordings!: Table<Recording, string>;
   takes!: Table<TakeLog, string>;
+  events!: Table<AppEvent, string>;
 
   constructor() {
     super('fermata');
@@ -309,6 +344,9 @@ class FermataDB extends Dexie {
     });
     this.version(10).stores({
       takes: 'id, at, day, sourceId',
+    });
+    this.version(11).stores({
+      events: 'id, at, day, type, sourceId',
     });
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PracticeDay, TakeLog } from '../db/db';
+import type { PracticeDay, TakeLog, TrainingRun } from '../db/db';
 import { packErrors } from '../analysis/takeLog';
 import { buildDigest, lastWeek, weekStart } from './digest';
 
@@ -47,5 +47,19 @@ describe('resumo da semana', () => {
 
     const pouco = buildDigest({ now, takes: [], runs: [], recordings: [], notes: [], goal: { minutes: 90, days: 3 }, practice: [pd('2026-10-13', 30)], songRoute: () => null });
     expect(pouco.qualifies).toBe(false);
+  });
+
+  it('blocos de prática a partir dos registros resumidos (semana antes do nota a nota)', () => {
+    const t0 = day('2026-10-17');
+    const runs: TrainingRun[] = [
+      ...Array.from({ length: 5 }, (_, i): TrainingRun => ({ id: i, treinoId: 'peca-ode', kind: 'timed', at: t0 + i * 20_000, day: '2026-10-17', bpm: 60, accuracy: [0.6, 0.8, 0.9, 0.9, 0.95][i], from: 1, to: 8, weakFrom: 7, weakTo: 7 })),
+      ...Array.from({ length: 3 }, (_, i): TrainingRun => ({ id: 10 + i, treinoId: 'peca-ode', kind: 'timed', at: t0 + 600_000 + i * 20_000, day: '2026-10-17', bpm: 60, accuracy: 0.7, from: 1, to: 12 })),
+    ];
+    const r = buildDigest({ now, takes: [], runs, recordings: [], notes: [], goal: { minutes: 90, days: 3 }, practice: [], songRoute: () => null, songTitle: () => 'Ode to Joy' });
+    expect(r.digest.blocos.map((b) => [b.trecho, b.bpm, b.passadas])).toEqual([
+      ['compassos 1 a 8', 60, 5],
+      ['compassos 1 a 12', 60, 3],
+    ]);
+    expect(r.digest.blocos[0]).toMatchObject({ musica: 'Ode to Joy', firmeAPartirDaPassada: 3, trechoMaisFraco: 'compasso 7 (o mais fraco em 5 de 5 passadas)', acerto: { primeira: 60, ultima: 95 } });
   });
 });

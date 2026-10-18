@@ -63,15 +63,16 @@ async function load(): Promise<InsightState> {
   const cached = readCache(week.id);
   if (cached?.status === 'ready') return cached;
 
-  const [takes, runs, practice, recordings, notes, route] = await Promise.all([
+  const [takes, runs, practice, recordings, notes, route, events] = await Promise.all([
     db.takes.where('at').between(week.start, week.end).toArray(),
     db.runs.where('at').between(week.start - 7 * 86_400_000, week.end).toArray(),
     db.practice.toArray(),
     db.recordings.toArray(),
     db.notes.toArray(),
     songLookup(),
+    db.events.where('at').between(week.start, week.end).toArray(),
   ]);
-  const built = buildDigest({ now, takes, runs, practice, recordings, notes, goal: getGoal(), songRoute: route.route, songTitle: route.title });
+  const built = buildDigest({ now, takes, runs, practice, recordings, notes, events, goal: getGoal(), songRoute: route.route, songTitle: route.title });
   const targets = built.digest.alvos;
 
   let res = await fetch(`/api/insight?week=${week.id}`, { headers: authHeaders() }).catch(() => null);

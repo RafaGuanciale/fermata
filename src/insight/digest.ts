@@ -2,9 +2,11 @@
 // Junta as passadas registradas nota a nota (takes), os treinos (runs), os minutos, a leitura, o ouvido e os marcos.
 // Puro e testado (digest.test.ts).
 
-import type { NoteReadStat, PracticeDay, Recording, TakeLog, TrainingRun } from '../db/db';
+import type { AppEvent, NoteReadStat, PracticeDay, Recording, TakeLog, TrainingRun } from '../db/db';
 import { noteInfo } from '../music/notes';
 import { unpackErrors, type NoteError } from '../analysis/takeLog';
+import { blockStats, buildBlocks, buildPasses } from '../stats/model';
+import { findPatterns } from '../stats/summary';
 
 const DAY = 86_400_000;
 
@@ -52,6 +54,8 @@ export interface DigestInput {
   songRoute: (sourceId: string) => string | null;
   /** nome de cada música pelo id dos registros */
   songTitle?: (sourceId: string) => string | null;
+  /** eventos (parou no meio, ouviu o trecho) para os blocos de prática */
+  events?: AppEvent[];
 }
 
 function fingerTable(takes: TakeLog[]) {
@@ -79,7 +83,7 @@ function measureTable(takes: TakeLog[], top = 4) {
     .sort((a, b) => b[1].errors.length - a[1].errors.length)
     .slice(0, top)
     .map(([compasso, v]) => {
-      const tipos = { trocou: 0, cedo: 0, tarde: 0, faltou: 0 };
+      const tipos = { trocou: 0, cedo: 0, tarde: 0, faltou: 0, hesitou: 0 };
       const dedos = new Map<string, number>();
       const trocas = new Map<string, number>();
       for (const e of v.errors) {
@@ -101,7 +105,7 @@ function measureTable(takes: TakeLog[], top = 4) {
 
 function groupTakes(takes: TakeLog[]) {
   const by = new Map<string, TakeLog[]>();
-  for (const t of takes) by.set(t.sourceId, [...(by.get(t.sourceId) ?? []), t]);
+  for (const t of takes) if (t.mode !== 'estudo') by.set(t.sourceId, [...(by.get(t.sourceId) ?? []), t]);
   for (const list of by.values()) list.sort((a, b) => a.at - b.at);
   return by;
 }
@@ -147,7 +151,32 @@ export interface WeekDigest {
   leitura: { rodadas: number; tempoMedioMs: number | null; acertoDePrimeira: number | null; notasQueMaisErra: string[] } | null;
   ouvido: { maiorFrase: number } | null;
   marcosGravados: { musica: string; acerto: number | null; bpm: number | null }[];
+  /** blocos de prática: mesma música, trecho, mão e andamento em sequência (os com mais passadas) */
+  blocos: DigestBlock[];
+  /** erros que se repetem em várias músicas e exercícios, já calculados pelo app */
+  padroes: { titulo: string; detalhe: string }[];
+  /** voltas no modo Estudar (a partitura espera): sem tempo, só teclas erradas e demora */
+  estudar: { musica: string; voltas: number; pontosSemErro: number; segundosPorNota: number | null; compassosOndeDemorou: string[] }[];
   alvos: Target[];
+}
+
+export interface DigestBlock {
+  musica: string;
+  dia: string;
+  hora: string;
+  modo: 'tocar junto' | 'estudar';
+  trecho: string;
+  bpm: number | null;
+  mao: string | null;
+  passadas: number;
+  paradasNoMeio: number;
+  acerto: { primeira: number; ultima: number; melhor: number; media: number } | null;
+  firmeAPartirDaPassada: number | null;
+  passadasLimpas: number;
+  notasComMaisErro: string[];
+  trechoMaisFraco: string | null;
+  tempo: { emMediaMs: number | null; tendencia: string | null; passadasQueAceleraram: number } | null;
+  sugestaoDoApp: string | null;
 }
 
 export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies: boolean; minutes: number; days: number } {
@@ -234,6 +263,50 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
     .map((n) => `${name(n.midi)} na clave de ${n.clef === 'bass' ? 'fá' : 'sol'} (${pct(1 - n.acc)}% de erro)`);
   const eco = input.runs.filter((r) => r.treinoId === 'eco' && inWeek(r.at) && r.level);
 
+  // Blocos de prática da semana (passadas nota a nota e registros resumidos), os com mais passadas.
+  const passes = buildPasses(takes, input.runs.filter((r) => inWeek(r.at)), (id) => input.songTitle?.(id) ?? null);
+  const hhmm = (t: number) => `${String(new Date(t).getHours()).padStart(2, '0')}:${String(new Date(t).getMinutes()).padStart(2, '0')}`;
+  const trecho = (x: { from?: number; to?: number }) => (x.from && x.to ? (x.from === x.to ? `compasso ${x.from}` : `compassos ${x.from} a ${x.to}`) : 'não registrado');
+  const OUT: Record<NoteError['outcome'], string> = { trocou: 'trocou', cedo: 'entrou cedo', tarde: 'entrou tarde', faltou: 'não tocou', hesitou: 'demorou para achar' };
+  const blocos: DigestBlock[] = buildBlocks(passes, (input.events ?? []).filter((e) => inWeek(e.at)))
+    .map((b) => ({ b, s: blockStats(b) }))
+    .filter(({ s }) => s.n + s.aborts >= 2)
+    .sort((x, y) => y.s.n - x.s.n)
+    .slice(0, 24)
+    .sort((x, y) => x.b.start - y.b.start)
+    .map(({ b, s }) => ({
+      musica: b.title,
+      dia: key(b.start),
+      hora: hhmm(b.start),
+      modo: b.mode === 'estudo' ? 'estudar' : 'tocar junto',
+      trecho: trecho(b),
+      bpm: b.mode === 'estudo' ? null : b.bpm,
+      mao: b.hand ?? null,
+      passadas: s.n,
+      paradasNoMeio: s.aborts,
+      acerto: s.n ? { primeira: pct(s.first!), ultima: pct(s.last!), melhor: pct(s.best!), media: pct(s.mean!) } : null,
+      firmeAPartirDaPassada: s.stableAt,
+      passadasLimpas: s.clean,
+      notasComMaisErro: s.notes.map((n) => `${name(n.midi)} no compasso ${n.measure}: ${n.outcome === 'trocou' && n.played ? `trocou por ${name(n.played)}` : OUT[n.outcome]} (${n.passes} de ${s.n} passadas)`),
+      trechoMaisFraco: s.weak ? `${trecho(s.weak)} (o mais fraco em ${s.weak.count} de ${s.n} passadas)` : null,
+      tempo: s.timing.measured ? { emMediaMs: s.timing.mean, tendencia: s.timing.tendency, passadasQueAceleraram: s.timing.accelerated } : null,
+      sugestaoDoApp: s.suggestion?.kind === 'subir' ? `subir para ${s.suggestion.bpm} BPM` : s.suggestion?.kind === 'baixar' ? `baixar para ${s.suggestion.bpm} BPM` : s.suggestion?.kind === 'tocar junto' ? 'passar para o tocar junto' : null,
+    }));
+  const studyBy = new Map<string, TakeLog[]>();
+  for (const t of takes) if (t.mode === 'estudo') studyBy.set(t.sourceId, [...(studyBy.get(t.sourceId) ?? []), t]);
+  const estudar = [...studyBy.values()].map((list) => {
+    const hes = new Map<number, number>();
+    for (const t of list) for (const e of unpackErrors(t.errors)) if (e.outcome === 'hesitou') hes.set(e.measure, (hes.get(e.measure) ?? 0) + 1);
+    const ms = list.map((t) => t.stepMs).filter((x): x is number => typeof x === 'number');
+    return {
+      musica: input.songTitle?.(list[0].sourceId) ?? list[0].title,
+      voltas: list.length,
+      pontosSemErro: pct(list.reduce((a, t) => a + t.accuracy, 0) / list.length),
+      segundosPorNota: ms.length ? Math.round(ms.reduce((a, b) => a + b, 0) / ms.length / 100) / 10 : null,
+      compassosOndeDemorou: [...hes.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([m, n]) => `compasso ${m} (${n} vezes)`),
+    };
+  });
+
   const digest: WeekDigest = {
     semana: { de: key(start), ate: key(end - DAY) },
     constancia: { minutos: week.minutos, dias: week.dias, minutosTocandoLivre: week.free, meta: { minutos: input.goal.minutes, dias: input.goal.days }, semanaAnterior: { minutos: prev.minutos, dias: prev.dias } },
@@ -252,6 +325,9 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
       : null,
     ouvido: eco.length ? { maiorFrase: Math.max(...eco.map((r) => r.level!)) } : null,
     marcosGravados: input.recordings.filter((r) => r.kind === 'marco' && inWeek(r.createdAt)).map((r) => ({ musica: r.sourceTitle ?? r.title, acerto: r.accuracy !== undefined ? pct(r.accuracy) : null, bpm: r.bpm ?? null })),
+    blocos,
+    padroes: findPatterns(passes).slice(0, 5).map((p) => ({ titulo: p.title, detalhe: p.detail })),
+    estudar,
     alvos,
   };
   // Só vale gastar com a IA se a semana teve treino de verdade.

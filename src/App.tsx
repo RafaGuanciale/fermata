@@ -8,6 +8,7 @@ import { LiveSoundProvider } from './audio/LiveSound';
 import PracticeClock from './progress/PracticeClock';
 import BreakReminder from './progress/BreakReminder';
 import KeepAwake from './components/KeepAwake';
+import ActivityTracker from './analysis/ActivityTracker';
 import AppLayout from './components/AppLayout';
 import ImmersiveFrame, { useCloseImmersive, type ImmersiveState } from './components/ImmersiveFrame';
 import TodayPage from './pages/TodayPage';
@@ -34,6 +35,7 @@ const CourseUnitPage = lazy(() => import('./pages/CourseUnitPage'));
 const CourseFocusPage = lazy(() => import('./pages/CourseFocusPage'));
 const ReferencePage = lazy(() => import('./pages/ReferencePage'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage'));
+const StatsPage = lazy(() => import('./pages/StatsPage'));
 const NoteReadingPage = lazy(() => import('./pages/NoteReadingPage'));
 const TreinoFocusPage = lazy(() => import('./pages/TreinoFocusPage'));
 const FreePlayPage = lazy(() => import('./pages/FreePlayPage'));
@@ -168,6 +170,7 @@ export default function App() {
           <PracticeClock />
           <BreakReminder />
           <KeepAwake />
+          <ActivityTracker />
         <Routes location={background}>
           <Route element={<AppLayout />}>
             <Route index element={<TodayPage />} />
@@ -183,6 +186,7 @@ export default function App() {
             <Route path="/estudo/unidade/:n" element={<CourseUnitPage />} />
             <Route path="/estudo/unidade/:n/:lessonId" element={<CourseLessonPage />} />
             <Route path="/progresso" element={<ProgressPage />} />
+            <Route path="/estatisticas" element={<StatsPage />} />
             <Route path="/arcade" element={<ArcadePage />} />
             <Route path="/consulta" element={<ReferencePage />} />
             <Route path="/consulta/:secao" element={<ReferencePage />} />

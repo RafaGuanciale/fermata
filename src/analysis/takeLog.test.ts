@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { judgeExpected, windowsFor } from '../training/timing';
-import { analyzeTake, packErrors, unpackErrors, type LogExpected } from './takeLog';
+import { analyzeStudyLap, analyzeTake, packErrors, unpackErrors, type LogExpected } from './takeLog';
 
 const exp = (ms: number[], midi = [60, 62, 64, 65, 67, 65, 64, 62]): LogExpected[] =>
   ms.map((t, i) => ({ midi: midi[i % midi.length], t, measure: 1 + Math.floor(i / 4), finger: (i % 5) + 1, hand: 'r' as const }));
@@ -46,5 +46,24 @@ describe('registro da passada', () => {
       { measure: 2, midi: 48, finger: 5, hand: 'l' as const, outcome: 'faltou' as const, delta: 0, played: 0 },
     ];
     expect(unpackErrors(packErrors(errs))).toEqual(errs);
+  });
+
+  it('modo Estudar: tecla errada vira troca contra a nota mais perto; demora grande vira "hesitou"', () => {
+    const r = (m: number) => ({ midi: m, finger: 1, hand: 'r' as const });
+    const a = analyzeStudyLap([
+      { measure: 1, expected: [r(60)], ms: null, wrong: [] },
+      { measure: 1, expected: [r(62)], ms: 600, wrong: [] },
+      { measure: 2, expected: [r(64), r(67)], ms: 700, wrong: [65] },
+      { measure: 2, expected: [r(65)], ms: 650, wrong: [] },
+      { measure: 3, expected: [r(67)], ms: 4000, wrong: [] },
+    ]);
+    expect(a.total).toBe(6);
+    expect(a.accuracy).toBeCloseTo(0.8);
+    expect(a.stepMs).toBe(675);
+    expect(a.errors.map((e) => [e.measure, e.midi, e.outcome, e.played, e.delta])).toEqual([
+      [2, 64, 'trocou', 65, 0],
+      [3, 67, 'hesitou', 0, 4000],
+    ]);
+    expect(unpackErrors(packErrors(a.errors))).toEqual(a.errors);
   });
 });

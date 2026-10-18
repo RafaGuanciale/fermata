@@ -11,7 +11,9 @@ import { db } from '../db/db';
 import type { SongSpec } from '../course/types';
 import { songXml } from '../course/song';
 import { addScoreFingerings, stepFingers } from '../score/fingering';
-import { logTake } from '../analysis/takesRepo';
+import { logStudyLap, logTake } from '../analysis/takesRepo';
+import { logEvent, setViewSubject } from '../analysis/activity';
+import type { StudyStep } from '../analysis/takeLog';
 import { useRecorder, type Take as RecTake } from '../recording/useRecorder';
 import { saveRecording } from '../recording/repo';
 import { timingStats } from '../recording/take';
@@ -136,9 +138,12 @@ const FINGERS_KEY = 'fermata-score-fingers';
 export default function ScorePracticePage({ onClose, song }: { onClose: () => void; song?: SongSpec }) {
   const id = Number(useParams().id);
   // A página de Progresso pode abrir direto num trecho difícil.
-  const startAt = useLocation().state as { from?: number; to?: number } | null;
+  // As Estatísticas abrem com o mesmo andamento e modo ("Refazer este trecho").
+  const startAt = useLocation().state as { from?: number; to?: number; bpm?: number; mode?: 'estudar' | 'junto' } | null;
   const startFrom = startAt?.from;
   const startTo = startAt?.to;
+  const startBpm = startAt?.bpm;
+  const startMode = startAt?.mode;
   const { midi, held, connectMidi, press, release } = useNoteInput();
   const metronome = useMetronome();
   const isFull = useFullscreenState();
@@ -266,7 +271,12 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       const total = measureCount(steps);
       if (startFrom && startTo && startFrom <= startTo && startTo <= total) setRange({ from: startFrom, to: startTo });
       else setRange({ from: 1, to: total });
-      setBpm(meta.song ? Math.round(meta.song.bpm * 0.8) : (meta.ideal ?? scoreTempo ?? 80));
+      // Abre no andamento em que você tocou por último (não no ideal da música, que pode ser bem mais rápido).
+      const lastRuns = await db.runs.where('treinoId').equals(meta.runId).sortBy('at');
+      const lastBpm = [...lastRuns].reverse().find((r) => r.kind === 'timed' && r.bpm)?.bpm;
+      if (cancelled) return;
+      setBpm(startBpm ?? lastBpm ?? (meta.song ? Math.round(meta.song.bpm * 0.8) : (meta.ideal ?? scoreTempo ?? 80)));
+      if (startMode) setMode(startMode);
       setHand('direita');
       setLoaded({ ...meta, steps, staffCount, beatsPerBar, clickEvery, low, high, scoreTempo });
       if (meta.song) setHand(meta.song.hands);
@@ -276,7 +286,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       osmdRef.current?.clear();
       osmdRef.current = null;
     };
-  }, [id, song, startFrom, startTo]);
+  }, [id, song, startFrom, startTo, startBpm, startMode]);
 
   // Redesenha a partitura quando a largura muda (os elementos SVG mudam, então relê).
   useEffect(() => {
@@ -321,13 +331,42 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   const order = useMemo(() => (loaded ? playableSteps(loaded.steps, hand, loaded.staffCount, range) : []), [loaded, hand, range]);
   const allNotes = useMemo(() => (loaded ? playNotes(loaded.steps, loaded.staffCount, range, bpm) : []), [loaded, range, bpm]);
 
+  // ---------- registro: o que a tela mostra e cada mudança de andamento, trecho, mão ou modo ----------
+  useEffect(() => {
+    if (loaded) setViewSubject({ sourceId: loaded.runId, title: loaded.title });
+  }, [loaded]);
+  const lastConfig = useRef('');
+  useEffect(() => {
+    if (!loaded) return;
+    const key = [mode, hand, range.from, range.to, mode === 'junto' ? bpm : 0].join('|');
+    if (key === lastConfig.current) return;
+    // Espera você parar de mexer: 60 → 64 → 68 vira uma mudança só.
+    const timer = window.setTimeout(() => {
+      lastConfig.current = key;
+      void logEvent({ type: 'config', sourceId: loaded.runId, title: loaded.title, mode: mode === 'junto' ? 'junto' : 'estudo', bpm: mode === 'junto' ? bpm : undefined, hand, from: range.from, to: range.to });
+    }, 2500);
+    return () => window.clearTimeout(timer);
+  }, [loaded, mode, hand, range.from, range.to, bpm]);
+
   // ---------- estudar ----------
   const [wait, setWait] = useState<WaitState>(() => createWait([]));
   const [wrongKey, setWrongKey] = useState<number | null>(null);
+  // Cada volta no Estudar vira um registro: teclas erradas e onde você demorou para achar a nota.
+  const studyRef = useRef<{ steps: StudyStep[]; stepStart: number | null; wrong: Midi[]; hand: Hand; from: number; to: number }>({ steps: [], stepStart: null, wrong: [], hand: 'direita', from: 1, to: 1 });
+  const flushStudy = useCallback((complete: boolean) => {
+    const st = studyRef.current;
+    const l = loadedRef.current;
+    if (l && st.steps.length >= (complete ? 1 : 4)) void logStudyLap({ sourceId: l.runId, title: l.title, hand: st.hand, from: st.from, to: st.to, steps: st.steps, complete });
+    studyRef.current = { ...st, steps: [], stepStart: null, wrong: [] };
+  }, []);
+  const loadedRef = useRef(loaded);
+  loadedRef.current = loaded;
   useEffect(() => {
+    flushStudy(false);
     setWait(createWait(order));
     setWrongKey(null);
-  }, [order, mode]);
+  }, [order, mode, flushStudy]);
+  useEffect(() => () => flushStudy(false), [flushStudy]);
 
   const currentStep = loaded && wait.order.length ? loaded.steps[wait.order[wait.pos]] : null;
   const expected = currentStep && loaded ? expectedFor(currentStep, hand, loaded.staffCount) : [];
@@ -354,7 +393,19 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   const takeRef = useRef<Take>(take);
   takeRef.current = take;
 
+  // Parou no meio (botão Parar ou fechou a tela): fica registrado com o acerto até ali.
+  const abortRef = useRef<() => void>(() => {});
+  abortRef.current = () => {
+    const track = trackRef.current;
+    const plan = planRef.current;
+    if (!track || !plan || !loaded || listening || takeRef.current !== 'playing') return;
+    const elapsed = performance.now() - track.firstBeat;
+    const j = judgeExpected(plan.expected, eventsRef.current, windowsFor(1), Math.max(150, track.beatMs / 2), elapsed);
+    void logEvent({ type: 'abort', sourceId: loaded.runId, title: loaded.title, mode: 'junto', bpm, hand, from: range.from, to: range.to, accuracy: Math.round(j.accuracy * 1000) / 1000, ms: Math.round(elapsed), notes: eventsRef.current.length });
+  };
+
   const stopTake = useCallback(() => {
+    abortRef.current();
     recRef.current.cancel();
     trackRef.current?.cancel();
     trackRef.current = null;
@@ -365,6 +416,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
   }, []);
 
   useEffect(() => () => {
+    abortRef.current();
     trackRef.current?.cancel();
     stopSoundRef.current?.();
   }, []);
@@ -394,6 +446,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
     setLastTake(null);
     setMarcoSaved(false);
     if (!listenOnly) recRef.current.start(track.firstBeat);
+    else void logEvent({ type: 'listen', sourceId: loaded.runId, title: loaded.title, bpm, hand, from: range.from, to: range.to });
     setListening(listenOnly);
     setTake('countin');
   };
@@ -476,6 +529,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
       hand,
     });
     setMarcoSaved(true);
+    void logEvent({ type: 'marco', sourceId: loaded.runId, title: loaded.title, bpm, hand, from: range.from, to: range.to, accuracy: result.r.accuracy });
   };
 
   // ---------- entrada de notas ----------
@@ -484,6 +538,21 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
     if (mode === 'estudar') {
       if (!currentStep) return;
       const next = waitPress(wait, m, expected);
+      const st = studyRef.current;
+      if (st.stepStart === null) Object.assign(st, { stepStart: at, hand, from: range.from, to: range.to });
+      if (next.wrong !== null) st.wrong.push(m);
+      if (next.pos !== wait.pos || next.laps !== wait.laps) {
+        const stepIdx = wait.order[wait.pos];
+        st.steps.push({
+          measure: currentStep.measure,
+          expected: expected.map((x) => ({ midi: x, ...fingerMapRef.current?.get(`${stepIdx}:${x}`) })),
+          ms: st.steps.length ? at - st.stepStart! : null,
+          wrong: st.wrong,
+        });
+        st.stepStart = at;
+        st.wrong = [];
+        if (next.laps !== wait.laps) flushStudy(true);
+      }
       setWrongKey(next.wrong);
       setWait(next);
       return;
