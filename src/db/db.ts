@@ -59,6 +59,8 @@ export interface Piece extends Synced {
   scoreFileUid?: string | null;
   /** Andamento ideal (BPM). Sem ele, vale o da partitura. */
   bpm?: number | null;
+  /** Música do caminho de repertório (src/repertoire/path.ts), quando entrou por lá. */
+  pathId?: string;
   createdAt: number;
   updatedAt: number;
   openedAt: number | null;

@@ -36,6 +36,7 @@ const CourseFocusPage = lazy(() => import('./pages/CourseFocusPage'));
 const ReferencePage = lazy(() => import('./pages/ReferencePage'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
+const PathPage = lazy(() => import('./pages/PathPage'));
 const NoteReadingPage = lazy(() => import('./pages/NoteReadingPage'));
 const TreinoFocusPage = lazy(() => import('./pages/TreinoFocusPage'));
 const FreePlayPage = lazy(() => import('./pages/FreePlayPage'));
@@ -179,6 +180,7 @@ export default function App() {
             <Route path="/repertorio/nova" element={<PieceFormPage />} />
             <Route path="/repertorio/categoria/:slug" element={<CategoryPage />} />
             <Route path="/repertorio/musicos" element={<MusiciansPage />} />
+            <Route path="/repertorio/caminho" element={<PathPage />} />
             <Route path="/repertorio/peca/:id" element={<PiecePage />} />
             <Route path="/repertorio/peca/:id/editar" element={<PieceFormPage />} />
             <Route path="/conta" element={<AccountPage />} />

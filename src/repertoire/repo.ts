@@ -3,6 +3,7 @@
 
 import { db, type Piece, type StoredFile } from '../db/db';
 import { downloadFile } from '../sync/engine';
+import type { PathSong } from './path';
 
 export const ACCEPTED_FILES = 'application/pdf,image/png,image/jpeg,image/webp';
 export const MAX_FILE_BYTES = 40 * 1024 * 1024;
@@ -96,6 +97,23 @@ export async function deletePiece(id: number) {
     if (p?.scoreFileId) await db.files.delete(p.scoreFileId);
     await db.pieces.delete(id);
   });
+}
+
+/**
+ * Põe uma música do caminho no seu repertório como "Quero aprender". As de domínio público vêm com a partitura
+ * do app (public/library); as outras ficam sem partitura até você importar em Editar.
+ */
+export async function addPathSong(song: PathSong): Promise<number> {
+  let score: File | undefined;
+  if (song.file) {
+    const res = await fetch(song.file.path);
+    if (!res.ok) throw new Error('Não deu para baixar a partitura. Tente de novo com internet.');
+    score = new File([await res.blob()], song.file.name, { type: 'application/vnd.recordare.musicxml' });
+  }
+  return savePiece(
+    { title: song.title, people: song.people, arrangement: song.file?.source ?? '', categories: song.categories, level: song.level, status: 'wish', bpm: song.bpm ?? null, pathId: song.id },
+    score ? { score } : {},
+  );
 }
 
 /** Devolve a partitura com o arquivo. Se ela veio de outro aparelho, baixa da nuvem na primeira vez. */

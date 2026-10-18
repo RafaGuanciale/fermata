@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type LearnStatus } from '../db/db';
 import { CATEGORIES, STATUS_LABEL, STATUS_ORDER, countLabel, matchesQuery, musiciansOf } from '../repertoire/catalog';
 import PhotoCard from '../components/PhotoCard';
+import { nextOnPath, pathItems } from '../repertoire/path';
 import PieceList from '../components/PieceList';
 import { PlusIcon, SearchIcon } from '../components/Icons';
 
@@ -17,6 +18,9 @@ export default function RepertoirePage() {
   const shown = all.filter((p) => (status === 'all' || p.status === status) && matchesQuery(p, query));
   const musicians = musiciansOf(all);
   const count = (slug: string) => all.filter((p) => p.categories.includes(slug)).length;
+  const items = pathItems(all);
+  const next = nextOnPath(items);
+  const done = items.filter((i) => i.state === 'aprendida').length;
 
   return (
     <>
@@ -42,6 +46,14 @@ export default function RepertoirePage() {
           aria-label="Buscar por título, músico ou categoria"
         />
       </label>
+
+      {!searching && next && (
+        <Link className="pathBanner" to="/repertorio/caminho">
+          <span className="pathBanner__eyebrow">Seu caminho · {done} de {items.length} aprendidas</span>
+          <span className="pathBanner__title">Agora: {next.song.title}</span>
+          <span className="pathBanner__meta">Dez músicas da primeira semana até Clair de lune. Ver o caminho</span>
+        </Link>
+      )}
 
       {!searching && (
         <section className="page__section" aria-label="Categorias">
