@@ -249,7 +249,9 @@ export function progressChanges(passes: Pass[], now: number): Change[] {
   const isNow = (p: Pass) => p.at > recentStart && p.at <= now;
   const isBefore = (p: Pass) => p.at > beforeStart && p.at <= recentStart;
   const out: Change[] = [];
-  const j = passes.filter(junto);
+  // Só músicas (a técnica tem a escada própria em skillChanges) e só passadas com o trecho registrado:
+  // sem o trecho não dá para saber se foi a música inteira ou um compasso.
+  const j = passes.filter((p) => junto(p) && p.kind === 'musica' && p.from !== undefined && p.to !== undefined);
 
   const configs = new Map<string, Pass[]>();
   for (const p of j) {

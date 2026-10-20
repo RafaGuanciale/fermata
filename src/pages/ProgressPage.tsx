@@ -93,7 +93,12 @@ function ChangeRows({ items }: { items: Change[] }) {
 
 function WeekPart() {
   const s = useWeeklyInsight();
-  if (s.status === 'loading') return <Part n={1} id="pg-semana" name="Sua semana" headline="Preparando a análise da semana passada…" />;
+  if (s.status === 'loading')
+    return (
+      <Part n={1} id="pg-semana" name="Sua semana" headline="Preparando a análise da semana passada…">
+        <p className="story__lead">Quando a análise é nova, a IA leva até um minuto para escrever. O resto da página já está abaixo.</p>
+      </Part>
+    );
   if (s.status === 'error') return <Part n={1} id="pg-semana" name="Sua semana" headline="Análise indisponível agora"><p className="story__lead">{s.message}</p></Part>;
   if (s.status === 'skipped')
     return (
