@@ -5,7 +5,8 @@ import { useWeeklyInsight } from './useWeeklyInsight';
 
 export default function InsightFocus() {
   const s = useWeeklyInsight();
-  if (s.status !== 'ready' || !s.insight.foco) return null;
+  // Com metas, o foco aparece junto delas (WeekGoals).
+  if (s.status !== 'ready' || !s.insight.foco || s.insight.acoes.length) return null;
   return (
     <p className="insightFocus">
       <span className="insightFocus__label">Foco da semana</span>

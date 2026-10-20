@@ -1,8 +1,11 @@
 // Progresso: responde "estou melhorando, e onde eu travo?". Hoje é o "o que eu faço agora"; Estatísticas é o
 // lugar de investigar (painel, dia a dia, cada música, constância).
-// Aqui: a análise da semana (IA), o que melhorou e o que piorou, a evolução por habilidade e o que pode melhorar.
+// Uma coluna só, para ler de cima para baixo: 1 sua semana (IA), 2 metas da semana, 3 o que mudou,
+// 4 onde você está, 5 o que treinar. Cada parte tem uma manchete e linhas com o número em destaque.
+// Só entra o que você está estudando (src/stats/focus.ts): música aberta só para ver não conta.
 // Os números vêm de src/stats/summary.ts e src/progress/skills.ts (puros e testados).
 
+import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
@@ -10,11 +13,12 @@ import { DAY } from '../db/stats';
 import { noteLabel } from '../music/notes';
 import { formatPercent } from '../format';
 import { CheckIcon, CrossIcon } from '../components/Icons';
-import WeeklyInsight from '../insight/WeeklyInsight';
+import { useWeeklyInsight } from '../insight/useWeeklyInsight';
+import WeekGoals, { useWeekGoals } from '../insight/WeekGoals';
 import { ALL_TRACKS, bestTechBpm, techRunId, techStatus } from '../course/track';
 import ReviewSpots from '../progress/ReviewSpots';
-import { weakSpots } from '../progress/weakSpots';
 import { bestByTreino, weakNotes } from '../progress/stats';
+import { weakSpots } from '../progress/weakSpots';
 import { earSummary, readingSummary, trend, weakReading } from '../progress/skills';
 import { useStatsData } from '../stats/useStatsData';
 import { findPatterns, progressChanges, skillChanges, songNow, type Change } from '../stats/summary';
@@ -22,32 +26,117 @@ import { FIRM } from '../stats/model';
 import { handText, rangeText } from '../stats/format';
 
 const seconds = (ms: number) => `${(ms / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} s`;
+const dayMonth = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short' });
+
+function weekLabel(week: string) {
+  const start = new Date(`${week}T12:00`);
+  return `${dayMonth.format(start)} a ${dayMonth.format(new Date(start.getTime() + 6 * DAY))}`;
+}
+
+/** Uma parte da página: número, nome, manchete e o conteúdo. */
+function Part({ n, name, headline, children, id }: { n: number; name: string; headline: React.ReactNode; children?: React.ReactNode; id: string }) {
+  return (
+    <section className="story__part" aria-labelledby={id}>
+      <p className="story__eyebrow">
+        <span className="story__n">{n}</span>
+        {name}
+      </p>
+      <h2 className="story__headline" id={id}>{headline}</h2>
+      {children}
+    </section>
+  );
+}
+
+/** Linha: rótulo à esquerda, o número em destaque, o detalhe embaixo, e uma ação opcional. */
+function Row({ label, value, detail, trendNode, action }: { label: React.ReactNode; value: React.ReactNode; detail?: React.ReactNode; trendNode?: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <li className="storyRow">
+      <span className="storyRow__label">{label}</span>
+      <span className="storyRow__main">
+        <span className="storyRow__value">{value}</span>
+        {detail && <span className="storyRow__detail">{detail}</span>}
+        {trendNode}
+      </span>
+      {action && <span className="storyRow__action">{action}</span>}
+    </li>
+  );
+}
 
 /** "melhor" / "pior" com ícone e palavra (nunca só cor). */
-function Trend({ t, before }: { t: ReturnType<typeof trend>; before: string }) {
+function TrendTag({ t, text }: { t: 'melhor' | 'pior' | 'igual' | null; text: string }) {
   if (!t) return null;
   return (
-    <span className={'skill__trend' + (t === 'melhor' ? ' skill__trend-up' : t === 'pior' ? ' skill__trend-down' : '')}>
-      {t === 'melhor' && <CheckIcon className="skill__trendIcon" />}
-      {t === 'pior' && <CrossIcon className="skill__trendIcon" />}
-      {t === 'igual' ? 'igual' : t} que nas 4 semanas antes ({before})
+    <span className={'storyRow__trend' + (t === 'melhor' ? ' storyRow__trend-up' : t === 'pior' ? ' storyRow__trend-down' : '')}>
+      {t === 'melhor' && <CheckIcon className="storyRow__trendIcon" />}
+      {t === 'pior' && <CrossIcon className="storyRow__trendIcon" />}
+      {text}
     </span>
   );
 }
 
-function ChangeList({ items, dir }: { items: Change[]; dir: 'melhor' | 'pior' }) {
+function ChangeRows({ items }: { items: Change[] }) {
   return (
-    <ul className="changes__list">
+    <ul className="story__rows">
       {items.map((c) => (
-        <li key={c.id} className={'changes__item changes__item-' + (dir === 'melhor' ? 'up' : 'down')}>
-          {dir === 'melhor' ? <CheckIcon className="changes__icon" /> : <CrossIcon className="changes__icon" />}
-          <span className="changes__text">
+        <li key={c.id} className={'storyChange storyChange-' + (c.dir === 'melhor' ? 'up' : 'down')}>
+          {c.dir === 'melhor' ? <CheckIcon className="storyChange__icon" /> : <CrossIcon className="storyChange__icon" />}
+          <span className="storyChange__word">{c.dir === 'melhor' ? 'Melhorou' : 'Piorou'}</span>
+          <span className="storyChange__text">
             <strong>{c.sourceId ? <Link to={`/estatisticas?ver=musica&id=${encodeURIComponent(c.sourceId)}`}>{c.title}</Link> : c.title}</strong>
             <span>{c.detail}</span>
           </span>
         </li>
       ))}
     </ul>
+  );
+}
+
+function WeekPart() {
+  const s = useWeeklyInsight();
+  if (s.status === 'loading') return <Part n={1} id="pg-semana" name="Sua semana" headline="Preparando a análise da semana passada…" />;
+  if (s.status === 'error') return <Part n={1} id="pg-semana" name="Sua semana" headline="Análise indisponível agora"><p className="story__lead">{s.message}</p></Part>;
+  if (s.status === 'skipped')
+    return (
+      <Part n={1} id="pg-semana" name={`Sua semana · ${weekLabel(s.week)}`} headline="Semana com pouco treino">
+        <p className="story__lead">{s.minutes} min em {s.days} {s.days === 1 ? 'dia' : 'dias'}. A análise sai toda segunda quando a semana anterior tem pelo menos 60 minutos em 3 dias.</p>
+      </Part>
+    );
+  const { insight } = s;
+  return (
+    <Part n={1} id="pg-semana" name={`Sua semana · ${weekLabel(s.week)}`} headline={insight.titulo}>
+      <p className="story__lead">{insight.resumo}</p>
+      {(insight.melhorou.length > 0 || insight.atencao.length > 0) && (
+        <ul className="story__rows">
+          {insight.melhorou.map((t) => (
+            <li key={t} className="storyChange storyChange-up">
+              <CheckIcon className="storyChange__icon" />
+              <span className="storyChange__word">Melhorou</span>
+              <span className="storyChange__text"><span>{t}</span></span>
+            </li>
+          ))}
+          {insight.atencao.map((t) => (
+            <li key={t} className="storyChange storyChange-down">
+              <CrossIcon className="storyChange__icon" />
+              <span className="storyChange__word">Atenção</span>
+              <span className="storyChange__text"><span>{t}</span></span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="story__note">Feita pela IA a partir dos números do app, só com o que você está estudando. "Dedo" é o do dedilhado sugerido.</p>
+    </Part>
+  );
+}
+
+function GoalsPart() {
+  const w = useWeekGoals();
+  if (!w) return null;
+  const done = w.states.filter((g) => g.done).length;
+  return (
+    <Part n={2} id="pg-metas" name="Metas da semana" headline={done === w.states.length ? 'Todas as metas feitas' : `${done} de ${w.states.length} metas feitas`}>
+      <p className="story__lead">Saem da análise. O app marca sozinho quando vê você conseguir; você também pode marcar.</p>
+      <WeekGoals />
+    </Part>
   );
 }
 
@@ -61,19 +150,19 @@ export default function ProgressPage() {
   }, []);
 
   if (!stats || !extra) return null;
-  const { runs, passes } = stats;
+  const { runs } = stats;
+  // Só o que é estudo: música aberta para ver como era fica de fora.
+  const passes = stats.passes.filter((p) => stats.isStudied(p.sourceId));
 
   const weak = weakReading(extra.notes, weakNotes(extra.attempts), now);
   const best = bestByTreino(runs);
   const reading = readingSummary(runs, now);
   const ear = earSummary(runs, now);
 
-  // O que mudou: últimos 7 dias contra os 21 antes.
-  const changes = [...progressChanges(passes, now), ...skillChanges(runs, now, stats.titleOf)].sort((a, b) => b.weight - a.weight);
-  const better = changes.filter((c) => c.dir === 'melhor').slice(0, 4);
-  const worse = changes.filter((c) => c.dir === 'pior').slice(0, 4);
+  const changes = [...progressChanges(passes, now), ...skillChanges(runs, now, stats.titleOf)].sort((a, b) => b.weight - a.weight).slice(0, 6);
+  const better = changes.filter((c) => c.dir === 'melhor').length;
+  const worse = changes.length - better;
 
-  // Técnica: quantos exercícios começados já estão no alvo, e os que estão subindo.
   const techItems = ALL_TRACKS.flatMap((t) => t.technique.map((item) => ({ item, unit: t.unit })));
   const techMeters = techItems
     .filter(({ item }) => best.has(techRunId(item)))
@@ -82,29 +171,29 @@ export default function ProgressPage() {
   const climbing = techMeters.filter((t) => t.status !== 'no alvo').sort((a, b) => b.last - a.last);
   const stale = climbing.filter((t) => now - t.last > 7 * DAY);
 
-  // Músicas: onde você está agora em cada uma (última configuração do Tocar junto) e o andamento firme.
   const songIds = [...new Set(passes.filter((p) => p.kind === 'musica').map((p) => p.sourceId))];
   const songs = songIds
     .map((id) => {
       const ps = passes.filter((p) => p.sourceId === id);
       const at = songNow(ps);
       if (!at) return null;
-      const recent = ps.filter((p) => p.mode === 'junto' && p.at > now - 28 * DAY);
+      const recent = ps.filter((p) => p.mode === 'junto' && p.at > now - 28 * DAY && p.from === at.from && p.to === at.to);
       const byBpm = new Map<number, number[]>();
       for (const p of recent) byBpm.set(p.bpm, [...(byBpm.get(p.bpm) ?? []), p.accuracy]);
       const firm = [...byBpm.entries()].filter(([, a]) => a.length >= 3 && a.reduce((x, y) => x + y, 0) / a.length >= FIRM).map(([b]) => b);
       const same = ps.filter((p) => p.mode === 'junto' && p.bpm === at.bpm && p.from === at.from && p.to === at.to);
       const prev = same.slice(0, -10);
       const prevMean = prev.length >= 3 ? prev.slice(-10).reduce((a, p) => a + p.accuracy, 0) / Math.min(10, prev.length) : null;
-      return { id, title: ps[ps.length - 1].title, at, firm: firm.length ? Math.max(...firm) : null, prevMean, week: ps.filter((p) => p.at > now - 7 * DAY).length, route: stats.routeOf(id) };
+      return { id, title: ps[ps.length - 1].title, at, firm: firm.length ? Math.max(...firm) : null, prevMean, route: stats.routeOf(id) };
     })
     .filter((s): s is NonNullable<typeof s> => !!s)
     .sort((a, b) => b.at.last - a.at.last)
-    .slice(0, 6);
+    .slice(0, 5);
 
   const patterns = findPatterns(passes.filter((p) => p.at > now - 14 * DAY)).slice(0, 3);
-  const songWeak = weakSpots(runs);
-  const empty = runs.length === 0 && passes.length === 0 && extra.attempts.length === 0 && extra.notes.length === 0;
+  const empty = runs.length === 0 && stats.passes.length === 0 && extra.attempts.length === 0 && extra.notes.length === 0;
+  const spots = weakSpots(runs.filter((r) => stats.isStudied(r.treinoId))).length;
+  const toTrain = patterns.length + weak.length + stale.length + spots;
 
   return (
     <>
@@ -120,185 +209,91 @@ export default function ProgressPage() {
           <Link className="button button-primary" to="/treino">Ir para o treino</Link>
         </section>
       ) : (
-        <div className="progress">
-          <WeeklyInsight />
+        <div className="story">
+          <WeekPart />
+          <GoalsPart />
 
-          <section className="page__section" aria-labelledby="pg-mudou">
-            <h2 className="page__sectionTitle" id="pg-mudou">O que mudou</h2>
-            <p className="page__lead">Últimos 7 dias comparados com as 3 semanas antes.</p>
-            {better.length || worse.length ? (
-              <div className="changes">
-                <div className="progress__card">
-                  <h3 className="progress__cardTitle">Melhorou</h3>
-                  {better.length ? <ChangeList items={better} dir="melhor" /> : <p className="progress__muted">Nada subiu de forma clara nesta semana.</p>}
-                </div>
-                <div className="progress__card">
-                  <h3 className="progress__cardTitle">Piorou</h3>
-                  {worse.length ? <ChangeList items={worse} dir="pior" /> : <p className="progress__muted">Nada caiu. Bom sinal.</p>}
-                </div>
-              </div>
+          <Part
+            n={3}
+            id="pg-mudou"
+            name="O que mudou · últimos 7 dias contra as 3 semanas antes"
+            headline={changes.length ? [better ? `${better} ${better === 1 ? 'coisa melhorou' : 'coisas melhoraram'}` : '', worse ? `${worse} ${worse === 1 ? 'piorou' : 'pioraram'}` : ''].filter(Boolean).join(', ') : 'Ainda sem comparação'}
+          >
+            {changes.length ? (
+              <ChangeRows items={changes} />
             ) : (
-              <p className="progress__muted">Ainda não dá para comparar: precisa de pelo menos 3 passadas do mesmo trecho e andamento nesta semana e nas anteriores, ou leitura, ouvido e técnica nos dois períodos.</p>
+              <p className="story__lead">Precisa de pelo menos 3 passadas do mesmo trecho e andamento nesta semana e nas anteriores, ou de leitura, ouvido e técnica nos dois períodos.</p>
             )}
-          </section>
+          </Part>
 
-          <section className="page__section" aria-labelledby="pg-evol">
-            <h2 className="page__sectionTitle" id="pg-evol">Evolução</h2>
-            <p className="page__lead">Cada cartão responde uma pergunta.</p>
-            <div className="skills">
-              <article className="skill skill-wide">
-                <h3 className="skill__name">Músicas</h3>
-                <p className="skill__question">Onde você está em cada música?</p>
-                {songs.length ? (
-                  <ul className="skill__songs">
-                    {songs.map((s) => (
-                      <li key={s.id} className="skill__song">
-                        <Link className="skill__songTitle" to={`/estatisticas?ver=musica&id=${encodeURIComponent(s.id)}`}>{s.title}</Link>
-                        <span className="skill__songMeta">
-                          Agora: {[rangeText(s.at), `${s.at.bpm} BPM`, handText(s.at.hand)].filter(Boolean).join(', ')} · {formatPercent(s.at.mean)} nas últimas {s.at.recent} {s.at.recent === 1 ? 'passada' : 'passadas'}
-                          {s.firm ? ` · firme a ${s.firm} BPM` : ''}
-                          {s.week ? ` · ${s.week} ${s.week === 1 ? 'passada' : 'passadas'} nesta semana` : ''}
-                        </span>
-                        {s.prevMean !== null && (
-                          <span className={'skill__trend' + (s.at.mean - s.prevMean >= 0.03 ? ' skill__trend-up' : s.at.mean - s.prevMean <= -0.03 ? ' skill__trend-down' : '')}>
-                            {s.at.mean - s.prevMean >= 0.03 && <CheckIcon className="skill__trendIcon" />}
-                            {s.at.mean - s.prevMean <= -0.03 && <CrossIcon className="skill__trendIcon" />}
-                            {s.at.mean - s.prevMean >= 0.03 ? 'melhor' : s.at.mean - s.prevMean <= -0.03 ? 'pior' : 'igual'} que nas 10 passadas antes no mesmo trecho e andamento ({formatPercent(s.prevMean)})
-                          </span>
-                        )}
-                        {s.route && (
-                          <Link className="page__link skill__play" to={s.route} state={{ background: location, from: s.at.from, to: s.at.to, bpm: s.at.bpm, mode: 'junto' }}>Continuar daqui</Link>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="skill__empty">Toque uma música no "Tocar junto" para ver aqui onde você está nela.</p>
-                )}
-              </article>
+          <Part n={4} id="pg-onde" name="Onde você está" headline="Cada habilidade, hoje">
+            <ul className="story__rows">
+              {songs.map((s) => (
+                <Row
+                  key={s.id}
+                  label="Música"
+                  value={<><Link to={`/estatisticas?ver=musica&id=${encodeURIComponent(s.id)}`}>{s.title}</Link> <span className="storyRow__num">{formatPercent(s.at.mean)}</span></>}
+                  detail={`${[rangeText(s.at), `${s.at.bpm} BPM`, handText(s.at.hand)].filter(Boolean).join(' · ')} · últimas ${s.at.recent} ${s.at.recent === 1 ? 'passada' : 'passadas'}${s.firm ? ` · firme a ${s.firm} BPM` : ''}`}
+                  trendNode={s.prevMean !== null ? <TrendTag t={trend(s.at.mean, s.prevMean)} text={`${trend(s.at.mean, s.prevMean)} que as 10 passadas antes (${formatPercent(s.prevMean)})`} /> : null}
+                  action={s.route ? <Link className="page__link" to={s.route} state={{ background: location, from: s.at.from, to: s.at.to, bpm: s.at.bpm, mode: 'junto' }}>Continuar</Link> : null}
+                />
+              ))}
+              <Row
+                label="Leitura"
+                value={reading.now ? <span className="storyRow__num">{seconds(reading.now.ms)} <small>por nota</small></span> : 'Sem leitura em 4 semanas'}
+                detail={reading.now ? `Acerto de primeira ${formatPercent(reading.now.firstTry)} · ${reading.now.rounds} ${reading.now.rounds === 1 ? 'rodada' : 'rodadas'} em 4 semanas` : undefined}
+                trendNode={reading.now && reading.before ? <TrendTag t={trend(reading.now.ms, reading.before.ms, true)} text={`${trend(reading.now.ms, reading.before.ms, true)} que nas 4 semanas antes (${seconds(reading.before.ms)})`} /> : null}
+                action={<Link className="page__link" to="/treino/notas" state={{ background: location }}>Treinar</Link>}
+              />
+              <Row
+                label="Técnica"
+                value={techMeters.length ? <span className="storyRow__num">{onTarget} <small>de {techMeters.length} no andamento alvo</small></span> : 'Nenhum exercício ainda'}
+                detail={climbing[0] ? `Subindo: ${climbing[0].item.title}, ${climbing[0].best ?? 0} de ${climbing[0].item.target} BPM` : undefined}
+                action={<Link className="page__link" to="/treino">Treinar</Link>}
+              />
+              <Row
+                label="Ouvido"
+                value={ear.now ? <span className="storyRow__num">{ear.now} <small>notas na maior frase de ouvido</small></span> : 'Ainda sem medida'}
+                trendNode={ear.now && ear.before ? <TrendTag t={trend(ear.now, ear.before)} text={`${trend(ear.now, ear.before)} que nas 4 semanas antes (${ear.before} notas)`} /> : null}
+                action={<Link className="page__link" to="/treino/eco" state={{ background: location }}>Treinar</Link>}
+              />
+            </ul>
+          </Part>
 
-              <article className="skill">
-                <h3 className="skill__name">Leitura</h3>
-                <p className="skill__question">Quanto tempo você leva para tocar a nota que aparece na pauta?</p>
-                {reading.now ? (
-                  <>
-                    <p className="skill__value">{seconds(reading.now.ms)}</p>
-                    <p className="skill__detail">Acerto de primeira: {formatPercent(reading.now.firstTry)} · {reading.now.rounds} {reading.now.rounds === 1 ? 'rodada' : 'rodadas'} em 4 semanas</p>
-                    <Trend t={trend(reading.now.ms, reading.before?.ms ?? null, true)} before={reading.before ? seconds(reading.before.ms) : ''} />
-                  </>
-                ) : (
-                  <p className="skill__empty">
-                    Sem leitura nas últimas 4 semanas. <Link to="/treino/notas" state={{ background: location }}>Fazer uma leitura de notas</Link>
-                  </p>
-                )}
-              </article>
-
-              <article className="skill">
-                <h3 className="skill__name">Técnica</h3>
-                <p className="skill__question">Quantos exercícios de técnica já estão no andamento alvo?</p>
-                {techMeters.length ? (
-                  <>
-                    <p className="skill__value">
-                      {onTarget} <span className="skill__unit">de {techMeters.length}</span>
-                    </p>
-                    {climbing.length > 0 && (
-                      <ul className="progress__meters">
-                        {climbing.slice(0, 3).map(({ item, unit, best: b }) => (
-                          <li key={item.id} className="progress__meter">
-                            <span className="progress__meterName">{item.title}</span>
-                            <span className="progress__meterValue">{b ? `${b} de ${item.target} BPM` : `começa em ${item.from} BPM, alvo ${item.target} BPM`} · unidade {unit}</span>
-                            <span className="progress__bar" role="img" aria-label={`${b ?? 0} de ${item.target} BPM`}>
-                              <span className="progress__barFill" style={{ width: `${Math.min(100, ((b ?? 0) / item.target) * 100)}%` }} />
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {climbing.length === 0 && <p className="skill__detail">Todos os exercícios começados estão no alvo.</p>}
-                  </>
-                ) : (
-                  <p className="skill__empty">
-                    Nenhum exercício de técnica ainda. <Link to="/treino">Ir para o treino</Link>
-                  </p>
-                )}
-              </article>
-
-              <article className="skill">
-                <h3 className="skill__name">Ouvido</h3>
-                <p className="skill__question">Qual a maior frase que você repete de ouvido?</p>
-                {ear.now ? (
-                  <>
-                    <p className="skill__value">
-                      {ear.now} <span className="skill__unit">notas</span>
-                    </p>
-                    <Trend t={trend(ear.now, ear.before)} before={ear.before ? `${ear.before} notas` : ''} />
-                  </>
-                ) : (
-                  <p className="skill__empty">
-                    Ainda sem medida. <Link to="/treino/eco" state={{ background: location }}>Ouvir e tocar de volta</Link>
-                  </p>
-                )}
-              </article>
-            </div>
-          </section>
-
-          <section className="page__section" aria-labelledby="pg-trava">
-            <h2 className="page__sectionTitle" id="pg-trava">O que pode melhorar</h2>
-            {patterns.length === 0 && weak.length === 0 && stale.length === 0 && songWeak.length === 0 ? (
-              <p className="progress__muted">Nada travando agora. Quando um erro começar a se repetir, ele aparece aqui.</p>
-            ) : (
-              <div className="progress__stuck progress__stuck-auto">
-                {patterns.length > 0 && (
-                  <div className="progress__card">
-                    <h3 className="progress__cardTitle">Erros que se repetem</h3>
-                    <p className="progress__muted">Últimas 2 semanas, em todas as músicas e exercícios.</p>
-                    <ul className="patterns">
-                      {patterns.map((p) => (
-                        <li key={p.id} className="patterns__item">
-                          <strong>{p.title}</strong>
-                          <span>{p.detail}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {songWeak.length > 0 && (
-                  <div className="progress__card">
-                    <h3 className="progress__cardTitle">Trechos difíceis das músicas</h3>
-                    <p className="progress__muted">Cada um volta para revisão em 1, 3, 7 e 14 dias, até sair bem.</p>
-                    <ReviewSpots mode="todos" />
-                  </div>
-                )}
-                {weak.length > 0 && (
-                  <div className="progress__card">
-                    <h3 className="progress__cardTitle">Notas que você mais erra na leitura</h3>
-                    <p className="progress__muted">Últimos 30 dias.</p>
-                    <ul className="progress__chips">
-                      {weak.map((w) => (
-                        <li key={w.midi} className="progress__chip">
-                          <strong>{noteLabel(w.midi)}</strong> erra {formatPercent(w.missRate)}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link className="page__link" to="/treino/notas" state={{ background: location }}>Treinar leitura</Link>
-                  </div>
-                )}
-                {stale.length > 0 && (
-                  <div className="progress__card">
-                    <h3 className="progress__cardTitle">Técnica parada</h3>
-                    <p className="progress__muted">Começada, abaixo do alvo e sem treino há mais de 7 dias.</p>
-                    <ul className="progress__list">
-                      {stale.map((t) => (
-                        <li key={t.item.id}>
-                          <Link to="/treino">{t.item.title} (unidade {t.unit})</Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+          <Part n={5} id="pg-treinar" name="O que treinar" headline={patterns.length || weak.length ? 'Onde você mais erra' : toTrain ? 'O que revisar' : 'Nada travando agora'}>
+            {patterns.length > 0 && (
+              <>
+                <h3 className="story__sub">Erros que se repetem nas últimas 2 semanas</h3>
+                <ul className="story__rows">
+                  {patterns.map((p) => (
+                    <Row key={p.id} label="Padrão" value={p.title} detail={p.detail} />
+                  ))}
+                </ul>
+              </>
             )}
-          </section>
+            <ReviewSpots mode="todos">
+              <h3 className="story__sub">Trechos que voltam para revisão (1, 3, 7 e 14 dias)</h3>
+            </ReviewSpots>
+            {weak.length > 0 && (
+              <>
+                <h3 className="story__sub">Notas que você mais erra na leitura (30 dias)</h3>
+                <ul className="story__rows">
+                  <Row label="Leitura" value={weak.map((w) => noteLabel(w.midi)).join(', ')} detail={weak.map((w) => `${noteLabel(w.midi)} erra ${formatPercent(w.missRate)}`).join(' · ')} action={<Link className="page__link" to="/treino/notas" state={{ background: location }}>Treinar</Link>} />
+                </ul>
+              </>
+            )}
+            {stale.length > 0 && (
+              <>
+                <h3 className="story__sub">Técnica parada há mais de 7 dias</h3>
+                <ul className="story__rows">
+                  {stale.map((t) => (
+                    <Row key={t.item.id} label="Técnica" value={t.item.title} detail={`unidade ${t.unit} · ${t.best ?? 0} de ${t.item.target} BPM`} action={<Link className="page__link" to="/treino">Treinar</Link>} />
+                  ))}
+                </ul>
+              </>
+            )}
+            {!toTrain && <p className="story__lead">Quando um erro começar a se repetir, ele aparece aqui.</p>}
+          </Part>
         </div>
       )}
     </>

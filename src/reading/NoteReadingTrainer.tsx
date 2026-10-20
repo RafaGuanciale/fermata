@@ -62,7 +62,11 @@ interface Result {
   ms: number;
 }
 
-type Phase = 'idle' | 'playing' | 'done';
+type Phase = 'idle' | 'countin' | 'playing' | 'done';
+
+/** Contagem antes da primeira nota: dá tempo de tirar a mão do mouse e pôr no piano. */
+const COUNT_FROM = 3;
+const COUNT_MS = 700;
 
 export default function NoteReadingTrainer({ count = 20, compact = false, onDone, onProgress }: {
   count?: number;
@@ -103,6 +107,8 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
 
   const item = round[index] as ReadItem | undefined;
 
+  const [countLeft, setCount] = useState(COUNT_FROM);
+
   const start = useCallback(() => {
     const r = drawRound(level.items, stats, count, Math.random);
     setRound(r);
@@ -111,22 +117,34 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
     setLastWrong(null);
     setFlash('ask');
     setResults([]);
-    setPhase('playing');
+    setCount(COUNT_FROM);
+    setPhase('countin');
     lock.current = false;
-    shownAt.current = performance.now();
     onProgress?.(0, r.length);
   }, [level, stats, count, onProgress]);
+
+  // 3, 2, 1: a primeira nota aparece (e o tempo começa a contar) só depois.
+  useEffect(() => {
+    if (phase !== 'countin') return;
+    if (countLeft <= 0) {
+      setPhase('playing');
+      shownAt.current = performance.now();
+      return;
+    }
+    const t = window.setTimeout(() => setCount((c) => c - 1), COUNT_MS);
+    return () => window.clearTimeout(t);
+  }, [phase, countLeft]);
 
   const finish = useCallback((all: Result[]) => {
     const firstTry = all.filter((r) => r.firstTry).length;
     const ok = all.filter((r) => r.firstTry);
     const avgMs = ok.length ? ok.reduce((s, r) => s + r.ms, 0) / ok.length : null;
     const summary = { firstTry, total: all.length, avgMs };
-    void saveRun({ treinoId: readRunId(levelN), kind: 'names', accuracy: firstTry / Math.max(1, all.length), firstTry, avgMs: avgMs ?? undefined, passed: roundPassed(summary), level: levelN });
+    void saveRun({ treinoId: readRunId(levelN), kind: 'names', accuracy: firstTry / Math.max(1, all.length), firstTry, avgMs: avgMs ?? undefined, passed: roundPassed(summary, level.targetMs), level: levelN });
     setPhase('done');
     endedAt.current = performance.now();
     doneRef.current?.(summary);
-  }, [levelN]);
+  }, [levelN, level.targetMs]);
 
   const answer = useCallback((played: Midi, at = performance.now()) => {
     if (phase !== 'playing' || !item || lock.current) return;
@@ -166,14 +184,14 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
   // Piano: no meio da rodada responde; parado, qualquer tecla começa.
   useNoteOn((m, at) => {
     if (phase === 'playing') answer(m, at);
-    else if (handsFree.isActive && performance.now() - endedAt.current > 1500) start();
+    else if (phase !== 'countin' && handsFree.isActive && performance.now() - endedAt.current > 1500) start();
   });
 
   // Barra de espaço ou Enter começam (fora de campos de texto).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target) || !handsFree.isActive) return;
-      if ((e.key === ' ' || e.key === 'Enter') && phase !== 'playing') {
+      if ((e.key === ' ' || e.key === 'Enter') && phase !== 'playing' && phase !== 'countin') {
         e.preventDefault();
         start();
       }
@@ -187,7 +205,7 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
   const okTimes = results.filter((r) => r.firstTry);
   const avgMs = okTimes.length ? okTimes.reduce((s, r) => s + r.ms, 0) / okTimes.length : null;
   const summary = { firstTry, total: results.length, avgMs };
-  const passedNow = phase === 'done' && roundPassed(summary);
+  const passedNow = phase === 'done' && roundPassed(summary, level.targetMs);
   const nextLevel = LEVELS.find((l) => l.n === levelN + 1);
 
   // Teclado (modo tecla): da menor à maior nota do nível, em oitavas inteiras.
@@ -229,11 +247,18 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
       {phase === 'idle' && (
         <div className="reading__intro">
           <p className="reading__level">Nível {level.n} · {level.title}</p>
-          <p className="reading__focus">{level.focus}</p>
+          <p className="reading__focus">{level.focus} Para passar: {Math.round(LEVEL_PASS.share * 100)}% de primeira e média até {formatSeconds(level.targetMs)} por nota.</p>
           {!compact && clefs.map((c) => <MasteryStaff key={c} items={level.items} stats={stats} clef={c} />)}
           {!compact && <MasteryLegend />}
           <button className="button button-primary" type="button" onClick={start}>Começar</button>
           <p className="reading__hint">Ou toque qualquer tecla do piano, ou aperte espaço.</p>
+        </div>
+      )}
+
+      {phase === 'countin' && (
+        <div className="reading__countin" aria-live="assertive">
+          <p className="reading__ask">Mãos no piano. A primeira nota aparece em</p>
+          <p className="timed__count">{countLeft}</p>
         </div>
       )}
 
@@ -291,7 +316,7 @@ export default function NoteReadingTrainer({ count = 20, compact = false, onDone
             </PassReward>
           ) : (
             <Verdict tone="miss">
-              {firstTry} de {results.length} de primeira{avgMs !== null ? ` · média ${formatSeconds(avgMs)}` : ''}. Para passar: {Math.round(LEVEL_PASS.share * 100)}% de primeira e média até {formatSeconds(LEVEL_PASS.avgMs)}.
+              {firstTry} de {results.length} de primeira{avgMs !== null ? ` · média ${formatSeconds(avgMs)}` : ''}. Para passar: {Math.round(LEVEL_PASS.share * 100)}% de primeira e média até {formatSeconds(level.targetMs)}.
             </Verdict>
           )}
           {!compact && clefs.map((c) => <MasteryStaff key={c} items={level.items} stats={stats} clef={c} />)}

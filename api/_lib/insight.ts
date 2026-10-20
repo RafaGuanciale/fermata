@@ -8,6 +8,8 @@ export interface InsightAction {
   /** id de um dos alvos do resumo (música, leitura, treino…) */
   alvo: string;
   compassos?: { de: number; ate: number };
+  /** o que conta como feito: andamento mínimo e acerto (0 a 1) em 3 passadas seguidas */
+  criterio?: { bpm?: number; acerto?: number };
 }
 
 export interface Insight {
@@ -33,7 +35,9 @@ Regras:
 - Seja honesto. Se a semana foi fraca, diga sem drama. Elogio só quando há número que o justifique.
 - Ações concretas, cada uma com no máximo 15 minutos: o quê, onde (música e compassos), em qual andamento e como (devagar, mãos separadas, ritmos pontuados, metrônomo que some, parar antes do erro). Cada ação aponta para um "alvo" da lista "alvos" do JSON (use o id exato). Para músicas, informe os compassos.
 - Português do Brasil, "você", frases curtas, sem emoji, vírgula decimal, números sempre com unidade, sem Title Case.
-- Se uma área não tem dados, não fale dela.`;
+- Se uma área não tem dados, não fale dela.
+- "musicasSoExploradas" são músicas que ele só abriu para ver como eram, sem estudar: não analise, não cite como problema, não proponha ação nem foco sobre elas.
+- O foco e as ações são sobre o que ele está estudando. Cada ação de música traz em "criterio" o que conta como feito (andamento e acerto), para o app marcar sozinho quando ele conseguir.`;
 
 /** Ferramenta que força a resposta no formato certo. */
 export const INSIGHT_TOOL = {
@@ -58,6 +62,11 @@ export const INSIGHT_TOOL = {
             minutos: { type: 'integer', minimum: 3, maximum: 15 },
             alvo: { type: 'string', description: 'id de um item de "alvos".' },
             compassos: { type: 'object', properties: { de: { type: 'integer' }, ate: { type: 'integer' } } },
+            criterio: {
+              type: 'object',
+              description: 'Só para música: o que conta como feito, para o app marcar sozinho (andamento mínimo em BPM e acerto em %, em 3 passadas seguidas).',
+              properties: { bpm: { type: 'integer' }, acerto: { type: 'integer', minimum: 50, maximum: 100 } },
+            },
           },
           required: ['titulo', 'como', 'minutos', 'alvo'],
         },
@@ -87,7 +96,11 @@ export function parseInsight(input: unknown, targets: string[]): Insight | null 
     const de = typeof c?.de === 'number' ? Math.max(1, Math.round(c.de)) : null;
     const ate = typeof c?.ate === 'number' ? Math.max(de ?? 1, Math.round(c.ate)) : null;
     const alvo = typeof x.alvo === 'string' && targets.includes(x.alvo) ? x.alvo : 'treino';
-    return [{ titulo, como, minutos: Math.min(15, Math.max(3, Math.round(Number(x.minutos) || 10))), alvo, ...(de && ate ? { compassos: { de, ate } } : {}) }];
+    const k = x.criterio as Record<string, unknown> | undefined;
+    const bpm = typeof k?.bpm === 'number' && k.bpm >= 20 && k.bpm <= 240 ? Math.round(k.bpm) : undefined;
+    const acc = typeof k?.acerto === 'number' ? (k.acerto > 1 ? k.acerto / 100 : k.acerto) : undefined;
+    const criterio = bpm || acc ? { ...(bpm ? { bpm } : {}), ...(acc ? { acerto: Math.min(1, Math.max(0.5, acc)) } : {}) } : undefined;
+    return [{ titulo, como, minutos: Math.min(15, Math.max(3, Math.round(Number(x.minutos) || 10))), alvo, ...(de && ate ? { compassos: { de, ate } } : {}), ...(criterio ? { criterio } : {}) }];
   });
   return {
     titulo: str(o.titulo, 80) || 'Sua semana no piano',

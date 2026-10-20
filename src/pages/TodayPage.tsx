@@ -5,6 +5,7 @@ import { formatToday } from '../format';
 import PhotoCard from '../components/PhotoCard';
 import PieceList from '../components/PieceList';
 import InsightFocus from '../insight/InsightFocus';
+import WeekGoals from '../insight/WeekGoals';
 import StreakLine from '../progress/StreakLine';
 import { PlayIcon } from '../components/Icons';
 import { useTrainingToday } from '../course/useTrainingToday';
@@ -63,13 +64,16 @@ export default function TodayPage() {
       <StreakLine />
       <InsightFocus />
 
+      <WeekGoals compact />
+
       {hasDue && (
         <section className="page__section">
-          <div className="page__sectionHead">
-            <h2 className="page__sectionTitle">Trechos para rever hoje</h2>
-          </div>
-          <p className="page__lead">Onde você mais errou no Tocar junto. Estude devagar e depois passe o trecho no tempo: se sair bem, ele volta mais espaçado.</p>
-          <ReviewSpots mode="hoje" />
+          <ReviewSpots mode="hoje">
+            <div className="page__sectionHead">
+              <h2 className="page__sectionTitle">Trechos para rever hoje</h2>
+            </div>
+            <p className="page__lead">Onde você mais errou no Tocar junto. Estude devagar e depois passe o trecho no tempo: se sair bem, ele volta mais espaçado.</p>
+          </ReviewSpots>
         </section>
       )}
 

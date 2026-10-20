@@ -241,7 +241,8 @@ export interface AppEvent extends Synced {
   id: string;
   at: number;
   day: string;
-  type: 'view' | 'config' | 'listen' | 'abort' | 'marco';
+  /** goal: meta da semana marcada (accuracy 1) ou desmarcada (0) à mão; sourceId = id da meta */
+  type: 'view' | 'config' | 'listen' | 'abort' | 'marco' | 'goal';
   /** visita: endereço, área ("musicas", "leitura"…), duração com a aba visível (ms) e notas tocadas */
   path?: string;
   area?: string;

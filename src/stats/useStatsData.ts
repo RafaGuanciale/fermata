@@ -8,6 +8,7 @@ import { ALL_TRACKS } from '../course/track';
 import { parseArcadeRunId } from '../arcade/settings';
 import { ARCADE_CATALOG } from '../arcade/songs';
 import { buildPasses, type Pass } from './model';
+import { studiedSplit, type Engagement } from './focus';
 
 export interface StatsData {
   passes: Pass[];
@@ -19,6 +20,10 @@ export interface StatsData {
   titleOf: (sourceId: string) => string | null;
   /** endereço para tocar a música (curso ou repertório) */
   routeOf: (sourceId: string) => string | null;
+  /** conta como estudo? (src/stats/focus.ts): as análises só olham para isso */
+  isStudied: (sourceId: string) => boolean;
+  /** músicas só exploradas (abertas para ver, sem estudar) */
+  explored: Map<string, Engagement & { title: string }>;
 }
 
 const techTitle = new Map<string, string>(ALL_TRACKS.flatMap((t) => t.technique.map((i): [string, string] => [`tec-${i.id}`, i.title])));
@@ -57,8 +62,12 @@ export function useStatsData(): StatsData | undefined {
       const p = byKey.get(id);
       return p ? `/peca/${p.id}/estudar` : null;
     };
+    const passes = buildPasses(raw.takes, raw.runs, titleOf);
+    const { studied, explored } = studiedSplit(passes, (id) => byKey.get(id)?.status ?? null);
     return {
-      passes: buildPasses(raw.takes, raw.runs, titleOf),
+      passes,
+      isStudied: (id: string) => !id.startsWith('peca-') || studied.has(id),
+      explored,
       runs: raw.runs,
       events: raw.events.sort((a, b) => a.at - b.at),
       practice: raw.practice,

@@ -1,0 +1,363 @@
+/* Progresso em uma coluna: partes numeradas, cada uma com manchete e linhas com o número em destaque.
+   E as metas da semana (lista que se marca sozinha), usadas também no Hoje. */
+
+.story {
+  display: grid;
+  gap: var(--space-12);
+  max-width: 880px;
+}
+
+.story__part {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+  min-width: 0;
+}
+
+.story__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font: 600 11px/14px var(--font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.story__n {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--hit-soft);
+  color: var(--hit);
+  font: 700 12px/1 var(--font-body);
+  letter-spacing: 0;
+}
+
+.story__headline {
+  margin: 0;
+  font: 600 26px/34px var(--font-display);
+  color: var(--text);
+}
+
+.story__lead {
+  margin: 0;
+  max-width: 68ch;
+  font: 400 15px/23px var(--font-body);
+  color: var(--text);
+}
+
+.story__note {
+  margin: 0;
+  font: 400 12px/16px var(--font-body);
+  color: var(--text-muted);
+}
+
+.story__sub {
+  margin: var(--space-3) 0 0;
+  font: 600 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.story__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+/* Linha com número em destaque */
+.storyRow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: baseline;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.storyRow__label {
+  font: 600 11px/16px var(--font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.storyRow__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.storyRow__value {
+  font: 600 16px/24px var(--font-body);
+  color: var(--text);
+}
+
+.storyRow__value a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.storyRow__value a:hover {
+  text-decoration: underline;
+}
+
+.storyRow__num {
+  font: 600 22px/28px var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.storyRow__num small {
+  font: 400 14px/20px var(--font-body);
+  color: var(--text-muted);
+}
+
+.storyRow__detail {
+  font: 400 13px/19px var(--font-body);
+  color: var(--text-muted);
+}
+
+.storyRow__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 500 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.storyRow__trend-up {
+  color: var(--hit);
+}
+
+.storyRow__trend-down {
+  color: var(--miss-ink);
+}
+
+.storyRow__trendIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.storyRow__action {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Melhorou / piorou / atenção */
+.storyChange {
+  display: grid;
+  grid-template-columns: 18px 84px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.storyChange__icon {
+  width: 16px;
+  height: 16px;
+  align-self: center;
+}
+
+.storyChange__word {
+  font: 600 11px/16px var(--font-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.storyChange-up .storyChange__icon,
+.storyChange-up .storyChange__word {
+  color: var(--hit);
+}
+
+.storyChange-down .storyChange__icon,
+.storyChange-down .storyChange__word {
+  color: var(--miss-ink);
+}
+
+.storyChange__text {
+  display: grid;
+  gap: 2px;
+  font: 400 14px/21px var(--font-body);
+  color: var(--text);
+}
+
+.storyChange__text strong {
+  font: 600 15px/22px var(--font-body);
+}
+
+.storyChange__text strong + span {
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--text-muted);
+}
+
+.storyChange__text a {
+  color: inherit;
+}
+
+/* Metas da semana */
+.goals__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.goals__item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.goals__check {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: transparent;
+  color: var(--on-primary);
+  cursor: pointer;
+}
+
+.goals__check:hover {
+  border-color: var(--hit);
+}
+
+.goals__item-done .goals__check {
+  border-color: var(--hit);
+  background: var(--hit);
+}
+
+:root:not([data-theme="light"]) .goals__item-done .goals__check {
+  color: var(--color-ebony);
+}
+
+.goals__checkIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.goals__body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.goals__title {
+  font: 600 15px/22px var(--font-body);
+}
+
+.goals__item-done .goals__title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--line-strong);
+}
+
+.goals__how {
+  font: 400 14px/21px var(--font-body);
+}
+
+.goals__meta {
+  font: 400 13px/19px var(--font-body);
+  color: var(--text-muted);
+}
+
+.goals__meta a {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.goals__item-done .goals__meta {
+  color: var(--hit);
+}
+
+/* No Hoje: caixa compacta */
+.goals-compact {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.goals-compact .goals__list {
+  border-top: 0;
+}
+
+.goals-compact .goals__item:last-child {
+  border-bottom: 0;
+}
+
+.goals-compact .goals__item {
+  padding: var(--space-2) 0;
+}
+
+.goals__focus {
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
+  font: 500 15px/22px var(--font-body);
+}
+
+.goals__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-1);
+}
+
+.goals__label {
+  font: 600 12px/16px var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.goals__count {
+  font: 600 14px/20px var(--font-body);
+}
+
+.goals__more {
+  margin-left: auto;
+  font: 600 13px/18px var(--font-body);
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .story__headline {
+    font-size: 22px;
+    line-height: 29px;
+  }
+
+  .storyRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px var(--space-3);
+  }
+
+  .storyRow__label {
+    grid-column: 1 / -1;
+  }
+
+  .storyChange {
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 2px var(--space-2);
+  }
+
+  .storyChange__text {
+    grid-column: 2;
+  }
+}

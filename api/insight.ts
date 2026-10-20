@@ -18,6 +18,8 @@ interface StoredInsight {
   createdAt: number;
   model: string;
   insight: Insight;
+  /** versão das regras do resumo com que foi feita (o app pede de novo quando a dele é maior) */
+  rev?: number;
   usage?: unknown;
 }
 
@@ -48,7 +50,7 @@ export async function GET(request: Request): Promise<Response> {
     const db = await getDb();
     const found = await db.collection<StoredInsight>('insights').findOne({ _id: `${user.id}:${week}` });
     if (!found) return json({ message: 'Ainda não há análise desta semana.' }, 404);
-    return json({ insight: found.insight, createdAt: found.createdAt });
+    return json({ insight: found.insight, createdAt: found.createdAt, rev: found.rev ?? 1 });
   } catch (err) {
     return fail(err);
   }
@@ -77,7 +79,8 @@ async function checkKey(): Promise<{ ok: boolean; message: string; model: string
 export async function POST(request: Request): Promise<Response> {
   try {
     const user = await requireUser(request);
-    const body = await readJson<{ week?: unknown; digest?: unknown; targets?: unknown }>(request);
+    const body = await readJson<{ week?: unknown; digest?: unknown; targets?: unknown; rev?: unknown }>(request);
+    const rev = typeof body.rev === 'number' && body.rev >= 1 && body.rev <= 99 ? Math.floor(body.rev) : 1;
     if (!isWeekId(body.week)) throw new HttpError(400, 'Semana inválida.');
     const digestText = JSON.stringify(body.digest ?? null);
     if (!body.digest || digestText.length > MAX_DIGEST_BYTES) throw new HttpError(400, 'Resumo da semana inválido.');
@@ -87,7 +90,7 @@ export async function POST(request: Request): Promise<Response> {
     const col = db.collection<StoredInsight>('insights');
     const id = `${user.id}:${body.week}`;
     const found = await col.findOne({ _id: id });
-    if (found) return json({ insight: found.insight, createdAt: found.createdAt });
+    if (found && (found.rev ?? 1) >= rev) return json({ insight: found.insight, createdAt: found.createdAt, rev: found.rev ?? 1 });
 
     const recent = await col.countDocuments({ userId: user.id, createdAt: { $gt: Date.now() - 86_400_000 } });
     if (recent >= MAX_PER_DAY) throw new HttpError(429, 'Muitas análises hoje. Tente amanhã.');
@@ -135,8 +138,8 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     const createdAt = Date.now();
-    await col.updateOne({ _id: id }, { $setOnInsert: { _id: id, userId: user.id, week: body.week, createdAt, model, insight, usage: out.usage } }, { upsert: true });
-    return json({ insight, createdAt });
+    await col.replaceOne({ _id: id }, { userId: user.id, week: body.week, createdAt, model, insight, usage: out.usage, rev }, { upsert: true });
+    return json({ insight, createdAt, rev });
   } catch (err) {
     return fail(err);
   }

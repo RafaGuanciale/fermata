@@ -324,3 +324,13 @@
     gap: var(--space-3);
   }
 }
+
+/* Contagem antes da primeira nota */
+.reading__countin {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--space-2);
+  min-height: 220px;
+  text-align: center;
+}

@@ -7,8 +7,12 @@ import { noteInfo } from '../music/notes';
 import { unpackErrors, type NoteError } from '../analysis/takeLog';
 import { blockStats, buildBlocks, buildPasses } from '../stats/model';
 import { findPatterns } from '../stats/summary';
+import { studiedSplit, type StatusOf } from '../stats/focus';
 
 const DAY = 86_400_000;
+
+/** Versão das regras do resumo. Quando muda, a análise da semana é refeita uma vez (rev 2: sem músicas só exploradas). */
+export const INSIGHT_REV = 2;
 
 /** Segunda-feira 00:00 (hora local) da semana de `ts`. */
 export function weekStart(ts: number): number {
@@ -56,6 +60,8 @@ export interface DigestInput {
   songTitle?: (sourceId: string) => string | null;
   /** eventos (parou no meio, ouviu o trecho) para os blocos de prática */
   events?: AppEvent[];
+  /** status de cada música do repertório: só entram as que você está estudando (src/stats/focus.ts) */
+  statusOf?: StatusOf;
 }
 
 function fingerTable(takes: TakeLog[]) {
@@ -155,6 +161,8 @@ export interface WeekDigest {
   blocos: DigestBlock[];
   /** erros que se repetem em várias músicas e exercícios, já calculados pelo app */
   padroes: { titulo: string; detalhe: string }[];
+  /** músicas só abertas para ver como eram (sem estudar): não analisar */
+  musicasSoExploradas: string[];
   /** voltas no modo Estudar (a partitura espera): sem tempo, só teclas erradas e demora */
   estudar: { musica: string; voltas: number; pontosSemErro: number; segundosPorNota: number | null; compassosOndeDemorou: string[] }[];
   alvos: Target[];
@@ -198,7 +206,12 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
   const week = sumDays(start, end);
   const prev = sumDays(start - 7 * DAY, start);
 
-  const takes = input.takes.filter((t) => inWeek(t.at));
+  // Só o que é estudo: música aberta para ver se é fácil (fora de "Aprendendo" e com pouca prática) fica de fora.
+  const weekRunsAll = input.runs.filter((r) => inWeek(r.at));
+  const split = studiedSplit(buildPasses(input.takes.filter((t) => inWeek(t.at)), weekRunsAll, (id) => input.songTitle?.(id) ?? null), input.statusOf ?? (() => 'learning'));
+  const keep = (id: string) => !id.startsWith('peca-') || split.studied.has(id);
+  const takes = input.takes.filter((t) => inWeek(t.at) && keep(t.sourceId));
+  const runs = input.runs.filter((r) => keep(r.treinoId));
   const groups = groupTakes(takes);
   const alvos: Target[] = [
     { id: 'treino', titulo: 'Treino do dia (técnica, leitura, ouvido)', rota: '/treino' },
@@ -221,7 +234,7 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
   }
   // Músicas tocadas só com o registro resumido (antes do registro nota a nota): acerto, andamento e trecho fraco.
   const songRuns = new Map<string, TrainingRun[]>();
-  for (const r of input.runs)
+  for (const r of runs)
     if (inWeek(r.at) && r.kind === 'timed' && (r.treinoId.startsWith('peca-') || r.treinoId.startsWith('curso-')) && !groups.has(r.treinoId))
       songRuns.set(r.treinoId, [...(songRuns.get(r.treinoId) ?? []), r]);
   const songsFromRuns: WeekDigest['musicasSemDetalhe'] = [];
@@ -264,7 +277,7 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
   const eco = input.runs.filter((r) => r.treinoId === 'eco' && inWeek(r.at) && r.level);
 
   // Blocos de prática da semana (passadas nota a nota e registros resumidos), os com mais passadas.
-  const passes = buildPasses(takes, input.runs.filter((r) => inWeek(r.at)), (id) => input.songTitle?.(id) ?? null);
+  const passes = buildPasses(takes, runs.filter((r) => inWeek(r.at)), (id) => input.songTitle?.(id) ?? null);
   const hhmm = (t: number) => `${String(new Date(t).getHours()).padStart(2, '0')}:${String(new Date(t).getMinutes()).padStart(2, '0')}`;
   const trecho = (x: { from?: number; to?: number }) => (x.from && x.to ? (x.from === x.to ? `compasso ${x.from}` : `compassos ${x.from} a ${x.to}`) : 'não registrado');
   const OUT: Record<NoteError['outcome'], string> = { trocou: 'trocou', cedo: 'entrou cedo', tarde: 'entrou tarde', faltou: 'não tocou', hesitou: 'demorou para achar' };
@@ -326,6 +339,7 @@ export function buildDigest(input: DigestInput): { digest: WeekDigest; qualifies
     ouvido: eco.length ? { maiorFrase: Math.max(...eco.map((r) => r.level!)) } : null,
     marcosGravados: input.recordings.filter((r) => r.kind === 'marco' && inWeek(r.createdAt)).map((r) => ({ musica: r.sourceTitle ?? r.title, acerto: r.accuracy !== undefined ? pct(r.accuracy) : null, bpm: r.bpm ?? null })),
     blocos,
+    musicasSoExploradas: [...split.explored.values()].map((e) => `${e.title} (${e.passes} passadas em ${e.days} ${e.days === 1 ? 'dia' : 'dias'})`),
     padroes: findPatterns(passes).slice(0, 5).map((p) => ({ titulo: p.title, detalhe: p.detail })),
     estudar,
     alvos,

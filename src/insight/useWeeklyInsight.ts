@@ -2,12 +2,12 @@
 // pede uma nova (uma vez por semana, a partir de segunda). Guarda neste aparelho para não perguntar de novo.
 
 import { useEffect, useState } from 'react';
-import { db } from '../db/db';
+import { db, type Piece } from '../db/db';
 import { authHeaders } from '../sync/account';
 import { findSong } from '../course';
 import { getGoal } from '../progress/goals';
 import type { Insight } from '../../api/_lib/insight';
-import { buildDigest, lastWeek, type Target } from './digest';
+import { buildDigest, INSIGHT_REV, lastWeek, type Target } from './digest';
 
 export type InsightState =
   | { status: 'loading' }
@@ -15,7 +15,7 @@ export type InsightState =
   | { status: 'skipped'; week: string; minutes: number; days: number }
   | { status: 'error'; message: string };
 
-const cacheKey = (week: string) => `fermata-insight:${week}`;
+const cacheKey = (week: string) => `fermata-insight:${week}:r${INSIGHT_REV}`;
 
 function readCache(week: string): InsightState | null {
   try {
@@ -39,7 +39,7 @@ async function readMessage(res: Response): Promise<string> {
   return data?.message ?? 'Não deu para buscar a análise agora.';
 }
 
-async function songLookup(): Promise<{ route: (id: string) => string | null; title: (id: string) => string | null }> {
+async function songLookup(): Promise<{ route: (id: string) => string | null; title: (id: string) => string | null; status: (id: string) => Piece['status'] | null }> {
   const pieces = await db.pieces.toArray();
   const byKey = new Map(pieces.map((p) => [`peca-${p.uid ?? p.id}`, p]));
   return {
@@ -52,6 +52,7 @@ async function songLookup(): Promise<{ route: (id: string) => string | null; tit
       return p ? `/peca/${p.id}/estudar` : null;
     },
     title: (id) => (id.startsWith('curso-') ? (findSong(id.slice(6))?.title ?? null) : (byKey.get(id)?.title ?? null)),
+    status: (id) => byKey.get(id)?.status ?? null,
   };
 }
 
@@ -72,26 +73,34 @@ async function load(): Promise<InsightState> {
     songLookup(),
     db.events.where('at').between(week.start, week.end).toArray(),
   ]);
-  const built = buildDigest({ now, takes, runs, practice, recordings, notes, events, goal: getGoal(), songRoute: route.route, songTitle: route.title });
+  const built = buildDigest({ now, takes, runs, practice, recordings, notes, events, goal: getGoal(), songRoute: route.route, songTitle: route.title, statusOf: route.status });
   const targets = built.digest.alvos;
 
   let res = await fetch(`/api/insight?week=${week.id}`, { headers: authHeaders() }).catch(() => null);
+  // Análise feita com regras antigas: vale refazer uma vez (o servidor confere e guarda a nova).
+  const stale = res?.ok ? ((await res.clone().json().catch(() => ({}))) as { rev?: number }).rev ?? 1 : INSIGHT_REV;
+  let old: InsightState | null = null;
   if (res?.ok) {
     const data = (await res.json()) as { insight: Insight; createdAt: number };
     const s: InsightState = { status: 'ready', insight: data.insight, createdAt: data.createdAt, week: week.id, targets };
-    writeCache(week.id, s);
-    return s;
+    if (stale >= INSIGHT_REV || !built.qualifies) {
+      writeCache(week.id, s);
+      return s;
+    }
+    old = s;
   }
   if (!res) return { status: 'error', message: 'Sem conexão: a análise aparece quando a internet voltar.' };
-  if (res.status !== 404) return { status: 'error', message: await readMessage(res) };
+  if (!res.ok && res.status !== 404) return { status: 'error', message: await readMessage(res) };
 
   // Pouco treino: não guarda a decisão (dados de outro aparelho podem chegar depois pela sincronização).
   if (!built.qualifies) return { status: 'skipped', week: week.id, minutes: built.minutes, days: built.days };
   res = await fetch('/api/insight', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify({ week: week.id, digest: built.digest, targets: targets.map((t) => t.id) }),
+    body: JSON.stringify({ week: week.id, digest: built.digest, targets: targets.map((t) => t.id), rev: INSIGHT_REV }),
   }).catch(() => null);
+  // Não deu para refazer: fica a análise que já existia.
+  if (old && !res?.ok) return old;
   if (!res) return { status: 'error', message: 'Sem conexão: a análise aparece quando a internet voltar.' };
   if (!res.ok) return { status: 'error', message: await readMessage(res) };
   const data = (await res.json()) as { insight: Insight; createdAt: number };

@@ -119,19 +119,24 @@ export interface ReadLevel {
   /** Uma frase: o que este nível treina. */
   focus: string;
   items: ReadItem[];
+  /** Tempo médio para passar (ms): começa folgado e aperta conforme os níveis sobem. */
+  targetMs: number;
 }
 
 export const LEVELS: ReadLevel[] = [
-  { n: 1, title: 'Clave de sol: as linhas', focus: 'As cinco linhas, de baixo para cima: Mi, Sol, Si, Ré, Fá.', items: on('treble', T_LINES) },
-  { n: 2, title: 'Clave de sol: os espaços', focus: 'Os quatro espaços, de baixo para cima: Fá, Lá, Dó, Mi.', items: on('treble', T_SPACES) },
-  { n: 3, title: 'Clave de sol: linhas e espaços', focus: 'As nove posições da pauta misturadas.', items: on('treble', T_STAFF) },
-  { n: 4, title: 'Clave de sol: linhas suplementares', focus: 'Do Lá abaixo do Dó central ao Dó duas linhas acima da pauta.', items: on('treble', T_LEDGER) },
-  { n: 5, title: 'Clave de fá: as linhas', focus: 'As cinco linhas, de baixo para cima: Sol, Si, Ré, Fá, Lá.', items: on('bass', B_LINES) },
-  { n: 6, title: 'Clave de fá: os espaços', focus: 'Os quatro espaços, de baixo para cima: Lá, Dó, Mi, Sol.', items: on('bass', B_SPACES) },
-  { n: 7, title: 'Clave de fá: linhas e espaços', focus: 'As nove posições da pauta misturadas.', items: on('bass', B_STAFF) },
-  { n: 8, title: 'Clave de fá: linhas suplementares', focus: 'Do Dó duas linhas abaixo ao Mi acima do Dó central.', items: on('bass', B_LEDGER) },
-  { n: 9, title: 'As duas claves', focus: 'Sol e fá misturadas, só dentro da pauta: olhe a clave antes da nota.', items: [...on('treble', T_STAFF), ...on('bass', B_STAFF)] },
-  { n: 10, title: 'As duas claves com suplementares', focus: 'Tudo junto, de Dó1 a Dó5 na pauta dupla.', items: [...on('treble', T_LEDGER), ...on('bass', B_LEDGER)] },
+  { n: 1, title: 'Clave de sol: as linhas', focus: 'As cinco linhas, de baixo para cima: Mi, Sol, Si, Ré, Fá.', items: on('treble', T_LINES), targetMs: 5000 },
+  { n: 2, title: 'Clave de sol: os espaços', focus: 'Os quatro espaços, de baixo para cima: Fá, Lá, Dó, Mi.', items: on('treble', T_SPACES), targetMs: 4500 },
+  { n: 3, title: 'Clave de sol: linhas e espaços', focus: 'As nove posições da pauta misturadas.', items: on('treble', T_STAFF), targetMs: 4000 },
+  { n: 4, title: 'Clave de sol: linhas suplementares', focus: 'Do Lá abaixo do Dó central ao Dó duas linhas acima da pauta.', items: on('treble', T_LEDGER), targetMs: 4000 },
+  { n: 5, title: 'Clave de fá: as linhas', focus: 'As cinco linhas, de baixo para cima: Sol, Si, Ré, Fá, Lá.', items: on('bass', B_LINES), targetMs: 5000 },
+  { n: 6, title: 'Clave de fá: os espaços', focus: 'Os quatro espaços, de baixo para cima: Lá, Dó, Mi, Sol.', items: on('bass', B_SPACES), targetMs: 4500 },
+  { n: 7, title: 'Clave de fá: linhas e espaços', focus: 'As nove posições da pauta misturadas.', items: on('bass', B_STAFF), targetMs: 4000 },
+  { n: 8, title: 'Clave de fá: linhas suplementares', focus: 'Do Dó duas linhas abaixo ao Mi acima do Dó central.', items: on('bass', B_LEDGER), targetMs: 4000 },
+  { n: 9, title: 'As duas claves', focus: 'Sol e fá misturadas, só dentro da pauta: olhe a clave antes da nota.', items: [...on('treble', T_STAFF), ...on('bass', B_STAFF)], targetMs: 3500 },
+  { n: 10, title: 'As duas claves com suplementares', focus: 'Tudo junto, de Dó1 a Dó5 na pauta dupla.', items: [...on('treble', T_LEDGER), ...on('bass', B_LEDGER)], targetMs: 3000 },
+  { n: 11, title: 'Tudo junto, mais rápido', focus: 'As mesmas notas do nível 10, agora com menos tempo.', items: [...on('treble', T_LEDGER), ...on('bass', B_LEDGER)], targetMs: 2500 },
+  { n: 12, title: 'Tudo junto, leitura fluente', focus: 'Ler e tocar quase sem parar para pensar.', items: [...on('treble', T_LEDGER), ...on('bass', B_LEDGER)], targetMs: 2000 },
+  { n: 13, title: 'Tudo junto, à primeira vista', focus: 'O tempo de quem lê partitura tocando.', items: [...on('treble', T_LEDGER), ...on('bass', B_LEDGER)], targetMs: 1500 },
 ];
 
 export const levelOf = (n: number) => LEVELS.find((l) => l.n === n) ?? LEVELS[0];
@@ -208,11 +213,11 @@ export interface RoundResult {
   avgMs: number | null;
 }
 
-/** Passa de nível com 90% de primeira e média de até 2,5 segundos. */
-export const LEVEL_PASS = { share: 0.9, avgMs: 2500 };
+/** Passa de nível com 90% de primeira e a média de tempo do nível (5 s no começo, até 1,5 s no último). */
+export const LEVEL_PASS = { share: 0.9 };
 
-export function roundPassed(r: RoundResult): boolean {
-  return r.total > 0 && r.firstTry / r.total >= LEVEL_PASS.share && r.avgMs !== null && r.avgMs <= LEVEL_PASS.avgMs;
+export function roundPassed(r: RoundResult, targetMs: number): boolean {
+  return r.total > 0 && r.firstTry / r.total >= LEVEL_PASS.share && r.avgMs !== null && r.avgMs <= targetMs;
 }
 
 /** Nível sugerido: o primeiro ainda não passado (ou o último). */

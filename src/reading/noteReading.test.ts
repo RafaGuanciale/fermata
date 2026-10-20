@@ -34,7 +34,7 @@ describe('leitura de notas', () => {
   });
 
   it('níveis só com teclas brancas, dentro da clave', () => {
-    expect(LEVELS).toHaveLength(10);
+    expect(LEVELS).toHaveLength(13);
     for (const l of LEVELS) for (const it of l.items) expect([1, 3, 6, 8, 10]).not.toContain(it.midi % 12);
     expect(LEVELS[0].items.map((i) => i.midi)).toEqual([64, 67, 71, 74, 77]);
   });
@@ -61,8 +61,11 @@ describe('leitura de notas', () => {
     expect(s.acc).toBeCloseTo(0.7);
     expect(answerMatches({ clef: 'treble', midi: 64 }, 52, 'nome')).toBe(true);
     expect(answerMatches({ clef: 'treble', midi: 64 }, 52, 'tecla')).toBe(false);
-    expect(roundPassed({ firstTry: 18, total: 20, avgMs: 2400 })).toBe(true);
-    expect(roundPassed({ firstTry: 17, total: 20, avgMs: 1000 })).toBe(false);
+    expect(roundPassed({ firstTry: 18, total: 20, avgMs: 2400 }, 2500)).toBe(true);
+    expect(roundPassed({ firstTry: 17, total: 20, avgMs: 1000 }, 2500)).toBe(false);
+    // no começo há mais tempo; nos últimos níveis, menos
+    expect(roundPassed({ firstTry: 18, total: 20, avgMs: 4600 }, LEVELS[0].targetMs)).toBe(true);
+    expect(LEVELS[LEVELS.length - 1].targetMs).toBeLessThan(LEVELS[0].targetMs);
     expect(suggestedLevel(new Set([1, 2]))).toBe(3);
   });
 });
