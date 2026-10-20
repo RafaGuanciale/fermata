@@ -22,6 +22,18 @@ interface StoredInsight {
 }
 
 const MAX_DIGEST_BYTES = 80_000;
+
+/** Se a IA respondeu em texto em vez de chamar a ferramenta, pega o primeiro objeto JSON do texto. */
+function jsonFromText(text: string): unknown {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start < 0 || end <= start) return null;
+  try {
+    return JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
 /** Teto de gerações por usuário em 24 horas (proteção contra erro em loop). */
 const MAX_PER_DAY = 3;
 
@@ -92,8 +104,9 @@ export async function POST(request: Request): Promise<Response> {
           max_tokens: 2500,
           system: INSIGHT_SYSTEM,
           tools: [INSIGHT_TOOL],
-          tool_choice: { type: 'tool', name: INSIGHT_TOOL.name },
-          messages: [{ role: 'user', content: `Dados da semana (JSON calculado pelo app):\n${digestText}` }],
+          // Alguns modelos não aceitam forçar a ferramenta (tool_choice "tool"): pede no texto e aceita a resposta em JSON.
+          tool_choice: { type: 'auto' },
+          messages: [{ role: 'user', content: `Dados da semana (JSON calculado pelo app):\n${digestText}\n\nResponda chamando a ferramenta ${INSIGHT_TOOL.name}, uma vez, com a análise completa.` }],
         }),
       });
     } catch {
@@ -112,9 +125,9 @@ export async function POST(request: Request): Promise<Response> {
       }
       throw new HttpError(502, `A IA não conseguiu analisar agora (erro ${res.status}${detail ? `: ${detail}` : ''}).`);
     }
-    const out = (await res.json()) as { content?: { type: string; name?: string; input?: unknown }[]; usage?: unknown };
+    const out = (await res.json()) as { content?: { type: string; name?: string; input?: unknown; text?: string }[]; usage?: unknown };
     const call = out.content?.find((c) => c.type === 'tool_use' && c.name === INSIGHT_TOOL.name);
-    const insight = parseInsight(call?.input, targets);
+    const insight = parseInsight(call?.input ?? jsonFromText(out.content?.filter((c) => c.type === 'text').map((c) => c.text ?? '').join('\n') ?? ''), targets);
     if (!insight) throw new HttpError(502, 'A resposta da IA veio incompleta. Tente de novo mais tarde.');
 
     const createdAt = Date.now();
