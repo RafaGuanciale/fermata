@@ -101,7 +101,7 @@ export async function POST(request: Request): Promise<Response> {
         headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({
           model,
-          max_tokens: 2500,
+          max_tokens: 8000,
           system: INSIGHT_SYSTEM,
           tools: [INSIGHT_TOOL],
           // Alguns modelos não aceitam forçar a ferramenta (tool_choice "tool"): pede no texto e aceita a resposta em JSON.
@@ -125,10 +125,14 @@ export async function POST(request: Request): Promise<Response> {
       }
       throw new HttpError(502, `A IA não conseguiu analisar agora (erro ${res.status}${detail ? `: ${detail}` : ''}).`);
     }
-    const out = (await res.json()) as { content?: { type: string; name?: string; input?: unknown; text?: string }[]; usage?: unknown };
+    const out = (await res.json()) as { content?: { type: string; name?: string; input?: unknown; text?: string }[]; usage?: unknown; stop_reason?: string };
     const call = out.content?.find((c) => c.type === 'tool_use' && c.name === INSIGHT_TOOL.name);
     const insight = parseInsight(call?.input ?? jsonFromText(out.content?.filter((c) => c.type === 'text').map((c) => c.text ?? '').join('\n') ?? ''), targets);
-    if (!insight) throw new HttpError(502, 'A resposta da IA veio incompleta. Tente de novo mais tarde.');
+    if (!insight) {
+      const kinds = (out.content ?? []).map((c) => c.type).join(', ') || 'nada';
+      console.error('insight incompleto', out.stop_reason, JSON.stringify(out.content ?? []).slice(0, 2000));
+      throw new HttpError(502, `A resposta da IA veio incompleta (parou por ${out.stop_reason ?? '?'}; veio: ${kinds}). Tente de novo mais tarde.`);
+    }
 
     const createdAt = Date.now();
     await col.updateOne({ _id: id }, { $setOnInsert: { _id: id, userId: user.id, week: body.week, createdAt, model, insight, usage: out.usage } }, { upsert: true });
