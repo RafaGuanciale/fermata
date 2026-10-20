@@ -101,8 +101,16 @@ export async function POST(request: Request): Promise<Response> {
     }
     if (res.status === 401) throw new HttpError(500, 'A chave ANTHROPIC_API_KEY da Vercel foi recusada. Confira se está certa.');
     if (!res.ok) {
-      console.error('anthropic', res.status, await res.text().catch(() => ''));
-      throw new HttpError(502, 'A IA não conseguiu analisar agora. Tente de novo mais tarde.');
+      const text = await res.text().catch(() => '');
+      console.error('anthropic', res.status, text);
+      // Mostra o motivo que a Anthropic deu (sem dados sensíveis), para dar para corrigir sem os logs da Vercel.
+      let detail = '';
+      try {
+        detail = ((JSON.parse(text) as { error?: { message?: string } }).error?.message ?? '').slice(0, 300);
+      } catch {
+        detail = text.slice(0, 120);
+      }
+      throw new HttpError(502, `A IA não conseguiu analisar agora (erro ${res.status}${detail ? `: ${detail}` : ''}).`);
     }
     const out = (await res.json()) as { content?: { type: string; name?: string; input?: unknown }[]; usage?: unknown };
     const call = out.content?.find((c) => c.type === 'tool_use' && c.name === INSIGHT_TOOL.name);
