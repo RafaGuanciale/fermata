@@ -1,8 +1,7 @@
 // Tela cheia de verdade onde o navegador deixa (notebook, Android, iPad recente).
 // No iPhone a API não existe: o modo imersivo continua, só sem esconder a barra do navegador.
 
-import { useEffect, useRef, useState } from 'react';
-import type React from 'react';
+import { useEffect, useState } from 'react';
 
 export function canFullscreen(): boolean {
   return typeof document !== 'undefined' && !!document.documentElement.requestFullscreen && document.fullscreenEnabled !== false;
@@ -35,16 +34,20 @@ export function useFullscreenState(): boolean {
 }
 
 /** Largura de um elemento, atualizada quando ele muda de tamanho. */
-export function useElementWidth<T extends HTMLElement>(): [React.RefObject<T | null>, number] {
-  const ref = useRef<T>(null);
+/**
+ * Largura de um elemento, atualizada quando ele muda de tamanho. Usa um ref de função: funciona também quando o
+ * elemento só aparece depois (a pauta de um exercício que surge ao começar), o que um ref de objeto lido uma vez
+ * no primeiro desenho não pegava.
+ */
+export function useElementWidth<T extends HTMLElement>(): [(el: T | null) => void, number] {
+  const [el, setEl] = useState<T | null>(null);
   const [width, setWidth] = useState(0);
   useEffect(() => {
-    const el = ref.current;
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
     ro.observe(el);
     setWidth(el.getBoundingClientRect().width);
     return () => ro.disconnect();
-  }, []);
-  return [ref, width];
+  }, [el]);
+  return [setEl, width];
 }
