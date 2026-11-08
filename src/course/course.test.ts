@@ -105,7 +105,7 @@ describe('modo menor e intervalos com qualidade', () => {
     expect(spellInterval('E4', '3m', -1)).toBe('C#4');
     expect(spellInterval('Bb3', '8J')).toBe('Bb4');
     const q = qualityInterval({ from: ['D4'], intervals: ['3m'] })(seeded(1));
-    expect(q.steps).toEqual([{ kind: 'exact', midis: [62] }, { kind: 'exact', midis: [65] }]);
+    expect(q.steps).toEqual([{ kind: 'pc', pcs: [2] }, { kind: 'rel', semis: 3 }]);
     for (let seed = 1; seed < 40; seed++) {
       const c = spellIntervalChoice({ from: ['C4', 'D4', 'E4', 'F#4', 'Bb3'], intervals: ['3m', '3M', '6m', '4A', '5d'] })(seeded(seed));
       expect(c.choices!.length).toBeGreaterThanOrEqual(2);
@@ -113,7 +113,7 @@ describe('modo menor e intervalos com qualidade', () => {
       expect(c.answer).toBeGreaterThanOrEqual(0);
     }
     const e = qualityByEar({ from: ['C4'], intervals: ['5J'], answerFrom: ['E4'] })(seeded(1));
-    expect(e.steps).toEqual([{ kind: 'exact', midis: [64] }, { kind: 'exact', midis: [71] }]);
+    expect(e.steps).toEqual([{ kind: 'pc', pcs: [4] }, { kind: 'rel', semis: 7 }]);
     const t = chordQualityByEar({ qualities: ['m'], roots: [57], answerRoots: [62, 64] })(seeded(3));
     const s0 = t.steps[0];
     expect(s0.kind === 'chord' && s0.bass !== undefined && s0.pcs.length === 3).toBe(true);
@@ -489,8 +489,15 @@ describe('geradores', () => {
   it('intervalo, cifra e grau', () => {
     const rng = seeded(3);
     const it = intervalAbove({ sizes: [3], from: [62] })(rng);
-    expect(it.steps).toEqual([{ kind: 'exact', midis: [62] }, { kind: 'exact', midis: [65] }]);
-    expect(intervalAbove({ sizes: [5], from: [71] })(rng).steps[1]).toEqual({ kind: 'exact', midis: [77] });
+    expect(it.steps).toEqual([{ kind: 'pc', pcs: [2] }, { kind: 'rel', semis: 3 }]);
+    expect(intervalAbove({ sizes: [5], from: [71] })(rng).steps[1]).toEqual({ kind: 'rel', semis: 6 });
+    // qualquer Ré serve; a resposta conta a partir do Ré tocado
+    let pr = pressItem(startItem(), it, 74, [74]);
+    expect(pr.step).toBe(1);
+    pr = pressItem(pr, it, 65, [65]);
+    expect(pr.misses).toBe(1);
+    pr = pressItem(pr, it, 77, [77]);
+    expect(pr.done).toBe(true);
     expect(parseChord('F/A')).toEqual({ root: 5, pcs: [5, 9, 0], bass: 9 });
     expect(parseChord('Bb7M').pcs).toEqual([10, 2, 5, 9]);
     expect(parseChord('Dm7(b5)').pcs).toEqual([2, 5, 8, 0]);
@@ -545,15 +552,15 @@ describe('geradores', () => {
     expect(whiteAbove(64, 4)).toBe(69);
     expect(() => whiteAbove(61, 3)).toThrow();
     const ear = intervalByEar({ sizes: [5], from: [62], harmonic: true })(rng);
-    expect(ear.steps).toEqual([{ kind: 'exact', midis: [62] }, { kind: 'exact', midis: [69] }]);
+    expect(ear.steps).toEqual([{ kind: 'pc', pcs: [2] }, { kind: 'rel', semis: 7 }]);
     expect(ear.listen?.steps[0].midis).toEqual([62, 69]);
     const read = readInterval({ sizes: [3], from: [55], clef: 'bass' })(rng);
     expect(read.staff).toEqual({ notes: [55, 59], clef: 'bass' });
     const up = toneOrSemitone({ from: [64], kinds: ['semitom'], dirs: ['acima'] })(rng);
-    expect(up.steps[1]).toEqual({ kind: 'exact', midis: [65] });
+    expect(up.steps[1]).toEqual({ kind: 'rel', semis: 1 });
     const down = toneOrSemitone({ from: [60], kinds: ['tom'], dirs: ['abaixo'] })(rng);
     expect(down.prompt).toBe('Toque um tom abaixo de Dó');
-    expect(down.steps[1]).toEqual({ kind: 'exact', midis: [58] });
+    expect(down.steps[1]).toEqual({ kind: 'rel', semis: -2 });
   });
 });
 

@@ -81,9 +81,10 @@ export function intervalAbove(opts: { sizes: number[]; from: Midi[]; skill?: str
     const target = whiteAbove(from, size);
     return {
       prompt: `Toque uma ${size}ª acima de ${nameOf(from)}`,
-      detail: `${INTERVAL_NAMES[steps]}: conte ${size} teclas brancas, incluindo as duas pontas. Comece apertando ${nameOf(from)}.`,
+      detail: `${INTERVAL_NAMES[steps]}: conte ${size} teclas brancas, incluindo as duas pontas. Comece em qualquer ${nameOf(from)} do teclado.`,
       hintKeys: [from, target],
-      steps: [{ kind: 'exact', midis: [from] }, { kind: 'exact', midis: [target] }],
+      // Qualquer oitava: o que se treina é contar o intervalo, não achar um Dó específico.
+      steps: [{ kind: 'pc', pcs: [pcOf(from)] }, { kind: 'rel', semis: target - from }],
       skill: 'intervalo',
     };
   };
@@ -112,7 +113,7 @@ export function intervalByEar(opts: { sizes: number[]; from: Midi[]; harmonic?: 
       listen,
       hintKeys: [from, target],
       hint: `${size}ª: ${nameOf(from)} → ${nameOf(target)}`,
-      steps: [{ kind: 'exact', midis: [from] }, { kind: 'exact', midis: [target] }],
+      steps: [{ kind: 'pc', pcs: [pcOf(from)] }, { kind: 'rel', semis: target - from }],
       skill: opts.skill ?? 'intervalo-ouvido',
     };
   };
@@ -145,10 +146,10 @@ export function toneOrSemitone(opts: { from: Midi[]; kinds: ('tom' | 'semitom')[
     const target = from + (kind === 'tom' ? 2 : 1) * (dir === 'acima' ? 1 : -1);
     return {
       prompt: `Toque um ${kind} ${dir} de ${nameOf(from)}`,
-      detail: `Primeiro ${nameOf(from)}, depois a resposta.`,
+      detail: `Primeiro um ${nameOf(from)} (qualquer um do teclado), depois a resposta.`,
       hintKeys: [from, target],
       hint: kind === 'semitom' ? `Semitom: a tecla vizinha, preta ou branca. ${nameOf(target)}.` : `Tom: pule uma tecla, preta ou branca. ${nameOf(target)}.`,
-      steps: [{ kind: 'exact', midis: [from] }, { kind: 'exact', midis: [target] }],
+      steps: [{ kind: 'pc', pcs: [pcOf(from)] }, { kind: 'rel', semis: target - from }],
       skill: opts.skill ?? 'tom-semitom',
     };
   };
@@ -800,10 +801,10 @@ export function qualityInterval(opts: { from: string[]; intervals: string[]; dir
     const target = spellInterval(from, iv, d);
     return {
       prompt: `Toque uma ${ivLabel(iv)} ${d > 0 ? 'acima' : 'abaixo'} de ${ptName(from)}`,
-      detail: `Primeiro ${ptName(from)}${from.slice(-1)}, depois a resposta.`,
+      detail: `Primeiro um ${ptName(from)} (qualquer um do teclado), depois a resposta.`,
       hintKeys: [n(from), n(target)],
       hint: `${ptName(target)}: ${iv[0]} letras contando as duas pontas, ${IV_SEMIS[iv]} semitons.`,
-      steps: [{ kind: 'exact', midis: [n(from)] }, { kind: 'exact', midis: [n(target)] }],
+      steps: [{ kind: 'pc', pcs: [pcOf(n(from))] }, { kind: 'rel', semis: n(target) - n(from) }],
       skill: opts.skill ?? 'intervalo-qualidade',
     };
   };
@@ -871,7 +872,7 @@ export function qualityByEar(opts: { from: string[]; intervals: string[]; harmon
       listen,
       hintKeys: [start, start + semis],
       hint: `${ivLabel(iv)}: ${semis} semitons.`,
-      steps: [{ kind: 'exact', midis: [start] }, { kind: 'exact', midis: [start + semis] }],
+      steps: [{ kind: 'pc', pcs: [pcOf(start)] }, { kind: 'rel', semis }],
       skill: opts.skill ?? 'intervalo-ouvido-qualidade',
     };
   };

@@ -21,6 +21,8 @@ export interface ItemProgress {
   lastChord?: Midi[];
   /** Explicação do último erro, quando não é só uma tecla errada (condução de vozes). */
   why?: string;
+  /** Última nota aceita (o passo `rel` conta a partir dela). */
+  prevNote?: Midi;
 }
 
 export const startItem = (): ItemProgress => ({ step: 0, found: [], misses: 0, done: false, lastWrong: null });
@@ -87,6 +89,8 @@ function fits(accept: Accept, midi: Midi): boolean {
       return accept.midis.some((m) => pcOf(m) === pcOf(midi));
     case 'anyChord':
       return accept.options.some((o) => o.pcs.includes(pcOf(midi)));
+    case 'rel':
+      return false;
   }
 }
 
@@ -101,9 +105,9 @@ export function chordMatches(accept: Extract<Accept, { kind: 'chord' }>, held: M
   return true;
 }
 
-function advance(p: ItemProgress, item: Item, chord?: Midi[]): ItemProgress {
+function advance(p: ItemProgress, item: Item, chord?: Midi[], note?: Midi): ItemProgress {
   const step = p.step + 1;
-  return { ...p, step, found: [], lastWrong: null, why: undefined, lastChord: chord ?? p.lastChord, done: step >= item.steps.length };
+  return { ...p, step, found: [], lastWrong: null, why: undefined, lastChord: chord ?? p.lastChord, prevNote: note ?? p.prevNote, done: step >= item.steps.length };
 }
 
 /**
@@ -113,6 +117,10 @@ function advance(p: ItemProgress, item: Item, chord?: Midi[]): ItemProgress {
 export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[]): ItemProgress {
   if (p.done || !item.steps.length) return p;
   const accept = item.steps[p.step];
+  if (accept.kind === 'rel') {
+    if (p.prevNote !== undefined && midi === p.prevNote + accept.semis) return advance(p, item, undefined, midi);
+    return { ...p, misses: p.misses + 1, lastWrong: midi, why: undefined };
+  }
   if (!fits(accept, midi)) return { ...p, misses: p.misses + 1, lastWrong: midi, why: undefined };
   if (accept.kind === 'chord') {
     // Condução com baixo: espera o baixo e as vozes de cima (uma por classe) antes de julgar,
@@ -156,7 +164,7 @@ export function pressItem(p: ItemProgress, item: Item, midi: Midi, held: Midi[])
     if (found.length >= accept.midis.length) return advance({ ...p, found }, item);
     return { ...p, found, lastWrong: null };
   }
-  return advance(p, item);
+  return advance(p, item, undefined, midi);
 }
 
 export interface ItemsScore {

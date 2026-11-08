@@ -72,6 +72,7 @@ function solve(item: Item, low: Midi, high: Midi): ItemProgress {
       while (pcOf(k) !== accept.pcs[0]) k++;
       keys = [k];
     } else if (accept.kind === 'exact') keys = [accept.midis[0]];
+    else if (accept.kind === 'rel') keys = [p.prevNote! + accept.semis];
     else if (accept.kind === 'all') keys = accept.midis;
     else if (accept.kind === 'chord') keys = playChord(accept, p.lastChord, low, high);
     else if (accept.kind === 'anyChord') keys = playChord({ kind: 'chord', ...accept.options[0] }, undefined, low, high);

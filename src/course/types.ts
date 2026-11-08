@@ -19,6 +19,11 @@ export type Accept =
   | { kind: 'pc'; pcs: Pc[] }
   /** Uma destas teclas exatamente. */
   | { kind: 'exact'; midis: Midi[] }
+  /**
+   * A tecla a `semis` semitons da nota aceita no passo anterior (negativo = abaixo). Para "toque uma 3ª acima de
+   * Dó": o primeiro passo aceita qualquer Dó (`pc`) e este conta a partir do Dó que você tocou.
+   */
+  | { kind: 'rel'; semis: number }
   /** Acorde: todas as classes seguradas ao mesmo tempo, sem notas a mais. `bass` exige a nota mais grave. */
   | {
       kind: 'chord';
