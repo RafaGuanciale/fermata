@@ -4,8 +4,8 @@ import { END_PAD, FIRST_X, FLAT_STEPS, GAP, SHARP_STEPS, spellOnStaff, staffLayo
 export type NoteState = 'hit' | 'late' | 'miss' | 'current' | 'upcoming' | 'plain';
 
 interface StaffProps {
-  /** null = pausa */
-  notes: (Midi | null)[];
+  /** null = pausa; undefined = nada nesta coluna (pauta dupla: a outra mão toca aqui). */
+  notes: (Midi | null | undefined)[];
   states: NoteState[];
   /** Nota ativa: a janela visível acompanha ela. */
   current: number;
@@ -28,6 +28,8 @@ interface StaffProps {
   ties?: boolean[];
   /** Acordes: todas as notas da figura (a de `notes` é uma delas). Desenhadas na mesma haste. */
   chords?: (Midi[] | undefined)[];
+  /** Tempo em que começa cada coluna. Com isso, as barras de compasso saem do tempo (pauta dupla alinhada). */
+  starts?: number[];
   /** Mostra todas as notas de uma vez, encolhendo o quanto precisar (figuras fixas, como na Consulta). */
   fitAll?: boolean;
   /** Dedilhado: para cada figura, o dedo de cada cabeça (do grave para o agudo). Desenhado numa linha acima da pauta. */
@@ -49,7 +51,7 @@ const KEY_X = 72;
 const FINGER_GAP = 17;
 const KEY_GAP = 13;
 
-export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1, ties, chords, fitAll = false, fingers }: StaffProps) {
+export default function Staff({ notes, states, current, showNames, barEvery, width, label, clef = 'treble', durations, beatsPerBar, fifths = 0, beatScale = 1, ties, chords, fitAll = false, fingers, starts }: StaffProps) {
   if (width <= 0) return <div className="staff" style={{ height: HEIGHT * 0.62 }} />;
   const keyW = fifths ? Math.abs(fifths) * KEY_GAP + 6 : 0;
   const layout = staffLayout(width, notes.length, keyW);
@@ -71,7 +73,7 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
   let top = 0;
   let bottom = HEIGHT;
   notes.forEach((m, i) => {
-    if (m === null) return;
+    if (m == null) return;
     const group = chords?.[i] && chords[i]!.length > 1 ? chords[i]! : [m];
     for (const g of group) {
       const st = spellOnStaff(g, clef, fifths).step;
@@ -88,7 +90,7 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
   if (fingers?.some((f) => f && f.some((x) => x !== null))) {
     fingerY = TOP - 16;
     notes.forEach((m, i) => {
-      if (m === null) return;
+      if (m == null) return;
       const group = (chords?.[i] && chords[i]!.length > 1 ? chords[i]! : [m]).map((g) => spellOnStaff(g, clef, fifths).step);
       const lo = Math.min(...group);
       const hi = Math.max(...group);
@@ -106,7 +108,12 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
   const tuplets = tupletMiddles(figures);
 
   const bars: number[] = [];
-  if (durations && beatsPerBar) {
+  if (starts && beatsPerBar) {
+    slice.forEach((_, i) => {
+      const at = starts[start + i];
+      if (i > 0 && at > 0 && Math.abs(at / beatsPerBar - Math.round(at / beatsPerBar)) < 1e-6) bars.push(xOf(i) - GAP / 2);
+    });
+  } else if (durations && beatsPerBar) {
     let acc = durations.slice(0, start).reduce((a, b) => a + b, 0);
     slice.forEach((_, i) => {
       if (i > 0 && acc > 0 && Math.abs(acc % beatsPerBar) < 1e-6) bars.push(xOf(i) - GAP / 2);
@@ -147,7 +154,7 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           </text>
         ))}
         {slice.map((midi, i) => {
-          if (!ties?.[start + i] || midi === null || i + 1 >= slice.length) return null;
+          if (!ties?.[start + i] || midi == null || i + 1 >= slice.length || slice[i + 1] == null) return null;
           // Curva do lado oposto à haste: embaixo da cabeça com haste para cima, em cima com haste para baixo.
           const cy = y(spellOnStaff(midi, clef, fifths).step);
           const below = spellOnStaff(midi, clef, fifths).step < 4;
@@ -162,6 +169,7 @@ export default function Staff({ notes, states, current, showNames, barEvery, wid
           const state = sliceStates[i];
           const mod = state === 'current' || state === 'plain' ? '' : `-${state}`;
           const beats = figures?.[start + i] ?? 1;
+          if (midi === undefined) return null;
           if (midi === null) {
             return (
               <g key={start + i}>

@@ -66,8 +66,10 @@ export function twoHandTask(right: string, left: string, opts: { bpm: number; be
   const l = parseLine(left, bpb);
   const midis = [...r, ...l].flatMap((x) => x.midis);
   const [low, high] = rangeOf(midis, [48, 72]);
+  const line = (xs: typeof r) => xs.map((x) => ({ midi: x.midis.length ? Math.min(...x.midis) : null, beats: x.beats, ...(x.midis.length > 1 ? { chord: x.midis } : {}) }));
   return {
-    display: r.map((x) => ({ midi: x.midis.length ? Math.min(...x.midis) : null, beats: x.beats, ...(x.midis.length > 1 ? { chord: x.midis } : {}) })),
+    display: line(r),
+    lower: line(l),
     clef: 'treble',
     events: [
       ...r.flatMap((x) => x.midis.map((m) => ({ midi: m, beat: x.beat, beats: x.beats, hand: 'r' as const }))),
@@ -174,7 +176,7 @@ export function swingTask(text: string, opts: { bpm: number; beatsPerBar?: numbe
   return { ...base, events, swing: true, caption: opts.caption ?? 'Swing: as colcheias estão escritas iguais, mas se tocam longa-curta, como "tá-a-ta".' };
 }
 
-/** Swing em duas mãos (pauta mostra a direita). */
+/** Swing em duas mãos (pauta dupla, como no twoHandTask). */
 export function swingTwoHands(right: string, left: string, opts: { bpm: number; beatsPerBar?: number; caption?: string; fifths?: number }): TimedTask {
   const base = twoHandTask(right, left, opts);
   return { ...base, events: base.events.map((e) => ({ ...e, beat: swingBeat(e.beat) })), swing: true };
@@ -186,7 +188,13 @@ export function swingTwoHands(right: string, left: string, opts: { bpm: number; 
  */
 export function sightReadingTwoHands(rng: Rng, opts: { tonic: Midi; bars: number; bpm: number; fifths?: number; caption?: string; level?: 1 | 2 }): TimedTask {
   const right = sightReadingTask(rng, { tonic: opts.tonic, bars: opts.bars, bpm: opts.bpm, fifths: opts.fifths, level: opts.level });
-  const bassT = opts.tonic - 24 + (opts.tonic - 24 < 36 ? 12 : 0);
+  // A esquerda fica entre Mi2 e Sol3: dentro da pauta de fá, no máximo uma linha suplementar embaixo.
+  const fit = (m: Midi) => {
+    while (m > 55) m -= 12;
+    while (m < 40) m += 12;
+    return m;
+  };
+  const bassT = fit(opts.tonic - 12);
   // Grau da nota da direita num tempo (0 a 11 semitons acima da tônica).
   const degAt = (beat: number) => {
     const e = right.events.find((x) => x.midi !== null && x.beat <= beat + 1e-6 && x.beat + x.beats > beat + 1e-6);
@@ -200,7 +208,7 @@ export function sightReadingTwoHands(rng: Rng, opts: { tonic: Midi; bars: number
       const half = (beat: number) => {
         const d = degAt(beat);
         const root = d === 5 || d === 9 ? 5 : d === 2 || d === 11 || (d === 7 && beat % 4 === 2) ? 7 : 0;
-        return `${sci(bassT + root - (root === 7 ? 12 : 0))}:2`;
+        return `${sci(fit(bassT + root))}:2`;
       };
       left.push(`${half(b * 4)} ${half(b * 4 + 2)}`);
       continue;
@@ -208,7 +216,7 @@ export function sightReadingTwoHands(rng: Rng, opts: { tonic: Midi; bars: number
     const deg = degAt(b * 4);
     // Graus 2 e 7 (e o 5 no meio da frase) pedem a dominante; o resto, a tônica.
     const useV = !last && (deg === 2 || deg === 11 || (deg === 7 && b % 2 === 1));
-    left.push(`${sci(useV ? bassT + 7 - 12 : bassT)}:4`);
+    left.push(`${sci(useV ? fit(bassT + 7) : bassT)}:4`);
   }
   const rightText = right.display.map((d) => (d.midi === null ? `r:${d.beats}` : `${sci(d.midi)}:${d.beats}`));
   // Reconstrói a linha da direita com barras a cada 4 tempos.

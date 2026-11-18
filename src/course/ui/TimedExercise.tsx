@@ -15,6 +15,7 @@ import { useMetronome } from '../../metronome/MetronomeProvider';
 import { getLatency, scheduleTrack, type ScheduledTrack } from '../../training/clickTrack';
 import type { TakeResult } from '../../training/timing';
 import { swingBeat } from '../tasks';
+import { grandColumns, spread } from '../grandStaff';
 import { ARTIC_PASS, articulationScore, rulesLine, balanceScore, takeAftermath, dynamicsScore, ioiSd, judgeTask, LEGATO_GAP_MS, matchedVelocities, nextToPlay, pedalScore, releaseGap, takeHeadline, takePassed, taskBeats, type CourseEvent, type PedalEvent, type PedalScore, type TakeChecks } from '../judge';
 import type { Exercise, Rng, TimedTask } from '../types';
 import { LEVEL_LABEL, Verdict, getVelocityCal, pct } from './shared';
@@ -201,6 +202,7 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: 
   const anyKey = task.events.some((e) => e.midi === null);
   // Dedilhado sugerido junto com as outras dicas (nomes e teclas acesas).
   const fingers = useMemo(() => timedFingers(task), [task]);
+  const lowerFingers = useMemo(() => (task.lower ? timedFingers({ ...task, display: task.lower, clef: 'bass' }) : null), [task]);
   const showFingers = hints && !anyKey;
 
   useEffect(() => {
@@ -392,36 +394,45 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: 
     }
   }
 
-  // A pauta mostra a linha `display`; o estado de cada nota vem do evento esperado no mesmo tempo.
+  // A pauta mostra a linha `display` (e a `lower`, na pauta dupla); o estado de cada nota vem do evento esperado no mesmo tempo.
+  // As duas mãos dividem as mesmas colunas: o que se toca junto fica um em cima do outro.
   const beatMs = 60000 / bpm;
-  const displayStarts = useMemo(() => {
-    let b = 0;
-    return task.display.map((d) => {
-      const at = b;
-      b += d.beats;
-      // Swing: a colcheia do contratempo é tocada no último terço do tempo.
-      return task.swing ? swingBeat(at) : at;
-    });
-  }, [task.display, task.swing]);
+  const cols = useMemo(() => grandColumns(task.display, task.lower), [task.display, task.lower]);
+  // Swing: a colcheia do contratempo é tocada no último terço do tempo.
+  const playedAt = (b: number) => (task.swing ? swingBeat(b) : b);
   const shift = task.transpose ?? 0;
   let current = 0;
-  displayStarts.forEach((b, i) => {
-    if (phase === 'playing' && b * beatMs - 120 <= elapsed) current = i;
+  cols.starts.forEach((b, i) => {
+    if (phase === 'playing' && playedAt(b) * beatMs - 120 <= elapsed) current = i;
   });
-  const states: NoteState[] = [];
-  task.display.forEach((d, i) => {
-    // A figura que continua uma ligadura não é tocada: herda o estado da nota de onde vem.
-    states.push(i > 0 && task.display[i - 1].tie ? states[i - 1] : stateOf(d, i));
-  });
-  function stateOf(d: TimedTask['display'][number], i: number): NoteState {
+  const statesFor = (line: TimedTask['display'], colOf: (number | undefined)[], hand: 'r' | 'l' | null): NoteState[] => {
+    const out: NoteState[] = [];
+    let prev: NoteState = 'plain';
+    colOf.forEach((li, ci) => {
+      if (li === undefined) {
+        out.push('plain');
+        return;
+      }
+      const d = line[li];
+      // A figura que continua uma ligadura não é tocada: herda o estado da nota de onde vem.
+      const st = li > 0 && line[li - 1].tie ? prev : stateOf(d, cols.starts[ci], ci, hand);
+      out.push(st);
+      prev = st;
+    });
+    return out;
+  };
+  function stateOf(d: TimedTask['display'][number], at: number, ci: number, hand: 'r' | 'l' | null): NoteState {
     if (d.midi === null && !anyKey) return 'plain';
-    const ei = task.events.findIndex((e) => Math.abs(e.beat - displayStarts[i]) < 1e-6 && (e.midi === null || (d.midi !== null && e.midi === d.midi + shift)));
+    const ei = task.events.findIndex((e) => Math.abs(e.beat - playedAt(at)) < 1e-6 && (!hand || !e.hand || e.hand === hand) && (e.midi === null || (d.midi !== null && e.midi === d.midi + shift)));
     const j = ei >= 0 ? live?.notes[ei] : null;
     if (j) return j.grade === 'perfect' || j.grade === 'good' ? 'hit' : j.grade === 'off' ? 'late' : 'miss';
     if (phase === 'done') return 'plain';
-    if (i === current) return 'current';
+    if (ci === current) return 'current';
     return phase === 'idle' ? 'plain' : 'upcoming';
   }
+  const grand = !!task.lower?.length;
+  const states = statesFor(task.display, cols.upper, grand ? 'r' : null);
+  const lowerStates = grand ? statesFor(task.lower!, cols.lower, 'l') : [];
 
   // Guia: a próxima nota ainda não tocada. Anda quando você toca, não sozinho com o relógio.
   const marks: Partial<Record<number, KeyMark>> = {};
@@ -435,23 +446,43 @@ function TimedTake({ task, bpm, ex, hints, onTake, onStart, active, autoKick }: 
   return (
     <>
       {task.caption && <p className="runner__detail">{task.caption}</p>}
-      <div className={'runner__staff runner__staff-wide' + (onTime >= 16 ? ' runner__staff-blazing' : onTime >= 8 ? ' runner__staff-hot' : '')} ref={staffRef}>
+      <div className={'runner__staff runner__staff-wide' + (task.lower?.length ? ' runner__staff-grand' : '') + (onTime >= 16 ? ' runner__staff-blazing' : onTime >= 8 ? ' runner__staff-hot' : '')} ref={staffRef}>
         <Staff
-          notes={task.display.map((d) => d.midi)}
+          notes={spread(cols.upper, task.display).map((d) => d?.midi)}
           states={states}
           current={current}
           showNames={hints && !anyKey}
           width={staffWidth}
           clef={task.clef}
-          durations={task.display.map((d) => d.beats)}
-          ties={task.display.map((d) => !!d.tie)}
-          chords={task.display.map((d) => d.chord)}
-          fingers={showFingers ? fingers : undefined}
+          durations={spread(cols.upper, task.display).map((d) => d?.beats ?? 1)}
+          starts={grand ? cols.starts : undefined}
+          ties={spread(cols.upper, task.display).map((d) => !!d?.tie)}
+          chords={spread(cols.upper, task.display).map((d) => d?.chord)}
+          fingers={showFingers ? spread(cols.upper, fingers).map((f) => f ?? null) : undefined}
           beatsPerBar={task.beatsPerBar}
           beatScale={task.compound ? 1.5 : 1}
           fifths={task.fifths}
-          label="Pauta do exercício"
+          label={grand ? 'Pauta do exercício, mão direita' : 'Pauta do exercício'}
         />
+        {grand && (
+          <Staff
+            notes={spread(cols.lower, task.lower!).map((d) => d?.midi)}
+            states={lowerStates}
+            current={current}
+            showNames={hints && !anyKey}
+            width={staffWidth}
+            clef="bass"
+            durations={spread(cols.lower, task.lower!).map((d) => d?.beats ?? 1)}
+            starts={cols.starts}
+            ties={spread(cols.lower, task.lower!).map((d) => !!d?.tie)}
+            chords={spread(cols.lower, task.lower!).map((d) => d?.chord)}
+            fingers={showFingers && lowerFingers ? spread(cols.lower, lowerFingers).map((f) => f ?? null) : undefined}
+            beatsPerBar={task.beatsPerBar}
+            beatScale={task.compound ? 1.5 : 1}
+            fifths={task.fifths}
+            label="Pauta do exercício, mão esquerda"
+          />
+        )}
       </div>
       <div className="runner__actions">
         {phase === 'countin' ? (

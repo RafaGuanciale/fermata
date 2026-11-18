@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { TrainingRun } from '../db/db';
 import { seeded } from './music';
-import { ALL_TRACKS, MAJOR, partsDone, trainingUnit, lineTask, pentachord, scaleUpDown, techRunId, techStartBpm, techStatus, techniqueForDay, trackFor } from './track';
+import { ALL_TRACKS, MAJOR, partsDone, trainingUnit, lineTask, pentachord, scaleUpDown, techRunId, techStartBpm, techStatus, techniqueForDay, trackFor, trackForDay } from './track';
+import { UNITS } from '.';
 import type { Exercise, TimedTask } from './types';
 
 function checkTask(t: TimedTask, where: string) {
@@ -132,6 +133,61 @@ describe('variação do treino', () => {
     for (const p of ALBERTI_PROGRESSIONS) for (const c of p.chords) {
       expect(c.length).toBe(3);
       expect(Math.min(...c) >= 40 && Math.max(...c) <= 57, p.name).toBe(true);
+    }
+  });
+});
+
+// Um conceito por vez: o treino de uma unidade só usa o que já foi ensinado.
+// Lição que apresenta cada coisa que o detector abaixo reconhece numa tarefa.
+const TAUGHT_IN = { colcheias: 20, tercinas: 39, semicolcheias: 70, 'mãos juntas': 14 } as const;
+type Concept = keyof typeof TAUGHT_IN;
+
+function conceptsIn(t: TimedTask): Concept[] {
+  const out = new Set<Concept>();
+  const figures = [...t.display, ...(t.lower ?? [])].map((d) => d.beats * (t.compound ? 1.5 : 1));
+  const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
+  if (figures.some((b) => near(b, 0.5))) out.add('colcheias');
+  if (figures.some((b) => near(b, 1 / 3))) out.add('tercinas');
+  if (figures.some((b) => near(b, 0.25))) out.add('semicolcheias');
+  if (t.events.some((e) => e.hand === 'l') || !!t.lower?.length) out.add('mãos juntas');
+  return [...out];
+}
+
+describe('um conceito por vez no treino', () => {
+  const firstLesson = (unit: number) => Math.min(...UNITS[unit - 1].lessons.map((l) => l.n));
+  const cases = ALL_TRACKS.flatMap((track) => [
+    ...track.warmup.map((w) => ({ track, what: `aquecimento "${w.title}"`, after: w.afterLesson, gen: w.kind === 'timed' ? w.gen : null })),
+    ...track.technique.map((t) => ({ track, what: `técnica "${t.id}"`, after: t.afterLesson, gen: t.gen })),
+    { track, what: 'leitura', after: track.reading.afterLesson, gen: track.reading.kind === 'timed' ? track.reading.gen : null },
+  ]);
+  it.each(cases.map((c) => [`unidade ${c.track.unit}, ${c.what}`, c] as const))('%s', (_name, c) => {
+    if (!c.gen) return;
+    for (let seed = 1; seed <= 10; seed++) {
+      for (const k of conceptsIn(c.gen(seeded(seed)))) {
+        const lesson = TAUGHT_IN[k];
+        const ok = lesson < firstLesson(c.track.unit) || (c.after ?? 0) >= lesson;
+        expect(ok, `usa ${k} (lição ${lesson}) sem "afterLesson" a partir dela`).toBe(true);
+      }
+    }
+  });
+
+  it('chegar na unidade 3 não traz colcheias nem tercinas antes das lições', () => {
+    const none = trackForDay(3, () => false);
+    expect(none.technique.map((t) => t.id)).toEqual(trackFor(2).technique.map((t) => t.id));
+    const after17 = trackForDay(3, (n) => n <= 17);
+    expect(after17.technique.map((t) => t.id)).toEqual(['triade-quebrada-1']);
+    const after20 = trackForDay(3, (n) => n <= 20);
+    expect(after20.technique.map((t) => t.id)).toEqual(['triade-quebrada-1', 'penta-colcheias']);
+    expect(after20.warmup.map((w) => w.title)).toContain('Pentacorde em colcheias');
+    for (const seed of [1, 2, 3]) expect(conceptsIn(after17.technique[0].gen(seeded(seed)))).toEqual([]);
+  });
+
+  it('a tríade quebrada da unidade 3 cabe na pauta (sem linhas suplementares em cima)', () => {
+    const item = trackFor(3).technique.find((t) => t.id === 'triade-quebrada-1')!;
+    for (let seed = 1; seed <= 20; seed++) {
+      const midis = item.gen(seeded(seed)).display.map((d) => d.midi ?? 0);
+      expect(Math.max(...midis)).toBeLessThanOrEqual(79);
+      expect(Math.min(...midis)).toBeGreaterThanOrEqual(60);
     }
   });
 });

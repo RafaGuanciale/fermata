@@ -90,6 +90,11 @@ export interface TimedTask {
   /** Linha para a pauta (uma voz). Pausas = midi null em `display`. */
   display: { midi: Midi | null; beats: number; /** Ligada à próxima figura (mesma tecla, sem reatacar). */ tie?: boolean; /** Acorde: todas as notas da figura. */ chord?: Midi[] }[];
   clef: Clef;
+  /**
+   * Mãos juntas: a linha da mão esquerda, desenhada numa segunda pauta (clave de fá) embaixo de `display`.
+   * Sem ela, a pauta é simples. Quem toca com as duas mãos precisa ver as duas.
+   */
+  lower?: { midi: Midi | null; beats: number; tie?: boolean; chord?: Midi[] }[];
   /** O que precisa ser tocado. Para acordes ou duas vozes, eventos com o mesmo `beat`. */
   events: TimedEvent[];
   beatsPerBar: number;

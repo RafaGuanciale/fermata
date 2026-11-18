@@ -6,8 +6,8 @@ import { db } from '../db/db';
 import { saveRun, useRuns } from '../training/runs';
 import { dayIndex, dayKey } from '../training/progress';
 import { PLAN, UNITS } from '.';
-import { afterReview, courseStep, currentUnitN, nextLesson, warmupItems, type Position } from './progress';
-import { DAY_PARTS, dayRunId, partsDone, techniqueForDay, trackFor, type DayPart } from './track';
+import { afterReview, courseStep, currentUnitN, isPassed, lessonKey, nextLesson, warmupItems, type Position } from './progress';
+import { DAY_PARTS, dayRunId, partsDone, techniqueForDay, trackForDay, type DayPart } from './track';
 import { useCourseRows } from './useCourseRows';
 
 const KIND: Record<DayPart, 'warmup' | 'review' | 'timed' | 'reading' | 'ear' | 'names'> = {
@@ -24,7 +24,12 @@ export function useDayPlan(chosenUnit: number | null = null) {
   const next = rows && runs ? nextLesson(UNITS, rows, runs) : null;
   const courseUnit = rows && runs ? currentUnitN(UNITS, rows, runs) : 1;
   const unitN = chosenUnit ?? courseUnit;
-  const track = trackFor(unitN);
+  // Lições passadas: o trilho só traz o que já foi ensinado (colcheias depois da lição das colcheias, e assim por diante).
+  const passedKey = rows ? UNITS.flatMap((u) => u.lessons.filter((l) => isPassed(rows.get(lessonKey(u, l)))).map((l) => l.n)).join(',') : '';
+  const track = useMemo(() => {
+    const passed = new Set(passedKey.split(',').filter(Boolean).map(Number));
+    return trackForDay(unitN, (n) => passed.has(n));
+  }, [unitN, passedKey]);
 
   // Revisão: lições antes da atual. Com as lições da unidade feitas (falta a música final) ou o curso no fim, todas contam.
   const reviewPos: Position | null = useMemo(() => {

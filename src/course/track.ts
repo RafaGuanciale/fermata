@@ -25,15 +25,20 @@ export interface TechItem {
   /** Uniformidade exigida (IOI-SD em ms), para escalas e arpejos. */
   evenness?: number;
   articulation?: 'legato' | 'staccato';
+  /** Só entra no treino depois de passar esta lição (a que ensina o que o item usa). */
+  afterLesson?: number;
 }
+
+/** Exercício que só entra no treino depois de passar a lição `afterLesson`. */
+export type GatedExercise = Exercise & { afterLesson?: number };
 
 export interface DailyTrack {
   unit: number;
   /** Meta técnica da unidade, uma frase. */
   goal: string;
-  warmup: Exercise[];
+  warmup: GatedExercise[];
   technique: TechItem[];
-  reading: Exercise;
+  reading: GatedExercise;
   ear: Exercise;
 }
 
@@ -117,8 +122,11 @@ export function lineTask(midis: Midi[], dur: number, opts: { bpm: number; hands:
   events.sort((a, b) => a.beat - b.beat);
   const clef: Clef = opts.hands === 'esquerda' ? 'bass' : 'treble';
   const [low, high] = roundRange(events.map((e) => e.midi));
+  // Mãos juntas: a esquerda ganha a pauta dela, em clave de fá.
+  const leftLine = opts.hands === 'duas' ? midis.map((m) => m - 12) : opts.hands === 'contrario' ? midis.map((m) => 2 * midis[0] - m - 12) : null;
   return {
     display: right.map((m, i) => ({ midi: m, beats: durs[i] })),
+    ...(leftLine ? { lower: leftLine.map((m, i) => ({ midi: m, beats: durs[i] })) } : {}),
     clef,
     events,
     beatsPerBar: bpb,
@@ -209,6 +217,26 @@ function arpItem(id: string, keys: Key[], hands: Hands, from: number, target: nu
   };
 }
 
+/** Mesmo item, liberado só depois da lição `n`. */
+const after = <T extends { afterLesson?: number }>(n: number, x: T): T => ({ ...x, afterLesson: n });
+
+/** Tríade quebrada em 1 oitava (1-3-5-8-5-3-1), em semínimas: cabe na pauta, sem linhas suplementares em cima. */
+function brokenTriadItem(id: string, keys: Key[], from: number, target: number): TechItem {
+  return {
+    id,
+    title: 'Tríade quebrada, 1 oitava, mão direita',
+    how: `Fundamental, 3ª, 5ª, oitava e volta, uma nota por tempo, em ${keys.map((k) => k.name).join(', ')}. Mão aberta na posição do acorde, sem esticar: o polegar na fundamental, o 5 na oitava.`,
+    gen: (rng) => {
+      const k = pick(rng, keys);
+      return lineTask(arpeggio(near(k, 60), [0, 4, 7], 1), 1, { bpm: from, hands: 'direita', fifths: k.fifths, caption: k.name });
+    },
+    from,
+    target,
+    step: 4,
+    evenness: 40,
+  };
+}
+
 const CHROMATIC_STARTS: { name: string; midi: Midi }[] = [
   { name: 'Dó', midi: 60 }, { name: 'Ré', midi: 62 }, { name: 'Mi', midi: 64 }, { name: 'Fá', midi: 65 }, { name: 'Sol', midi: 67 },
 ];
@@ -275,8 +303,8 @@ const touchesItem: TechItem = {
 
 // ---------- aquecimento, leitura e ouvido ----------
 
-const warm = (title: string, gen: (rng: Rng) => TimedTask): Exercise => ({
-  kind: 'timed', title, how: 'Devagar e solto. É para acordar as mãos, não para medir velocidade. Muda a cada dia.', gen, reps: 1, window: 120, pass: { accuracy: 0.7 },
+const warm = (title: string, gen: (rng: Rng) => TimedTask, afterLesson?: number): GatedExercise => ({
+  kind: 'timed', title, how: 'Devagar e solto. É para acordar as mãos, não para medir velocidade. Muda a cada dia.', gen, reps: 1, window: 120, pass: { accuracy: 0.7 }, afterLesson,
 });
 
 /** Tônica na região certa para a mão (a esquerda é escrita uma oitava acima e o lineTask desce). */
@@ -309,8 +337,8 @@ const arpWarm = (keys: Key[], dur: number, bpm: number, octaves = 1, chord?: num
   return lineTask(arpeggio(near(k, 55), steps, octaves), dur, { bpm, hands: 'direita', fifths: k.fifths, caption: k.name });
 };
 
-const readingEx = (gen: (rng: Rng) => TimedTask, how: string): Exercise => ({
-  kind: 'timed', title: 'Leitura à primeira vista', how, gen, reps: 1, window: 100, pass: { accuracy: 0.85 },
+const readingEx = (gen: (rng: Rng) => TimedTask, how: string, afterLesson?: number): GatedExercise => ({
+  kind: 'timed', title: 'Leitura à primeira vista', how, gen, reps: 1, window: 100, pass: { accuracy: 0.85 }, afterLesson,
 });
 
 const earEx = (gen: ItemGen, how: string): Exercise => ({
@@ -333,41 +361,42 @@ const TRACKS: DailyTrack[] = [
   {
     unit: 2,
     goal: 'Pentacordes em Dó, Sol, Ré e Lá menor, mãos separadas, rumo a 100 BPM.',
-    warmup: [warm('Pentacorde, mão direita', pentaWarm([C, G, D, A_MIN], 'direita', 1, 60)), warm('Pentacorde, mãos juntas', pentaWarm([C, G], 'duas', 1, 56))],
+    warmup: [warm('Pentacorde, mão direita', pentaWarm([C, G, D, A_MIN], 'direita', 1, 60)), warm('Pentacorde, mãos juntas', pentaWarm([C, G], 'duas', 1, 56), 14)],
     technique: [pentaItem('penta-tons-md', [C, { ...G, tonic: 67 }, D, { ...A_MIN, tonic: 69 }], 'direita', 1, 60, 100), pentaItem('penta-tons-me', [{ ...C, tonic: 48 }, G, { ...D, tonic: 50 }, A_MIN], 'esquerda', 1, 60, 100)],
     reading: readingEx((rng) => (rng() < 0.5 ? sightReadingTask(rng, { tonic: 60, bars: 4, bpm: 60 }) : sightReadingTask(rng, { tonic: 48, bars: 4, bpm: 60, clef: 'bass' })), '4 compassos novos, ora na clave de sol, ora na de fá.'),
     ear: earEx(intervalByEar({ sizes: [2, 3, 4, 5], from: [60, 62, 64, 65, 67] }), 'O app toca um intervalo; toque as duas notas.'),
   },
   {
     unit: 3,
-    goal: 'Pentacordes em colcheias a 60 BPM e tríades quebradas em tercinas a 50 BPM.',
-    warmup: [warm('Pentacorde em colcheias', pentaWarm([C, G, F], 'direita', 0.5, 52)), warm('Pentacorde, mãos juntas', pentaWarm([C, G, F], 'duas', 1, 60))],
-    technique: [pentaItem('penta-colcheias', [C, { ...G, tonic: 67 }, { ...F, tonic: 65 }], 'direita', 0.5, 44, 60), arpItem('triade-quebrada', [C, { ...F, tonic: 65 }, { ...G, tonic: 67 }], 'direita', 40, 50)],
+    goal: 'Tríades quebradas de 1 oitava em semínimas rumo a 80 BPM e, depois da lição das colcheias, pentacordes em colcheias a 60 BPM.',
+    warmup: [warm('Pentacorde em colcheias', pentaWarm([C, G, F], 'direita', 0.5, 52), 20), warm('Pentacorde, mãos juntas', pentaWarm([C, G, F], 'duas', 1, 60))],
+    technique: [after(17, brokenTriadItem('triade-quebrada-1', [C, F, G], 52, 80)), after(20, pentaItem('penta-colcheias', [C, { ...G, tonic: 67 }, { ...F, tonic: 65 }], 'direita', 0.5, 44, 60))],
     reading: readingEx((rng) => sightReadingTwoHands(rng, { tonic: 60, bars: 4, bpm: 60 }), '4 compassos com as duas mãos: melodia na direita, tônica ou dominante na esquerda.'),
     ear: earEx(progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'I', 'I'], ['I', 'IV', 'I', 'V7']], answer: 'bass' }), 'O app toca 4 acordes; toque o baixo de cada um.'),
   },
   {
     unit: 4,
     goal: 'Escalas maiores de 1 oitava, mãos separadas, em colcheias a 60 BPM; movimento contrário em Dó, Sol ou Fá.',
-    warmup: [warm('Escala, mão direita', scaleWarm([C, G, F], 'direita', 1, 60)), warm('Escala, mão esquerda', scaleWarm([C, G, F], 'esquerda', 1, 60))],
+    warmup: [warm('Escala, mão direita', scaleWarm([C, G, F], 'direita', 1, 60), 27), warm('Escala, mão esquerda', scaleWarm([C, G, F], 'esquerda', 1, 60), 27)],
     technique: [
-      scaleItem('escala-1-md', [C, { ...G, tonic: 67 }, { ...F, tonic: 65 }, D, { ...BB, tonic: 70 }], { octaves: 1, dur: 0.5, hands: 'direita', from: 44, target: 60, evenness: 40 }),
-      scaleItem('escala-1-me', [{ ...C, tonic: 60 }, { ...G, tonic: 55 }, { ...F, tonic: 53 }, { ...D, tonic: 62 }, BB], { octaves: 1, dur: 0.5, hands: 'esquerda', from: 44, target: 60, evenness: 40 }),
-      scaleItem('escala-contraria', [C, G, F], { octaves: 1, dur: 0.5, hands: 'contrario', from: 44, target: 60, evenness: 40 }),
+      // Passagem do polegar na lição 26; Ré e Si♭ maior na 32; mãos juntas em escala na 31.
+      ...[scaleItem('escala-1-md', [C, { ...G, tonic: 67 }, { ...F, tonic: 65 }, D, { ...BB, tonic: 70 }], { octaves: 1, dur: 0.5, hands: 'direita', from: 44, target: 60, evenness: 40 }),
+      scaleItem('escala-1-me', [{ ...C, tonic: 60 }, { ...G, tonic: 55 }, { ...F, tonic: 53 }, { ...D, tonic: 62 }, BB], { octaves: 1, dur: 0.5, hands: 'esquerda', from: 44, target: 60, evenness: 40 })].map((t) => after(32, t)),
+      after(31, scaleItem('escala-contraria', [C, G, F], { octaves: 1, dur: 0.5, hands: 'contrario', from: 44, target: 60, evenness: 40 })),
     ],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
       return sightReadingTwoHands(rng, { tonic: k.tonic < 60 ? k.tonic + 12 : k.tonic, bars: 4, bpm: 60, fifths: k.fifths });
-    }, '4 compassos com as duas mãos, com armadura até 2 sustenidos ou 2 bemóis.'),
+    }, '4 compassos com as duas mãos, com armadura até 2 sustenidos ou 2 bemóis.', 32),
     ear: earEx(degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6] }), 'Depois da cadência, toque o grau que ouviu (1 a 6).'),
   },
   {
     unit: 5,
     goal: 'Escalas menores harmônicas, 2 oitavas, mãos separadas, rumo a 69 BPM em colcheias.',
-    warmup: [warm('Escala menor harmônica, 1 oitava', scaleWarm([A_MIN, E_MIN, D_MIN], 'direita', 1, 60)), warm('Escala maior, mãos juntas', scaleWarm([G, C, F], 'duas', 1, 56))],
+    warmup: [warm('Escala menor harmônica, 1 oitava', scaleWarm([A_MIN, E_MIN, D_MIN], 'direita', 1, 60), 35), warm('Escala maior, mãos juntas', scaleWarm([G, C, F], 'duas', 1, 56))],
     technique: [
-      scaleItem('menor-2-md', [{ ...A_MIN, tonic: 57 }, { ...E_MIN, tonic: 52 }, { ...D_MIN, tonic: 62 }], { octaves: 2, dur: 0.5, hands: 'direita', minor: true, from: 50, target: 69, evenness: 40 }),
-      scaleItem('menor-2-me', [A_MIN, E_MIN, D_MIN], { octaves: 2, dur: 0.5, hands: 'esquerda', minor: true, from: 50, target: 69, evenness: 40 }),
+      ...[scaleItem('menor-2-md', [{ ...A_MIN, tonic: 57 }, { ...E_MIN, tonic: 52 }, { ...D_MIN, tonic: 62 }], { octaves: 2, dur: 0.5, hands: 'direita', minor: true, from: 50, target: 69, evenness: 40 }),
+      scaleItem('menor-2-me', [A_MIN, E_MIN, D_MIN], { octaves: 2, dur: 0.5, hands: 'esquerda', minor: true, from: 50, target: 69, evenness: 40 })].map((t) => after(35, t)),
     ],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D])(rng);
@@ -382,7 +411,7 @@ const TRACKS: DailyTrack[] = [
     technique: [
       scaleItem('escala-2-md', [C, { ...G, tonic: 55 }, { ...F, tonic: 53 }, D, BB], { octaves: 2, dur: 0.5, hands: 'direita', from: 56, target: 80, evenness: 35 }),
       scaleItem('escala-2-me', [{ ...C, tonic: 48 }, { ...G, tonic: 43 }, { ...F, tonic: 41 }, { ...D, tonic: 50 }, { ...BB, tonic: 46 }].map((k) => ({ ...k, tonic: k.tonic + 12 })), { octaves: 2, dur: 0.5, hands: 'esquerda', from: 56, target: 80, evenness: 35 }),
-      chromaticItem(50, 69),
+      after(48, chromaticItem(50, 69)),
     ],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
@@ -394,7 +423,7 @@ const TRACKS: DailyTrack[] = [
     unit: 7,
     goal: 'Escalas de 2 oitavas com as mãos juntas, rumo a 80 BPM em colcheias.',
     warmup: [warm('Escala, mãos juntas', scaleWarm([C, G, F], 'duas', 0.5, 56)), warm('Cromática, mão direita', (rng) => { const st = pick(rng, CHROMATIC_STARTS); return lineTask(scaleUpDown(st.midi, CHROMATIC, 1), 0.5, { bpm: 50, hands: 'direita', caption: `Começando em ${st.name}` }); })],
-    technique: [scaleItem('escala-2-mj', [C, G, F, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', minor: false, from: 56, target: 80, evenness: 35 })],
+    technique: [after(55, scaleItem('escala-2-mj', [C, G, F, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', minor: false, from: 56, target: 80, evenness: 35 }))],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
       return sightReadingTwoHands(rng, { tonic: k.tonic < 60 ? k.tonic + 12 : k.tonic, bars: 8, bpm: 72, fifths: k.fifths });
@@ -405,7 +434,7 @@ const TRACKS: DailyTrack[] = [
     unit: 8,
     goal: 'Arpejos de 2 oitavas, mãos separadas, rumo a 72 BPM em tercinas.',
     warmup: [warm('Escala, mãos juntas', scaleWarm([G, D, C], 'duas', 0.5, 60)), warm('Arpejo, 1 oitava', arpWarm([C, F, G, A_MIN], 1, 66))],
-    technique: [arpItem('arpejo-md', [C, { ...G, tonic: 55 }, { ...F, tonic: 53 }, A_MIN], 'direita', 50, 72), arpItem('arpejo-me', [C, G, F, A_MIN], 'esquerda', 50, 72), scaleItem('escala-2-mj-b', [C, G, F, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', from: 64, target: 84, evenness: 35 })],
+    technique: [after(61, arpItem('arpejo-md', [C, { ...G, tonic: 55 }, { ...F, tonic: 53 }, A_MIN], 'direita', 50, 72)), after(61, arpItem('arpejo-me', [C, G, F, A_MIN], 'esquerda', 50, 72)), scaleItem('escala-2-mj-b', [C, G, F, A_MIN].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', from: 64, target: 84, evenness: 35 })],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
       return sightReadingTwoHands(rng, { tonic: k.tonic < 60 ? k.tonic + 12 : k.tonic, bars: 8, bpm: 72, fifths: k.fifths });
@@ -416,7 +445,7 @@ const TRACKS: DailyTrack[] = [
     unit: 9,
     goal: 'Escalas de 2 oitavas mãos juntas a 92–104 BPM e baixo de Alberti.',
     warmup: [warm('Arpejo, 2 oitavas', arpWarm([C, G, F], 1 / 3, 50, 2)), warm('Escala, mãos juntas', scaleWarm([D, G, C], 'duas', 0.5, 66))],
-    technique: [scaleItem('escala-2-mj-c', [C, G, D, F, BB].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', from: 72, target: 104, evenness: 30 }), albertiItem(60, 100)],
+    technique: [scaleItem('escala-2-mj-c', [C, G, D, F, BB].map((k) => ({ ...k, tonic: k.tonic < 60 ? k.tonic : k.tonic - 12 })), { octaves: 2, dur: 0.5, hands: 'duas', from: 72, target: 104, evenness: 30 }), after(67, albertiItem(60, 100))],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
       return sightReadingTwoHands(rng, { tonic: k.tonic < 60 ? k.tonic + 12 : k.tonic, bars: 8, bpm: 80, fifths: k.fifths });
@@ -427,7 +456,7 @@ const TRACKS: DailyTrack[] = [
     unit: 10,
     goal: 'Arpejos de tônica, V7 e diminuta, mãos separadas, rumo a 92 BPM.',
     warmup: [warm('Escala, 2 oitavas, mãos juntas', scaleWarm([C, G, F], 'duas', 0.5, 72, 2, 55)), warm('Alberti', (rng) => albertiTask(rng, 72))],
-    technique: [arpItem('arpejo-v7', [{ ...G, tonic: 55 }, { ...C, tonic: 48 }, { ...F, tonic: 53 }], 'direita', 60, 92, { name: 'dominante com sétima', steps: [0, 4, 7, 10] }), arpItem('arpejo-dim7', [{ ...C, tonic: 59 }, { ...C, tonic: 61 }, { ...C, tonic: 62 }], 'direita', 60, 92, { name: 'diminuta com sétima', steps: [0, 3, 6, 9] }), arpItem('arpejo-mj', [C, G, F], 'duas', 50, 72)],
+    technique: [arpItem('arpejo-v7', [{ ...G, tonic: 55 }, { ...C, tonic: 48 }, { ...F, tonic: 53 }], 'direita', 60, 92, { name: 'dominante com sétima', steps: [0, 4, 7, 10] }), after(77, arpItem('arpejo-dim7', [{ ...C, tonic: 59 }, { ...C, tonic: 61 }, { ...C, tonic: 62 }], 'direita', 60, 92, { name: 'diminuta com sétima', steps: [0, 3, 6, 9] })), arpItem('arpejo-mj', [C, G, F], 'duas', 50, 72)],
     reading: readingEx((rng) => {
       const k = readKeys([C, G, F, D, BB])(rng);
       return sightReadingTwoHands(rng, { tonic: k.tonic < 60 ? k.tonic + 12 : k.tonic, bars: 8, bpm: 84, fifths: k.fifths });
@@ -463,6 +492,28 @@ export function trackFor(unit: number): DailyTrack {
 }
 
 export const ALL_TRACKS = TRACKS;
+
+/**
+ * O trilho de hoje: o da unidade, sem o que ainda não foi ensinado.
+ * Item com `afterLesson` só entra com a lição passada; o que faltar vem da unidade anterior (com a mesma regra).
+ * Assim, chegar numa unidade não joga na técnica uma figura que a lição ainda vai apresentar.
+ */
+export function trackForDay(unit: number, passed: (lesson: number) => boolean): DailyTrack {
+  const base = trackFor(unit);
+  if (base.unit <= 1) return base;
+  const ok = (x: { afterLesson?: number }) => !x.afterLesson || passed(x.afterLesson);
+  const prev = trackForDay(base.unit - 1, passed);
+  const warmup = base.warmup.filter(ok);
+  const technique = base.technique.filter(ok);
+  const filled = [...warmup, ...prev.warmup.filter((w) => !warmup.some((x) => x.title === w.title))].slice(0, Math.max(base.warmup.length, warmup.length));
+  return {
+    ...base,
+    goal: technique.length ? base.goal : prev.goal,
+    warmup: filled,
+    technique: technique.length ? technique : prev.technique,
+    reading: ok(base.reading) ? base.reading : prev.reading,
+  };
+}
 
 // ---------- escada de andamento que continua de um dia para o outro ----------
 

@@ -232,6 +232,16 @@
   width: 100%;
 }
 
+/* Pauta dupla: as duas pautas precisam da mesma escala para as colunas ficarem alinhadas */
+.runner__staff-grand {
+  display: flex;
+  flex-direction: column;
+}
+
+.runner__staff-grand .staff + .staff {
+  margin-top: calc(-1 * var(--space-3));
+}
+
 .runner__keys {
   overflow-x: auto;
 }
@@ -537,6 +547,18 @@ a.progress__phaseTitle {
   .runner__staff .staff {
     display: flex;
     justify-content: center;
+  }
+
+  /* Na pauta dupla, encolher pela largura (igual nas duas), nunca pela altura de cada uma */
+  .runner__staff-grand .staff__svg {
+    max-height: none;
+    max-width: 82%;
+  }
+}
+
+@media (max-height: 700px) {
+  .runner__staff-grand .staff__svg {
+    max-width: 66%;
   }
 }
 
