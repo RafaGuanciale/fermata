@@ -251,7 +251,7 @@ No exercício, o app mede cada nota no tempo, com janela de ±80 ms. Comece deva
 const l18: Lesson = {
   n: 18,
   id: 'l18',
-  title: 'I–V7–I em Dó',
+  title: 'Graus e I–V7–I em Dó',
   minutes: 60,
   objectives: [
     'Consigo dizer o que é o tom de Dó maior e tocar qualquer grau da escala (1 a 7).',
@@ -801,7 +801,9 @@ const KEY_F: ChoiceQuestion[] = [
 
 const bassC = progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'V7', 'I'], ['I', 'I', 'IV', 'I'], ['I', 'IV', 'I', 'V7'], ['I', 'IV', 'IV', 'V7']], answer: 'bass' });
 const chordsByEar = progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'I'], ['I', 'V7', 'I'], ['I', 'IV', 'V7'], ['I', 'IV', 'V7', 'I']], answer: 'chords' });
-const tonic = tonicByEar({ keys: ['C', 'G', 'F', 'D'] });
+// Tônica só nos tons já vistos: Dó e Sol na lição 23; Fá entra na 24.
+const tonic = tonicByEar({ keys: ['C', 'G'] });
+const tonic3 = tonicByEar({ keys: ['C', 'G', 'F'] });
 const fChords = primaryChord({ keys: ['F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
 const allKeys = primaryChord({ keys: ['C', 'G', 'F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
 
@@ -833,7 +835,7 @@ const l23: Lesson = {
   title: 'Ouvido 2: baixo e função',
   minutes: 60,
   objectives: [
-    'Consigo achar a tônica de uma progressão em Dó, Sol, Fá ou Ré.',
+    'Consigo achar a tônica de uma progressão em Dó ou Sol.',
     'Consigo tocar o baixo de uma progressão de 4 acordes com I, IV e V7.',
     'Consigo tocar de ouvido progressões curtas com I, IV e V7.',
   ],
@@ -847,7 +849,7 @@ Para achar a tônica, ouça o trecho e **cante a nota em que ele quer parar**. D
 
 Uma dica que ajuda muito: progressões que acabam no V7 deixam a casa "no ar". O ouvido completa sozinho a resolução. Cante essa resolução: é a tônica.`,
     },
-    { kind: 'exercise', id: 'l23-tonica', exercise: { kind: 'items', title: 'Ache a casa', how: 'O app toca I–IV–V7 numa tonalidade sorteada, sem resolver. Toque a tônica, em qualquer oitava.', gen: tonic, count: 10, low: 48, high: 72, labels: 'off', pass: { accuracy: 0.85 } } },
+    { kind: 'exercise', id: 'l23-tonica', exercise: { kind: 'items', title: 'Ache a casa', how: 'O app toca I–IV–V7 em Dó ou em Sol, sorteado, sem resolver. Toque a tônica, em qualquer oitava.', gen: tonic, count: 10, low: 48, high: 72, labels: 'off', pass: { accuracy: 0.85 } } },
     {
       kind: 'text',
       title: 'O baixo conta a história',
@@ -962,7 +964,7 @@ Estude primeiro a esquerda sozinha, no exercício abaixo. Depois a direita, e s�
       kind: 'items',
       title: 'Acordes, cifra e ouvido',
       how: '20 perguntas misturadas das lições 17 a 23, com algumas da Unidade 2. Meta: 85%.',
-      gen: mix([allKeys, allKeys, chordsCFG7, HARM_C, cadenceC, toG, degreesCG, bassC, tonic, choice([...CHORDS, ...DOMINANT, ...FUNCTIONS, ...KEY_G, ...PEDAL, ...EAR2])]),
+      gen: mix([allKeys, allKeys, chordsCFG7, HARM_C, cadenceC, toG, degreesCG, bassC, tonic3, choice([...CHORDS, ...DOMINANT, ...FUNCTIONS, ...KEY_G, ...PEDAL, ...EAR2])]),
       count: 20,
       low: 36,
       high: 84,
@@ -1010,4 +1012,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, degreesC, degreesG, degreesCG, HARM_C, gChords, cgChords, toG, bassC, chordsByEar, tonic, fChords, allKeys];
+export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, degreesC, degreesG, degreesCG, HARM_C, gChords, cgChords, toG, bassC, chordsByEar, tonic, tonic3, fChords, allKeys];
