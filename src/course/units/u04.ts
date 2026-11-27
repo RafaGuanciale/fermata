@@ -89,7 +89,7 @@ const l25: Lesson = {
     {
       kind: 'text',
       title: 'Uma escada com degraus de dois tamanhos',
-      body: `Toque todas as brancas de Dó4 a Dó5: **Dó, Ré, Mi, Fá, Sol, Lá, Si, Dó**. Isso é a **escala de Dó maior**, e ela tem um segredo: os degraus não são todos iguais.
+      body: `Toque todas as brancas de Dó4 a Dó5: **Dó, Ré, Mi, Fá, Sol, Lá, Si, Dó**, a **escala de Dó maior** da lição 18. Na lição 21 você viu o segredo dela, que agora vira regra: os degraus não são todos iguais.
 
 Lembre da lição 13: entre Mi e Fá, e entre Si e Dó, não há tecla preta. Esses degraus são **semitons**. Todos os outros são **tons**. Em ordem:
 
@@ -406,7 +406,7 @@ const l28: Lesson = {
     {
       kind: 'text',
       title: 'Cada grau tem um nome e um papel',
-      body: `Você já chama os acordes pelo número romano (I, IV, V). As **notas** da escala também têm números (graus 1 a 7) e, além disso, **nomes** que descrevem o papel de cada uma:
+      body: `Você já chama os acordes pelo número romano (I, IV, V) e as **notas** da escala pelos graus, de 1 a 7. Além do número, cada grau tem um **nome** que descreve o papel dele:
 
 1. **Tônica**: a casa.
 2. **Supertônica**: logo acima da tônica.

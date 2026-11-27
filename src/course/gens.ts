@@ -424,12 +424,25 @@ export function keyFromSignature(opts: { fifths: number[]; skill?: string }): It
 
 const DEGREE_PT = ['tônica', 'supertônica', 'mediante', 'subdominante', 'dominante', 'superdominante', 'sensível'];
 
-/** "Toque a mediante de Sol maior": nome do grau → nota, em qualquer oitava. */
-export function scaleDegreeNote(opts: { keys: string[]; degrees: number[]; skill?: string }): ItemGen {
+/**
+ * "Toque a mediante de Sol maior": nome do grau → nota, em qualquer oitava.
+ * Com `byNumber`, pede pelo número ("Toque o grau 5 de Sol maior"), para antes da lição dos nomes (28).
+ */
+export function scaleDegreeNote(opts: { keys: string[]; degrees: number[]; byNumber?: boolean; skill?: string }): ItemGen {
   return (rng) => {
     const key = pick(rng, opts.keys);
     const d = pick(rng, opts.degrees);
     const pc = (rootPc(key) + MAJOR[d - 1]) % 12;
+    if (opts.byNumber) {
+      const counted = MAJOR.slice(0, d).map((x, i) => `${ptInKey((rootPc(key) + x) % 12, key)} (${i + 1})`).join(', ');
+      return {
+        prompt: `Toque o grau ${d} de ${keyName(key)} maior`,
+        detail: 'Qualquer oitava. Conte a escala a partir da casa.',
+        hint: counted,
+        steps: [{ kind: 'pc', pcs: [pc] }],
+        skill: opts.skill ?? 'grau-numero',
+      };
+    }
     return {
       prompt: `Toque a ${DEGREE_PT[d - 1]} de ${keyName(key)} maior`,
       detail: 'Qualquer oitava.',

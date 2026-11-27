@@ -1,7 +1,7 @@
 // Unidade 3 — Primeiros acordes, cifra e acompanhamento (lições 17 a 24). Projeto final: Amazing Grace com acordes.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
-import { choice, harmonize, mix, playChord, primaryChord, progressionByEar, resolveCadence, tonicByEar, transposeProgression, type ChoiceQuestion } from '../gens';
+import { choice, harmonize, mix, playChord, primaryChord, progressionByEar, resolveCadence, scaleDegreeNote, tonicByEar, transposeProgression, type ChoiceQuestion } from '../gens';
 import { n, pick } from '../music';
 import { melodyTask, randomRhythm, twoHandTask } from '../tasks';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
@@ -45,6 +45,8 @@ const CHORDS: ChoiceQuestion[] = [
 ];
 
 const DOMINANT: ChoiceQuestion[] = [
+  { q: '"Tom de Dó maior" quer dizer…', options: ['As notas vêm da escala de Dó maior e a casa é o Dó', 'Tocar o acorde de Dó o tempo todo', 'Começar a música na nota Dó'], answer: 0, why: 'O tom diz a escala e a casa. Dentro dele aparecem vários acordes: Dó, Fá, Sol…' },
+  { q: 'Num exercício, "o primeiro acorde é o I" quer dizer…', options: ['O primeiro acorde tocado é o do 1º grau (a casa)', 'É o acorde número 1 da lista', 'É um acorde de uma nota só'], answer: 0, why: 'O número romano é o grau do acorde na escala, não a ordem em que ele aparece.' },
   { q: 'Em Dó maior, o acorde do V grau é…', options: ['Sol (G)', 'Fá (F)', 'Ré (D)'], answer: 0, why: 'Conte de Dó: Dó (I), Ré, Mi, Fá (IV), Sol (V).' },
   { q: 'O G7 tem quais notas?', options: ['Sol, Si, Ré, Fá', 'Sol, Si, Ré, Fá♯', 'Sol, Dó, Mi'], answer: 0, why: 'Sol maior mais a 7ª: Fá.' },
   { q: 'O par de notas que dá tensão ao G7 é…', options: ['Si e Fá (o trítono)', 'Sol e Ré', 'Dó e Mi'], answer: 0, why: 'Si e Fá ficam a 3 tons de distância. Eles se resolvem fechando em Dó e Mi.' },
@@ -68,6 +70,10 @@ const chordsDAE = playChord({ symbols: ['D', 'A', 'E'], low: 48, high: 72, requi
 const chordsCG7 = playChord({ symbols: ['C', 'G7'], low: 36, high: 72, omitFifth: true });
 const chordsCFG7 = playChord({ symbols: ['C', 'F', 'G7'], low: 36, high: 72, omitFifth: true, skill: 'cifra' });
 const cadenceC = resolveCadence({ keys: ['C'], before: [['I', 'V7'], ['V7'], ['IV', 'V7']] });
+const SEVEN = [1, 2, 3, 4, 5, 6, 7];
+const degreesC = scaleDegreeNote({ keys: ['C'], degrees: SEVEN, byNumber: true });
+const degreesG = scaleDegreeNote({ keys: ['G'], degrees: SEVEN, byNumber: true });
+const degreesCG = scaleDegreeNote({ keys: ['C', 'G'], degrees: SEVEN, byNumber: true });
 
 const HARM_C = harmonize({
   key: 'C',
@@ -248,6 +254,7 @@ const l18: Lesson = {
   title: 'I–V7–I em Dó',
   minutes: 60,
   objectives: [
+    'Consigo dizer o que é o tom de Dó maior e tocar qualquer grau da escala (1 a 7).',
     'Consigo tocar Dó e G7 em posição próxima na mão esquerda, movendo o mínimo.',
     'Consigo completar uma cadência V7–I de ouvido.',
     'Consigo acompanhar uma melodia de 8 compassos com I e V7 a 72 BPM.',
@@ -255,15 +262,34 @@ const l18: Lesson = {
   blocks: [
     {
       kind: 'text',
-      title: 'Graus: o nome do acorde pela posição na escala',
-      body: `Numa tonalidade, cada acorde ganha um número romano pela nota da escala em que ele começa. Em Dó maior, conte a partir de Dó: Dó é o **I**, Ré o II, Mi o III, Fá o **IV**, Sol o **V**.
+      title: 'Escala, tom e graus',
+      body: `Antes do acorde novo, três palavras que vão aparecer em toda a harmonia daqui para a frente.
 
-Os graus importam mais do que os nomes, porque eles dizem o **papel** do acorde. O **I** é a casa. O **V** é o acorde que mais puxa de volta para casa. Essa ida e volta, I → V → I, é a menor história que a harmonia sabe contar, e está em quase toda música tonal, de Bach ao sertanejo.`,
+- **Escala de Dó maior**: as sete notas **Dó, Ré, Mi, Fá, Sol, Lá, Si** (as teclas brancas), subindo até o próximo Dó. As cinco primeiras você já conhece: são o pentacorde da posição de Dó.
+- **Tom** (ou tonalidade): diz qual escala a música usa e qual nota é a **casa**. "Em Dó maior" quer dizer que as notas vêm da escala de Dó maior e que a música descansa no Dó. Tom não é um acorde: dentro do tom de Dó aparecem vários acordes (Dó, Fá, Sol…).
+- **Graus**: os números das notas da escala, contando a partir da casa. Dó é o **1**, Ré o 2, Mi o 3, Fá o **4**, Sol o **5**, Lá o 6, Si o 7.
+
+Os acordes ganham o número da nota em que começam, em algarismo romano: o acorde de Dó é o **I**, o de Fá é o **IV**, o de Sol é o **V**. O número importa mais do que o nome, porque diz o **papel** do acorde. O **I** é a casa. O **V** é o acorde que mais puxa de volta para ela. Essa ida e volta, I → V → I, é a menor história que a harmonia sabe contar, e está em quase toda música tonal, de Bach ao sertanejo.`,
     },
+    {
+      kind: 'keys',
+      low: 60,
+      high: 72,
+      lit: [60, 62, 64, 65, 67, 69, 71],
+      labels: { 60: '1', 62: '2', 64: '3', 65: '4', 67: '5', 69: '6', 71: '7', 72: '1' },
+      caption: 'Escala de Dó maior com os graus: Dó (1), Ré (2), Mi (3), Fá (4), Sol (5), Lá (6), Si (7). Depois do Si, a casa de novo.',
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'achar que o número romano é a ordem',
+      body: 'O I não quer dizer "o primeiro acorde que aparece": quer dizer "o acorde do 1º grau", o da casa. Uma música pode começar no V e terminar no I. Quando um exercício diz "o primeiro acorde é o I", ele avisa que a música começa no acorde da casa (em Dó maior, o de Dó).',
+    },
+    { kind: 'exercise', id: 'l18-graus', exercise: { kind: 'items', title: 'Graus de Dó maior', how: 'O app pede um número de 1 a 7; toque essa nota da escala de Dó, em qualquer oitava. Conte a partir do Dó.', gen: degreesC, count: 10, low: 48, high: 84, labels: 'fade', pass: { accuracy: 0.8 } } },
     {
       kind: 'text',
       title: 'O V7 e o trítono',
-      body: `Acrescente ao acorde de Sol maior mais uma terça: Sol, Si, Ré e **Fá**. Esse acorde de 4 notas é o **G7**, o "Sol com sétima", ou **V7** em Dó maior. O nome técnico é **dominante**.
+      body: `Monte o acorde do 5º grau com a fórmula da lição 17: **Sol**, 4 semitons acima **Si**, mais 3 **Ré**. Agora empilhe mais uma terça, de 3 semitons: **Fá**. Sol, Si, Ré, Fá. Esse acorde de 4 notas (4 + 3 + 3 semitons) é o **G7**, o "Sol com sétima", ou **V7** em Dó maior. O nome técnico é **dominante**.
 
 O segredo da tensão do V7 está em duas notas: **Si e Fá**. A distância entre elas é de 3 tons inteiros, o **trítono**, um intervalo instável que quer se resolver. E ele se resolve de um jeito muito particular:
 
@@ -326,14 +352,14 @@ Em "Mary Had a Little Lamb", uma canção tradicional americana do século XIX, 
     },
     { kind: 'exercise', id: 'l18-mary', exercise: quickTimed('Mary Had a Little Lamb, duas mãos', 'Melodia na direita, Dó e G7 na esquerda. Começa a 60 BPM e sobe até 72 BPM.', () => twoHandTask(MARY_R, MARY_L, { bpm: 60, caption: 'Esquerda: Dó nos compassos 1, 2, 4, 5, 6 e 8; G7 nos compassos 3 e 7.' }), { ladder: { from: 60, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-mary', why: 'A mesma música na pauta dupla, com os acordes escritos na clave de Fá.' },
-    { kind: 'exercise', id: 'l18-quiz', exercise: quiz('A dominante', 'Cinco perguntas rápidas.', DOMINANT) },
+    { kind: 'exercise', id: 'l18-quiz', exercise: quiz('Tom, graus e dominante', 'Sete perguntas rápidas.', DOMINANT) },
   ],
-  review: [chordsCG7, cadenceC, choice(DOMINANT, 'dominante')],
+  review: [degreesC, chordsCG7, cadenceC, choice(DOMINANT, 'dominante')],
   checkpoint: [
     quickTimed('Mary Had a Little Lamb a 72 BPM', '8 compassos, duas mãos, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(MARY_R, MARY_L, { bpm: 72, caption: 'Esquerda: Dó nos compassos 1, 2, 4, 5, 6 e 8; G7 nos compassos 3 e 7.' }), { window: 80, pass: { accuracy: 0.9 } }),
-    { kind: 'items', title: 'Acordes e cadências', how: 'Dó, G7 e cadências para completar, misturados com acordes da lição 17.', gen: mix([chordsCG7, cadenceC, chordsCFG]), count: 12, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
+    { kind: 'items', title: 'Graus, acordes e cadências', how: 'Graus de Dó, os acordes Dó e G7 e cadências para completar, misturados com acordes da lição 17.', gen: mix([degreesC, chordsCG7, cadenceC, chordsCFG]), count: 12, low: 36, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
   ],
-  exit: [chordsCG7, choice(DOMINANT, 'dominante')],
+  exit: [degreesC, chordsCG7, choice(DOMINANT, 'dominante')],
 };
 
 const l19: Lesson = {
@@ -448,6 +474,7 @@ const KEY_G: ChoiceQuestion[] = [
   { q: 'O D7 tem quais notas?', options: ['Ré, Fá♯, Lá, Dó', 'Ré, Fá, Lá, Dó', 'Ré, Fá♯, Lá, Dó♯'], answer: 0, why: 'Ré maior (Ré, Fá♯, Lá) mais a 7ª da dominante, Dó.' },
   { q: 'Transpor I–IV–V7 de Dó para Sol dá…', options: ['G – C – D7', 'G – F – C7', 'C – F – G7'], answer: 0, why: 'Os graus não mudam; mudam os acordes: o I vira G, o IV vira C, o V7 vira D7.' },
   { q: 'A sensível de Sol maior (a nota que puxa para o Sol) é…', options: ['Fá♯', 'Fá', 'Lá'], answer: 0, why: 'Meio tom abaixo da tônica: Fá♯. Ela está no D7.' },
+  { q: 'Por que a escala de Sol maior tem Fá♯?', options: ['Para copiar o desenho da escala de Dó: do 6º para o 7º grau é um tom', 'Porque toda escala tem uma tecla preta', 'Para soar mais forte'], answer: 0, why: 'De Mi para Fá é só semitom; o desenho pede tom ali. Com Fá♯, o semitom fica entre o 7º grau e a casa, como Si–Dó em Dó.' },
 ];
 
 const PEDAL: ChoiceQuestion[] = [
@@ -574,6 +601,7 @@ const l21: Lesson = {
   title: 'Tonalidade de Sol: G, C e D7',
   minutes: 60,
   objectives: [
+    'Consigo dizer as notas da escala de Sol maior e por que ela tem Fá♯.',
     'Consigo tocar I, IV e V7 de Sol maior pelo grau.',
     'Consigo transpor uma progressão de Dó para Sol pensando nos graus.',
     'Consigo tocar Twinkle, Twinkle em Sol com acompanhamento.',
@@ -581,14 +609,32 @@ const l21: Lesson = {
   blocks: [
     {
       kind: 'text',
+      title: 'A escala de Sol e o Fá♯',
+      body: `Os degraus da escala de Dó não são todos iguais. Lembre da lição 13: entre **Mi e Fá** e entre **Si e Dó** não há tecla preta, então esses passos são **semitons**; todos os outros são **tons**. Subindo de Dó: tom, tom, **semitom**, tom, tom, tom, **semitom**. Repare onde cai o último semitom: entre o 7º grau (Si) e a casa. É por isso que o Si puxa para o Dó.
+
+Agora comece no **Sol** e copie o mesmo desenho. Sol, Lá, Si, Dó, Ré e Mi encaixam: tom, tom, semitom, tom, tom. Do 6º para o 7º grau o desenho pede **tom**, mas de Mi para Fá só há um semitom. Então o Fá sobe: **Fá♯**. E de Fá♯ para Sol fica o semitom final, meio tom abaixo da casa, como o Si em Dó.
+
+**Escala de Sol maior: Sol, Lá, Si, Dó, Ré, Mi, Fá♯.** Por isso, em Sol, todo Fá é Fá♯. Na lição 25 você usa esse desenho para montar a escala maior a partir de qualquer nota.`,
+    },
+    {
+      kind: 'keys',
+      low: 67,
+      high: 79,
+      lit: [67, 69, 71, 72, 74, 76, 78],
+      labels: { 67: '1', 69: '2', 71: '3', 72: '4', 74: '5', 76: '6', 78: '7', 79: '1' },
+      caption: 'Escala de Sol maior com os graus: Sol (1), Lá (2), Si (3), Dó (4), Ré (5), Mi (6), Fá♯ (7).',
+    },
+    { kind: 'exercise', id: 'l21-escala', exercise: { kind: 'items', title: 'Graus de Sol maior', how: 'O app pede um número de 1 a 7; toque essa nota da escala de Sol, em qualquer oitava. O 7 é o Fá♯.', gen: degreesG, count: 10, low: 48, high: 84, labels: 'fade', pass: { accuracy: 0.8 } } },
+    {
+      kind: 'text',
       title: 'Os mesmos graus em outra casa',
-      body: `Mude a casa para **Sol**. Contando a partir de Sol: Sol (I), Lá, Si, **Dó (IV)**, **Ré (V)**. Os acordes primários de Sol maior são:
+      body: `Com a escala de Sol, os acordes saem do mesmo jeito que em Dó: Sol (I), Lá, Si, **Dó (IV)**, **Ré (V)**. Os acordes primários de Sol maior são:
 
 - **I = G** (Sol, Si, Ré): a casa.
 - **IV = C** (Dó, Mi, Sol): o afastamento.
 - **V7 = D7** (Ré, **Fá♯**, Lá, Dó): a tensão.
 
-O D7 traz o **Fá♯**, que você conheceu na posição de Sol. Ele é a **sensível** de Sol: meio tom abaixo da casa, puxando para cima, como o Si em Dó. E o trítono do D7 é **Fá♯–Dó**, que resolve em Sol–Si.
+O D7 traz o **Fá♯**, o 7º grau da escala de Sol. Ele é a **sensível** de Sol: meio tom abaixo da casa, puxando para cima, como o Si em Dó. E o trítono do D7 é **Fá♯–Dó**, que resolve em Sol–Si.
 
 Repare: o acorde de **Dó** era o I em Dó maior e agora é o IV em Sol maior. O acorde é o mesmo; o **papel** mudou porque a casa mudou.`,
     },
@@ -639,14 +685,14 @@ C – F – G7 – C em Dó é **I – IV – V7 – I**. Em Sol, I – IV – V
     { kind: 'exercise', id: 'l21-transpor', exercise: { kind: 'items', title: 'Transponha para Sol', how: 'A cifra vem em Dó. Pense nos graus e toque os acordes de Sol maior, em ordem.', gen: toG, count: 8, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
     { kind: 'exercise', id: 'l21-brilha', exercise: quickTimed('Twinkle, Twinkle em Sol', '12 compassos, duas mãos: melodia a partir do Sol4, G, C e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_G_R, TWINKLE_G_L, { bpm: 56, fifths: 1, caption: 'Um acorde a cada 2 tempos: G, C e D7 na esquerda, como na partitura do "Tocar a música".' }), { ladder: { from: 56, to: 72, step: 4 } }) },
     { kind: 'song', songId: 'u03-brilha-g', why: 'A versão em Sol na pauta dupla. O sustenido no começo de cada linha é a armadura: vale para todos os Fá da música. Você estuda armaduras a fundo na Unidade 4.' },
-    { kind: 'exercise', id: 'l21-quiz', exercise: quiz('Sol maior', 'Cinco perguntas rápidas.', KEY_G) },
+    { kind: 'exercise', id: 'l21-quiz', exercise: quiz('Sol maior', 'Seis perguntas rápidas.', KEY_G) },
   ],
-  review: [gChords, toG, choice(KEY_G, 'tom-sol')],
+  review: [degreesG, gChords, toG, choice(KEY_G, 'tom-sol')],
   checkpoint: [
-    { kind: 'items', title: 'Graus em Dó e em Sol', how: 'I, IV ou V7, numa das duas tonalidades, sem dicas. Meta: 85%.', gen: cgChords, count: 16, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
+    { kind: 'items', title: 'Graus em Dó e em Sol', how: 'Notas da escala (1 a 7) e acordes I, IV ou V7, numa das duas tonalidades, sem dicas. Meta: 85%.', gen: mix([cgChords, cgChords, degreesCG]), count: 16, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
     { kind: 'items', title: 'Transposição de progressões', how: 'Progressões novas de Dó para Sol. Meta: 85%.', gen: toG, count: 6, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
   ],
-  exit: [gChords, choice(KEY_G, 'tom-sol')],
+  exit: [degreesG, gChords, choice(KEY_G, 'tom-sol')],
 };
 
 /** Acordes em bloco para o pedal direto: com pausas (o pedal sobe na pausa) e sem pausas (sobe antes do próximo). */
@@ -873,7 +919,9 @@ O checkpoint de hoje mistura tudo isso, com perguntas novas e sem dicas. O proje
     {
       kind: 'text',
       title: 'O terceiro tom: Fá maior',
-      body: `Contando a partir de Fá: Fá (I), Sol, Lá, **Si♭ (IV)**, **Dó (V)**. Em Fá maior o Si é sempre **Si♭**, assim como em Sol o Fá era sempre Fá♯. Os acordes primários:
+      body: `Copie o desenho da escala a partir de Fá, como fez em Sol na lição 21: Fá, Sol, Lá, e do 3º para o 4º grau o desenho pede **semitom**. De Lá para Si é tom, então o Si desce: **Si♭**. **Escala de Fá maior: Fá, Sol, Lá, Si♭, Dó, Ré, Mi.** Em Fá maior o Si é sempre Si♭, assim como em Sol o Fá era sempre Fá♯.
+
+Contando os graus: Fá (I), Sol, Lá, **Si♭ (IV)**, **Dó (V)**. Os acordes primários:
 
 - **I = F** (Fá, Lá, Dó).
 - **IV = B♭** (Si♭, Ré, Fá).
@@ -914,7 +962,7 @@ Estude primeiro a esquerda sozinha, no exercício abaixo. Depois a direita, e s�
       kind: 'items',
       title: 'Acordes, cifra e ouvido',
       how: '20 perguntas misturadas das lições 17 a 23, com algumas da Unidade 2. Meta: 85%.',
-      gen: mix([allKeys, allKeys, chordsCFG7, HARM_C, cadenceC, toG, bassC, tonic, choice([...CHORDS, ...DOMINANT, ...FUNCTIONS, ...KEY_G, ...PEDAL, ...EAR2])]),
+      gen: mix([allKeys, allKeys, chordsCFG7, HARM_C, cadenceC, toG, degreesCG, bassC, tonic, choice([...CHORDS, ...DOMINANT, ...FUNCTIONS, ...KEY_G, ...PEDAL, ...EAR2])]),
       count: 20,
       low: 36,
       high: 84,
@@ -962,4 +1010,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, HARM_C, gChords, cgChords, toG, bassC, chordsByEar, tonic, fChords, allKeys];
+export const _gens: ItemGen[] = [chordsCFG, chordsDAE, chordsCG7, chordsCFG7, cadenceC, degreesC, degreesG, degreesCG, HARM_C, gChords, cgChords, toG, bassC, chordsByEar, tonic, fChords, allKeys];

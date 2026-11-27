@@ -151,10 +151,10 @@ Todo o conteúdo desta seção é **[I]**: design sobre as âncoras acima. **Cri
 | Nº | Título | Teoria | Prática | Critério |
 |---|---|---|---|---|
 | 17 | O acorde maior | Acorde = terças empilhadas (1-3-5); bloco vs quebrado; Dó, Fá, Sol | A1 N1 C/F/G em estado fundamental; E4 N1 C↔G em 1 minuto | 20 acordes com ≥90% e simultaneidade <50 ms; ≥20 trocas limpas/min |
-| 18 | I–V7–I em Dó | G7 em posição próxima (Si–Fá–Sol): tensão (trítono Si–Fá) → repouso; mão mínima | B4 N1 completar a cadência; E3 MD melodia + ME I/V7 | 8 compassos a 72 bpm sem acorde errado; trocas em ±80 ms |
+| 18 | I–V7–I em Dó | Escala de Dó, tom (tonalidade) e graus 1 a 7, antes dos números romanos; G7 em posição próxima (Si–Fá–Sol): tensão (trítono Si–Fá) → repouso; mão mínima | B4 N1 completar a cadência; E3 MD melodia + ME I/V7 | 8 compassos a 72 bpm sem acorde errado; trocas em ±80 ms |
 | 19 | IV e a cifra básica | I–IV–V7–I; ler cifra C, F, G7; graus como função (casa, afastamento, tensão) | A2 N1 chuva C/F/G7 em 3 s; B2 N1 harmonizar "Parabéns" ou música folclórica escolhendo I, IV ou V7 | ≥90% em 20 cifras; ≥85% dos compassos com acorde válido |
 | 20 | Colcheias e padrões de ME | Contagem "1 e 2 e"; padrões de ME em bloco, raiz+oitava, raiz–5ª | E1 N3 colcheias a 80 bpm ±60 ms; F3 N1 três padrões sobre I–IV–V–I | ≥85% dos onsets na janela; 2 ciclos de cada padrão sem erro |
-| 21 | Tonalidade de Sol: G–C–D7 | Acordes primários em Sol; transpor uma progressão = manter os graus | A3 N1 primários em Sol; C1 N2 transpor progressão de Dó para Sol | ≥85% |
+| 21 | Tonalidade de Sol: G–C–D7 | Escala de Sol pelo desenho de tons e semitons da escala de Dó (por que Fá♯); acordes primários em Sol; transpor uma progressão = manter os graus | A3 N1 primários em Sol; C1 N2 transpor progressão de Dó para Sol | ≥85% |
 | 22 | Pedal direto | Calcanhar no chão, parte da frente do pé no pedal; pedal direto (desce com o acorde); não segurar através de pausas | E5 N1 com acordes em bloco; o app mostra o CC64 sobre a linha do tempo | ≥85% das trocas sem lama e sem pedal preso em pausas |
 | 23 | Ouvido 2: baixo e função | Achar a tônica; I, IV e V pelo baixo | D6 N1 ditado do baixo I–IV–V; D5 N1 progressões de 4 acordes | ≥85% |
 | 24 | **Checkpoint U3 + Projeto** "Folclore em três tons" | Revisão intercalada | Arranjar uma canção folclórica com acompanhamento I–IV–V7 em Dó, Sol e Fá, usando 2 padrões de ME | Checkpoint ≥85%; projeto: acordes certos em ≥95% dos compassos nos 3 tons, pulso estável |

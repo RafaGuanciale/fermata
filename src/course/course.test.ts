@@ -540,6 +540,11 @@ describe('geradores', () => {
     const deg = scaleDegreeNote({ keys: ['G'], degrees: [7] })(rng);
     expect(deg.prompt).toBe('Toque a sensível de Sol maior');
     expect(deg.steps).toEqual([{ kind: 'pc', pcs: [6] }]);
+    const byNum = scaleDegreeNote({ keys: ['G'], degrees: [7], byNumber: true })(rng);
+    expect(byNum.prompt).toBe('Toque o grau 7 de Sol maior');
+    expect(byNum.steps).toEqual([{ kind: 'pc', pcs: [6] }]);
+    expect(byNum.hint).toBe('Sol (1), Lá (2), Si (3), Dó (4), Ré (5), Mi (6), Fá♯ (7)');
+    expect(scaleDegreeNote({ keys: ['F'], degrees: [4], byNumber: true })(rng).hint).toBe('Fá (1), Sol (2), Lá (3), Si♭ (4)');
     const tp = transposeProgression({ from: 'C', to: ['G'], progressions: [['I', 'IV', 'V7', 'I']] })(rng);
     expect(tp.symbol).toBe('C – F – G7 – C');
     expect(tp.steps.map((x) => (x.kind === 'chord' ? x.pcs : []))).toEqual([[7, 11, 2], [0, 4, 7], [2, 6, 9, 0], [7, 11, 2]]);

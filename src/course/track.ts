@@ -39,7 +39,8 @@ export interface DailyTrack {
   warmup: GatedExercise[];
   technique: TechItem[];
   reading: GatedExercise;
-  ear: Exercise;
+  /** Antes da lição em `afterLesson`, o ouvido vem da unidade anterior. */
+  ear: GatedExercise;
 }
 
 // ---------- linhas técnicas ----------
@@ -341,8 +342,8 @@ const readingEx = (gen: (rng: Rng) => TimedTask, how: string, afterLesson?: numb
   kind: 'timed', title: 'Leitura à primeira vista', how, gen, reps: 1, window: 100, pass: { accuracy: 0.85 }, afterLesson,
 });
 
-const earEx = (gen: ItemGen, how: string): Exercise => ({
-  kind: 'items', title: 'Ouvido', how, gen, count: 6, low: 36, high: 84, labels: 'off', pass: { accuracy: 0.8 },
+const earEx = (gen: ItemGen, how: string, afterLesson?: number): GatedExercise => ({
+  kind: 'items', title: 'Ouvido', how, gen, count: 6, low: 36, high: 84, labels: 'off', pass: { accuracy: 0.8 }, afterLesson,
 });
 
 const readKeys = (keys: Key[]) => (rng: Rng) => pick(rng, keys);
@@ -372,7 +373,8 @@ const TRACKS: DailyTrack[] = [
     warmup: [warm('Pentacorde em colcheias', pentaWarm([C, G, F], 'direita', 0.5, 52), 20), warm('Pentacorde, mãos juntas', pentaWarm([C, G, F], 'duas', 1, 60))],
     technique: [after(17, brokenTriadItem('triade-quebrada-1', [C, F, G], 52, 80)), after(20, pentaItem('penta-colcheias', [C, { ...G, tonic: 67 }, { ...F, tonic: 65 }], 'direita', 0.5, 44, 60))],
     reading: readingEx((rng) => sightReadingTwoHands(rng, { tonic: 60, bars: 4, bpm: 60 }), '4 compassos com as duas mãos: melodia na direita, tônica ou dominante na esquerda.'),
-    ear: earEx(progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'I', 'I'], ['I', 'IV', 'I', 'V7']], answer: 'bass' }), 'O app toca 4 acordes; toque o baixo de cada um.'),
+    // Ditado do baixo: ensinado na lição 23.
+    ear: earEx(progressionByEar({ keys: ['C'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'I', 'I'], ['I', 'IV', 'I', 'V7']], answer: 'bass' }), 'O app toca 4 acordes; toque o baixo de cada um.', 23),
   },
   {
     unit: 4,
@@ -388,7 +390,8 @@ const TRACKS: DailyTrack[] = [
       const k = readKeys([C, G, F, D, BB])(rng);
       return sightReadingTwoHands(rng, { tonic: k.tonic < 60 ? k.tonic + 12 : k.tonic, bars: 4, bpm: 60, fifths: k.fifths });
     }, '4 compassos com as duas mãos, com armadura até 2 sustenidos ou 2 bemóis.', 32),
-    ear: earEx(degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6] }), 'Depois da cadência, toque o grau que ouviu (1 a 6).'),
+    // Graus 1 a 6 de ouvido: lição 28.
+    ear: earEx(degreeByEar({ tonic: 60, degrees: [1, 2, 3, 4, 5, 6] }), 'Depois da cadência, toque o grau que ouviu (1 a 6).', 28),
   },
   {
     unit: 5,
@@ -512,6 +515,7 @@ export function trackForDay(unit: number, passed: (lesson: number) => boolean): 
     warmup: filled,
     technique: technique.length ? technique : prev.technique,
     reading: ok(base.reading) ? base.reading : prev.reading,
+    ear: ok(base.ear) ? base.ear : prev.ear,
   };
 }
 

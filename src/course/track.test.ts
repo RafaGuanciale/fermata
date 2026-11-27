@@ -182,6 +182,14 @@ describe('um conceito por vez no treino', () => {
     for (const seed of [1, 2, 3]) expect(conceptsIn(after17.technique[0].gen(seeded(seed)))).toEqual([]);
   });
 
+  it('o ouvido do treino só traz o ditado do baixo depois da lição 23, e os graus de ouvido depois da 28', () => {
+    const before23 = trackForDay(3, (n) => n <= 22);
+    expect(before23.ear.how).toBe(trackFor(2).ear.how);
+    expect(trackForDay(3, (n) => n <= 23).ear.how).toBe(trackFor(3).ear.how);
+    expect(trackForDay(4, (n) => n <= 27).ear.how).toBe(trackFor(3).ear.how);
+    expect(trackForDay(4, (n) => n <= 28).ear.how).toBe(trackFor(4).ear.how);
+  });
+
   it('a tríade quebrada da unidade 3 cabe na pauta (sem linhas suplementares em cima)', () => {
     const item = trackFor(3).technique.find((t) => t.id === 'triade-quebrada-1')!;
     for (let seed = 1; seed <= 20; seed++) {
