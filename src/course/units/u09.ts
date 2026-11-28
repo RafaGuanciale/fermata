@@ -6,6 +6,7 @@ import { pick } from '../music';
 import { melodyTask, sightReadingTwoHands, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
+import { ENT_L, ENT_R } from './u08';
 
 // ---------- escrita ----------
 
@@ -75,6 +76,10 @@ const l66: Lesson = {
     'Consigo dar nome a passagem, bordadura, apojatura, retardo, antecipação e escapada.',
     'Consigo ornamentar uma melodia simples com passagens e bordaduras.',
   ],
+  music: [
+    { song: 'u09-minueto', why: 'O Minuet in G é uma aula de notas estranhas: passagens em quase todo compasso, ligando as notas do acorde por grau conjunto, e bordaduras no compasso 6.' },
+    { song: 'u05-fur-elise', why: 'Für Elise abre com a bordadura mais famosa do piano: Mi–Ré♯–Mi–Ré♯–Mi, o Ré♯ saindo e voltando para o Mi. Toque o começo e diga o nome de cada nota estranha.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -132,6 +137,16 @@ Toque a versão ornamentada no exercício e depois invente a sua, com a regra: n
     },
     { kind: 'exercise', id: 'l66-ornamentar', exercise: quickTimed('A melodia ornamentada', 'Mão direita, semínimas, de 66 a 80 BPM.', () => melodyTask('E4 F4 G4 E4 | F4 G4 A4 F4 | G4 A4 G4 F4 | E4:4', { bpm: 66 }), { ladder: { from: 66, to: 80, step: 7 } }) },
     { kind: 'exercise', id: 'l66-quiz', exercise: quiz('Notas estranhas', 'Seis perguntas rápidas.', STRANGE_Q) },
+    {
+      kind: 'text',
+      title: 'Nas músicas que você conhece',
+      body: `Agora procure as notas estranhas em duas músicas do curso:
+
+- **Für Elise** (unidade 5): o vaivém **Mi–Ré♯–Mi–Ré♯–Mi** do começo é uma **bordadura** (inferior): o Ré♯ sai do Mi meio tom abaixo e volta. Toque devagar, com o acorde de Lá menor na cabeça, e ouça o Ré♯ como um enfeite em volta do Mi.
+- **Minuet in G** (lição 70): no compasso 1, sobre o acorde de Sol, Ré–Sol–**Lá**–Si–**Dó**: o Lá e o Dó são **passagens** entre notas do acorde. No compasso 6, Si–**Dó**–Si: uma bordadura.
+
+Nas duas, a nota estranha cai no tempo fraco e anda por grau conjunto: é o que faz a melodia correr sem tropeçar na harmonia.`,
+    },
   ],
   review: [strangePlay, strangeName, choice(STRANGE_Q, 'notas-estranhas')],
   checkpoint: [
@@ -140,11 +155,9 @@ Toque a versão ornamentada no exercício e depois invente a sua, com a regra: n
   exit: [strangeName, choice(STRANGE_Q, 'notas-estranhas')],
 };
 
-// Alberti em Dó, Fá e Sol (colcheias) e uma sonatina original sobre ele.
+// Alberti em Dó, Fá e Sol (colcheias).
 const ALB: Record<string, string> = { C: 'C3:0.5 G3:0.5 E3:0.5 G3:0.5', F: 'C3:0.5 A3:0.5 F3:0.5 A3:0.5', G: 'B2:0.5 G3:0.5 D3:0.5 G3:0.5', G7: 'B2:0.5 G3:0.5 F3:0.5 G3:0.5', Am: 'C3:0.5 A3:0.5 E3:0.5 A3:0.5', Dm: 'D3:0.5 A3:0.5 F3:0.5 A3:0.5' };
 const albBar = (c: string) => `${ALB[c]} ${ALB[c]}`;
-const SONATINA_R = 'C5:2 E5 C5 | G4:2 G4:2 | A4 F4 C5 A4 | G4:4 | C5:2 E5 C5 | D5 B4 G4 B4 | C5 E5 D5 B4 | C5:4';
-const SONATINA_L = ['C', 'C', 'F', 'C', 'C', 'G', 'C', 'C'].map((c, i) => (i === 3 ? `${ALB.C} ${ALB.G7}` : i === 6 ? `${ALB.C} ${ALB.G7}` : albBar(c))).join(' | ');
 
 const l67: Lesson = {
   n: 67,
@@ -154,6 +167,10 @@ const l67: Lesson = {
   objectives: [
     'Consigo tocar o baixo de Alberti em colcheias, leve e igual, em Dó, Fá e Sol.',
     'Consigo tocar a melodia mais forte que o acompanhamento em pelo menos 80% dos compassos.',
+  ],
+  music: [
+    { song: 'u09-k545', why: 'A Sonata facile de Mozart (K. 545) é o baixo de Alberti mais famoso do mundo: Dó–Sol–Mi–Sol na esquerda, a melodia cantando por cima. Os 12 primeiros compassos, no ritmo original.' },
+    { piece: 'nessun-dorma', why: 'Nessun dorma, a ária de Puccini que o Pavarotti eternizou, é melodia acompanhada no seu ponto mais alto: a voz canta e a orquestra só sustenta. No piano, a direita canta e a esquerda tem de ficar por baixo.' },
   ],
   blocks: [
     {
@@ -197,13 +214,23 @@ O app mede o equilíbrio pela força (velocity) de cada mão, compasso por compa
       title: 'o polegar batendo',
       body: 'No Alberti, o polegar toca a nota repetida a cada duas colcheias, e ele é o dedo mais pesado. Se o Sol "pula" para fora do desenho, deixe o polegar quase parado sobre a tecla e toque com a ponta, sem bater.',
     },
-    { kind: 'exercise', id: 'l67-sonatina', exercise: quickTimed('Sonatina em Dó, com equilíbrio', 'Melodia na direita, Alberti na esquerda, de 60 a 72 BPM. A melodia precisa soar acima do acompanhamento.', () => twoHandTask(SONATINA_R, SONATINA_L, { bpm: 60, caption: 'Melodia mf, Alberti p.' }), { ladder: { from: 60, to: 72, step: 6 }, balance: 8 }) },
-    { kind: 'song', songId: 'u09-sonatina', why: 'A sonatina inteira na partitura. Toque devagar ouvindo só a melodia.' },
+    {
+      kind: 'text',
+      title: 'A Sonata facile',
+      body: `Mozart chamou a Sonata em Dó, K. 545 (1788), de "sonata para principiantes". Os 4 primeiros compassos são o modelo da melodia acompanhada:
+
+- **Direita**: Dó (mínima), Mi, Sol | Si (pontuada), Dó–Ré, Dó | Lá (mínima), Sol, Dó | Sol, Fá–Mi–Fá, Mi. O ritmo é o original, com a pontuada e as semicolcheias.
+- **Esquerda**: o Alberti em colcheias, uma oitava abaixo da melodia: **Dó–Sol–Mi–Sol** (C), **Ré–Sol–Fá–Sol** (G7), **Dó–Lá–Fá–Lá** (F) e **Si–Sol–Ré–Sol** (G).
+
+Depois vêm as escalas em semicolcheias (compassos 5 a 10), na música inteira do "Tocar a música". O exercício abaixo é só o tema, com o equilíbrio medido.`,
+    },
+    { kind: 'exercise', id: 'l67-k545', exercise: quickTimed('Sonata facile, tema, com equilíbrio', 'Os 4 primeiros compassos: melodia na direita, Alberti na esquerda, de 60 a 84 BPM. A melodia precisa soar acima do acompanhamento.', () => twoHandTask(K545_R.slice(0, 4).join(' | '), K545_L.slice(0, 4).join(' | '), { bpm: 60, caption: 'Melodia mf, Alberti p. Esquerda: Dó–Sol–Mi–Sol, Ré–Sol–Fá–Sol, Dó–Lá–Fá–Lá, Si–Sol–Ré–Sol.' }), { ladder: { from: 60, to: 84, step: 8 }, balance: 8 }) },
+    { kind: 'song', songId: 'u09-k545', why: 'Os 12 primeiros compassos da Sonata facile, com as escalas. Comece no modo Estudar, mãos separadas, e suba o andamento aos poucos; o alvo é 120 BPM.' },
     { kind: 'exercise', id: 'l67-quiz', exercise: quiz('Alberti e equilíbrio', 'Três perguntas rápidas.', ALBERTI_Q, 0.66) },
   ],
   review: [choice(ALBERTI_Q, 'alberti'), strangeName],
   checkpoint: [
-    quickTimed('Sonatina a 72 BPM', 'Duas mãos, sem dicas, com a melodia acima do acompanhamento em 80% dos compassos.', () => twoHandTask(SONATINA_R, SONATINA_L, { bpm: 72 }), { balance: 8 }),
+    quickTimed('Sonata facile a 84 BPM', 'O tema, duas mãos, sem dicas, com a melodia acima do acompanhamento em 80% dos compassos.', () => twoHandTask(K545_R.slice(0, 4).join(' | '), K545_L.slice(0, 4).join(' | '), { bpm: 84 }), { balance: 8 }),
   ],
   exit: [choice(ALBERTI_Q, 'alberti')],
 };
@@ -301,20 +328,6 @@ O remédio é o **movimento contrário**: quando o baixo sobe, a direita desce, 
 
 // ---------- músicas ----------
 
-const sonatina: SongSpec = {
-  id: 'u09-sonatina',
-  title: 'Sonatina em Dó',
-  composer: 'melodia original do Fermata, no estilo clássico',
-  arrangement: 'melodia na direita, baixo de Alberti em colcheias na esquerda',
-  bpm: 72,
-  beatsPerBar: 4,
-  fifths: 0,
-  right: SONATINA_R,
-  left: SONATINA_L,
-  hands: 'duas',
-  pass: { accuracy: 0.85 },
-};
-
 // Minuet in G, BWV Anh. 114 (Christian Petzold, atribuído; do Caderno de Anna Magdalena Bach, 1725).
 const MINUET_R = [
   'D5 G4:0.5 A4:0.5 B4:0.5 C5:0.5', 'D5 G4 G4', 'E5 C5:0.5 D5:0.5 E5:0.5 F#5:0.5', 'G5 G4 G4',
@@ -339,6 +352,221 @@ const minuet: SongSpec = {
   left: MINUET_L,
   hands: 'duas',
   pass: { accuracy: 0.9 },
+};
+
+
+// ---------- músicas de domínio público da troca de 28/11/2026 ----------
+// Todas conferidas numa fonte e convertidas por script, sem notas de memória. Onde uma mão tinha duas vozes, a de
+// cima (direita) ou a de baixo (esquerda) manda no ritmo e a outra entra só nos ataques juntos; a nota ligada pela
+// barra vira nota + pausa (o motor não liga compassos).
+
+// Für Elise (Beethoven, WoO 59). Fonte: public/library/fur-elise.mxl (Mutopia, Breitkopf & Härtel 1888, domínio
+// público), os 126 compassos com as repetições por extenso. Como no tema A da unidade 5: 3/4 contando colcheias (no
+// original, 3/8 com semicolcheias), mesmo ritmo. Nos compassos 21 a 23 (e nas voltas) a edição divide o Mi–Ré♯ entre as
+// mãos: a nota que encostava na outra mão ficou meio valor mais curta.
+const FE_FULL_R = [
+  'r:2 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5',
+  'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5', 'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5',
+  'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5', 'A4:2 E5:0.5 D#5:0.5',
+  'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5',
+  'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5',
+  'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5', 'A4 r:0.5 B4:0.5 C5:0.5 D5:0.5', 'E5:1.5 G4:0.5 F5:0.5 E5:0.5',
+  'D5:1.5 F4:0.5 E5:0.5 D5:0.5', 'C5:1.5 E4:0.5 D5:0.5 C5:0.5', 'B4 r:0.5 E4:0.5 E5:0.5 r:0.5',
+  'r:0.5 E5:0.5 E6:0.5 r D#5:0.5', 'E5:0.75 r:0.25 r:0.5 D#5:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5',
+  'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5', 'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5',
+  'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5',
+  'A4 r:0.5 B4:0.5 C5:0.5 D5:0.5', 'E5:1.5 G4:0.5 F5:0.5 E5:0.5', 'D5:1.5 F4:0.5 E5:0.5 D5:0.5',
+  'C5:1.5 E4:0.5 D5:0.5 C5:0.5', 'B4 r:0.5 E4:0.5 E5:0.5 r:0.5', 'r:0.5 E5:0.5 E6:0.5 r D#5:0.5',
+  'E5:0.75 r:0.25 r:0.5 D#5:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5',
+  'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5', 'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5',
+  'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5', 'A4 r:0.5 E4+C5:0.5 F4+C5:0.5 E4+G4+C5:0.5',
+  'C5:2 F5:0.75 E5:0.25', 'E5 D5 Bb5:0.75 A5:0.25', 'A5:0.5 G5:0.5 F5:0.5 E5:0.5 D5:0.5 C5:0.5',
+  'Bb4 A4 A4:0.25 G4:0.25 A4:0.25 Bb4:0.25', 'C5:2 D5:0.5 D#5:0.5', 'E5:1.5 E5:0.5 F5:0.5 A4:0.5',
+  'C5:2 D5:0.75 B4:0.25', 'C5:0.25 G5:0.25 G4:0.25 G5:0.25 A4:0.25 G5:0.25 B4:0.25 G5:0.25 C5:0.25 G5:0.25 D5:0.25 G5:0.25', 'E5:0.25 G5:0.25 C6:0.25 B5:0.25 A5:0.25 G5:0.25 F5:0.25 E5:0.25 D5:0.25 G5:0.25 F5:0.25 D5:0.25',
+  'C5:0.25 G5:0.25 G4:0.25 G5:0.25 A4:0.25 G5:0.25 B4:0.25 G5:0.25 C5:0.25 G5:0.25 D5:0.25 G5:0.25', 'E5:0.25 G5:0.25 C6:0.25 B5:0.25 A5:0.25 G5:0.25 F5:0.25 E5:0.25 D5:0.25 G5:0.25 F5:0.25 D5:0.25', 'E5:0.25 F5:0.25 E5:0.25 D#5:0.25 E5:0.25 B4:0.25 E5:0.25 D#5:0.25 E5:0.25 B4:0.25 E5:0.25 D#5:0.25',
+  'E5:1.5 B4:0.5 E5:0.5 D#5:0.5', 'E5:1.5 B4:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 D#5:0.5 E5:0.5 D#5:0.5',
+  'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5',
+  'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5',
+  'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5', 'A4 r:0.5 B4:0.5 C5:0.5 D5:0.5', 'E5:1.5 G4:0.5 F5:0.5 E5:0.5',
+  'D5:1.5 F4:0.5 E5:0.5 D5:0.5', 'C5:1.5 E4:0.5 D5:0.5 C5:0.5', 'B4 r:0.5 E4:0.5 E5:0.5 r:0.5',
+  'r:0.5 E5:0.5 E6:0.5 r D#5:0.5', 'E5:0.5 r D#5:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5',
+  'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5', 'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5',
+  'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5',
+  'A4 r:2', 'E4+G4+Bb4+C#5:3', 'F4+A4+D5:2 C#5+E5:0.5 D5+F5:0.5',
+  'G#4+D5+F5:2 G#4+D5+F5', 'A4+C5+E5:3', 'F4+D5:2 E4+C5:0.5 D4+B4:0.5',
+  'C4+F#4+A4:2 C4+A4', 'C4+A4 E4+C5 D4+B4', 'C4+A4:3',
+  'E4+G4+Bb4+C#5:3', 'F4+A4+D5:2 C#5+E5:0.5 D5+F5:0.5', 'D5+F5:2 D5+F5',
+  'D5+F5:3', 'G4+Eb5:2 F4+D5:0.5 Eb4+C5:0.5', 'D4+F4+Bb4:2 D4+F4+A4',
+  'D4+F4+G#4:2 D4+F4+G#4', 'C4+E4+A4:2 r', 'E4+B4 r:2',
+  'A3:1/3 C4:1/3 E4:1/3 A4:1/3 C5:1/3 E5:1/3 D5:1/3 C5:1/3 B4:1/3', 'A4:1/3 C5:1/3 E5:1/3 A5:1/3 C6:1/3 E6:1/3 D6:1/3 C6:1/3 B5:1/3', 'A5:1/3 C6:1/3 E6:1/3 A6:1/3 C7:1/3 E7:1/3 D7:1/3 C7:1/3 B6:1/3',
+  'Bb6:1/3 A6:1/3 G#6:1/3 G6:1/3 F#6:1/3 F6:1/3 E6:1/3 D#6:1/3 D6:1/3', 'C#6:1/3 C6:1/3 B5:1/3 Bb5:1/3 A5:1/3 G#5:1/3 G5:1/3 F#5:1/3 F5:1/3', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5',
+  'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5', 'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5',
+  'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5',
+  'A4 r:0.5 B4:0.5 C5:0.5 D5:0.5', 'E5:1.5 G4:0.5 F5:0.5 E5:0.5', 'D5:1.5 F4:0.5 E5:0.5 D5:0.5',
+  'C5:1.5 E4:0.5 D5:0.5 C5:0.5', 'B4 r:0.5 E4:0.5 E5:0.5 r:0.5', 'r:0.5 E5:0.5 E6:0.5 r D#5:0.5',
+  'E5:0.5 r D#5:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5', 'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5',
+  'B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5', 'C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5', 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5',
+  'A4 r:0.5 C4:0.5 E4:0.5 A4:0.5', 'B4 r:0.5 E4:0.5 C5:0.5 B4:0.5', 'A4 r:2',
+];
+const FE_FULL_L = [
+  'r:3', 'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'r:3',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'C3:0.5 G3:0.5 C4:0.5 r:1.5',
+  'G2:0.5 G3:0.5 B3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 E4:0.25 r:0.25 r E4:0.5',
+  'E5:0.25 r:0.25 r D#5:0.5 E5:0.5 r:0.5', 'r:0.5 D#5:0.5 E5:0.5 r:1.5', 'r:3',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'C3:0.5 G3:0.5 C4:0.5 r:1.5', 'G2:0.5 G3:0.5 B3:0.5 r:1.5',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 E4:0.25 r:0.25 r E4:0.5', 'E5:0.25 r:0.25 r D#5:0.5 E5:0.5 r:0.5',
+  'r:0.5 D#5:0.5 E5:0.5 r:1.5', 'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'r:3',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 Bb3+C4:0.5 A3+C4:0.5 G3+Bb3+C4:0.5',
+  'F3:0.5 A3:0.5 C4:0.5 A3:0.5 C4:0.5 A3:0.5', 'F3:0.5 Bb3:0.5 D4:0.5 Bb3:0.5 D4:0.5 Bb3:0.5', 'F3:0.5 E4:0.5 F3+G3+Bb3:0.5 E4:0.5 F3+G3+Bb3:0.5 E4:0.5',
+  'F3:0.5 A3:0.5 C4:0.5 A3:0.5 C4:0.5 A3:0.5', 'F3:0.5 A3:0.5 C4:0.5 A3:0.5 C4:0.5 A3:0.5', 'E3:0.5 A3:0.5 C4:0.5 A3:0.5 D3+D4:0.5 F3:0.5',
+  'G3:0.5 E4:0.5 G3:0.5 E4:0.5 G3:0.5 F4:0.5', 'C4+E4 r:0.5 F4+G4:0.5 E4+G4:0.5 D4+F4+G4:0.5', 'C4+E4+G4 F3+A3 G3+B3',
+  'C4 r:0.5 F4+G4:0.5 E4+G4:0.5 D4+F4+G4:0.5', 'C4+E4+G4 F3+A3 G3+B3', 'G#3+B3 r:2',
+  'r:3', 'r:3', 'r:3',
+  'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'C3:0.5 G3:0.5 C4:0.5 r:1.5',
+  'G2:0.5 G3:0.5 B3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 E4:0.25 r:0.25 r E4:0.5',
+  'E5:0.25 r:0.25 r D#5:0.5 E5:0.5 r:0.5', 'r:0.5 D#5:0.5 E5:0.5 r:1.5', 'r:3',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5',
+  'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5', 'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5', 'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5',
+  'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5', 'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5', 'D2+A2:0.5 D2+A2:0.5 D2+A2:0.5 D2+A2:0.5 D2+A2:0.5 D2+A2:0.5',
+  'D#2+A2:0.5 D#2+A2:0.5 D#2+A2:0.5 D#2+A2:0.5 D#2+A2:0.5 D#2+A2:0.5', 'E2+A2:0.5 E2+A2:0.5 E2+A2:0.5 E2+A2:0.5 E2+G#2:0.5 E2+G#2:0.5', 'A1+A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5',
+  'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5', 'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5', 'A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5 A2:0.5',
+  'Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5', 'Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5', 'Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5 Bb2:0.5',
+  'B2:0.5 B2:0.5 B2:0.5 B2:0.5 B2:0.5 B2:0.5', 'C3:2 r', 'E3+G#3 r:2',
+  'A1 r A3+C4+E4', 'A3+C4+E4 r A3+C4+E4', 'A3+C4+E4 r A3+C4+E4',
+  'A3+C4+E4 r:2', 'r:3', 'r:3',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'C3:0.5 G3:0.5 C4:0.5 r:1.5', 'G2:0.5 G3:0.5 B3:0.5 r:1.5',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 E4:0.25 r:0.25 r E4:0.5', 'E5:0.25 r:0.25 r D#5:0.5 E5:0.5 r:0.5',
+  'r:0.5 D#5:0.5 E5:0.5 r:1.5', 'r:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5',
+  'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'r:3',
+  'A2:0.5 E3:0.5 A3:0.5 r:1.5', 'E2:0.5 E3:0.5 G#3:0.5 r:1.5', 'A1+A2 r:2',
+];
+// Musette in D, BWV Anh. 126 (Caderno de Anna Magdalena Bach). Fonte: Mutopia, BachJS/BWVAnh126 (Allen Garvin, a
+// partir da Bach-Gesellschaft, domínio público), 20 compassos sem as repetições; notas e ritmo originais.
+const MUSETTE_R = [
+  'A5 G5:0.25 F#5:0.25 E5:0.25 D5:0.25', 'A5 G5:0.25 F#5:0.25 E5:0.25 D5:0.25', 'F#4:0.25 G4:0.25 A4:0.5 G4:0.5 F#4:0.5', 'E4:0.5 A4:0.5 F#4:0.5 D4:0.5',
+  'A5 G5:0.25 F#5:0.25 E5:0.25 D5:0.25', 'A5 G5:0.25 F#5:0.25 E5:0.25 D5:0.25', 'F#4:0.25 G4:0.25 A4:0.5 G4:0.5 F#4:0.5', 'E4:0.5 A4:0.5 D4',
+  'C#5:0.25 D5:0.25 E5:0.5 C#5:0.25 D5:0.25 E5:0.5', 'A5:0.5 E5:0.5 E5', 'A5:0.5 E5:0.5 A5:0.5 E5:0.5', 'D5:0.25 C#5:0.25 B4:0.25 A4:0.25 B4:0.5 E4:0.5',
+  'E5:0.5 D#5:0.5 E4:0.5 D5:0.5', 'r:0.5 C#5:0.5 A5:0.5 G#5:0.5', 'E5:0.5 D#5:0.5 E4:0.5 D5:0.5', 'r:0.5 C#5:0.5 A5:0.5 G#5:0.5',
+  'E5:0.25 D#5:0.25 C#5:0.25 D#5:0.25 E5:0.25 D#5:0.25 C#5:0.25 D#5:0.25', 'E5:0.5 G#4:0.5 A4:0.5 D5:0.5', 'C#5:0.25 D5:0.25 E5:0.5 A4:0.5 D4:0.5', 'C#4:0.25 D4:0.25 E4:0.5 A3',
+];
+const MUSETTE_L = [
+  'D2:0.5 D3:0.5 D2:0.5 D3:0.5', 'D2:0.5 D3:0.5 D2:0.5 D3:0.5', 'F#3:0.25 G3:0.25 A3:0.5 G3:0.5 F#3:0.5', 'E3:0.5 A3:0.5 F#3:0.5 D3:0.5',
+  'D2:0.5 D3:0.5 D2:0.5 D3:0.5', 'D2:0.5 D3:0.5 D2:0.5 D3:0.5', 'F#3:0.25 G3:0.25 A3:0.5 G3:0.5 F#3:0.5', 'E3:0.5 A3:0.5 D3',
+  'A2:0.5 A3:0.5 A2:0.5 A3:0.5', 'A2:0.5 A3:0.5 A2:0.5 A3:0.5', 'A2:0.5 A3:0.5 A2:0.5 A3:0.5', 'A2:0.5 A3:0.5 E2:0.5 E3:0.5',
+  'E2:0.5 E3:0.5 E2:0.5 E3:0.5', 'E2:0.5 E3:0.5 E2:0.5 E3:0.5', 'E2:0.5 E3:0.5 E2:0.5 E3:0.5', 'E2:0.5 E3:0.5 E2:0.5 E3:0.5',
+  'E2:0.5 E3:0.5 E2:0.5 E3:0.5', 'E2:0.5 D3:0.5 C#3:0.5 D3:0.5', 'E3 A2:0.5 D3:0.5', 'C#3:0.25 D3:0.25 E3:0.5 A2',
+];
+// Sonata facile, K. 545, 1º movimento (Mozart), compassos 1 a 12. Fonte: Mutopia, MozartWA/KV545/K545-1 (Alejandro
+// Sierra, a partir do IMSLP; edição CC BY-SA 3.0, obra em domínio público); notas e ritmo originais, sem o trinado do 4.
+const K545_R = [
+  'C5:2 E5 G5', 'B4:1.5 C5:0.25 D5:0.25 C5 r', 'A5:2 G5 C6', 'G5 F5:0.5 E5:0.25 F5:0.25 E5 r',
+  'A4:0.5 B4:0.25 C5:0.25 D5:0.25 E5:0.25 F5:0.25 G5:0.25 A5:0.25 G5:0.25 F5:0.25 E5:0.25 D5:0.25 C5:0.25 B4:0.25 A4:0.25', 'G4:0.5 A4:0.25 B4:0.25 C5:0.25 D5:0.25 E5:0.25 F5:0.25 G5:0.25 F5:0.25 E5:0.25 D5:0.25 C5:0.25 B4:0.25 A4:0.25 G4:0.25', 'F4:0.5 G4:0.25 A4:0.25 B4:0.25 C5:0.25 D5:0.25 E5:0.25 F5:0.25 E5:0.25 D5:0.25 C5:0.25 B4:0.25 A4:0.25 G4:0.25 F4:0.25', 'E4:0.5 F4:0.25 G4:0.25 A4:0.25 B4:0.25 C5:0.25 D5:0.25 E5:0.25 D5:0.25 C5:0.25 B4:0.25 A4:0.25 G4:0.25 F4:0.25 E4:0.25',
+  'D4:0.5 E4:0.25 F4:0.25 G4:0.25 A4:0.25 B4:0.25 C#5:0.25 D5:0.25 A4:0.25 B4:0.25 C#5:0.25 D5:0.25 E5:0.25 F5:0.25 G5:0.25', 'A5:0.25 B5:0.25 C6:0.25 B5:0.25 A5:0.25 G5:0.25 F5:0.25 E5:0.25 F5:0.25 G5:0.25 A5:0.25 G5:0.25 F5:0.25 E5:0.25 D5:0.25 C5:0.25', 'B4:0.5 G5:0.5 E5:0.5 C5:0.5 D5:0.5 G5:0.5 E5:0.5 C5:0.5', 'D5 B4+D5+G5 G4 r',
+];
+const K545_L = [
+  'C4:0.5 G4:0.5 E4:0.5 G4:0.5 C4:0.5 G4:0.5 E4:0.5 G4:0.5', 'D4:0.5 G4:0.5 F4:0.5 G4:0.5 C4:0.5 G4:0.5 E4:0.5 G4:0.5', 'C4:0.5 A4:0.5 F4:0.5 A4:0.5 C4:0.5 G4:0.5 E4:0.5 G4:0.5', 'B3:0.5 G4:0.5 D4:0.5 G4:0.5 C4:0.5 G4:0.5 E4:0.5 G4:0.5',
+  'F4 r r F3+C4', 'E3+C4 r r E3+C4', 'D3+C4 r r D3+B3', 'C3+C4 r r C3+E3',
+  'F3+A3:4', 'F3:1.5 G3:0.5 A3:1.5 F#3:0.5', 'G2:0.25 B2:0.25 D3:0.25 G3:0.25 G2:0.25 C3:0.25 E3:0.25 G3:0.25 G2:0.25 B2:0.25 D3:0.25 G3:0.25 G2:0.25 C3:0.25 E3:0.25 G3:0.25', 'G2 G3 G2 r',
+];
+// "O Haupt voll Blut und Wunden", coral da Paixão segundo São Mateus (Bach, BWV 244, nº 54). Fonte: corpus do music21
+// (bach/bwv244.54, domínio público). Estilo teclado: soprano e contralto na direita, tenor e baixo na esquerda; sem a
+// repetição dos compassos 1 a 4. As fermatas dividem os compassos 4 e 8 na fonte; aqui eles voltam a ter 4 tempos.
+const CORAL_R = [
+  'r:3 F4+A4', 'F4+D5 A4+C5 D4+Bb4 F4+A4', 'F4+G4:2 F4+A4 A4+E5', 'A4+F5 A4+F5 A4+E5:0.5 D5:0.5 A4+E5',
+  'F4+D5:3 A4+F5', 'G4+E5:0.5 D5:0.5 G4+C5 F4+D5 Bb4+E5', 'Bb4+F5:2 A4+F5 A4+C5', 'A4+D5 A4+C5 G4+Bb4:0.5 F#4+A4:0.5 G4+Bb4',
+  'F#4+A4:3 G4+F5', 'G4+E5:0.5 F5:0.5 C5+G5 C5+F5 C5+E5', 'C5+D5:2 C5+E5 F4+A4', 'D4+Bb4 F4+A4 F4+G4 E4+C5',
+  'F4+A4:3 r',
+];
+const CORAL_L = [
+  'r:3 D4:0.5 C4:0.5', 'Bb3+D4 A3 G3+G4 F3+C4', 'Bb2+D4 C3+C4 F3+C4 C#3+E4', 'D3+E4:0.5 E3:0.5 F3+D4:0.5 G3:0.5 A3+D4 A2+C#4',
+  'D3+A3:3 D3+D4', 'G3+Bb3 A3+C4 Bb3+C4:0.5 A3:0.5 G3+Bb3', 'F3+D4:2 F3+C4 F3+F4', 'Bb3+D4 F#3+D4 G3+D4 G2+D4',
+  'D3+D4:3 B2+D4', 'C3+C4 C4+E4:0.5 B3:0.5 A3+F4 G3+G4', 'F3+A4 G3+G4 C3+G4 F3+C4', 'G3+Bb3 A3+C4:0.5 Bb3:0.5 C4 C3+G3',
+  'F3+C4:3 r',
+];
+// Rondo alla Turca (Mozart, Sonata K. 331, 3º movimento), primeira parte: A, B (em Dó) e A de volta. Fonte: Mutopia,
+// MozartWA/KV331/KV331_3_RondoAllaTurca (Rune Zedeler e Chris Sawer, a partir do IMSLP, domínio público), seções righta,
+// rightb e rightaa; notas e ritmo originais, sem as notinhas (acciaccaturas) e com o trinado do compasso 23 como nota simples.
+const TURCA_R = [
+  'r B4:0.25 A4:0.25 G#4:0.25 A4:0.25', 'C5:0.5 r:0.5 D5:0.25 C5:0.25 B4:0.25 C5:0.25', 'E5:0.5 r:0.5 F5:0.25 E5:0.25 D#5:0.25 E5:0.25', 'B5:0.25 A5:0.25 G#5:0.25 A5:0.25 B5:0.25 A5:0.25 G#5:0.25 A5:0.25',
+  'C6 A5:0.5 C6:0.5', 'B5:0.5 F#5+A5:0.5 E5+G5:0.5 F#5+A5:0.5', 'B5:0.5 F#5+A5:0.5 E5+G5:0.5 F#5+A5:0.5', 'B5:0.5 F#5+A5:0.5 E5+G5:0.5 D#5+F#5:0.5',
+  'E5 C5+E5:0.5 D5+F5:0.5', 'E5+G5:0.5 E5+G5:0.5 A5:0.25 G5:0.25 F5:0.25 E5:0.25', 'D5 C5+E5:0.5 D5+F5:0.5', 'E5+G5:0.5 E5+G5:0.5 A5:0.25 G5:0.25 F5:0.25 E5:0.25',
+  'B4+D5 A4+C5:0.5 B4+D5:0.5', 'C5+E5:0.5 C5+E5:0.5 F5:0.25 E5:0.25 D5:0.25 C5:0.25', 'B4 A4+C5:0.5 B4+D5:0.5', 'C5+E5:0.5 C5+E5:0.5 F5:0.25 E5:0.25 D5:0.25 C5:0.25',
+  'G#4+B4 B4:0.25 A4:0.25 G#4:0.25 A4:0.25', 'C5:0.5 r:0.5 D5:0.25 C5:0.25 B4:0.25 C5:0.25', 'E5:0.5 r:0.5 F5:0.25 E5:0.25 D#5:0.25 E5:0.25', 'B5:0.25 A5:0.25 G#5:0.25 A5:0.25 B5:0.25 A5:0.25 G#5:0.25 A5:0.25',
+  'C6 A5:0.5 B5:0.5', 'C6:0.5 B5:0.5 A5:0.5 G#5:0.5', 'A5:0.5 E5:0.5 F5:0.5 D5:0.5', 'C5 B4',
+  'A4 r',
+];
+const TURCA_L = [
+  'r:2', 'A3:0.5 C4+E4:0.5 C4+E4:0.5 C4+E4:0.5', 'A3:0.5 C4+E4:0.5 C4+E4:0.5 C4+E4:0.5', 'A3:0.5 C4+E4:0.5 A3:0.5 C4+E4:0.5',
+  'A3:0.5 C4+E4:0.5 C4+E4:0.5 C4+E4:0.5', 'E3:0.5 B3+E4:0.5 B3+E4:0.5 B3+E4:0.5', 'E3:0.5 B3+E4:0.5 B3+E4:0.5 B3+E4:0.5', 'E3:0.5 B3+E4:0.5 B2:0.5 B3:0.5',
+  'E3 r', 'C3:0.5 C4:0.5 E3:0.5 E4:0.5', 'G3 r', 'C3:0.5 C4:0.5 E3:0.5 E4:0.5',
+  'G3 r', 'A2:0.5 A3:0.5 C3:0.5 C4:0.5', 'E3 r', 'A2:0.5 A3:0.5 C3:0.5 C4:0.5',
+  'E3 r', 'A3:0.5 C4+E4:0.5 C4+E4:0.5 C4+E4:0.5', 'A3:0.5 C4+E4:0.5 C4+E4:0.5 C4+E4:0.5', 'A3:0.5 C4+E4:0.5 A3:0.5 C4+E4:0.5',
+  'F3:0.5 A3+D#4:0.5 A3+D#4:0.5 A3+D#4:0.5', 'E3:0.5 A3+E4:0.5 D3:0.5 F3+B3:0.5', 'C3:0.5 E3+A3:0.5 D3:0.5 F3+B3:0.5', 'E3+A3:0.5 E3+A3:0.5 E3+G#3:0.5 E3+G#3:0.5',
+  'A2+A3 r',
+];
+// The Entertainer, tema B (compassos 22 a 37 da edição do Mutopia; ver a unidade 8): a melodia na nota de cima das
+// oitavas, como no original; a esquerda com o baixo numa nota só.
+const ENT_B_R = [
+  'G5:0.5 A5:0.25 G5:0.5 E5:0.25 F5:0.25 F#5:0.25', 'G5:0.5 A5:0.25 G5:0.5 E5:0.25 C5:0.25 G4:0.25', 'A4:0.25 B4:0.25 C5:0.25 D5:0.25 E5:0.25 D5:0.25 C5:0.25 D5:0.25', 'G4:0.25 E5:0.25 F5:0.25 G5:0.25 A5:0.25 G5:0.25 E5:0.25 F5:0.25',
+  'G5:0.5 A5:0.25 G5:0.5 E5:0.25 F5:0.25 F#5:0.25', 'G5:0.5 A5:0.25 G5:0.5 G5:0.25 A5:0.25 A#5:0.25', 'B5:0.25 B5:0.5 B5:0.5 A5:0.25 F#5:0.25 D5:0.25', 'G5 r:0.25 E5:0.25 F5:0.25 F#5:0.25',
+  'G5:0.5 A5:0.25 G5:0.5 E5:0.25 F5:0.25 F#5:0.25', 'G5:0.5 A5:0.25 G5:0.5 E5:0.25 C5:0.25 G4:0.25', 'A4:0.25 B4:0.25 C5:0.25 D5:0.25 E5:0.25 D5:0.25 C5:0.25 D5:0.25', 'C5 r:0.25 G4:0.25 F#4:0.25 G4:0.25',
+  'C5:0.5 A4:0.25 C5:0.5 A4:0.25 C5:0.25 A4:0.25', 'G4:0.25 C5:0.25 E5:0.25 G5:0.5 E5:0.25 C5:0.25 G4:0.25', 'A4:0.5 C5:0.5 E5:0.25 D5:0.5 C5:0.25', 'r:1.5 D4:0.25 D#4:0.25',
+];
+const ENT_B_L = [
+  'C2:0.5 G3+C4+E4:0.5 G2:0.5 G3+C4+E4:0.5', 'C3:0.5 G3+C4+E4:0.5 G2:0.5 G3+C4+E4:0.5', 'F2:0.5 A3+C4+F4:0.5 F3:0.5 Ab3+C4+F4:0.5', 'E3:0.5 G3+C4+E4:0.5 G2:0.5 G3+C4+E4:0.5',
+  'C3:0.5 G3+C4+E4:0.5 G2:0.5 G3+C4+E4:0.5', 'C3:0.5 G3+C4+E4:0.5 E3:0.5 Eb3:0.5', 'D3:0.5 G3+B3+D4:0.5 D3:0.5 A3+C4+D4:0.5', 'G3+B3+D4:0.5 F2:0.5 E2:0.5 D2:0.5',
+  'C2:0.5 G3+C4+E4:0.5 G2:0.5 G3+C4+E4:0.5', 'C3:0.5 G3+C4+E4:0.5 G2:0.5 G3+C4+E4:0.5', 'F2:0.5 A3+C4+F4:0.5 F3:0.5 Ab3+C4+F4:0.5', 'E3:0.5 G3+C4+E4:0.5 C3:0.5 Bb3+C4+E4:0.5',
+  'F3+A3+C4+F4:0.5 F3+A3+C4+F4:0.5 F#3+A3+C4+D#4:0.5 F#3+A3+C4+D#4:0.5', 'G3+C4+E4:0.5 G3+C4+E4:0.5 G3+C4+E4:0.5 G3+C4+E4:0.5', 'D3+C4:0.5 D3+A3:0.5 G3+B3:0.5 G3+B3:0.5', 'C3:0.5 G2:0.5 C2:0.5 r:0.5',
+];
+
+/** O tema A da unidade 8 terminando na ponte para o B (2ª casa do compasso 21 da edição). */
+const ENT_A1_R = [...ENT_R.split(' | ').slice(0, -1), 'C5 r:0.25 E5:0.25 F5:0.25 F#5:0.25'];
+const ENT_A_L = ENT_L.split(' | ');
+
+const furEliseFull: SongSpec = {
+  id: 'u09-fur-elise', title: 'Für Elise, completa', composer: 'Ludwig van Beethoven',
+  arrangement: 'a música inteira (126 compassos) da edição do Mutopia, notas e ritmo originais; escrita em 3/4 contando colcheias, como o tema A da unidade 5; onde uma mão tem duas vozes, a principal manda no ritmo',
+  bpm: 120, beatsPerBar: 3, fifths: 0, right: FE_FULL_R.join(' | '), left: FE_FULL_L.join(' | '), hands: 'duas', pass: { accuracy: 0.85 },
+};
+const musette: SongSpec = {
+  id: 'u09-musette', title: 'Musette in D, BWV Anh. 126', composer: 'Johann Sebastian Bach (atribuído; Caderno de Anna Magdalena Bach)',
+  arrangement: 'os 20 compassos da edição do Mutopia, sem as repetições; notas e ritmo originais',
+  bpm: 100, beatsPerBar: 2, fifths: 2, right: MUSETTE_R.join(' | '), left: MUSETTE_L.join(' | '), hands: 'duas', pass: { accuracy: 0.85 },
+};
+const k545: SongSpec = {
+  id: 'u09-k545', title: 'Sonata facile, K. 545, 1º movimento, compassos 1 a 12', composer: 'Wolfgang Amadeus Mozart',
+  arrangement: 'compassos 1 a 12 da edição do Mutopia: o tema com o baixo de Alberti e as escalas em semicolcheias; notas e ritmo originais, sem o trinado do compasso 4',
+  bpm: 120, beatsPerBar: 4, fifths: 0, right: K545_R.join(' | '), left: K545_L.join(' | '), hands: 'duas', pass: { accuracy: 0.85 },
+};
+const coral: SongSpec = {
+  id: 'u09-coral', title: 'O Haupt voll Blut und Wunden (Paixão segundo São Mateus)', composer: 'Johann Sebastian Bach',
+  arrangement: 'coral a quatro vozes no estilo teclado: soprano e contralto na direita, tenor e baixo na esquerda; as notas de passagem que caem entre os ataques da voz principal ficam de fora; sem a repetição',
+  bpm: 60, beatsPerBar: 4, fifths: -1, right: CORAL_R.join(' | '), left: CORAL_L.join(' | '), hands: 'duas', pass: { accuracy: 0.85 },
+};
+const turca: SongSpec = {
+  id: 'u09-turca', title: 'Rondo alla Turca, primeira parte', composer: 'Wolfgang Amadeus Mozart',
+  arrangement: 'a primeira parte (A, B e A) da edição do Mutopia, com a anacruse; notas e ritmo originais, sem as notinhas dos compassos 5 a 7 e com o trinado do compasso 23 como nota simples',
+  bpm: 120, beatsPerBar: 2, fifths: 0, right: TURCA_R.join(' | '), left: TURCA_L.join(' | '), hands: 'duas', pass: { accuracy: 0.85 },
+};
+const entertainerAB: SongSpec = {
+  id: 'u09-entertainer', title: 'The Entertainer, temas A e B', composer: 'Scott Joplin',
+  arrangement: 'o tema A da unidade 8, o tema B e o A de novo (forma A B A), da edição original de 1902 no Mutopia; tom, 2/4 e ritmo originais; no B, a melodia na nota de cima das oitavas',
+  bpm: 72, beatsPerBar: 2, fifths: 0,
+  right: [...ENT_A1_R, ...ENT_B_R, ...ENT_R.split(' | ').slice(1)].join(' | '),
+  left: [...ENT_A_L, ...ENT_B_L, ...ENT_A_L.slice(1)].join(' | '),
+  hands: 'duas', pass: { accuracy: 0.85 },
 };
 
 const SIGHT_KEYS = [
@@ -737,7 +965,7 @@ const unit: Unit = {
   goal: 'Reconhecer notas estranhas, equilibrar melodia e acompanhamento, conduzir quatro vozes, ler à primeira vista com as duas mãos, tocar ornamentos, duas vozes independentes e 2 contra 3.',
   technique: 'Escalas maiores em 2 oitavas, mãos juntas, de 60 rumo a 92 BPM em colcheias; trinados medidos (6 notas ou mais, variação abaixo de 30 ms) (referência: RCM Level 3). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l66, l67, l68, l69, l70, l71, l72, l73],
-  songs: [minuet, sonatina, canon],
+  songs: [minuet, k545, coral, musette, turca, entertainerAB, furEliseFull, canon],
   final: {
     songId: 'u09-minueto',
     brief: 'O Minuet in G do Caderno de Anna Magdalena Bach (hoje atribuído a Christian Petzold): dança em 3/4, melodia com notas de passagem e bordaduras, frases de 4 compassos, cadência no V no compasso 8 e no I no 16. Toque leve, com o primeiro tempo de cada compasso um pouco mais apoiado, como numa dança.',

@@ -2,6 +2,14 @@
 
 ## Noite de 2026-11-27
 
+- **01:23 às 01:34 (já dia 28)** — Unidade 9, "Leitura clássica e textura": troca de músicas **em andamento** (lições 66 e 67 prontas).
+  - **Lição 66 (notas estranhas)**: o **Minuet in G** (passagens e bordaduras) e **Für Elise** (a bordadura Mi–Ré♯–Mi do começo).
+  - **Lição 67 (baixo de Alberti)**: a **Sonata facile de Mozart (K. 545)**, nova no app, compassos 1 a 12 no ritmo original (edição do Mutopia, alvo 120 BPM), no lugar da "Sonatina em Dó" que o app tinha inventado. Exercício novo: o tema com o equilíbrio entre as mãos medido (60 a 84 BPM). Para importar: **Nessun dorma**.
+  - Já entraram no app, para as próximas lições: o coral **O Haupt voll Blut und Wunden** de Bach (quatro vozes), a **Musette in D**, o **Rondo alla Turca** (primeira parte), **The Entertainer** com os temas A e B, e **Für Elise completa** (os 126 compassos). Todas com notas das edições do Mutopia ou do corpus do music21.
+  - Para testar: a Sonata facile na lição 67 (o exercício do tema e a música inteira no "Tocar a música").
+  - Músicas protegidas novas até aqui:
+    - Nessun dorma (Puccini, na voz de Pavarotti) - Partitura - XML (a obra é de domínio público, mas não achei uma edição aberta para conferir as notas; por isso ela entrou para importar)
+
 - **01:10 às 01:22 (já dia 28)** — Unidade 8, "Tétrades, blues e improviso": troca de músicas **pronta**. Todas as 8 lições (58 a 65) começam com as músicas que ensinam.
   - **Lição 58 (as cinco tétrades)**: a **Gymnopédie No. 1** de Satie (nova no app, notas da edição do Mutopia que já está no app, compassos 1 a 21 no ritmo original, alvo 66 BPM). Ela balança entre G7M e D7M. Exercício novo: a introdução da esquerda (52 a 66 BPM).
   - **Lição 59 (campo em tétrades)**: **When You Wish Upon a Star**, para importar, tocada pela cifra em tétrades.

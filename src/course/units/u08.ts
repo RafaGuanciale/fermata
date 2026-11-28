@@ -918,7 +918,7 @@ Comece a 40 BPM no exercício abaixo e no modo Estudar do "Tocar a música". O a
 // ficam como na edição; a nota que atravessa a barra vira nota + pausa (o motor não liga compassos).
 const ENT_A = 'E4:0.25 C5:0.5 E4:0.25 C5:0.5 E4:0.25 C5:0.25';
 const ENT_B = 'E5:0.25 C5:0.25 D5:0.25 E5:0.5 B4:0.25 D5:0.5';
-const ENT_R = [
+export const ENT_R = [
   'r:1.5 D4:0.25 D#4:0.25',
   ENT_A, 'r r:0.25 C5:0.25 D5:0.25 D#5:0.25', ENT_B, 'C5:1.5 D4:0.25 D#4:0.25',
   ENT_A, 'r:1.5 A4:0.25 G4:0.25', 'F#4:0.25 A4:0.25 C5:0.25 E5:0.5 D5:0.25 C5:0.25 A4:0.25', 'D5:1.5 D4:0.25 D#4:0.25',
@@ -931,7 +931,7 @@ const OOM = {
   F: 'F2:0.5 A3+C4:0.5 E2:0.5 G3+C4:0.5',
   G: 'G2:0.5 E3+G3+C4:0.5 G2:0.5 F3+G3+B3:0.5',
 };
-const ENT_L = [
+export const ENT_L = [
   'r:2',
   OOM.C, OOM.F, OOM.G, 'C3:0.5 E3+G3+C4:0.5 E3+G3+C4:0.5 G3+B3:0.5',
   OOM.C, 'F2:0.5 A3+C4:0.5 E2:0.5 Eb2:0.5', 'D2:0.5 D3+F#3+A3+C4:0.5 D3:0.5 F#3+A3+C4:0.5', 'G3+B3:0.5 G2:0.5 A2:0.5 B2:0.5',

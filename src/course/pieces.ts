@@ -73,6 +73,8 @@ export const COURSE_PIECES: CoursePiece[] = [
   p('great-balls', 'Great Balls of Fire', ['Jerry Lee Lewis'], 'Inteira', 'Rock and roll', ['pop-rock'], 'Great Balls of Fire piano'),
   p('friend-in-me', "You've Got a Friend in Me", ['Randy Newman'], 'Refrão', 'Disney', ['filmes'], "You've Got a Friend in Me easy piano", ['youve got a friend in me', 'toy story']),
   p('another-one', 'Another One Bites the Dust', ['Queen'], 'Riff do baixo', 'Rock', ['pop-rock'], 'Another One Bites the Dust piano'),
+  // Unidade 9 (Nessun dorma é de domínio público, mas a rodada não achou uma edição aberta para conferir as notas)
+  p('nessun-dorma', 'Nessun dorma', ['Giacomo Puccini', 'Luciano Pavarotti'], 'Ária', 'Ópera', ['classico'], 'Nessun dorma easy piano', ['turandot']),
   // Unidade 10
   p('whole-new-world', 'A Whole New World', ['Alan Menken'], 'Inteira', 'Disney', ['filmes'], 'A Whole New World easy piano', ['aladdin']),
   // Unidade 12
