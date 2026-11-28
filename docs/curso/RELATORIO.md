@@ -2,6 +2,12 @@
 
 ## Noite de 2026-11-27
 
+- **00:22 (já dia 28)** — Unidade 7, "Campo harmônico e funções": troca de músicas **em andamento** (lições 50 e 51 prontas).
+  - **Lição 50 (campo harmônico)**: o **Canon in D** da Unidade 6, agora analisado: seis dos sete graus de Ré maior, um por tempo.
+  - **Lição 51 (graus e transposição)**: **Heart and Soul**, para importar: o acompanhamento é I – vi – IV – V, bom para transpor pelos graus.
+  - Músicas protegidas novas até aqui:
+    - Heart and Soul (Hoagy Carmichael) - Partitura - XML
+
 - **00:10 às 00:20 (já dia 28)** — Unidade 6, "Tríades, inversões e condução": troca de músicas **pronta**. Todas as 8 lições (42 a 49) começam com as músicas que ensinam.
   - **Lição 42 (os quatro tipos de tríade)**: **Oh! Darling** (Beatles), para importar: ela abre com um acorde aumentado.
   - **Lição 43 (inversões)**: o **Canon in D** volta numa **versão longa** (novo no app, notas da edição do Mutopia feita a partir do original no IMSLP): os oito acordes com inversões na introdução e as oito primeiras variações do violino no ritmo original, com a descida famosa em semicolcheias, alvo 54 BPM. Exercício novo: os acordes do Cânone invertidos na direita com o baixo na esquerda (46 a 54 BPM).

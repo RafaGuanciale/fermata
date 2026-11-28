@@ -87,6 +87,9 @@ const l50: Lesson = {
     'Consigo dizer a qualidade de cada grau sem pensar: I, IV e V maiores; ii, iii e vi menores; vii° diminuto.',
     'Consigo tocar qualquer grau pedido em Dó, Sol, Ré, Fá e Si♭ com 90% de acerto e menos de 2 s.',
   ],
+  music: [
+    { song: 'u06-canone', why: 'O Canon in D usa seis dos sete acordes do campo de Ré maior, um por tempo: I – V – vi – iii – IV – I – IV – V. Toque a versão longa e diga o grau de cada acorde do baixo.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -135,6 +138,17 @@ Um atalho de teclado: monte o I e "suba a mão" pela escala, sempre em posição
     { kind: 'exercise', id: 'l50-tons', exercise: items('Graus em cinco tons', 'Dó, Sol, Ré, Fá ou Si♭ maior, grau sorteado.', fieldRandom, 16, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l50-desce', exercise: items('Subindo e descendo em cinco tons', 'O campo inteiro em ordem, tom e direção sorteados.', fieldSeq, 4, 48, 84, 0.75) },
     { kind: 'exercise', id: 'l50-quiz', exercise: quiz('Campo harmônico', 'Seis perguntas rápidas.', FIELD_Q) },
+    {
+      kind: 'text',
+      title: 'A música da lição: o Cânone analisado',
+      body: `O **Canon in D** que você tocou na lição 43 é um passeio pelo campo harmônico de **Ré maior** (Ré, Mi, Fá♯, Sol, Lá, Si, Dó♯). O baixo de 8 notas carrega um acorde por tempo:
+
+- **D** (I) – **A** (V) – **Bm** (vi) – **F♯m** (iii) – **G** (IV) – **D** (I) – **G** (IV) – **A** (V)
+
+Seis dos sete graus aparecem; só falta o ii (Em) e o vii° (C♯°). Os maiores caem em I, IV e V, os menores em vi e iii, exatamente o padrão desta lição. E o último acorde, o V, puxa de volta para o I, que recomeça o ciclo.
+
+Toque a versão longa no "Tocar a música" e, nos dois primeiros compassos (só acordes), diga em voz alta o grau de cada um.`,
+    },
   ],
   review: [fieldRandom, fieldSeq, choice(FIELD_Q, 'campo')],
   checkpoint: [
@@ -152,6 +166,9 @@ const l51: Lesson = {
     'Consigo analisar uma progressão em graus (C – Am – F – G = I – vi – IV – V).',
     'Consigo transpor uma progressão para outro tom pensando nos graus.',
     'Consigo ditar o baixo e os acordes de progressões com vi e ii.',
+  ],
+  music: [
+    { piece: 'heart-and-soul', why: 'Heart and Soul é o dueto que todo mundo toca no piano: a esquerda gira em I – vi – IV – V. Toque em Dó (C – Am – F – G) e depois transponha pelos graus, como nesta lição.' },
   ],
   blocks: [
     {
@@ -206,6 +223,13 @@ Comece sempre pelo **baixo**: cante a nota mais grave de cada acorde e procure n
     { kind: 'exercise', id: 'l51-baixo', exercise: items('Ditado do baixo', 'Ouça 4 acordes e toque a fundamental de cada um, em ordem.', earBass, 8, 36, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l51-acordes', exercise: items('Ditado dos acordes', 'Agora os acordes inteiros, em ordem.', earChords, 6, 48, 72, 0.8, 'off') },
     { kind: 'exercise', id: 'l51-quiz', exercise: quiz('Graus e cifras', 'Cinco perguntas rápidas.', ROMAN_Q) },
+    {
+      kind: 'text',
+      title: 'A música da lição: Heart and Soul',
+      body: `**Heart and Soul** (Hoagy Carmichael, 1938) é a música que duas pessoas tocam juntas num piano qualquer: uma faz o acompanhamento, a outra a melodia. O acompanhamento é um loop de **I – vi – IV – V**: em Dó, C – Am – F – G.
+
+Pensando em graus, ela vai para qualquer tom: em Sol, G – Em – C – D; em Fá, F – Dm – B♭ – C. Importe a partitura no Repertório (é protegida) e, depois de tocar em Dó, toque o acompanhamento em Sol e em Fá sem partitura, só pelos graus.`,
+    },
   ],
   review: [transpose, earBass, choice(ROMAN_Q, 'graus')],
   checkpoint: [

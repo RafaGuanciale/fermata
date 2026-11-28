@@ -84,7 +84,7 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 4 | pronta | 2026-11-27 |
 | 5 | pronta | 2026-11-27 23:23 |
 | 6 | pronta | 2026-11-28 00:19 |
-| 7 | em construção | 2026-11-28 00:20 |
+| 7 | em construção | 2026-11-28 00:25 |
 | 8 | a fazer | |
 | 9 | a fazer | |
 | 10 | a fazer | |

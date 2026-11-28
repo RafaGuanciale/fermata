@@ -64,6 +64,9 @@ export const COURSE_PIECES: CoursePiece[] = [
   p('stand-by-me', 'Stand By Me', ['Ben E. King'], 'Inteira', 'Rock and roll', ['pop-rock'], 'Stand By Me easy piano'),
   p('beauty-and-the-beast', 'Beauty and the Beast', ['Alan Menken'], 'Refrão', 'Disney', ['filmes'], 'Beauty and the Beast easy piano', ['a bela e a fera', 'tale as old as time']),
   p('once-upon-a-dream', 'Once Upon a Dream', ['Tchaikovsky', 'Sammy Fain'], 'Tema', 'Disney', ['filmes'], 'Once Upon a Dream easy piano'),
+  p('heart-and-soul', 'Heart and Soul', ['Hoagy Carmichael'], 'Inteira', 'Clássico pop', ['pop-rock'], 'Heart and Soul piano duet easy'),
+  p('hit-the-road-jack', 'Hit the Road Jack', ['Ray Charles'], 'Inteira', 'Soul', ['pop-rock'], 'Hit the Road Jack easy piano'),
+  p('dont-stop-believin', "Don't Stop Believin'", ['Journey'], 'Introdução e verso', 'Rock', ['pop-rock'], "Don't Stop Believin' easy piano", ['dont stop believin']),
   // Unidade 8
   p('when-you-wish', 'When You Wish Upon a Star', ['Leigh Harline'], 'Inteira', 'Disney', ['filmes'], 'When You Wish Upon a Star easy piano'),
   p('sweet-child', "Sweet Child O' Mine", ["Guns N' Roses"], 'Intro', 'Rock', ['pop-rock'], "Sweet Child O' Mine intro piano", ['sweet child o mine']),
