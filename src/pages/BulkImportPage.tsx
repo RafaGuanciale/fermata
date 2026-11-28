@@ -39,10 +39,12 @@ export default function BulkImportPage() {
 
   const add = (list: FileList | null) => {
     if (!list) return;
+    // Copia já: o FileList do campo esvazia quando o campo é limpo, antes de o React rodar a atualização.
+    const picked = [...list];
     setDone(null);
     setFiles((prev) => {
       const seen = new Set(prev.map((f) => `${f.name}|${f.size}`));
-      return [...prev, ...[...list].filter((f) => !seen.has(`${f.name}|${f.size}`))];
+      return [...prev, ...picked.filter((f) => !seen.has(`${f.name}|${f.size}`))];
     });
   };
 
