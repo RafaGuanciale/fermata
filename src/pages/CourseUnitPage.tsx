@@ -8,6 +8,7 @@ import PhotoCard from '../components/PhotoCard';
 import { BackIcon, PlayIcon } from '../components/Icons';
 import { useRuns } from '../training/runs';
 import { UNITS, findSong } from '../course';
+import { findCoursePiece } from '../course/pieces';
 import { LESSON_STATE_LABEL, finalPassedAt, isPassed, lessonKey, lessonState, unitUnlocked } from '../course/progress';
 import { useCourseRows } from '../course/useCourseRows';
 import { UNIT_PHOTOS } from './StudyPage';
@@ -34,6 +35,9 @@ export default function CourseUnitPage() {
   const songRuns = runs.filter((r) => r.treinoId === `curso-${unit.final.songId}`);
   const bestAcc = songRuns.reduce((m, r) => Math.max(m, r.accuracy ?? 0), 0);
   const allLessons = passed === unit.lessons.length;
+  const music = unit.lessons.flatMap((l) =>
+    (l.music ?? []).map((m) => ({ n: l.n, title: 'song' in m ? findSong(m.song)?.title ?? '' : findCoursePiece(m.piece)?.title ?? '' })),
+  ).filter((m, i, all) => m.title && all.findIndex((x) => x.title === m.title) === i);
 
   return (
     <>
@@ -53,6 +57,20 @@ export default function CourseUnitPage() {
           action={UNITS[index + 1] ? <Link className="button button-primary" to={`/estudo/unidade/${UNITS[index + 1].n}`} onClick={() => setParty(false)}>Abrir a unidade {UNITS[index + 1].n}</Link> : undefined}
           onClose={() => setParty(false)}
         />
+      )}
+
+      {music.length > 0 && (
+        <section className="page__section">
+          <h2 className="page__sectionTitle">O que você vai tocar</h2>
+          <ul className="unitMusic">
+            {music.map((m) => (
+              <li key={`${m.n}-${m.title}`} className="unitMusic__item">
+                <span className="unitMusic__n">Lição {m.n}</span>
+                {m.title}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {!open && <p className="courseBanner">Esta unidade abre quando você concluir a anterior: todas as lições e o projeto final.</p>}

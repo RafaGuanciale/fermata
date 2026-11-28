@@ -1,4 +1,6 @@
 // Unidade 3 — Primeiros acordes, cifra e acompanhamento (lições 17 a 24). Projeto final: Amazing Grace com acordes.
+// Músicas: Jingle Bells, Eine kleine Nachtmusik (em Dó e em Sol), Silent Night e Amazing Grace no app; Love Me Do e
+// Love Me Tender para importar (src/course/pieces.ts).
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { choice, harmonize, mix, playChord, primaryChord, progressionByEar, resolveCadence, scaleDegreeNote, tonicByEar, transposeProgression, type ChoiceQuestion } from '../gens';
@@ -105,53 +107,81 @@ const SWITCH_CG = [
 
 // ---------- músicas ----------
 
-// Mary Had a Little Lamb (canção tradicional americana, séc. XIX): só I e V7.
-const MARY_R = 'E4 D4 C4 D4 | E4 E4 E4:2 | D4 D4 D4:2 | E4 G4 G4:2 | E4 D4 C4 D4 | E4 E4 E4 E4 | D4 D4 E4 D4 | C4:4';
-const MARY_L = `${I}:4 | ${I}:4 | ${V7}:4 | ${I}:4 | ${I}:4 | ${I}:4 | ${V7}:4 | ${I}:4`;
+/** Uma linha de acordes da mão esquerda: um acorde por compasso, a partir dos graus. */
+const chordBars = (degs: string[], map: Record<string, string>, beats = 4) => degs.map((d) => `${map[d]}:${beats}`).join(' | ');
+const NEAR = { I, IV, V7 };
+/** Raiz e 5ª em mínimas, em Dó (C: Dó–Sol, F: Fá–Dó, G7: Sol–Ré). */
+const FIFTHS: Record<string, string> = { I: 'C3:2 G3:2', IV: 'F2:2 C3:2', V7: 'G2:2 D3:2' };
 
-// Twinkle, Twinkle, Little Star (melodia folclórica francesa, "Ah! vous dirai-je, maman"): I, IV e V7, um acorde a cada 2 tempos.
-const TWINKLE_R = 'C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2';
-const TW_A = `${I}:4 | ${IV}:2 ${I}:2 | ${IV}:2 ${I}:2 | ${V7}:2 ${I}:2`;
-const TW_B = `${I}:2 ${V7}:2 | ${I}:2 ${V7}:2 | ${I}:2 ${V7}:2 | ${I}:2 ${V7}:2`;
-const TWINKLE_L = `${TW_A} | ${TW_B} | ${TW_A}`;
+// Jingle Bells (James Lord Pierpont, 1857). Notas conferidas com a transcrição em ABC de B. Stephenson (Universidade de
+// Calgary), em Dó. Arranjo: colcheias e semínimas pontuadas viram semínimas (a unidade 3 ainda não pede nenhuma das duas).
+const JB_VERSE_R = 'G4 E5 D5 C5 | G4:3 G4 | G4 E5 D5 C5 | A4:4 | A4 F5 E5 D5 | B4:4 | G5 G5 F5 D5 | E5:4 | G4 E5 D5 C5 | G4:4 | G4 E5 D5 C5 | A4:3 A4 | A4 F5 E5 D5 | G5 G5 G5 G5 | A5 G5 F5 D5 | C5:2 r:2';
+const JB_CHORUS_R = 'E5 E5 E5:2 | E5 E5 E5:2 | E5 G5 C5 D5 | E5:4 | F5 F5 F5 F5 | F5 E5 E5 E5 | E5 D5 D5 E5 | D5:2 G5:2 | E5 E5 E5:2 | E5 E5 E5:2 | E5 G5 C5 D5 | E5:4 | F5 F5 F5 F5 | F5 E5 E5 E5 | G5 G5 F5 D5 | C5:4';
+const JB_VERSE_DEG = ['I', 'I', 'I', 'IV', 'IV', 'V7', 'V7', 'I', 'I', 'I', 'I', 'IV', 'IV', 'V7', 'V7', 'I'];
+const JB_CHORUS_DEG = ['I', 'I', 'I', 'I', 'IV', 'I', 'V7', 'V7', 'I', 'I', 'I', 'I', 'IV', 'I', 'V7', 'I'];
+const JB_CHORUS_L = chordBars(JB_CHORUS_DEG, NEAR);
+const JB_CHORUS_FIFTH = JB_CHORUS_DEG.map((d) => FIFTHS[d]).join(' | ');
 
-const mary: SongSpec = {
-  id: 'u03-mary',
-  title: 'Mary Had a Little Lamb',
-  composer: 'canção tradicional',
-  arrangement: 'arranjo do Fermata: melodia na posição de Dó e acordes de Dó e G7 em posição próxima na mão esquerda',
-  bpm: 72,
+const jingle: SongSpec = {
+  id: 'u03-jingle',
+  title: 'Jingle Bells',
+  composer: 'James Lord Pierpont (1857)',
+  arrangement: 'arranjo do Fermata em Dó: verso e refrão em semínimas na mão direita (sem colcheias nem pontuadas), um acorde por compasso (C, F e G7 em posição próxima) na esquerda',
+  bpm: 92,
   beatsPerBar: 4,
   fifths: 0,
-  right: MARY_R,
-  left: MARY_L,
-  hands: 'duas',
-  pass: { accuracy: 0.9 },
-};
-
-const twinkleC: SongSpec = {
-  id: 'u03-brilha-c',
-  title: 'Twinkle, Twinkle, Little Star (em Dó)',
-  composer: 'melodia folclórica francesa',
-  arrangement: 'arranjo do Fermata: I, IV e V7 em bloco na mão esquerda, um acorde a cada 2 tempos',
-  bpm: 76,
-  beatsPerBar: 4,
-  fifths: 0,
-  right: TWINKLE_R,
-  left: TWINKLE_L,
+  right: `${JB_VERSE_R} | ${JB_CHORUS_R}`,
+  left: `${chordBars(JB_VERSE_DEG, NEAR)} | ${JB_CHORUS_L}`,
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
 
-// Amazing Grace (melodia "New Britain", EUA, 1829): 3/4 com anacruse, I–IV–V7.
-const AMAZING_R = 'r:2 G4 | C5:2 E5 | E5:2 D5 | C5:2 A4 | G4:2 G4 | C5:2 E5 | E5:2 D5 | G5:3 | G5:2 E5 | G5:2 E5 | E5:2 D5 | C5:2 A4 | G4:2 G4 | C5:2 E5 | E5:2 D5 | C5:2 r';
-const AMAZING_L = `r:3 | ${I}:3 | ${I}:3 | ${IV}:3 | ${I}:3 | ${I}:3 | ${I}:3 | ${V}:3 | ${V7}:3 | ${I}:3 | ${I}:3 | ${IV}:3 | ${I}:3 | ${I}:3 | ${V7}:3 | ${I}:2 r`;
+// Eine kleine Nachtmusik (Mozart, K. 525, 1787), abertura do 1º movimento. Notas do 1º violino da edição do Mutopia Project
+// (compassos 1 a 4, em Sol). Em Dó para a lição 18, com os valores dobrados (só semínimas e mínimas); no ritmo original
+// na lição 20 (colcheias) e no tom original, Sol, na lição 21. O último compasso (o acorde de chegada) é do arranjo.
+const EK_C_R = 'C5:2 r G4 | C5:2 r G4 | C5 G4 C5 E5 | G5:2 r:2 | F5:2 r D5 | F5:2 r D5 | F5 D5 B4 D5 | G4:2 r:2 | C5:4';
+const EK_C_L = `${I}:4 | ${I}:4 | ${I}:4 | ${I}:4 | ${V7}:4 | ${V7}:4 | ${V7}:4 | ${V7}:4 | ${I}:4`;
+const EK_C8_R = 'C5 r:0.5 G4:0.5 C5 r:0.5 G4:0.5 | C5:0.5 G4:0.5 C5:0.5 E5:0.5 G5 r | F5 r:0.5 D5:0.5 F5 r:0.5 D5:0.5 | F5:0.5 D5:0.5 B4:0.5 D5:0.5 G4 r | C5:4';
+const EK_C8_L = `${I}:4 | ${I}:4 | ${V7}:4 | ${V7}:4 | ${I}:4`;
+
+const eineDo: SongSpec = {
+  id: 'u03-eine-do',
+  title: 'Eine kleine Nachtmusik',
+  composer: 'Wolfgang Amadeus Mozart (K. 525)',
+  arrangement: 'arranjo do Fermata: abertura do 1º movimento em Dó, com os valores dobrados (semínimas e mínimas); Dó e G7 em posição próxima na esquerda',
+  bpm: 84,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: EK_C_R,
+  left: EK_C_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const eineDoOriginal: SongSpec = {
+  id: 'u03-eine-do-colcheias',
+  title: 'Eine kleine Nachtmusik, no ritmo original',
+  composer: 'Wolfgang Amadeus Mozart (K. 525)',
+  arrangement: 'arranjo do Fermata: abertura do 1º movimento em Dó, no ritmo de Mozart (com colcheias); Dó e G7 em posição próxima na esquerda',
+  bpm: 72,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: EK_C8_R,
+  left: EK_C8_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+// Amazing Grace (melodia "New Britain", EUA, 1829): 3/4 com anacruse, I–IV–V7. Notas conferidas com a edição do Mutopia
+// Project (hinário, em Sol), transpostas para Dó. Arranjo: a semínima pontuada com colcheia vira duas semínimas.
+const AMAZING_R = 'r:2 G4 | C5:2 E5:0.5 C5:0.5 | E5:2 D5 | C5:2 A4 | G4:2 G4 | C5:2 E5:0.5 C5:0.5 | E5:2 D5 | G5:3 | E5 G5 E5 | G5:0.5 E5:0.5 C5:2 | G4 A4 C5 | C5:0.5 A4:0.5 G4:2 | G4 C5:2 | E5:0.5 C5:0.5 E5:2 | D5 C5:2 | C5:2 r';
+const AMAZING_L = `r:3 | ${I}:3 | ${I}:3 | ${IV}:3 | ${I}:3 | ${I}:3 | ${I}:3 | ${V}:3 | ${I}:3 | ${I}:3 | ${IV}:3 | ${I}:3 | ${I}:3 | ${I}:3 | ${V7}:3 | ${I}:2 r`;
 
 const amazing: SongSpec = {
   id: 'u03-amazing',
   title: 'Amazing Grace',
   composer: 'melodia tradicional "New Britain"',
-  arrangement: 'arranjo do Fermata em Dó: melodia uma oitava acima do Dó central, um acorde por compasso (I, IV, V e V7 em posição próxima) na mão esquerda; anacruse escrita com uma pausa de mínima',
+  arrangement: 'arranjo do Fermata em Dó: a melodia que o Elvis gravou, uma oitava acima do Dó central; um acorde por compasso (I, IV, V e V7 em posição próxima) na mão esquerda; anacruse escrita com uma pausa de mínima',
   bpm: 84,
   beatsPerBar: 3,
   fifths: 0,
@@ -172,6 +202,9 @@ const l17: Lesson = {
     'Consigo montar Dó, Fá e Sol maior em estado fundamental, sem olhar.',
     'Consigo tocar um acorde em bloco e quebrado.',
     'Consigo trocar entre Dó e Sol no tempo, sem parar.',
+  ],
+  music: [
+    { song: 'u03-jingle', why: 'O refrão inteiro cabe na posição de Dó, uma oitava acima do Dó central, e os acordes dele são exatamente os três desta lição: C, F e G. Hoje toque a melodia com a direita; na lição 19 a esquerda entra com os acordes.' },
   ],
   blocks: [
     {
@@ -257,7 +290,10 @@ const l18: Lesson = {
     'Consigo dizer o que é o tom de Dó maior e tocar qualquer grau da escala (1 a 7).',
     'Consigo tocar Dó e G7 em posição próxima na mão esquerda, movendo o mínimo.',
     'Consigo completar uma cadência V7–I de ouvido.',
-    'Consigo acompanhar uma melodia de 8 compassos com I e V7 a 72 BPM.',
+    'Consigo acompanhar Eine kleine Nachtmusik com I e V7 a 72 BPM.',
+  ],
+  music: [
+    { song: 'u03-eine-do', why: 'A abertura mais famosa de Mozart é literalmente um acorde de Dó quebrado e, depois, um G7 quebrado. É o I–V7 desta lição tocado por uma orquestra. Aqui ela vem em Dó, com valores longos; na lição 20 você toca no ritmo original e na 21, no tom em que Mozart escreveu.' },
   ],
   blocks: [
     {
@@ -348,15 +384,17 @@ Parta de **Dó3, Mi3, Sol3** (dedos 5, 3, 1). Para o G7:
       title: 'Melodia e acompanhamento',
       body: `Agora as duas coisas juntas: a mão direita na melodia, a esquerda nos acordes. A regra de ouro da lição 14 continua valendo: a esquerda precisa ficar **automática**. Toque a progressão da esquerda sozinha até ela sair sem pensar, e só então junte.
 
-Em "Mary Had a Little Lamb", uma canção tradicional americana do século XIX, a melodia avisa quando trocar: nos compassos em que o **Ré** é a nota principal (3 e 7), a harmonia vai para G7. Quando o Ré só passa entre Mi e Dó, fica em Dó. O Ré está no G7 (é a 5ª), mas não no Dó.`,
+Em **Eine kleine Nachtmusik** a melodia avisa quando trocar. Nos quatro primeiros compassos ela desenha **Dó, Sol, Mi**: o acorde de Dó, quebrado. Nos quatro seguintes desenha **Fá, Ré, Si, Sol**: o G7, quebrado. A esquerda só confirma o que a direita já está dizendo: Dó embaixo do Dó, G7 embaixo do G7. No último compasso, as duas mãos chegam juntas em casa.
+
+Os valores aqui são o dobro dos de Mozart (ele escreveu colcheias onde você toca semínimas). É a mesma música, mais devagar no papel: na lição 20 ela volta com as colcheias.`,
     },
-    { kind: 'exercise', id: 'l18-mary', exercise: quickTimed('Mary Had a Little Lamb, duas mãos', 'Melodia na direita, Dó e G7 na esquerda. Começa a 60 BPM e sobe até 72 BPM.', () => twoHandTask(MARY_R, MARY_L, { bpm: 60, caption: 'Esquerda: Dó nos compassos 1, 2, 4, 5, 6 e 8; G7 nos compassos 3 e 7.' }), { ladder: { from: 60, to: 72, step: 4 } }) },
-    { kind: 'song', songId: 'u03-mary', why: 'A mesma música na pauta dupla, com os acordes escritos na clave de Fá.' },
+    { kind: 'exercise', id: 'l18-eine', exercise: quickTimed('Eine kleine Nachtmusik, duas mãos', 'Melodia na direita, Dó e G7 na esquerda. Começa a 60 BPM e sobe até 72 BPM.', () => twoHandTask(EK_C_R, EK_C_L, { bpm: 60, caption: 'Esquerda: Dó nos compassos 1 a 4, G7 nos compassos 5 a 8, Dó no último.' }), { ladder: { from: 60, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-eine-do', why: 'A mesma abertura na pauta dupla, com os acordes escritos na clave de Fá.' },
     { kind: 'exercise', id: 'l18-quiz', exercise: quiz('Tom, graus e dominante', 'Sete perguntas rápidas.', DOMINANT) },
   ],
   review: [degreesC, chordsCG7, cadenceC, choice(DOMINANT, 'dominante')],
   checkpoint: [
-    quickTimed('Mary Had a Little Lamb a 72 BPM', '8 compassos, duas mãos, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(MARY_R, MARY_L, { bpm: 72, caption: 'Esquerda: Dó nos compassos 1, 2, 4, 5, 6 e 8; G7 nos compassos 3 e 7.' }), { window: 80, pass: { accuracy: 0.9 } }),
+    quickTimed('Eine kleine Nachtmusik a 72 BPM', '9 compassos, duas mãos, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(EK_C_R, EK_C_L, { bpm: 72, caption: 'Esquerda: Dó nos compassos 1 a 4, G7 nos compassos 5 a 8, Dó no último.' }), { window: 80, pass: { accuracy: 0.9 } }),
     { kind: 'items', title: 'Graus, acordes e cadências', how: 'Graus de Dó, os acordes Dó e G7 e cadências para completar, misturados com acordes da lição 17.', gen: mix([degreesC, chordsCG7, cadenceC, chordsCFG]), count: 12, low: 36, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
   ],
   exit: [degreesC, chordsCG7, choice(DOMINANT, 'dominante')],
@@ -371,6 +409,10 @@ const l19: Lesson = {
     'Consigo ler as cifras C, F e G7 e tocar cada acorde em menos de 3 s.',
     'Consigo dizer a função de I, IV e V7: casa, afastamento e tensão.',
     'Consigo escolher o acorde certo para um trecho de melodia.',
+    'Consigo tocar o refrão de Jingle Bells com C, F e G7 na esquerda.',
+  ],
+  music: [
+    { song: 'u03-jingle', why: 'Jingle Bells inteira, verso e refrão, usa só os três acordes desta lição: C, F e G7. É a cifra básica numa das músicas mais tocadas do mundo, e é dezembro.' },
   ],
   blocks: [
     {
@@ -441,15 +483,15 @@ Uma segunda regra: termine no **I**. E antes dele, o V7 soa melhor do que o IV.`
       body: 'A primeira nota de um trecho pode ser só uma nota de passagem. Decida pelo conjunto: se aparecem Si ou Ré, é G7; se aparece Lá, é F; se aparece Mi, é C.',
     },
     { kind: 'exercise', id: 'l19-harmonizar', exercise: { kind: 'items', title: 'Que acorde cabe aqui?', how: 'A pauta mostra um trecho de melodia em Dó. Toque o acorde (C, F ou G7) que contém essas notas.', gen: HARM_C, count: 12, low: 36, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l19-brilha-me', exercise: quickTimed('Twinkle, Twinkle: só a esquerda', 'Os 4 primeiros compassos da progressão: C, F–C, F–C, G7–C, a 66 BPM. Duas passadas boas.', () => melodyTask(TW_A, { bpm: 66, clef: 'bass' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l19-jingle-me', exercise: quickTimed('Jingle Bells: só a esquerda', 'Os acordes do refrão, um por compasso: C, C, C, C, F, C, G7, G7, a 66 BPM. Duas passadas boas.', () => melodyTask(JB_CHORUS_DEG.slice(0, 8).map((d) => `${NEAR[d as keyof typeof NEAR]}:4`).join(' | '), { bpm: 66, clef: 'bass' }), { reps: 2 }) },
     {
       kind: 'callout',
       tone: 'dica',
-      title: 'dedilhado de Twinkle, Twinkle',
-      body: 'A melodia vai do Dó ao Lá: seis notas para cinco dedos. Comece com o polegar no Dó e abra a mão para o 4 cair no Sol e o 5 no Lá: 1 1 4 4 5 5 4. Na frase seguinte a mão escorrega de volta para a posição de Dó: 4 4 3 3 2 2 1 (Fá, Mi, Ré, Dó). Na parte do meio (Sol, Sol, Fá, Fá, Mi, Mi, Ré), fica nessa posição: 5 5 4 4 3 3 2.',
+      title: 'dedilhado de Jingle Bells',
+      body: 'O refrão cabe inteiro na posição de Dó, uma oitava acima do Dó central: polegar no Dó5, e cada dedo numa nota (Dó 1, Ré 2, Mi 3, Fá 4, Sol 5). A mão não sai do lugar. "Jin-gle bells" é 3 3 3, e o "jin-gle all the way" é 3 5 1 2 3. No verso a mão abre um pouco mais: ele começa no Sol4 e sobe até o Lá5.',
     },
-    { kind: 'exercise', id: 'l19-brilha', exercise: quickTimed('Twinkle, Twinkle, Little Star', 'Melodia folclórica francesa, 12 compassos, duas mãos. Começa a 56 BPM e sobe até 72 BPM.', () => twoHandTask(TWINKLE_R, TWINKLE_L, { bpm: 56, caption: 'Esquerda: C, F e G7 em posição próxima, um acorde a cada 2 tempos, como no exercício anterior.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
-    { kind: 'song', songId: 'u03-brilha-c', why: 'A partitura completa com os acordes: confira na clave de Fá onde cada um entra.' },
+    { kind: 'exercise', id: 'l19-jingle', exercise: quickTimed('Jingle Bells, o refrão', 'O refrão inteiro, 16 compassos, duas mãos. Começa a 56 BPM e sobe até 72 BPM.', () => twoHandTask(JB_CHORUS_R, JB_CHORUS_L, { bpm: 56, caption: 'Esquerda: C, F e G7 em posição próxima, um acorde por compasso, como no exercício anterior.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-jingle', why: 'A música inteira, verso e refrão, com os acordes: confira na clave de Fá onde cada um entra.' },
     { kind: 'exercise', id: 'l19-quiz', exercise: quiz('Funções e cifra', 'Seis perguntas rápidas.', FUNCTIONS) },
   ],
   review: [chordsCFG7, HARM_C, choice(FUNCTIONS, 'funcoes')],
@@ -501,19 +543,20 @@ const gChords = primaryChord({ keys: ['G'], degrees: ['I', 'IV', 'V7'], low: 36,
 const cgChords = primaryChord({ keys: ['C', 'G'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
 const toG = transposeProgression({ from: 'C', to: ['G'], progressions: [['I', 'IV', 'V7', 'I'], ['I', 'V7', 'I'], ['I', 'IV', 'I', 'V7'], ['IV', 'V7', 'I']] });
 
-const TWINKLE_G_R = shift(TWINKLE_R, 7);
-const TWINKLE_G_L = shift(TWINKLE_L, -5);
+// Eine kleine Nachtmusik no tom original (Sol), uma oitava abaixo do 1º violino da edição do Mutopia Project.
+const EK_G_R = 'G4 r:0.5 D4:0.5 G4 r:0.5 D4:0.5 | G4:0.5 D4:0.5 G4:0.5 B4:0.5 D5 r | C5 r:0.5 A4:0.5 C5 r:0.5 A4:0.5 | C5:0.5 A4:0.5 F#4:0.5 A4:0.5 D4 r | G4:4';
+const EK_G_L = `${GI}:4 | ${GI}:4 | ${GV7}:4 | ${GV7}:4 | ${GI}:4`;
 
-const twinkleG: SongSpec = {
-  id: 'u03-brilha-g',
-  title: 'Twinkle, Twinkle, Little Star (em Sol)',
-  composer: 'melodia folclórica francesa',
-  arrangement: 'arranjo do Fermata: a versão em Dó transposta para Sol, com G, C e D7 em posição próxima',
-  bpm: 76,
+const eineSol: SongSpec = {
+  id: 'u03-eine-sol',
+  title: 'Eine kleine Nachtmusik, em Sol',
+  composer: 'Wolfgang Amadeus Mozart (K. 525)',
+  arrangement: 'arranjo do Fermata: abertura do 1º movimento no tom original, Sol maior, no ritmo de Mozart; G e D7 em posição próxima na esquerda',
+  bpm: 72,
   beatsPerBar: 4,
   fifths: 1,
-  right: TWINKLE_G_R,
-  left: TWINKLE_G_L,
+  right: EK_G_R,
+  left: EK_G_L,
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
@@ -527,6 +570,10 @@ const l20: Lesson = {
     'Consigo contar e tocar colcheias a 80 BPM, dentro de ±60 ms.',
     'Consigo tocar três padrões de mão esquerda sobre I–IV–V–I: bloco, raiz com oitava e raiz com 5ª.',
     'Consigo manter um padrão na esquerda enquanto a direita toca a melodia.',
+    'Consigo tocar Eine kleine Nachtmusik no ritmo de Mozart, com as colcheias.',
+  ],
+  music: [
+    { song: 'u03-eine-do-colcheias', why: 'A abertura da lição 18 agora no ritmo que Mozart escreveu: as colcheias que você aprende hoje são as notas rápidas do "pa-ra-pa-ra-pam" do segundo compasso.' },
   ],
   blocks: [
     {
@@ -584,7 +631,20 @@ Toque cada padrão sobre **I–IV–V–I** até ele sair sem olhar. Os três tr
       title: 'o salto da mão esquerda',
       body: 'Nos padrões de raiz, a mão salta (Dó → Fá → Sol). Olhe para a próxima raiz um tempo antes e deixe o braço levar a mão, com o pulso solto. O dedo 5 chega primeiro; os outros vêm junto.',
     },
-    { kind: 'exercise', id: 'l20-junto', exercise: quickTimed('Raiz e 5ª com a melodia', 'Twinkle, Twinkle (4 compassos) na direita; raiz e 5ª na esquerda, a 60 BPM. Duas passadas boas.', () => twoHandTask('C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2', 'C3 G3 C3 G3 | F2 C3 C3 G3 | F2 C3 C3 G3 | G2 D3 C3 G3', { bpm: 60, caption: 'Esquerda: Dó–Sol, Fá–Dó + Dó–Sol, Fá–Dó + Dó–Sol, Sol–Ré + Dó–Sol.' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l20-junto', exercise: quickTimed('Raiz e 5ª com a melodia', 'A primeira metade do refrão de Jingle Bells na direita; raiz e 5ª em mínimas na esquerda, a 60 BPM. Duas passadas boas.', () => twoHandTask(JB_CHORUS_R.split(' | ').slice(0, 8).join(' | '), JB_CHORUS_FIFTH.split(' | ').slice(0, 8).join(' | '), { bpm: 60, caption: 'Esquerda: Dó–Sol nos compassos 1 a 4 e 6, Fá–Dó no 5, Sol–Ré no 7 e no 8.' }), { reps: 2 }) },
+    {
+      kind: 'text',
+      title: 'Eine kleine Nachtmusik no ritmo original',
+      body: `Na lição 18 você tocou a abertura de Mozart com os valores dobrados. Agora ela volta como ele escreveu, com **colcheias**:
+
+- No 1º compasso: **Dó** (semínima), uma pausa de colcheia e **Sol** (colcheia), duas vezes. A pausa é curta: conte "**1** e **2** e", com o Sol no "e".
+- No 2º: quatro colcheias seguidas, **Dó, Sol, Dó, Mi**, e o **Sol** agudo em semínima. É o trecho que todo mundo canta.
+- Os compassos 3 e 4 repetem o desenho sobre o G7.
+
+A esquerda segura um acorde por compasso, como antes. Conte em voz alta antes de juntar as mãos.`,
+    },
+    { kind: 'exercise', id: 'l20-eine', exercise: quickTimed('Eine kleine Nachtmusik com colcheias', '5 compassos, duas mãos. Começa a 56 BPM e sobe até 72 BPM.', () => twoHandTask(EK_C8_R, EK_C8_L, { bpm: 56, caption: 'Esquerda: Dó nos compassos 1 e 2, G7 no 3 e no 4, Dó no último.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-eine-do-colcheias', why: 'A abertura no ritmo original, para tocar junto com a partitura.' },
     { kind: 'exercise', id: 'l20-quiz', exercise: quiz('Colcheias e padrões', 'Cinco perguntas rápidas.', EIGHTHS) },
   ],
   review: [choice(EIGHTHS, 'colcheias'), chordsCFG7],
@@ -604,7 +664,11 @@ const l21: Lesson = {
     'Consigo dizer as notas da escala de Sol maior e por que ela tem Fá♯.',
     'Consigo tocar I, IV e V7 de Sol maior pelo grau.',
     'Consigo transpor uma progressão de Dó para Sol pensando nos graus.',
-    'Consigo tocar Twinkle, Twinkle em Sol com acompanhamento.',
+    'Consigo tocar Eine kleine Nachtmusik em Sol, o tom original, com acompanhamento.',
+  ],
+  music: [
+    { song: 'u03-eine-sol', why: 'Mozart escreveu a Eine kleine Nachtmusik em Sol maior: o G quebrado e, depois, o D7 quebrado, com o Fá♯ desta lição. É a mesma música que você já toca, agora no tom de verdade.' },
+    { piece: 'love-me-do', why: 'Love Me Do é G, C e D: o I, o IV e o V de Sol, os três acordes desta lição, do começo ao fim. Primeiro single dos Beatles (1962).' },
   ],
   blocks: [
     {
@@ -683,8 +747,8 @@ C – F – G7 – C em Dó é **I – IV – V7 – I**. Em Sol, I – IV – V
       body: 'O D7 com Fá natural é outro acorde (Ré menor com sétima) e soa sem direção. Em Sol maior, todo Fá é Fá♯. Se o acorde de tensão soar triste, confira o Fá.',
     },
     { kind: 'exercise', id: 'l21-transpor', exercise: { kind: 'items', title: 'Transponha para Sol', how: 'A cifra vem em Dó. Pense nos graus e toque os acordes de Sol maior, em ordem.', gen: toG, count: 8, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l21-brilha', exercise: quickTimed('Twinkle, Twinkle em Sol', '12 compassos, duas mãos: melodia a partir do Sol4, G, C e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_G_R, TWINKLE_G_L, { bpm: 56, fifths: 1, caption: 'Um acorde a cada 2 tempos: G, C e D7 na esquerda, como na partitura do "Tocar a música".' }), { ladder: { from: 56, to: 72, step: 4 } }) },
-    { kind: 'song', songId: 'u03-brilha-g', why: 'A versão em Sol na pauta dupla. O sustenido no começo de cada linha é a armadura: vale para todos os Fá da música. Você estuda armaduras a fundo na Unidade 4.' },
+    { kind: 'exercise', id: 'l21-eine', exercise: quickTimed('Eine kleine Nachtmusik em Sol', '5 compassos, duas mãos: a melodia a partir do Sol4, G e D7 na esquerda. De 56 a 72 BPM.', () => twoHandTask(EK_G_R, EK_G_L, { bpm: 56, fifths: 1, caption: 'Esquerda: G nos compassos 1 e 2, D7 no 3 e no 4, G no último. O Fá♯ do compasso 4 é a sensível.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-eine-sol', why: 'A versão em Sol na pauta dupla. O sustenido no começo de cada linha é a armadura: vale para todos os Fá da música. Você estuda armaduras a fundo na Unidade 4.' },
     { kind: 'exercise', id: 'l21-quiz', exercise: quiz('Sol maior', 'Seis perguntas rápidas.', KEY_G) },
   ],
   review: [degreesG, gChords, toG, choice(KEY_G, 'tom-sol')],
@@ -693,6 +757,27 @@ C – F – G7 – C em Dó é **I – IV – V7 – I**. Em Sol, I – IV – V
     { kind: 'items', title: 'Transposição de progressões', how: 'Progressões novas de Dó para Sol. Meta: 85%.', gen: toG, count: 6, low: 36, high: 72, labels: 'off', pass: { accuracy: 0.85 } },
   ],
   exit: [degreesG, gChords, choice(KEY_G, 'tom-sol')],
+};
+
+// Silent Night ("Stille Nacht", Franz Xaver Gruber, 1818). Notas da edição do Mutopia Project (Daniel Widyanto, a partir
+// do manuscrito de Gruber, em Sol), transpostas para Dó. Arranjo: a semínima pontuada com colcheia vira duas semínimas
+// (a pontuada só chega na Unidade 4) e a esquerda toca um acorde por compasso, em mínima pontuada.
+const SN_R = 'G4 A4 G4 | E4:3 | G4 A4 G4 | E4:3 | D5:2 D5 | B4:3 | C5:2 C5 | G4:3 | A4:2 A4 | C5 B4 A4 | G4 A4 G4 | E4:3 | A4:2 A4 | C5 B4 A4 | G4 A4 G4 | E4:3 | D5:2 D5 | F5 D5 B4 | C5:2 C5 | E5:3 | C5 G4 E4 | G4 F4 D4 | C4:3';
+const SN_DEG = ['I', 'I', 'I', 'I', 'V7', 'V7', 'I', 'I', 'IV', 'IV', 'I', 'I', 'IV', 'IV', 'I', 'I', 'V7', 'V7', 'I', 'I', 'I', 'V7', 'I'];
+const SN_L = chordBars(SN_DEG, NEAR, 3);
+
+const noite: SongSpec = {
+  id: 'u03-noite',
+  title: 'Silent Night',
+  composer: 'Franz Xaver Gruber (1818)',
+  arrangement: 'arranjo do Fermata em Dó, 3/4: melodia em semínimas e mínimas (sem a pontuada) na direita, um acorde por compasso (C, F e G7 em posição próxima) na esquerda',
+  bpm: 84,
+  beatsPerBar: 3,
+  fifths: 0,
+  right: SN_R,
+  left: SN_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
 };
 
 /** Acordes em bloco para o pedal direto: com pausas (o pedal sobe na pausa) e sem pausas (sobe antes do próximo). */
@@ -715,6 +800,10 @@ const l22: Lesson = {
     'Consigo apoiar o pé no pedal com o calcanhar no chão e mover só o tornozelo.',
     'Consigo descer o pedal junto com o acorde e subir antes do próximo, sem misturar acordes.',
     'Consigo deixar as pausas em silêncio, sem pedal preso.',
+  ],
+  music: [
+    { song: 'u03-noite', why: 'Silent Night tem um acorde por compasso e nenhuma pressa: o lugar perfeito para o pedal direto. O pé desce no 1 de cada compasso, com o acorde, e sobe no fim.' },
+    { piece: 'love-me-tender', why: 'Love Me Tender é uma balada lenta de acordes longos, ótima para o pedal. Ela traz um acorde que você ainda não viu, o D7 (em Dó), que é só um G7 um tom acima: na Unidade 10 você entende por que ele soa tão bem ali.' },
   ],
   blocks: [
     {
@@ -774,6 +863,15 @@ Na Unidade 4 você aprende o **pedal legato** (sincopado), em que o pedal troca 
     },
     { kind: 'exercise', id: 'l22-pausas', exercise: quickTimed('Pedal com pausas', 'Acordes de mínima e pausas de mínima, mão direita, a 60 BPM. Pedal desce com o acorde e sobe na pausa. Duas passadas boas.', (rng) => melodyTask(pick(rng, PEDAL_RESTS), { bpm: 60 }), { reps: 2, pedal: 'direto' }) },
     { kind: 'exercise', id: 'l22-colado', exercise: quickTimed('Pedal com acordes colados', 'Agora sem pausas: suba o pedal no fim de cada acorde e desça com o próximo. 60 BPM, duas passadas boas.', (rng) => melodyTask(pick(rng, PEDAL_FLOW), { bpm: 60 }), { reps: 2, pedal: 'direto' }) },
+    {
+      kind: 'text',
+      title: 'Silent Night com pedal',
+      body: `**Silent Night** (Franz Xaver Gruber, 1818) é uma valsa lenta em 3/4, com **um acorde por compasso** na esquerda: C, G7 e F, os acordes da unidade. Toque com o pedal direto: o pé desce **junto** com o acorde, no 1 de cada compasso, e sobe no fim do compasso, um instante antes do próximo acorde.
+
+Onde a harmonia não muda de um compasso para o outro (os quatro primeiros são todos Dó), troque o pedal assim mesmo: é a melodia que pede, porque as notas da direita também ficam presas no pedal.`,
+    },
+    { kind: 'exercise', id: 'l22-noite', exercise: quickTimed('Silent Night, duas mãos', 'Os 8 primeiros compassos, com o pedal direto a cada compasso. Começa a 60 BPM e sobe até 76 BPM.', () => twoHandTask(SN_R.split(' | ').slice(0, 8).join(' | '), SN_L.split(' | ').slice(0, 8).join(' | '), { bpm: 60, beatsPerBar: 3, caption: 'Esquerda: Dó nos compassos 1 a 4, G7 no 5 e no 6, Dó no 7 e no 8. Pedal: desce no 1, sobe no fim do compasso.' }), { ladder: { from: 60, to: 76, step: 4 } }) },
+    { kind: 'song', songId: 'u03-noite', why: 'A música inteira, 23 compassos. Use o pedal direto em cada compasso.' },
     { kind: 'exercise', id: 'l22-quiz', exercise: quiz('O pedal', 'Cinco perguntas rápidas.', PEDAL) },
   ],
   review: [choice(PEDAL, 'pedal'), cgChords],
@@ -807,24 +905,37 @@ const tonic3 = tonicByEar({ keys: ['C', 'G', 'F'] });
 const fChords = primaryChord({ keys: ['F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
 const allKeys = primaryChord({ keys: ['C', 'G', 'F'], degrees: ['I', 'IV', 'V7'], low: 36, high: 72 });
 
-// Twinkle, Twinkle com raiz e 5ª na esquerda (C: Dó–Sol, F: Fá–Dó, G7: Sol–Ré), e as versões em Fá.
-const TWF_A = 'C3 G3 C3 G3 | F2 C3 C3 G3 | F2 C3 C3 G3 | G2 D3 C3 G3';
-const TWF_B = 'C3 G3 G2 D3 | C3 G3 G2 D3 | C3 G3 G2 D3 | C3 G3 G2 D3';
-const TWINKLE_FIFTH = `${TWF_A} | ${TWF_B} | ${TWF_A}`;
-const TWINKLE_F_R = shift(TWINKLE_R, 5, true);
-const TWINKLE_F_L = shift(TWINKLE_L, -7, true);
-const TWINKLE_F_FIFTH = shift(TWINKLE_FIFTH, 5, true);
+// O refrão de Jingle Bells em Sol e em Fá, para o projeto dos três tons (bloco e raiz com 5ª).
+const JB_G_R = shift(JB_CHORUS_R, -5);
+const JB_G_L = shift(JB_CHORUS_L, -5);
+const JB_F_R = shift(JB_CHORUS_R, -7, true);
+const JB_F_L = shift(JB_CHORUS_L, -7, true);
+const JB_F_FIFTH = shift(JB_CHORUS_FIFTH, 5, true);
 
-const twinkleF: SongSpec = {
-  id: 'u03-brilha-f',
-  title: 'Twinkle, Twinkle, Little Star (em Fá)',
-  composer: 'melodia folclórica francesa',
-  arrangement: 'arranjo do Fermata: a versão em Dó transposta para Fá, com F, B♭ e C7 em posição próxima',
-  bpm: 76,
+const jingleG: SongSpec = {
+  id: 'u03-jingle-sol',
+  title: 'Jingle Bells, refrão em Sol',
+  composer: 'James Lord Pierpont (1857)',
+  arrangement: 'arranjo do Fermata: o refrão em Sol maior, com G, C e D7 em posição próxima',
+  bpm: 92,
+  beatsPerBar: 4,
+  fifths: 1,
+  right: JB_G_R,
+  left: JB_G_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+const jingleF: SongSpec = {
+  id: 'u03-jingle-fa',
+  title: 'Jingle Bells, refrão em Fá',
+  composer: 'James Lord Pierpont (1857)',
+  arrangement: 'arranjo do Fermata: o refrão em Fá maior, com F, B♭ e C7 em posição próxima',
+  bpm: 92,
   beatsPerBar: 4,
   fifths: -1,
-  right: TWINKLE_F_R,
-  left: TWINKLE_F_L,
+  right: JB_F_R,
+  left: JB_F_L,
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
@@ -910,6 +1021,10 @@ const l24: Lesson = {
     'Consigo acompanhar uma canção folclórica em três tons, com dois padrões de mão esquerda.',
     'Consigo tocar Amazing Grace com acordes, em 3/4 e com anacruse.',
   ],
+  music: [
+    { song: 'u03-amazing', why: 'O projeto final da unidade. Amazing Grace é um hino de 1829 que virou de todo mundo: o Elvis gravou, e a melodia cabe em C, F e G7, os acordes que você já tem.' },
+    { song: 'u03-jingle-sol', why: 'O refrão de Jingle Bells em Sol e em Fá, para o mini-projeto dos três tons.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -943,15 +1058,16 @@ Em posição próxima na mão esquerda: **F** = Fá2, Lá2, Dó3; **B♭** = Fá
       body: 'Em Fá maior o Si é sempre Si♭, inclusive no acorde de B♭ e no C7. Antes de tocar, diga em voz alta: Fá maior, um bemol, Si♭.',
     },
     { kind: 'exercise', id: 'l24-fa', exercise: { kind: 'items', title: 'Graus em Fá', how: 'I, IV ou V7 de Fá maior. Lembre do Si♭.', gen: fChords, count: 12, low: 36, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
-    { kind: 'exercise', id: 'l24-brilha-fa', exercise: quickTimed('Twinkle, Twinkle em Fá', 'Duas mãos, F, B♭ e C7 em bloco. De 56 a 72 BPM.', () => twoHandTask(TWINKLE_F_R, TWINKLE_F_L, { bpm: 56, fifths: -1, caption: 'Um acorde a cada 2 tempos: F, B♭ e C7 na esquerda. Todo Si é Si♭.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
-    { kind: 'song', songId: 'u03-brilha-f', why: 'A versão em Fá na pauta dupla, com o bemol na armadura.' },
+    { kind: 'exercise', id: 'l24-jingle-fa', exercise: quickTimed('Jingle Bells em Fá', 'O refrão, duas mãos, F, B♭ e C7 em bloco. De 56 a 72 BPM.', () => twoHandTask(JB_F_R, JB_F_L, { bpm: 56, fifths: -1, caption: 'Um acorde por compasso: F, B♭ e C7 na esquerda. Todo Si é Si♭.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
+    { kind: 'song', songId: 'u03-jingle-fa', why: 'O refrão em Fá na pauta dupla, com o bemol na armadura.' },
+    { kind: 'song', songId: 'u03-jingle-sol', why: 'E em Sol, com o sustenido na armadura: as três casas da unidade.' },
     { kind: 'exercise', id: 'l24-quiz', exercise: quiz('Fá maior', 'Quatro perguntas rápidas.', KEY_F, 0.75) },
     {
       kind: 'text',
       title: 'Antes do projeto final: Amazing Grace',
       body: `A última música da unidade junta três coisas novas numa só: o **3/4**, a **anacruse** (a melodia entra no 3º tempo, antes do primeiro compasso cheio) e o **acorde de mínima pontuada**, que a esquerda toca no 1 e segura o compasso inteiro.
 
-A mão direita vai do Sol4 ao Sol5, então ela muda de posição no meio da frase: no salto para o Sol5 ("me"), leve a mão inteira, não estique os dedos. A esquerda usa os acordes que você já conhece: C, F, G e G7, em posição próxima. Num compasso ela toca G e, no seguinte, G7: só um dedo se move.
+A mão direita vai do Sol4 ao Sol5, então ela muda de posição no meio da frase: no salto para o Sol5 ("me"), leve a mão inteira, não estique os dedos. A esquerda usa os acordes que você já conhece: C, F, G e G7, em posição próxima. No compasso 8 ela toca G (sem a 7ª) e, no penúltimo, G7: do G para o G7 só um dedo se move.
 
 Estude primeiro a esquerda sozinha, no exercício abaixo. Depois a direita, e só então as duas juntas.`,
     },
@@ -972,11 +1088,11 @@ Estude primeiro a esquerda sozinha, no exercício abaixo. Depois a direita, e s�
       pass: { accuracy: 0.85 },
     },
     quickTimed('Colcheias', '4 compassos sorteados a 80 BPM, ±60 ms.', randomRhythm(RHY_8, 4, 80), { window: 60 }),
-    quickTimed('Raiz e 5ª com a melodia', 'Twinkle, Twinkle em Dó, 12 compassos, a 72 BPM. Meta: 90%.', () => twoHandTask(TWINKLE_R, TWINKLE_FIFTH, { bpm: 72, caption: 'Esquerda, raiz e 5ª: Dó–Sol no C, Fá–Dó no F, Sol–Ré no G7. Um par a cada 2 tempos.' }), { pass: { accuracy: 0.9 } }),
+    quickTimed('Raiz e 5ª com a melodia', 'O refrão de Jingle Bells em Dó, 16 compassos, a 72 BPM. Meta: 90%.', () => twoHandTask(JB_CHORUS_R, JB_CHORUS_FIFTH, { bpm: 72, caption: 'Esquerda, raiz e 5ª em mínimas: Dó–Sol no C, Fá–Dó no F, Sol–Ré no G7.' }), { pass: { accuracy: 0.9 } }),
   ],
   project: {
-    title: 'Folclore em três tons',
-    brief: `Acompanhe **Twinkle, Twinkle, Little Star** em **Dó, Sol e Fá**, usando **dois padrões** de mão esquerda: bloco e raiz com 5ª. A mesma progressão (I, IV e V7) em três casas, com a melodia por cima. Se quiser, faça o mesmo com outra canção folclórica que você conheça (cantiga de roda, por exemplo), descobrindo os acordes pelo ouvido.`,
+    title: 'Jingle Bells em três tons',
+    brief: `Acompanhe o refrão de **Jingle Bells** em **Dó, Sol e Fá**, usando **dois padrões** de mão esquerda: bloco e raiz com 5ª. A mesma progressão (I, IV e V7) em três casas, com a melodia por cima. Se quiser, faça o mesmo com outra música que você conheça, descobrindo os acordes pelo ouvido.`,
     steps: [
       'Escreva a progressão da música em graus (I, IV, V7), compasso por compasso.',
       'Toque em Dó com o padrão de bloco e depois com raiz e 5ª.',
@@ -990,7 +1106,7 @@ Estude primeiro a esquerda sozinha, no exercício abaixo. Depois a direita, e s�
       'A mão esquerda ficou mais leve que a melodia.',
       'Os dois padrões foram usados.',
     ],
-    exercise: { kind: 'timed', title: 'Em Fá, raiz e 5ª', how: 'Melodia em Fá na direita; raiz e 5ª (Fá–Dó, Si♭–Fá, Dó–Sol) na esquerda, a 72 BPM.', gen: () => twoHandTask(TWINKLE_F_R, TWINKLE_F_FIFTH, { bpm: 72, fifths: -1, caption: 'Esquerda: raiz e 5ª de F, B♭ e C7.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
+    exercise: { kind: 'timed', title: 'Em Fá, raiz e 5ª', how: 'O refrão em Fá na direita; raiz e 5ª (Fá–Dó, Si♭–Fá, Dó–Sol) na esquerda, a 72 BPM.', gen: () => twoHandTask(JB_F_R, JB_F_FIFTH, { bpm: 72, fifths: -1, caption: 'Esquerda: raiz e 5ª de F, B♭ e C7.' }), reps: 1, window: 100, pass: { accuracy: 0.9 } },
   },
   exit: [allKeys, bassC, choice(KEY_F, 'tom-fa')],
 };
@@ -1002,7 +1118,7 @@ const unit: Unit = {
   goal: 'Montar acordes maiores, acompanhar melodias com I, IV e V7 lendo cifra, em Dó, Sol e Fá, e usar o pedal.',
   technique: 'Trocas de acorde (C–F–G7) em posição próxima, acordes quebrados e padrões de mão esquerda em semínimas e colcheias, de 60 rumo a 96 BPM (referência: RCM Preparatory B). Nos dias sem lição nova, 5 minutos de chuva de cifras.',
   lessons: [l17, l18, l19, l20, l21, l22, l23, l24],
-  songs: [mary, twinkleC, twinkleG, twinkleF, amazing],
+  songs: [jingle, eineDo, eineDoOriginal, eineSol, noite, jingleG, jingleF, amazing],
   final: {
     songId: 'u03-amazing',
     brief: 'Amazing Grace em Dó, 3/4 com anacruse: a melodia na mão direita, uma oitava acima do Dó central, e um acorde por compasso na esquerda (I, IV, V e V7 em posição próxima). Junta o que a unidade ensinou: acordes primários, cifra, trocas no tempo e a anacruse da Unidade 2. No compasso 8 a mão direita sobe até o Sol5: prepare o salto no compasso anterior.',

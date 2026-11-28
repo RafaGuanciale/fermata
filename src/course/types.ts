@@ -210,6 +210,12 @@ export type Block =
   /** Música para tocar no estúdio (popup "Tocar a música"). */
   | { kind: 'song'; songId: string; why: string };
 
+/**
+ * Música da lição: o que você toca com o que a lição ensina. `song` é uma música do curso (o app tem a partitura);
+ * `piece` é uma do catálogo de músicas protegidas (src/course/pieces.ts), que você importa no Repertório.
+ */
+export type LessonMusic = { song: string; why: string } | { piece: string; why: string };
+
 export interface Lesson {
   /** Número no curso inteiro (1 a 100). */
   n: number;
@@ -220,6 +226,8 @@ export interface Lesson {
   minutes: number;
   /** Frases "Consigo…". */
   objectives: string[];
+  /** As músicas da lição, mostradas logo no começo: a lição existe para você tocar estas músicas. */
+  music?: LessonMusic[];
   blocks: Block[];
   /** Perguntas desta lição que voltam no aquecimento das lições seguintes (revisão espaçada). */
   review: ItemGen[];

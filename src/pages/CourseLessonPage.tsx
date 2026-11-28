@@ -8,6 +8,7 @@ import { RichText, Verdict, pct } from '../course/ui/shared';
 import ItemsRunner from '../course/ui/ItemsRunner';
 import { CheckpointRunner } from '../course/ui/ExerciseRunner';
 import { BlockView, ExerciseCard, ExitTicket } from '../course/ui/LessonParts';
+import { LessonMusicList } from '../course/ui/LessonMusic';
 import { useLesson } from '../course/useLesson';
 
 export default function CourseLessonPage() {
@@ -83,6 +84,14 @@ export default function CourseLessonPage() {
               />
             )}
             {isDone('aquecimento') && <button className="linkButton" type="button" onClick={setWarmKey}>Outra rodada</button>}
+          </section>
+        )}
+
+        {lesson.music && lesson.music.length > 0 && (
+          <section className="course__section" id="musica">
+            <h2 className="course__h2">{lesson.music.length > 1 ? 'As músicas desta lição' : 'A música desta lição'}</h2>
+            <p className="lesson__p">É para tocar isto que a lição existe. A teoria e os exercícios abaixo são o caminho até aqui.</p>
+            <LessonMusicList music={lesson.music} background={location} />
           </section>
         )}
 

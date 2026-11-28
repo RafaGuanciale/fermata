@@ -104,3 +104,7 @@ Uma revisão independente achou estes erros repetidos. Não os repita:
 Commit: `git add -A && git commit -m "feat(curso): unidade N — <o que entrou>"` com a linha `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; depois `git pull --rebase origin main && git push origin main` (conflito: pull --rebase de novo, até 2 vezes; nunca force push).
 
 Não mexa em código fora de `src/course/` sem necessidade. Se mexer (por exemplo, para o pedal), teste o que já existia.
+
+## Músicas (desde 27/11/2026)
+
+Toda lição tem `music`: a música conhecida que a lição ensina a tocar. Siga `docs/curso/MUSICAS.md` (regras e mapa por lição). Resumo: domínio público entra como `SongSpec` com as notas conferidas numa fonte (nunca de memória); música protegida entra só no catálogo `src/course/pieces.ts` e o Rafael importa a partitura. Nada de cantiga infantil nem melodia inventada como música da lição.

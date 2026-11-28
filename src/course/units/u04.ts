@@ -1,9 +1,11 @@
 // Unidade 4 — Escala maior, armaduras e pedal legato (lições 25 a 33). Projeto final: Canon in D (Pachelbel), simplificado.
+// Músicas: Joy to the World, Ode to Joy (em Dó e em Ré), Canon in D e Blues em Dó no app; Hey Jude, Let It Be, Raiders March,
+// Seven Nation Army, Under the Sea, Jurassic Park Theme, Hound Dog e Johnny B. Goode para importar (src/course/pieces.ts).
 // A lição 33 é o Marco 1: checkpoint das unidades 1 a 4 e mini-recital.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { buildScale, choice, degreeByEar, findNote, intervalAbove, keyFromSignature, mix, playChord, primaryChord, readNote, scaleDegreeNote, type ChoiceQuestion } from '../gens';
-import { pick } from '../music';
+import { n, pick } from '../music';
 import { melodyTask, randomRhythm, sci, sightReadingTask, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
@@ -85,6 +87,9 @@ const l25: Lesson = {
     'Consigo construir um tetracorde maior a partir de qualquer nota.',
     'Consigo tocar a escala maior de Dó, Sol, Fá e Ré, uma nota por vez, sem errar.',
   ],
+  music: [
+    { song: 'u04-joy', why: 'A melodia de Joy to the World começa com a escala de Dó maior inteira, do Dó5 ao Dó4, descendo nota por nota: os dois tetracordes desta lição, de trás para frente. Depois ela continua como hino de Natal.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -143,6 +148,15 @@ O mesmo raciocínio, a partir do Fá: Fá, Sol, Lá e... de Lá para Si seria um
     },
     { kind: 'exercise', id: 'l25-escalas', exercise: { kind: 'items', title: 'Construa a escala', how: 'Dó, Sol, Fá ou Ré maior, subindo uma oitava a partir da oitava 4. Siga a fórmula.', gen: scalesWhite, count: 8, low: 55, high: 84, labels: 'fade', pass: { accuracy: 0.85 } } },
     { kind: 'exercise', id: 'l25-quiz', exercise: quiz('A escala maior', 'Cinco perguntas rápidas.', SCALE) },
+    {
+      kind: 'text',
+      title: 'A escala numa música',
+      body: `Toque o começo de **Joy to the World** e repare: Dó, Si, Lá, Sol, Fá, Mi, Ré, Dó. É a escala de Dó maior inteira, descendo, com o ritmo de um hino. O primeiro tetracorde (Dó, Si, Lá, Sol) é "Joy to the world", e o segundo (Fá, Mi, Ré, Dó) é "the Lord is come".
+
+Por enquanto toque só a direita, com calma. O dedilhado da descida (5, 4, 3, 2, 1 e depois 3, 2, 1) é o assunto da próxima lição: hoje vale deixar a mão escorregar de uma posição para a outra.`,
+    },
+    { kind: 'exercise', id: 'l25-joy', exercise: quickTimed('Joy to the World: a escala', 'Os 4 primeiros compassos, só a mão direita, a 66 BPM. Duas passadas boas.', () => melodyTask(JOY_SCALE, { bpm: 66 }), { reps: 2 }) },
+    { kind: 'song', songId: 'u04-joy', why: 'A melodia inteira, para tocar junto com a partitura.' },
   ],
   review: [tetra, scalesWhite, choice(SCALE, 'escala-maior')],
   checkpoint: [
@@ -161,6 +175,9 @@ const l26: Lesson = {
   objectives: [
     'Consigo tocar Dó maior com o dedilhado certo nas duas mãos, sem parar na passagem.',
     'Consigo tocar a escala em colcheias a 60 BPM com variação abaixo de 40 ms entre as notas.',
+  ],
+  music: [
+    { song: 'u04-joy', why: 'A escala descendo de Joy to the World é o melhor treino de passagem do polegar com música de verdade: na descida, o dedo 3 passa por cima do polegar no Mi.' },
   ],
   blocks: [
     {
@@ -223,6 +240,13 @@ Um bom teste: a escala deve soar **igual**, sem um "tropeço" no Fá. Os pianist
       body: 'Três passadas limpas valem mais que vinte cansadas. Se o polegar ou o punho começarem a doer, pare, solte o braço e volte no dia seguinte. A escada de andamento não sobe com dor.',
     },
     { kind: 'exercise', id: 'l26-quiz', exercise: quiz('Dedilhado e passagem', 'Quatro perguntas rápidas.', THUMB, 0.75) },
+    {
+      kind: 'callout',
+      tone: 'dica',
+      title: 'o polegar em Joy to the World',
+      body: 'Na descida do Dó5 ao Dó4, comece com o 5 no Dó5 e desça 5, 4, 3, 2, 1 até o Fá. No Mi, o dedo 3 passa por cima do polegar, e você termina 3, 2, 1 no Mi, Ré e Dó. É exatamente a passagem da escala, agora com música.',
+    },
+    { kind: 'exercise', id: 'l26-joy', exercise: quickTimed('Joy to the World com a passagem do polegar', 'A melodia inteira, só a direita, de 60 a 76 BPM. Use o dedilhado da dica.', () => melodyTask(JOY_R, { bpm: 60 }), { ladder: { from: 60, to: 76, step: 4 } }) },
   ],
   review: [choice(THUMB, 'dedilhado'), scalesWhite],
   checkpoint: [
@@ -241,6 +265,9 @@ const l27: Lesson = {
     'Consigo dizer a ordem dos sustenidos e dos bemóis.',
     'Consigo ler uma melodia com armadura sem esquecer o Fá♯ ou o Si♭.',
     'Consigo tocar as escalas de Sol e de Fá maior a 60 BPM, mãos separadas.',
+  ],
+  music: [
+    { piece: 'hey-jude', why: 'Hey Jude está em Fá maior: o Si♭ da armadura aparece na melodia e no acorde de B♭. O verso é I–V–I–IV, os acordes primários que você já conhece, e a coda do "na na na" é uma das mais cantadas do rock.' },
   ],
   blocks: [
     {
@@ -390,7 +417,48 @@ const syncopated: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
+const SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+/** Transpõe uma linha escrita em semitons, grafando com sustenidos. */
+function shift(text: string, semis: number): string {
+  return text.replace(/[A-G](?:#|b)?-?\d/g, (name) => {
+    const m = n(name) + semis;
+    return `${SHARP[((m % 12) + 12) % 12]}${Math.floor(m / 12) - 1}`;
+  });
+}
+
+const odeD: SongSpec = {
+  ...odeDotted,
+  id: 'u04-ode-re',
+  title: 'Ode to Joy, em Ré',
+  arrangement: 'arranjo do Fermata: a versão completa da lição 29 no tom em que Beethoven escreveu o tema na 9ª Sinfonia, Ré maior (Fá♯ e Dó♯ na armadura)',
+  fifths: 2,
+  right: shift(ODE_FULL_R, 2),
+  left: shift(ODE_FULL_L, 2),
+};
+
+// Joy to the World (hino "Antioch", melodia atribuída a Händel, arranjada por Lowell Mason em 1839). Notas da edição do
+// Mutopia Project (Steve Dunlop, em Ré, 2/4), transpostas para Dó, com os valores dobrados (4/4). Arranjo: a colcheia
+// pontuada com semicolcheia vira duas semínimas (a pontuada só chega na lição 29). A melodia começa com a escala de Dó
+// maior inteira, descendo.
+const JOY_R = 'C5:2 B4 A4 | G4:3 F4 | E4:2 D4:2 | C4:3 G4 | A4:3 A4 | B4:3 B4 | C5:3 C5 | C5 B4 A4 G4 | G4 F4 G4 C5 | C5 B4 A4 G4 | G4 F4 E4 E4 | E4 E4 E4 E4:0.5 F4:0.5 | G4:3 F4:0.5 E4:0.5 | D4 D4 D4 D4:0.5 E4:0.5 | F4:3 E4:0.5 D4:0.5 | C4 C5:2 A4 | G4 F4 E4 F4 | E4:2 D4:2 | C4:4';
+const JOY_SCALE = 'C5:2 B4 A4 | G4:3 F4 | E4:2 D4:2 | C4:4';
+
+const joy: SongSpec = {
+  id: 'u04-joy',
+  title: 'Joy to the World',
+  composer: 'melodia atribuída a Georg Friedrich Händel, arranjo de Lowell Mason (1839)',
+  arrangement: 'arranjo do Fermata em Dó: a melodia inteira na mão direita, com os valores dobrados e sem pontuadas',
+  bpm: 84,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: JOY_R,
+  hands: 'direita',
+  pass: { accuracy: 0.85 },
+};
+
 const PEDAL_DRILL = 'C4+E4+G4:2 C4+F4+A4:2 | C4+E4+G4:2 B3+D4+F4+G4:2 | C4+E4+G4:4';
+
+const chordsPop = playChord({ symbols: ['C', 'G', 'Am', 'F'], low: 45, high: 72 });
 
 const l28: Lesson = {
   n: 28,
@@ -401,6 +469,9 @@ const l28: Lesson = {
     'Consigo dar nome aos 7 graus: tônica, supertônica, mediante, subdominante, dominante, superdominante e sensível.',
     'Consigo tocar o I, IV ou V7 de Dó, Sol ou Fá em menos de 2 s.',
     'Consigo reconhecer de ouvido os graus 1 a 6 em Dó maior.',
+  ],
+  music: [
+    { piece: 'let-it-be', why: 'Let It Be é I–V–vi–IV: Dó, Sol, Lá menor e Fá. O vi, o acorde do 6º grau, é o único novo, e você o aprende nesta lição. Com esses quatro acordes dá para tocar centenas de músicas.' },
   ],
   blocks: [
     {
@@ -452,6 +523,25 @@ Se ficar em dúvida, cante a nota e deixe ela "cair" para onde quer ir: o lugar 
     },
     { kind: 'exercise', id: 'l28-ouvido', exercise: { kind: 'items', title: 'Graus 1 a 6 de ouvido', how: 'Depois da cadência em Dó, toque a nota que você ouviu.', gen: ear16, count: 12, low: 48, high: 84, labels: 'off', pass: { accuracy: 0.8 } } },
     { kind: 'exercise', id: 'l28-quiz', exercise: quiz('Nomes dos graus', 'Sete perguntas rápidas.', DEGREE_NAMES) },
+    {
+      kind: 'text',
+      title: 'O acorde do 6º grau: Lá menor',
+      body: `Faça a conta dos graus com acordes: em Dó maior, o acorde que começa no **6º grau** (Lá) e usa só as notas da escala é **Lá, Dó, Mi**. Ele não é maior: de Lá a Dó são **3 semitons**, e de Dó a Mi, mais **4**. É o contrário do acorde maior (4 + 3). Esse é o acorde **menor**, e a cifra dele leva um "m": **Am**. Em graus, ele é o **vi** (minúsculo, porque é menor).
+
+O som é mais escuro, mais melancólico. A Unidade 5 explica o modo menor a fundo; por agora, basta a fórmula 3 + 4 e o lugar dele: o vi é o "parente triste" do I, com duas notas em comum (Dó e Mi).
+
+Com o **vi** você ganha a progressão mais tocada do pop: **I – V – vi – IV**, em Dó **C – G – Am – F**. É Let It Be, e são centenas de outras.`,
+    },
+    {
+      kind: 'keys',
+      low: 57,
+      high: 69,
+      lit: [57, 60, 64],
+      labels: { 57: 'Lá', 60: 'Dó', 64: 'Mi' },
+      caption: 'Lá menor (Am): Lá, Dó, Mi. 3 semitons até a 3ª, mais 4 até a 5ª.',
+    },
+    { kind: 'exercise', id: 'l28-vi', exercise: { kind: 'items', title: 'C, G, Am e F', how: 'Os quatro acordes de Let It Be, sorteados. Toque cada um em qualquer posição.', gen: chordsPop, count: 16, low: 45, high: 72, labels: 'fade', pass: { accuracy: 0.85 } } },
+    { kind: 'exercise', id: 'l28-pop', exercise: quickTimed('I – V – vi – IV', 'C, G, Am e F na mão esquerda, um acorde por compasso, a 66 BPM. Duas passadas boas.', () => melodyTask('C3+E3+G3:4 | B2+D3+G3:4 | A2+C3+E3:4 | A2+C3+F3:4 | C3+E3+G3:4 | B2+D3+G3:4 | A2+C3+F3:4 | C3+E3+G3:4', { bpm: 66, clef: 'bass' }), { reps: 2 }) },
   ],
   review: [degreeNames, chordsRandom, ear16, choice(DEGREE_NAMES, 'nomes-graus')],
   checkpoint: [
@@ -470,6 +560,12 @@ const l29: Lesson = {
     'Consigo tocar a semínima pontuada seguida de colcheia no tempo.',
     'Consigo tocar síncopes e contratempos simples com 85% das notas em ±60 ms.',
     'Consigo tocar uma música curta com síncope.',
+  ],
+  music: [
+    { piece: 'let-it-be', why: 'A melodia de Let It Be é cheia de notas que entram antes do tempo: a síncope desta lição, numa balada lenta. Agora dá para tocar a música inteira.' },
+    { piece: 'raiders-march', why: 'A marcha do Indiana Jones é o ritmo pontuado em estado puro: longa-curta, longa-curta, como um passo de herói.' },
+    { piece: 'seven-nation-army', why: 'O riff mais cantado dos estádios: sete notas, com a pontuada logo no começo. Cabe numa mão só.' },
+    { piece: 'under-the-sea', why: 'O refrão de Under the Sea é calipso: a síncope é o que faz a música balançar.' },
   ],
   blocks: [
     {
@@ -535,6 +631,10 @@ const l30: Lesson = {
   objectives: [
     'Consigo trocar o pedal logo depois do ataque do acorde novo, sem buraco e sem lama.',
     'Consigo fazer o encadeamento I–IV–I–V7–I com pedal legato em 3 passadas sem troca antecipada.',
+  ],
+  music: [
+    { song: 'u04-canone', why: 'Canon in D é o lugar clássico do pedal legato: acordes encadeados, um a cada mínima, que precisam soar ligados sem misturar.' },
+    { piece: 'jurassic-park', why: 'O tema de Jurassic Park é feito de acordes longos e solenes: troque o pedal logo depois de cada acorde novo e ouça o som crescer sem embolar.' },
   ],
   blocks: [
     {
@@ -648,6 +748,11 @@ const l31: Lesson = {
     'Consigo tocar Dó maior com as duas mãos em movimento contrário, uniforme.',
     'Consigo tocar a forma do blues de 12 compassos em Dó sem me perder.',
   ],
+  music: [
+    { song: 'u04-blues', why: 'O blues de 12 compassos na pauta dupla, para aprender a forma: I, IV e V, sempre na mesma ordem.' },
+    { piece: 'hound-dog', why: 'Hound Dog, do Elvis, é um blues de 12 compassos do começo ao fim: a mesma forma desta lição, com o rock and roll de 1956 por cima.' },
+    { piece: 'johnny-b-goode', why: 'Johnny B. Goode também é blues de 12 compassos: conte as frases e você sabe onde o refrão começa e termina.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -708,6 +813,10 @@ const l32: Lesson = {
     'Consigo dizer a tonalidade maior de qualquer armadura até 2 sustenidos ou 2 bemóis.',
     'Consigo tocar as escalas de Ré e Si♭ maior a 60 BPM, mãos separadas.',
   ],
+  music: [
+    { song: 'u04-ode-re', why: 'A Ode to Joy no tom em que Beethoven escreveu o tema na 9ª Sinfonia: Ré maior, com Fá♯ e Dó♯ na armadura.' },
+    { song: 'u04-canone', why: 'O Canon in D também está em Ré: o projeto final da unidade.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -747,6 +856,7 @@ De novo a regra: o polegar evita as pretas, e o dedilhado se organiza em torno d
     { kind: 'exercise', id: 'l32-re', exercise: quickTimed('Ré maior, mão direita', 'Colcheias de 45 a 60 BPM, com a armadura. Variação até 40 ms.', () => melodyTask(scaleLine(62), { bpm: 45, fifths: 2 }), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
     { kind: 'exercise', id: 'l32-sib', exercise: quickTimed('Si♭ maior, mão direita', 'Dedilhado 2 1 2 3 · 1 2 3 4, de 45 a 60 BPM.', () => melodyTask(scaleLine(58), { bpm: 45, fifths: -2 }), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
     { kind: 'exercise', id: 'l32-me', exercise: quickTimed('Ré ou Si♭, mão esquerda', 'Uma das duas, sorteada, a 55 BPM.', (rng) => (rng() < 0.5 ? melodyTask(scaleLine(50), { bpm: 55, fifths: 2, clef: 'bass' }) : melodyTask(scaleLine(46), { bpm: 55, fifths: -2, clef: 'bass' })), { reps: 2, evenness: 40 }) },
+    { kind: 'song', songId: 'u04-ode-re', why: 'A Ode to Joy em Ré maior, o tom da 9ª Sinfonia: leia a armadura antes de começar. Todo Fá é Fá♯ e todo Dó é Dó♯.' },
     { kind: 'song', songId: 'u04-canone', why: 'O projeto final da unidade, em Ré maior: o baixo de 8 notas e três variações por cima. Use o pedal legato a cada mínima.' },
     { kind: 'exercise', id: 'l32-quiz', exercise: quiz('Círculo de quintas', 'Seis perguntas rápidas.', CIRCLE) },
   ],
@@ -781,6 +891,12 @@ const l33: Lesson = {
     'Consigo passar no checkpoint cumulativo das unidades 1 a 4, sem dicas.',
     'Consigo ler à primeira vista uma melodia nova de 4 compassos, com armadura.',
     'Consigo apresentar um mini-recital de 4 músicas e comparar com a lição 1.',
+  ],
+  music: [
+    { song: 'u04-canone', why: 'A clássica do recital e o projeto final da unidade.' },
+    { song: 'u03-eine-sol', why: 'Mozart no tom original, da Unidade 3.' },
+    { piece: 'let-it-be', why: 'A popular do recital: Let It Be, pela cifra.' },
+    { piece: 'hound-dog', why: 'E um blues de 12 compassos para fechar com energia.' },
   ],
   blocks: [
     {
@@ -818,10 +934,12 @@ Depois toque no andamento, lendo o desenho (sobe, desce, passo, salto) e não no
       title: 'O recital',
       body: `Monte o seu recital com estas quatro músicas, nesta ordem:
 
-1. **Clássica**: o **Canon in D** de Pachelbel (o projeto final desta unidade).
-2. **Popular fácil**: **Amazing Grace** com acordes (Unidade 3).
-3. **Cifra em 2 tons**: **Twinkle, Twinkle** em Dó e em Sol, com dois padrões de mão esquerda.
+1. **Clássica**: o **Canon in D** de Pachelbel (o projeto final desta unidade) ou a **Eine kleine Nachtmusik** em Sol (Unidade 3).
+2. **Popular**: **Let It Be** pela cifra, se você já importou a partitura; senão, **Amazing Grace** com acordes (Unidade 3).
+3. **Cifra em 2 tons**: o refrão de **Jingle Bells** em Dó e em Sol, com dois padrões de mão esquerda.
 4. **Primeira vista**: uma melodia gerada no exercício do projeto.
+
+Se quiser fechar com energia, acrescente **Hound Dog**: é o blues de 12 compassos da lição 31.
 
 Toque tudo seguido, sem recomeçar: apresentação é isso. Grave com o celular e compare com a gravação (ou a lembrança) da lição 1. Depois escreva três frases: o que melhorou, o que ainda trava, o que você quer tocar a seguir.`,
     },
@@ -845,7 +963,7 @@ Toque tudo seguido, sem recomeçar: apresentação é isso. Grave com o celular 
   ],
   project: {
     title: 'Mini-recital nº 1',
-    brief: `Toque em sequência, sem recomeçar: o **Canon in D**, **Amazing Grace** com acordes, **Twinkle, Twinkle** em Dó e em Sol pela cifra, e uma **leitura à primeira vista** (exercício abaixo). Grave tudo e compare com a lição 1. Termine com uma autoavaliação escrita de três frases.`,
+    brief: `Toque em sequência, sem recomeçar: o **Canon in D**, **Let It Be** (ou Amazing Grace) com acordes, o refrão de **Jingle Bells** em Dó e em Sol pela cifra, e uma **leitura à primeira vista** (exercício abaixo). Grave tudo e compare com a lição 1. Termine com uma autoavaliação escrita de três frases.`,
     steps: [
       'Passe cada música no "Tocar a música" até ela sair com 90% das notas no andamento.',
       'Escolha um horário sem pressa, ajuste o banco e faça um aquecimento de 5 minutos.',
@@ -872,7 +990,7 @@ const unit: Unit = {
   goal: 'Construir e tocar escalas maiores com passagem do polegar, ler armaduras, usar o pedal legato e tocar a forma do blues.',
   technique: 'Escalas maiores de Dó, Sol, Ré, Fá e Si♭, uma oitava, mãos separadas e depois juntas em movimento contrário, em colcheias de 45 rumo a 60 BPM, com variação abaixo de 40 ms (referência: RCM Preparatory B, ABRSM Grau 1). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l25, l26, l27, l28, l29, l30, l31, l32, l33],
-  songs: [canon, odeDotted, syncopated, blues],
+  songs: [joy, canon, odeDotted, odeD, syncopated, blues],
   final: {
     songId: 'u04-canone',
     brief: 'O Canon in D de Pachelbel, simplificado: a mão esquerda repete o baixo de 8 notas (Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá) e a direita toca três das variações que se empilham sobre ele. Junta a armadura de 2 sustenidos (Fá♯ e Dó♯), o pedal legato (troque a cada mínima, logo depois do baixo) e a leitura em duas claves.',
@@ -882,4 +1000,4 @@ const unit: Unit = {
 export default unit;
 
 /** Para os testes conferirem que todo gerador funciona. */
-export const _gens: ItemGen[] = [tetra, scalesWhite, scalesAll, sigs12, readG, readF, degreeNames, degreeNamesD, chordsRandom, ear16, sigs22, scalesDBb, findAny, readTreble, readBass, intervals, chordsCFG, ear135];
+export const _gens: ItemGen[] = [chordsPop, tetra, scalesWhite, scalesAll, sigs12, readG, readF, degreeNames, degreeNamesD, chordsRandom, ear16, sigs22, scalesDBb, findAny, readTreble, readBass, intervals, chordsCFG, ear135];

@@ -5,6 +5,7 @@ import type { Block, Lesson } from './types';
 export type FocusStep =
   | { kind: 'warmup' }
   | { kind: 'intro' }
+  | { kind: 'music' }
   | { kind: 'read'; blocks: Block[]; title?: string }
   | { kind: 'exercise'; block: Extract<Block, { kind: 'exercise' }> }
   | { kind: 'song'; block: Extract<Block, { kind: 'song' }> }
@@ -14,7 +15,7 @@ export type FocusStep =
   | { kind: 'done' };
 
 /**
- * Cada texto abre um passo de leitura e leva junto as figuras, exemplos e avisos que vêm logo depois;
+ * Depois dos objetivos vêm as músicas da lição (se houver). Cada texto abre um passo de leitura e leva junto as figuras, exemplos e avisos que vêm logo depois;
  * cada exercício e cada música são um passo próprio. Antes: aquecimento (se houver) e objetivos;
  * depois: checkpoint, mini-projeto (se houver), ticket de saída e a tela de conclusão.
  */
@@ -22,6 +23,7 @@ export function focusSteps(lesson: Lesson, hasWarmup: boolean): FocusStep[] {
   const steps: FocusStep[] = [];
   if (hasWarmup) steps.push({ kind: 'warmup' });
   steps.push({ kind: 'intro' });
+  if (lesson.music?.length) steps.push({ kind: 'music' });
   let reading: Extract<FocusStep, { kind: 'read' }> | null = null;
   for (const b of lesson.blocks) {
     if (b.kind === 'exercise') {

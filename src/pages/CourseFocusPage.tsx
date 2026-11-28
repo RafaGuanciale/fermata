@@ -17,6 +17,7 @@ import { RichText, Verdict, pct } from '../course/ui/shared';
 import ItemsRunner from '../course/ui/ItemsRunner';
 import { CheckpointRunner, ExerciseRunner } from '../course/ui/ExerciseRunner';
 import { BlockView, ExitTicket } from '../course/ui/LessonParts';
+import { LessonMusicList } from '../course/ui/LessonMusic';
 import { Burst } from '../celebrate/Celebrate';
 import { starsFor, streakMilestone } from '../celebrate/rewards';
 import { playReward, rewardSoundOn, setRewardSound } from '../celebrate/sound';
@@ -122,6 +123,14 @@ function Focus({ L, onClose }: { L: Ready; onClose: () => void }) {
               </ul>
               {locked && <p className="courseBanner">Esta lição abre quando você concluir a anterior. Dá para ler; os exercícios ficam travados.</p>}
             </div>
+          )}
+
+          {step.kind === 'music' && lesson.music && (
+            <>
+              <StepHead eyebrow="Para que serve esta lição" title={lesson.music.length > 1 ? 'As músicas que você vai tocar' : 'A música que você vai tocar'} />
+              <p className="lesson__p">A teoria e os exercícios a seguir são o caminho até aqui.</p>
+              <LessonMusicList music={lesson.music} background={background ?? location} />
+            </>
           )}
 
           {step.kind === 'read' && step.blocks.map((b, k) => (
