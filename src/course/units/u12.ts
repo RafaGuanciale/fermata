@@ -124,20 +124,101 @@ const odeArr: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-// Prelude in E minor: original do Fermata no estilo romântico. Melodia longa na direita; acordes repetidos em colcheias
-// na esquerda, descendo por cromatismo.
-const PREL_LH = ['G3+B3+E4', 'F#3+A3+D#4', 'G3+B3+D4', 'G3+B3+C#4', 'G3+B3+C4', 'A3+C4+E4', 'F#3+A3+D#4'];
-const PREL_R = ['B4:3 C5', 'B4:4', 'B4:2 A4 G4', 'A4:3 B4', 'C5:2 B4 A4', 'E5:2 C5:2', 'D#5:2 C5 A4', 'G4:4'];
+// Prelúdio Op. 28 nº 4 (Frédéric Chopin, 1839; domínio público). Fonte: Mutopia Project, ChopinFF/O28/Chop-28-4
+// (Magnus Lewis-Smith, a partir da edição Peters de 1879, domínio público); alturas absolutas pelo `ly rel2abs` do
+// python-ly, sem rodar o LilyPond. Arranjo do Fermata: as 25 barras inteiras, notas e ritmo originais (com a anacruse,
+// as tercinas dos compassos 12 e 18 e as semicolcheias); escrito em 4/4 (o original é 2/2, alla breve); sem as duas
+// acciaccaturas e com o grupeto do compasso 16 tocado como nota simples; a nota ligada pela barra (compassos 8–9) vira
+// nota + pausa, e o Fá♯ ligado do compasso 20 solta um pouco antes do Mi; nos dois últimos compassos a esquerda toca só as oitavas do baixo (as notas do meio, que o original
+// cruza para a pauta de cima, ficam de fora).
+/** Acorde repetido em colcheias: "G3+B3+E4" × 8. */
+const eighths = (c: string, k: number) => Array.from({ length: k }, () => `${c}:0.5`).join(' ');
+const CHOPIN_R = [
+  'r:3 B3:0.75 B4:0.25',
+  'B4:3 C5', 'B4:3 C5', 'B4:3 C5', 'B4:3 Bb4',
+  'A4:3 B4', 'A4:3 B4', 'A4:3 B4:0.75 A4:0.25', 'A4:3 G#4',
+  'r A4:0.5 B4:0.5 D5:0.5 C5:0.5 E4:0.5 A4:0.5', 'F#4:3 A4', 'F#4:3 A4', 'G4:0.5 F#4:0.5 C4:0.5 B3:0.5 D#4:0.5 F#4:0.5 D5:1/3 C5:1/3 B4:1/3',
+  'B4:3 C5', 'B4:3 C5', 'B4:3 C5', 'B4:0.75 A#4:0.25 A#4 G##5 F#5:0.75 E5:0.25',
+  'E5:0.5 D#5:0.5 C6:0.5 D#5:0.5 D#5:0.5 E5:0.5 G5:0.5 B4:0.5', 'D5:0.5 C5:0.5 E5:1/3 E4:1/3 A4:1/3 F#4:1.5 A4:0.5', 'F#4:3 A4', 'F#4:3.5 r:0.25 E4:0.25',
+  'E4:3 F#4', 'E4:3 F#4', 'E4:2 r:2', 'E4:2 D#4:2', 'E4:4',
+];
+const CHOPIN_L = [
+  'r:4',
+  eighths('G3+B3+E4', 8),
+  `${eighths('F#3+A3+E4', 4)} ${eighths('F#3+A3+D#4', 4)}`,
+  `${eighths('F3+A3+D#4', 4)} ${eighths('F3+A3+D4', 2)} ${eighths('F3+G#3+D4', 2)}`,
+  `${eighths('E3+G#3+D4', 4)} ${eighths('E3+G3+D4', 2)} ${eighths('E3+G3+C#4', 2)}`,
+  `${eighths('E3+G3+C4', 4)} ${eighths('E3+F#3+C4', 4)}`,
+  `${eighths('E3+F#3+C4', 4)} ${eighths('D#3+F#3+C4', 4)}`,
+  eighths('D3+F#3+C4', 8),
+  `${eighths('D3+F3+C4', 4)} ${eighths('D3+F3+B3', 4)}`,
+  `${eighths('C3+E3+B3', 2)} ${eighths('C3+E3+A3', 6)}`,
+  `${eighths('B2+E3+A3', 2)} ${eighths('B2+D#3+A3', 2)} ${eighths('C3+E3+A3', 4)}`,
+  `${eighths('B2+D#3+A3', 4)} ${eighths('C3+E3+A3', 4)}`,
+  'B2+D#3+A3 r:3',
+  eighths('G3+B3+E4', 8),
+  `${eighths('F#3+A3+E4', 4)} ${eighths('F3+A3+D#4', 4)}`,
+  `${eighths('F3+G#3+D#4', 2)} ${eighths('F3+G#3+D4', 2)} ${eighths('E3+G#3+D4', 4)}`,
+  `${eighths('E3+G3+D4', 2)} ${eighths('E3+G3+C#4', 2)} ${eighths('C#3+E3+A#3', 2)} ${eighths('C3+E3+A3', 2)}`,
+  `B1+B2:0.5 ${eighths('A3+C4+F#4+A4', 3)} G3+B3+D#4+F#4:0.5 ${eighths('G3+B3+E4', 3)}`,
+  `${eighths('A3+C4+E4', 2)} A2:0.5 E3+F#3+C4:0.5 ${eighths('B2+E3+B3', 2)} ${eighths('C3+E3+A3', 2)}`,
+  `${eighths('B2+E3+B3', 4)} ${eighths('C3+E3+A3', 4)}`,
+  `${eighths('B2+E3+B3', 4)} ${eighths('B2+D#3+B3', 2)} ${eighths('B2+D#3+A3', 2)}`,
+  `${eighths('C3+G3', 4)} ${eighths('C3+Bb3', 2)} ${eighths('C3+E3+A3', 2)}`,
+  `${eighths('B2+E3+A3', 2)} ${eighths('B2+E3+G#3', 2)} ${eighths('B2+E3+G3', 4)}`,
+  'Bb2+C3+G3:2 r:2',
+  'B1+B2:2 B1+F#2+B2:2',
+  'E1+E2:4',
+];
+/** Compassos `from` a `to` do Prelúdio (a anacruse é o compasso 0). */
+const chopinBars = (from: number, to: number) => ({ r: CHOPIN_R.slice(from, to + 1).join(' | '), l: CHOPIN_L.slice(from, to + 1).join(' | ') });
 const preludio: SongSpec = {
-  id: 'u12-preludio',
-  title: 'Prelude in E minor',
-  composer: 'Fermata (original, no estilo romântico)',
-  arrangement: 'peça original: melodia cantada na direita sobre acordes repetidos em colcheias na esquerda, com a voz de cima descendo por meio tom (Em, B7, Em7, C♯ø, C7M, Am, B7, Em)',
+  id: 'u12-chopin-28-4',
+  title: 'Prelude in E minor, Op. 28 No. 4',
+  composer: 'Frédéric Chopin',
+  arrangement: 'edição Peters de 1879 (Mutopia), inteira, com notas e ritmo originais; escrita em 4/4 (o original é 2/2); sem as acciaccaturas e com o grupeto do compasso 16 como nota simples; a nota ligada pela barra vira nota e pausa; nos dois últimos compassos a esquerda toca só o baixo em oitavas',
   bpm: 50,
   beatsPerBar: 4,
   fifths: 1,
-  right: PREL_R.join(' | '),
-  left: [...PREL_LH.map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')), 'G3+B3+E4:4'].join(' | '),
+  right: CHOPIN_R.join(' | '),
+  left: CHOPIN_L.join(' | '),
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+// Nocturne in E-flat major, Op. 9 No. 2 (Frédéric Chopin, 1832; domínio público). Fonte: Mutopia Project,
+// ChopinFF/O9/chopin_nocturne_op9_n2 (Renato Biolcati Rinaldi, a partir da edição Schirmer de 1881; edição CC BY-SA 3.0);
+// alturas pelo `ly rel2abs` do python-ly, sem rodar o LilyPond. Arranjo do Fermata: a primeira frase (anacruse e
+// compassos 1 a 4), em 12/8, com notas e ritmo originais; sem o grupeto do compasso 2; a nota ligada dentro do
+// compasso 1 vira uma nota só. O alvo é o andamento da edição (colcheia = 132, semínima = 66).
+const NOCT_R = [
+  'r:1.5 r:1.5 r:1.5 r Bb4:0.5',
+  'G5:2 F5:0.5 G5:0.5 F5:1.5 Eb5 Bb4:0.5',
+  'G5 C5:0.5 C6 G5:0.5 Bb5:1.5 Ab5 G5:0.5',
+  'F5:1.5 G5 D5:0.5 Eb5:1.5 C5:1.5',
+  'Bb4:0.5 D6:0.5 C6:0.5 Bb5:0.25 Ab5:0.25 G5:0.25 Ab5:0.25 C5:0.25 D5:0.25 Eb5:1.5 r Bb4:0.5',
+];
+/** Um tempo da esquerda do noturno: baixo e dois acordes em colcheias. */
+const nt = (bass: string, a: string, b: string) => `${bass}:0.5 ${a}:0.5 ${b}:0.5`;
+const EB = ['G3+Eb4', 'Bb3+Eb4+G4'] as const;
+const NOCT_L = [
+  'r:6',
+  [nt('Eb2', ...EB), nt('Eb3', 'Ab3+D4', 'Cb4+D4+Ab4'), nt('Eb2', ...EB), nt('D2', ...EB)].join(' '),
+  [nt('C2', 'G3+E4', 'Bb3+E4+G4'), nt('C3', 'G3+E4', 'C4+E4+Bb4'), nt('F2', 'F3+Db4', 'Bb3+Db4+E4'), nt('F2', 'F3+C4', 'Ab3+C4+F4')].join(' '),
+  [nt('Bb2', 'F3+D4', 'Bb3+D4+Ab4'), nt('B2', 'G3+F4', 'D4+F4+G4'), nt('C3', 'G3+Eb4', 'C4+Eb4+G4'), nt('A2', 'Gb3+Eb4', 'C4+Eb4+Gb4')].join(' '),
+  [nt('Bb2', 'F3+Eb4', 'Bb3+Eb4+Ab4'), nt('Bb1', 'F3+D4', 'Bb3+Ab4'), nt('Eb2', ...EB), nt('Eb3', ...EB)].join(' '),
+];
+const noturno: SongSpec = {
+  id: 'u12-noturno',
+  title: 'Nocturne in E-flat major, Op. 9 No. 2, primeira frase',
+  composer: 'Frédéric Chopin',
+  arrangement: 'edição Schirmer de 1881 (Mutopia): anacruse e compassos 1 a 4, em 12/8, com notas e ritmo originais; sem o grupeto do compasso 2',
+  bpm: 66,
+  beatsPerBar: 6,
+  time: { beats: 12, beatType: 8 },
+  fifths: -3,
+  right: NOCT_R.join(' | '),
+  left: NOCT_L.join(' | '),
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
@@ -504,7 +585,7 @@ const ROMANTIC_Q: ChoiceQuestion[] = [
   { q: 'Voicing de melodia interna é…', options: ['Fazer soar mais a nota do meio do acorde, quando ela é a melodia', 'Tocar só a nota de cima', 'Tocar o acorde arpejado'], answer: 0, why: 'O peso vai para o dedo que tem a melodia; os outros tocam mais leves.' },
   { q: 'A escala de tons inteiros tem…', options: ['6 notas, todas a um tom de distância', '7 notas com um semitom', '5 notas'], answer: 0, why: 'Dó, Ré, Mi, Fá♯, Sol♯, Lá♯ (Si♭). Sem semitons, ela não tem centro forte: soa como sonho.' },
   { q: 'Acordes paralelos, no impressionismo, são…', options: ['O mesmo tipo de acorde deslizando junto, sem condução', 'Acordes com 5ªs proibidas no coral', 'Acordes de uma nota só'], answer: 0, why: 'Debussy usava a "regra proibida" de propósito, como cor.' },
-  { q: 'O Prelúdio Op. 28 nº 4 de Chopin e a Gnossienne nº 1 de Satie…', options: ['São de domínio público e ficam como próximos passos com partitura', 'São protegidos', 'Não existem para piano'], answer: 0, why: 'Chopin morreu em 1849 e Satie em 1925. O app usa um prelúdio original no lugar até entrar a partitura.' },
+  { q: 'O Prelúdio Op. 28 nº 4 de Chopin e a Gnossienne nº 1 de Satie…', options: ['São de domínio público', 'São protegidos', 'Não existem para piano'], answer: 0, why: 'Chopin morreu em 1849 e Satie em 1925. O Prelúdio está nesta lição; a Gnossienne fica como próximo passo.' },
 ];
 
 /** Escala de tons inteiros a partir de uma tônica: 6 notas e a oitava. */
@@ -630,6 +711,10 @@ const l94: Lesson = {
     'Consigo trocar o pedal legato em arpejos, a cada baixo novo, com 85% das trocas no alvo.',
     'Consigo explicar meio pedal, flutter e una corda e testar se o meu piano envia cada um.',
   ],
+  music: [
+    { song: 'u12-chopin-28-4', why: 'No Prelúdio em Mi menor de Chopin, a harmonia muda a cada meio compasso, às vezes por uma nota só, e a edição marca o pedal em cada troca. Pedal atrasado mistura dois acordes que já são quase iguais: o ouvido percebe na hora.' },
+    { song: 'u08-gymnopedie', why: 'Na Gymnopédie No. 1 o pedal troca a cada compasso, logo depois do baixo, e segura o baixo enquanto a mão salta para o acorde. É o pedal legato desta lição, num andamento em que dá para ouvir cada troca.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -655,6 +740,14 @@ Ouça o fim de cada compasso: se o acorde novo chega "sujo", a troca atrasou; se
       body: 'Subir e descer o pedal **no mesmo instante** do baixo novo apaga o baixo: ele soa sem o pedal e morre. O pé sobe **depois** que o baixo soou (um piscar de olhos) e desce em seguida. Pé atrasado em relação à mão: é esse o movimento.',
     },
     { kind: 'exercise', id: 'l94-arpejo', exercise: quickTimed('Pedal legato no arpejo', 'Arpejo na direita, baixo na esquerda, a 60 BPM. Troque o pedal a cada baixo novo.', pedalArp(60), { pedal: 'legato', reps: 2 }) },
+    {
+      kind: 'text',
+      title: 'Na música: o pedal de Chopin',
+      body: `No **Prelúdio Op. 28 nº 4** de Chopin, a esquerda toca acordes em colcheias que mudam por uma nota de cada vez. A edição marca o pedal **a cada meio compasso**, quando o acorde muda, e o solta antes da troca: o mesmo pedal legato do exercício, só que guiado pela harmonia, não pelo baixo.
+
+Como os acordes vizinhos são quase iguais, a lama não soa como "barulho": soa como um acorde errado. Ouça o fim de cada meio compasso. Se o acorde novo chega com a nota velha junto, a troca atrasou.`,
+    },
+    { kind: 'song', songId: 'u12-chopin-28-4', why: 'O Prelúdio inteiro, na edição Peters de 1879. Troque o pedal a cada acorde novo da esquerda; o app ainda não mede o pedal nesta tela, então grave e escute.' },
     {
       kind: 'text',
       title: 'Meio pedal, flutter e una corda',
@@ -691,9 +784,15 @@ const l95: Lesson = {
   title: 'Romântico e impressionista',
   minutes: 60,
   objectives: [
-    'Consigo tocar o Prelude in E minor com a melodia acima dos acordes da esquerda e 95% das notas.',
+    'Consigo tocar a primeira metade do Prelúdio Op. 28 nº 4 de Chopin (compassos 1 a 12) com a melodia acima dos acordes da esquerda e 90% das notas.',
     'Consigo explicar rubato, voicing de melodia interna e pedal como cor.',
     'Consigo tocar a escala de tons inteiros e acordes paralelos.',
+  ],
+  music: [
+    { song: 'u12-chopin-28-4', why: 'O Prelúdio em Mi menor é o romântico em uma página: a melodia quase parada canta sobre acordes que descem meio tom de cada vez. É a música desta lição, do começo ao fim.' },
+    { song: 'u12-noturno', why: 'O Noturno Op. 9 nº 2 é Chopin cantando como um tenor de ópera: melodia longa na direita sobre baixo e acordes em 12/8. A primeira frase treina a mão esquerda leve e o rubato.' },
+    { piece: 'clair-de-lune', why: 'Clair de lune é o impressionismo que todo mundo conhece: começa em pianíssimo, com terças que descem devagar, quase sem baixo, e o pedal misturando as cores. A partitura completa já está no seu caminho de repertório.' },
+    { piece: 'paganini-18', why: 'A Variação 18 de Rachmaninoff é o romantismo levado ao limite: o tema de Paganini virado de cabeça para baixo, com a melodia cantando no topo de acordes cheios. É a meta para depois do curso.' },
   ],
   blocks: [
     {
@@ -705,21 +804,21 @@ const l95: Lesson = {
 - **Rubato**: o "tempo roubado". A melodia estica uma nota e recupera depois, enquanto a pulsação de fundo continua. A descrição clássica, atribuída a Chopin: a esquerda é o maestro, que segura o tempo; a direita é o cantor, que respira.
 - **Pedal**: segura as harmonias e liga o que a mão não alcança.
 
-O Prelúdio Op. 28 nº 4 de Chopin, em Mi menor, é o exemplo perfeito: uma melodia quase parada sobre acordes repetidos que descem por meio tom. Ele é de domínio público e fica como próximo passo com a partitura; aqui você toca um **prelúdio original** com a mesma textura.`,
+O **Prelúdio Op. 28 nº 4** de Chopin, em Mi menor (1839), é o exemplo perfeito: uma melodia quase parada sobre acordes repetidos que descem por meio tom. Ele é de domínio público, e você toca o original, na edição Peters de 1879.`,
     },
     {
       kind: 'text',
-      title: 'O Prelude in E minor',
-      body: `A esquerda toca **acordes de 3 notas em colcheias**, oito por compasso. A cada compasso uma nota desce meio tom: Em (Sol–Si–Mi), B7 (Fá♯–Lá–Ré♯, sem o Si), Em7 (Sol–Si–Ré), C♯ø (Sol–Si–Dó♯), C7M (Sol–Si–Dó)… É **condução de vozes** em câmera lenta, a da unidade 6.
+      title: 'O Prelúdio em Mi menor',
+      body: `A esquerda toca **acordes de 3 notas em colcheias**, oito por compasso, quase do começo ao fim. A cada meio compasso, quase sempre **uma só nota desce meio tom**: Sol–Si–Mi; Fá♯–Lá–Mi; Fá♯–Lá–Ré♯; Fá–Lá–Ré♯; Fá–Lá–Ré… A mão quase não sai do lugar e o acorde muda de cor devagar. É **condução de vozes** em câmera lenta, a da unidade 6, com tanto cromatismo que às vezes o acorde nem tem nome: o ouvido segue as vozes descendo.
 
-A direita canta notas longas: Si, Dó, Si… A melodia quase não se move; quem dá o movimento é a harmonia por baixo.
+A direita canta: Si e Si (a anacruse, uma oitava acima), depois **Si longo e Dó**, quatro vezes, e Lá longo e Si. A melodia quase não se move; quem dá o movimento é a harmonia por baixo. No compasso 17 ela finalmente sobe até o Dó6, no único *forte* da peça, e volta a cair.
 
 Toque a esquerda **pianíssimo** e igual, como uma respiração. A direita fica por cima, sem força. O app mede o equilíbrio: a direita acima da esquerda em 80% dos compassos.`,
     },
     {
       kind: 'exercise',
       id: 'l95-esquerda',
-      exercise: quickTimed('Os acordes da esquerda', 'Só a esquerda, compassos 1 a 4, a 50 BPM. Acordes iguais e leves.', () => melodyTask(PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 50, fifths: 1, caption: 'Em | B7 | Em7 | C♯ø: uma nota desce meio tom a cada compasso.' }), { reps: 2 }),
+      exercise: quickTimed('Os acordes da esquerda', 'Só a esquerda, compassos 1 a 4, a 50 BPM. Acordes iguais e leves.', () => melodyTask(chopinBars(1, 4).l, { bpm: 50, clef: 'bass', fifths: 1, caption: 'Compassos 1 a 4: a cada meio compasso, uma nota desce meio tom.' }), { reps: 2 }),
     },
     {
       kind: 'callout',
@@ -730,9 +829,10 @@ Toque a esquerda **pianíssimo** e igual, como uma respiração. A direita fica 
     {
       kind: 'exercise',
       id: 'l95-maos',
-      exercise: quickTimed('Prelúdio, compassos 1 a 4', 'Mãos juntas, a 46 BPM. A melodia acima dos acordes.', () => twoHandTask(PREL_R.slice(0, 4).join(' | '), PREL_LH.slice(0, 4).map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')).join(' | '), { bpm: 46, fifths: 1, caption: 'Esquerda: acordes em colcheias, Em | B7 | Em7 | C♯ø.' }), { reps: 2, balance: 8 }),
+      exercise: quickTimed('Prelúdio, compassos 1 a 4', 'Mãos juntas, a 46 BPM. A melodia acima dos acordes.', () => { const b = chopinBars(1, 4); return twoHandTask(b.r, b.l, { bpm: 46, fifths: 1, caption: 'Esquerda: os acordes em colcheias dos compassos 1 a 4, uma nota descendo de cada vez.' }); }, { reps: 2, balance: 8 }),
     },
-    { kind: 'song', songId: 'u12-preludio', why: 'A música da lição: melodia longa sobre acordes repetidos que descem por meio tom.' },
+    { kind: 'song', songId: 'u12-chopin-28-4', why: 'A música da lição: o Prelúdio inteiro, 25 compassos, com a anacruse. O alvo é 50 BPM; comece pelo modo Estudar.' },
+    { kind: 'song', songId: 'u12-noturno', why: 'A primeira frase do Noturno Op. 9 nº 2, em 12/8: baixo e dois acordes em cada tempo na esquerda, a melodia cantando por cima. O alvo é o andamento da edição, 66 BPM em semínimas.' },
     {
       kind: 'text',
       title: 'Melodia interna',
@@ -749,6 +849,8 @@ Treine assim: toque o acorde Sol–Si–Mi na direita, fazendo o Si soar mais qu
 - **Acordes paralelos**: o mesmo acorde deslizando junto (C, D, E), sem condução, de propósito. As 5ªs paralelas que o coral evita viram cor.
 - **Pedal longo**: segurar o pedal sobre várias harmonias para misturá-las, como aquarela.
 
+O **Clair de lune** (Debussy, 1905), que está no seu caminho de repertório, começa assim: terças que descem devagar, em pianíssimo, quase sem baixo, com o pedal misturando tudo.
+
 Satie (Gymnopédies, Gnossiennes) fica no meio do caminho: harmonias paradas, sem pressa de resolver. É o estilo do projeto final.`,
     },
     { kind: 'exercise', id: 'l95-tons', exercise: items('Escala de tons inteiros', 'Toque a escala de tons inteiros a partir da nota pedida, subindo.', wholeToneGen, 6, 48, 84, 0.85, 'fade') },
@@ -757,7 +859,7 @@ Satie (Gymnopédies, Gnossiennes) fica no meio do caminho: harmonias paradas, se
   ],
   review: [wholeToneGen, choice(ROMANTIC_Q, 'romantico')],
   checkpoint: [
-    quickTimed('Prelude in E minor inteiro', 'Os 8 compassos, mãos juntas, a 50 BPM, sem dicas. Meta: 95% das notas e a melodia acima da esquerda.', () => twoHandTask(PREL_R.join(' | '), [...PREL_LH.map((c) => Array.from({ length: 8 }, () => `${c}:0.5`).join(' ')), 'G3+B3+E4:4'].join(' | '), { bpm: 50, fifths: 1 }), { pass: { accuracy: 0.95 }, balance: 8 }),
+    quickTimed('Prelúdio, compassos 1 a 12', 'A primeira metade, com a anacruse, mãos juntas, a 50 BPM, sem dicas. Meta: 90% das notas e a melodia acima da esquerda.', () => { const b = chopinBars(0, 12); return twoHandTask(b.r, b.l, { bpm: 50, fifths: 1 }); }, { pass: { accuracy: 0.9 }, balance: 8 }),
   ],
   exit: [wholeToneGen, choice(ROMANTIC_Q, 'romantico')],
 };
@@ -1308,7 +1410,7 @@ const l100: Lesson = {
       body: `Os Marcos 1 e 2 tinham um checkpoint e um recital. O **capstone** é só portfólio: quatro entregas, de consulta livre.
 
 1. **Recital** de 3 músicas, gravado em sequência:
-   - **clássica**: a **Gymnopédie nº 1** (abertura, nesta lição) ou, se preferir, o Prelude in E minor (lição 95) ou o Minuet in G (unidade 9);
+   - **clássica**: a **Gymnopédie nº 1** (abertura, nesta lição) ou, se preferir, o Prelúdio em Mi menor de Chopin (lição 95) ou o Minuet in G (unidade 9);
    - **trilha**: o **Tema de jogo** (lição 97) ou a trilha que você transcreveu;
    - **jazz ou ragtime**: o **Maple Leaf Rag** (unidade 11) ou o seu arranjo solo de um standard.
 2. **Arranjo próprio** de uma melodia, com intro e final.
@@ -1430,7 +1532,7 @@ const unit: Unit = {
   goal: 'Reconhecer a forma, arranjar uma melodia para piano solo e apresentar um recital próprio com peças de três mundos.',
   technique: 'Escalas de 2 oitavas mãos juntas em semicolcheias, de 44 rumo a 60 BPM (variação abaixo de 25 ms), e arpejos maiores mãos juntas. Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l90, l91, l92, l93, l94, l95, l96, l97, l98, l99, l100],
-  songs: [odeArr, preludio, tema, valsa, gymnopedie],
+  songs: [odeArr, preludio, noturno, tema, valsa, gymnopedie],
   final: {
     songId: 'u12-gymnopedie',
     brief: 'A abertura da Gymnopédie nº 1 de Erik Satie (1888), compassos 1 a 12: na esquerda, o baixo no tempo 1 e o acorde no tempo 2, alternando G7M e D7M, com pedal a cada compasso; na direita, a melodia lenta que entra no compasso 5. Toque devagar, com a melodia acima do acompanhamento, e feche o curso com o seu arranjo próprio da Valsa lenta.',

@@ -7,7 +7,9 @@
   - **Lição 91 (arranjo solo)**: a **Ode to Joy em arranjo solo** (como antes) e **Bohemian Rhapsody**, a parte da balada.
   - **Lição 92 (intro, turnaround e final)**: a Ode to Joy em arranjo solo, **Fly Me to the Moon** e **I Will Always Love You** (o último refrão que sobe de tom).
   - **Lição 93 (técnica)**: **Rondo alla Turca** (semicolcheias) e **Prelude in C** de Bach (arpejos).
-  - Para testar: os cartões de música no começo das lições 90 a 93.
+  - **Lição 94 (pedal avançado)**: o **Prelúdio em Mi menor, Op. 28 nº 4, de Chopin**, novo no app e inteiro (25 compassos, edição Peters de 1879 do Mutopia, notas e ritmo originais, alvo 50 BPM), e a **Gymnopédie No. 1** da unidade 8.
+  - **Lição 95 (romântico e impressionista)**: o Prelúdio de Chopin entrou no lugar do prelúdio inventado pelo app, nos exercícios e no checkpoint (agora a primeira metade, compassos 1 a 12, com 90% das notas); a **primeira frase do Noturno Op. 9 nº 2** de Chopin, nova no app (edição Schirmer de 1881 do Mutopia, em 12/8, alvo 66 BPM); **Clair de lune** (a partitura do seu caminho de repertório) e a **Variação 18 de Rachmaninoff**.
+  - Para testar: os cartões de música no começo das lições 90 a 95; o Prelúdio de Chopin no "Tocar a música" (a esquerda tem oito acordes por compasso; veja se a partitura fica legível) e o Noturno em 12/8 (o metrônomo deve bater a semínima pontuada).
   - Músicas protegidas novas desta rodada, para você baixar:
     - I Will Always Love You (Whitney Houston) - Partitura - XML
 
