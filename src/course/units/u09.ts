@@ -265,6 +265,9 @@ const l68: Lesson = {
     'Consigo dizer os quatro tipos de movimento entre vozes e reconhecer quintas e oitavas paralelas.',
     'Consigo tocar I–IV–V–I a quatro vozes (baixo na esquerda, três vozes conduzidas na direita) em tom sorteado.',
   ],
+  music: [
+    { song: 'u09-coral', why: 'O Haupt voll Blut und Wunden, o coral da Paixão segundo São Mateus, é Bach escrevendo a quatro vozes: soprano, contralto, tenor e baixo, cada uma uma melodia. É a harmonia desta lição em música de verdade.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -318,6 +321,18 @@ O remédio é o **movimento contrário**: quando o baixo sobe, a direita desce, 
       body: 'O app confere o baixo, as notas do acorde, o movimento total da direita e as 5ªs e oitavas paralelas entre o baixo e cada voz de cima. O caso clássico é o IV → V: o baixo sobe (Fá → Sol), então a direita tem de descer (Fá–Lá–Dó → Ré–Sol–Si). Se a direita subir junto, dá paralelas e o app marca.',
     },
     { kind: 'exercise', id: 'l68-quiz', exercise: quiz('Quatro vozes', 'Cinco perguntas rápidas.', FOUR_Q) },
+    {
+      kind: 'text',
+      title: 'Um coral de Bach',
+      body: `Bach harmonizou centenas de corais luteranos a quatro vozes. O mais famoso é **O Haupt voll Blut und Wunden**, que aparece cinco vezes na Paixão segundo São Mateus (1727); a melodia é tão conhecida que Paul Simon a usou em "American Tune".
+
+No coral, cada voz é uma melodia cantável, e as regras desta lição estão em todo compasso: o baixo anda em movimento contrário ao soprano, a sensível sobe, nada de 5ªs paralelas.
+
+Para tocar ao piano, o jeito mais comum é **duas vozes em cada mão**: soprano e contralto na direita, tenor e baixo na esquerda (é assim que o app escreve). É diferente do estilo teclado dos exercícios (três vozes na direita), porque as vozes de Bach se afastam demais para caber numa mão só.
+
+Toque devagar, a 50 ou 60 BPM, ouvindo primeiro só o soprano e o baixo: as duas pontas carregam a música.`,
+    },
+    { kind: 'song', songId: 'u09-coral', why: 'O coral inteiro, sem a repetição. Comece no modo Estudar a 40 BPM e escute cada voz; o alvo é 60 BPM.' },
   ],
   review: [fourVoices, choice([...FOUR_Q, ...PARALLELS], 'quatro-vozes')],
   checkpoint: [
@@ -594,6 +609,9 @@ const l69: Lesson = {
     'Consigo preparar uma leitura em 30 segundos: armadura, compasso, posição das mãos e ritmo.',
     'Consigo ler à primeira vista 8 compassos com as duas mãos, armaduras até 3 acidentes, sem parar, com 80% das notas no tempo.',
   ],
+  music: [
+    { song: 'u09-musette', why: 'A Musette in D, do Caderno de Anna Magdalena Bach, é a sua primeira leitura de verdade: leia uma vez sem parar, devagar, antes de estudar. Na lição 71 ela volta como música de duas vozes.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -626,6 +644,14 @@ Nesta lição há dois níveis. No primeiro, a esquerda toca semibreves (tônica
     },
     { kind: 'exercise', id: 'l69-quiz', exercise: quiz('Antes de ler', 'Quatro perguntas rápidas.', SIGHT_Q, 0.75) },
     { kind: 'exercise', id: 'l69-leitura', exercise: quickTimed('Primeira vista, mãos juntas', '8 compassos novos a cada passada, armaduras até 3 acidentes, a 52 BPM. Olhe 30 s antes. Três passadas boas.', sight2(52), { reps: 3, pass: { accuracy: 0.8 } }) },
+    {
+      kind: 'text',
+      title: 'Primeira vista numa música de verdade',
+      body: `Os exercícios geram leituras novas a cada passada. Agora faça o mesmo com uma música que você ainda não estudou: a **Musette in D** (BWV Anh. 126), do mesmo caderno do Minuet in G.
+
+Use os 30 segundos: armadura de **Ré maior** (Fá♯ e Dó♯), compasso **2/4**, a esquerda começando no **Ré2** e saltando uma oitava (a "gaita de foles" que dá nome à musette), a direita descendo de Lá5 em semicolcheias. Depois toque **uma vez sem parar**, bem devagar (40 BPM no "Tocar a música"), e só então comece a estudar.`,
+    },
+    { kind: 'song', songId: 'u09-musette', why: 'Leia a Musette uma vez sem parar, devagar, antes de estudar. O alvo, quando ela estiver estudada (lição 71), é 100 BPM.' },
     { kind: 'exercise', id: 'l69-mais', exercise: quickTimed('Nível 2: colcheias e baixo em mínimas', 'Direita com colcheias e pontuadas; esquerda trocando no meio do compasso, a 50 BPM. Duas passadas boas. Se pesar, use o truque de simplificar a esquerda.', sight2(50, 2), { reps: 2, pass: { accuracy: 0.8 } }) },
   ],
   review: [choice(SIGHT_Q, 'primeira-vista'), strangeName],
