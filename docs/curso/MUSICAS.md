@@ -5,7 +5,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 ## Regras
 
 1. **Toda lição tem `music`** (`Lesson.music` em `src/course/types.ts`): de uma a quatro músicas, mostradas logo no começo da lição (página e modo foco) e listadas na página da unidade ("O que você vai tocar"). O `why` diz, em uma ou duas frases, o que aquela música tem a ver com a lição.
-2. **Música conhecida, não inventada.** O Rafael gosta de clássicos (Beethoven, Mozart, Bach, Chopin, Debussy, Paganini), ópera (Pavarotti, Bocelli), Elvis, Beatles, rock clássico, trilhas de filme e Disney clássica. Não usar cantigas infantis nem melodias originais do app como música da lição. As originais que já existem ficam só como material de exercício.
+2. **Música conhecida, não inventada.** Fora da lista: Wonderwall (o Rafael não gosta), cantigas infantis e Garota de Ipanema. O Rafael gosta de clássicos (Beethoven, Mozart, Bach, Chopin, Debussy, Paganini), ópera (Pavarotti, Bocelli), Elvis, Beatles, rock clássico, trilhas de filme e Disney clássica. Não usar cantigas infantis nem melodias originais do app como música da lição. As originais que já existem ficam só como material de exercício.
 3. **Domínio público vai no código** (`SongSpec` na unidade), com as notas **conferidas numa fonte** (Mutopia Project, IMSLP, corpus do music21, uma transcrição ABC identificada), nunca de memória. O comentário acima da música diz a fonte e o que o arranjo mudou.
 3a. **A música tem que ser reconhecível** (pedido do Rafael, 27/11/2026: "quero reconhecer, mesmo que tenha que treinar muito"). Mantenha o **ritmo original da melodia**: nunca dobrar valores nem trocar pontuada por notas iguais. Simplifique o resto (acordes da esquerda, oitava, tom), não o ritmo. O `bpm` da música (o alvo para passar) é perto do andamento das gravações; os exercícios da lição começam devagar e sobem em escada, e o resto do caminho fica no "Tocar a música". Se a música tem um ritmo que a lição ainda não ensinou (colcheia antes da 20, pontuada antes da 29), tudo bem: o texto avisa que é para tocar de ouvido e a lição certa explica depois.
 4. **Música protegida nunca vai no código** (o repositório é público e o site também). Ela entra no catálogo `src/course/pieces.ts` (só título, artista, trecho, tipo e o texto da busca no MuseScore) e a lição usa `{ piece: 'id', why }`. O Rafael importa o MusicXML no Repertório; a lição acha a música pelo título (ou por um apelido) e mostra "Tocar junto". Sem a partitura, o cartão mostra "Pôr no repertório", "Importar a partitura" e "Procurar no MuseScore".
@@ -83,7 +83,7 @@ Unidades 3 a 12: feitas. "App" = domínio público, no código; "importar" = pro
 | 10 | 80 | A Whole New World | importar | Modulação |
 | 10 | 81 | When the Saints, original e rearmonizada | App | Projeto |
 | 11 | 82 | Imagine · Hallelujah · Someone Like You | importar | Padrões de esquerda da balada e baixo invertido |
-| 11 | 83 | Wonderwall · Fly Me to the Moon | importar | Tensões (add9, sus, 9ª e 13ª) |
+| 11 | 83 | Fly Me to the Moon | importar | Tensões (add9, sus, 9ª e 13ª) |
 | 11 | 84 | Autumn Leaves · Fly Me to the Moon | importar | Voicings sem fundamental |
 | 11 | 85 | The Pink Panther Theme · Fly Me to the Moon · Sweet Georgia Brown | importar | Comping em swing (Charleston e two-feel) |
 | 11 | 86 | So What · Eleanor Rigby · Norwegian Wood | importar | Modos como cores (dórico, mixolídio) |

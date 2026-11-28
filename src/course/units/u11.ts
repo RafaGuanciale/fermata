@@ -537,7 +537,6 @@ const l83: Lesson = {
     'Consigo ler uma chuva de cifras com tensões com 85% de acerto e menos de 6 s por acorde.',
   ],
   music: [
-    { piece: 'wonderwall', why: 'Wonderwall, do Oasis, é Em7 – G – Dsus4 – A7sus4 com o Cadd9 no refrão: duas notas (Ré e Sol) ficam soando em cima de todos os acordes e viram 9ª, 4ª ou 7ª conforme o baixo muda. É a tensão no pop, sem nenhum jazz.' },
     { piece: 'fly-me', why: 'Fly Me to the Moon na versão do Sinatra com o Count Basie: os acordes do ciclo de quintas vêm cheios de 9ª e 13ª. Toque a cifra da sua partitura com as tensões desta lição.' },
   ],
   blocks: [
