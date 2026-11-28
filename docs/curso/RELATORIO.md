@@ -2,18 +2,23 @@
 
 ## Noite de 2026-11-27
 
-- **23:10 (em andamento)** — Unidade 5, "Modo menor e intervalos": troca de músicas começou. Prontas até agora as lições 34 a 37.
+- **23:10 (em andamento)** — Unidade 5, "Modo menor e intervalos": troca de músicas começou. Prontas até agora as lições 34 a 39.
   - **Lição 34**: a música da lição é a **Marcha Imperial** (Star Wars), para importar.
   - **Lição 35**: **Für Elise** (tema A, notas conferidas na edição do Mutopia que já está no app; o alvo subiu para perto das gravações), o **tema do Caprice nº 24 de Paganini** (novo no app, notas da edição do Mutopia, ritmo original, alvo 100 BPM) e o **tema de amor de O Poderoso Chefão**, para importar.
   - **Lições 36 e 37 (intervalos)**: **Jaws** (a 2ª menor), **Smoke on the Water** (3ª menor e 4ª justa) e a fanfarra de **Star Wars** (5ª justa e a inversão dela, a 4ª), todas para importar, com um texto curto mostrando onde está cada intervalo.
+  - **Lição 38 (acordes em menor)**: **Zombie** (com um exercício novo: os quatro acordes da música, Mi menor, Dó, Sol e Ré, com o meio-arpejo na esquerda), **Caruso** e **The Final Countdown**, para importar.
+  - **Lição 39 (tercinas)**: a **Moonlight Sonata** em arranjo fácil (compassos 1 a 9, notas conferidas na edição que já está no app, no tom original de Dó♯ menor e no ritmo original, alvo 54 BPM) e a fanfarra de **Star Wars**. A melodia inventada "Tercinas em Lá menor" saiu do papel de música e ficou só como exercício.
   - Pendente: **Swan Lake** (lição 34). Não achei uma fonte aberta que esta rodada conseguisse ler (o site com a transcrição foi bloqueado) e não escrevo notas de memória.
-  - Para testar: o exercício novo do Caprice nº 24 na lição 35 (começa a 50 BPM e sobe até 100).
+  - Para testar: o exercício novo do Caprice nº 24 na lição 35 (começa a 50 BPM e sobe até 100), os acordes de Zombie na lição 38 e as tercinas da Moonlight Sonata na lição 39 (veja se a troca das tercinas para a mão esquerda no compasso 5 do arranjo fácil fica confortável).
   - Músicas protegidas novas desta rodada (o catálogo já existia; esta é a lista para você baixar):
     - Imperial March (John Williams) - Partitura - XML
     - Love Theme from The Godfather (Nino Rota) - Partitura - XML
     - Jaws Theme (John Williams) - Partitura - XML
     - Smoke on the Water (Deep Purple) - Partitura - XML
     - Star Wars Main Theme (John Williams) - Partitura - XML
+    - Zombie (The Cranberries) - Partitura - XML
+    - Caruso (Lucio Dalla) - Partitura - XML
+    - The Final Countdown (Europe) - Partitura - XML
 
 ## Noite de 2026-10-11
 

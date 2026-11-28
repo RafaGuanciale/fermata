@@ -608,6 +608,11 @@ const l38: Lesson = {
     'Consigo tocar i–iv–V7 em Lá, Ré e Mi menor, em posição próxima, no tempo.',
     'Consigo tocar o meio-arpejo na mão esquerda sobre Am–F–C–G, 4 ciclos a 72 BPM sem erro.',
   ],
+  music: [
+    { piece: 'zombie', why: 'Zombie, dos Cranberries, é a música inteira sobre quatro acordes: Mi menor, Dó, Sol e Ré. É o mesmo desenho do Am – F – C – G desta lição (i – VI – III – VII), só que em Mi menor.' },
+    { piece: 'caruso', why: 'Caruso, de Lucio Dalla, cantada por Pavarotti e Bocelli, é uma balada em Ré menor: o i e o iv menores, e o V maior puxando de volta para a casa.' },
+    { piece: 'final-countdown', why: 'O riff de teclado de The Final Countdown é em Fá♯ menor e anda sobre tríades menores e maiores, uma por compasso: bom para treinar a mão esquerda em fundamentais enquanto a direita toca o riff.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -693,6 +698,16 @@ Vamos praticar sobre uma progressão muito comum no pop: **Am – F – C – G*
     { kind: 'exercise', id: 'l38-me', exercise: quickTimed('Meio-arpejo 1-5-8-5, só a esquerda', 'Am – F – C – G, duas voltas, de 60 a 72 BPM.', () => melodyTask(`${HALF_ARP_158} | ${HALF_ARP_158}`, { bpm: 60, clef: 'bass' }), { ladder: { from: 60, to: 72, step: 4 } }) },
     { kind: 'exercise', id: 'l38-maos', exercise: quickTimed('Meio-arpejo com acordes', 'Acorde em semibreve na direita, 1-5-8-5 na esquerda. Quatro ciclos, de 60 a 72 BPM.', () => halfArp(HALF_ARP_158, 4, 60), { ladder: { from: 60, to: 72, step: 4 }, pass: { accuracy: 0.9 } }) },
     { kind: 'exercise', id: 'l38-1358', exercise: quickTimed('Desafio: 1-3-5-8', 'O mesmo, com a 3ª no meio-arpejo. Dois ciclos a 66 BPM.', () => halfArp(HALF_ARP_1358, 2, 66), { reps: 2 }) },
+    {
+      kind: 'text',
+      title: 'O desenho de Zombie',
+      body: `O Am – F – C – G desta lição tem um nome em graus, contando a partir do Lá: **i – VI – III – VII**. Mude a casa para **Mi menor** e ele vira **Em – C – G – D**: a sequência que **Zombie** (The Cranberries, 1994) repete do começo ao fim.
+
+Em Mi menor, a armadura tem Fá♯ (é a de Sol maior, a relativa). O Fá♯ aparece no acorde de Ré (Ré, **Fá♯**, Lá). Na direita, use as posições mais próximas: **Mi–Sol–Si**, **Mi–Sol–Dó**, **Ré–Sol–Si**, **Ré–Fá♯–Lá**. Duas notas ficam paradas de um acorde para o outro.
+
+Com isso, a esquerda em meio-arpejo e a direita em acordes, você já acompanha a música inteira. A melodia, importe no Repertório.`,
+    },
+    { kind: 'exercise', id: 'l38-zombie', exercise: quickTimed('Os acordes de Zombie', 'Em – C – G – D: acorde em semibreve na direita, 1-5-8-5 na esquerda. Dois ciclos, de 60 a 80 BPM.', () => twoHandTask(Array(2).fill('E4+G4+B4:4 | E4+G4+C5:4 | D4+G4+B4:4 | D4+F#4+A4:4').join(' | '), Array(2).fill('E2 B2 E3 B2 | C2 G2 C3 G2 | G2 D3 G3 D3 | D2 A2 D3 A2').join(' | '), { bpm: 60, fifths: 1, caption: 'Em – C – G – D (i – VI – III – VII em Mi menor). A esquerda faz o meio-arpejo 1-5-8-5.' }), { ladder: { from: 60, to: 80, step: 5 }, pass: { accuracy: 0.9 } }) },
     { kind: 'song', songId: 'u05-fur-elise', why: 'O projeto final já pode começar: ouça como o meio-arpejo da esquerda (Lá–Mi–Lá, Mi–Mi–Sol♯) sustenta a melodia. Comece pelo modo Estudar, mãos separadas.' },
     { kind: 'exercise', id: 'l38-quiz', exercise: quiz('Acordes em menor', 'Seis perguntas rápidas.', MINOR_CHORDS) },
   ],
@@ -729,6 +744,11 @@ const l39: Lesson = {
     'Consigo ler e tocar tercinas de colcheia com as três notas iguais.',
     'Consigo alternar colcheias e tercinas no mesmo compasso, com 85% das notas em ±50 ms.',
     'Consigo tocar uma melodia com tercinas a 60 BPM.',
+    'Consigo tocar a abertura da Moonlight Sonata em tercinas, com as notas iguais.',
+  ],
+  music: [
+    { song: 'u05-moonlight', why: 'O primeiro movimento da Moonlight Sonata é uma tercina atrás da outra, do primeiro ao último compasso: três notas iguais por tempo, devagar, sob a melodia. É o melhor estudo de tercina que existe, e está em Dó♯ menor.' },
+    { piece: 'star-wars', why: 'A fanfarra de Star Wars começa com uma tercina rápida de três notas iguais antes do salto: a tercina como impulso, no andamento de marcha.' },
   ],
   blocks: [
     {
@@ -771,21 +791,29 @@ Esta lição pede a **sequência** (2 num tempo, 3 no outro). Tocar 3 numa mão 
     {
       kind: 'text',
       title: 'Tercinas na melodia',
-      body: `Na melodia, a tercina costuma aparecer como um **floreio** que leva de uma nota a outra: três notas rápidas subindo ou descendo até a nota longa. É o caso da música desta lição, **Tercinas em Lá menor**, uma melodia original escrita para o curso.
-
-Ela junta tudo da unidade: Lá menor com o **Sol♯** da harmônica, a mão esquerda nas fundamentais de i, iv e V (Lá, Ré e Mi) e uma tercina abrindo quase todos os compassos.
+      body: `Na melodia, a tercina costuma aparecer como um **floreio** que leva de uma nota a outra: três notas rápidas subindo ou descendo até a nota longa. É o caso da fanfarra de **Star Wars**, e da melodia de exercício abaixo, em Lá menor com o **Sol♯** da harmônica: uma tercina abre quase todos os compassos.
 
 Toque primeiro só o ritmo na tecla Lá, depois as notas devagar. A tercina tem que chegar **no tempo** da nota longa, sem atrasar a chegada.`,
     },
     { kind: 'exercise', id: 'l39-escala', exercise: quickTimed('Lá menor harmônica em tercinas', 'A escala subindo e descendo em tercinas, a 50 BPM. Dedilhado de sempre; a passagem do polegar cai em lugares novos do tempo. Duas passadas boas.', () => melodyTask(TRI_SCALE, { bpm: 50 }), { reps: 2, window: 60 }) },
-    { kind: 'exercise', id: 'l39-melodia', exercise: quickTimed('Tercinas em Lá menor, 4 compassos', 'Mão direita, de 48 a 60 BPM. Janela de ±60 ms.', () => melodyTask(TRI_A, { bpm: 48 }), { window: 60, ladder: { from: 48, to: 60, step: 4 } }) },
-    { kind: 'song', songId: 'u05-tercinas', why: 'A música inteira, com a mão esquerda. Use o modo Estudar nas tercinas e depois o "Tocar junto" a 60 BPM.' },
+    { kind: 'exercise', id: 'l39-melodia', exercise: quickTimed('Melodia com tercinas, 4 compassos', 'Mão direita, de 48 a 60 BPM. Janela de ±60 ms.', () => melodyTask(TRI_A, { bpm: 48 }), { window: 60, ladder: { from: 48, to: 60, step: 4 } }) },
+    {
+      kind: 'text',
+      title: 'A música da lição: Moonlight Sonata',
+      body: `O primeiro movimento da **Sonata ao luar** (Moonlight Sonata, Beethoven, 1801) é o oposto da fanfarra: tercinas **lentas**, todas iguais, como água parada. A direita toca o acorde quebrado em tercinas (**Sol♯, Dó♯, Mi**, quatro vezes por compasso) e a esquerda segura o baixo em oitavas.
+
+A tonalidade é **Dó♯ menor**, com 4 sustenidos na armadura (Fá♯, Dó♯, Sol♯, Ré♯): é a relativa de Mi maior. No compasso 4 aparece o **Si♯**, a sensível de Dó♯ (soa como Dó, mas a letra é Si: a menor harmônica).
+
+No arranjo fácil do app, quando a melodia entra (compasso 5, com a pontuada **Sol♯ longo, Sol♯ curto**), a direita fica só com ela e as tercinas passam para a esquerda, na mesma altura. Estude as tercinas da abertura primeiro, só a direita: o alvo é 54 BPM, perto das gravações, e o que conta é cada tercina sair igual, sem galope.`,
+    },
+    { kind: 'exercise', id: 'l39-moonlight', exercise: quickTimed('Moonlight Sonata: as tercinas da abertura', 'Os 4 primeiros compassos, só a direita, de 36 a 54 BPM. Janela de ±60 ms.', () => melodyTask(MOON_INTRO, { bpm: 36, fifths: 4 }), { window: 60, ladder: { from: 36, to: 54, step: 3 } }) },
+    { kind: 'song', songId: 'u05-moonlight', why: 'Os 9 primeiros compassos, no arranjo fácil: comece pelo modo Estudar, mãos separadas.' },
     { kind: 'exercise', id: 'l39-quiz', exercise: quiz('Tercinas', 'Quatro perguntas rápidas.', TRIPLETS, 0.75) },
   ],
   review: [choice(TRIPLETS, 'tercinas'), minorDegrees],
   checkpoint: [
     quickTimed('Colcheias e tercinas a 66 BPM', 'Quatro compassos sorteados, sem dicas. Meta: 85% em ±50 ms.', randomRhythm([...RHY_TRI, ...RHY_32], 4, 66), { window: 50 }),
-    quickTimed('Melodia com tercinas a 60 BPM', 'Os 4 primeiros compassos de Tercinas em Lá menor.', () => melodyTask(TRI_A, { bpm: 60 }), { window: 60 }),
+    quickTimed('Melodia com tercinas a 60 BPM', 'Os 4 compassos da melodia de exercício em Lá menor.', () => melodyTask(TRI_A, { bpm: 60 }), { window: 60 }),
   ],
   exit: [choice(TRIPLETS, 'tercinas'), ivBelow],
 };
@@ -878,21 +906,6 @@ const mountainKing: SongSpec = {
   fifths: 0,
   right: `${MK_1} | G5:0.5 E5:0.5 C5:0.5 E5:0.5 G5:2 | ${MK_1} | G5:0.5 E5:0.5 C5:0.5 E5:0.5 G4+G5:2`,
   left: `${MK_L} | ${MK_L}`,
-  hands: 'duas',
-  pass: { accuracy: 0.85 },
-};
-
-// Melodia original do Fermata para as tercinas (lição 39): fica só como exercício.
-const triplets: SongSpec = {
-  id: 'u05-tercinas',
-  title: 'Tercinas em Lá menor',
-  composer: 'melodia original do Fermata',
-  arrangement: 'mão esquerda em mínimas e semibreves: i, iv e V de Lá menor',
-  bpm: 60,
-  beatsPerBar: 4,
-  fifths: 0,
-  right: 'A4:1/3 B4:1/3 C5:1/3 E5:2 D5 | C5:1/3 B4:1/3 A4:1/3 B4 C5 A4 | D5:1/3 E5:1/3 F5:1/3 A5:2 F5 | E5:1/3 D5:1/3 C5:1/3 B4 G#4 E4 | A4:1/3 B4:1/3 C5:1/3 E5:2 D5 | C5:1/3 B4:1/3 A4:1/3 B4 C5 D5 | E5:1/3 D5:1/3 C5:1/3 B4:1/3 C5:1/3 D5:1/3 E5 G#4 | A4:4',
-  left: 'A2:4 | A2:2 E3:2 | D3:4 | E2:4 | A2:4 | A2:2 D3:2 | E2:4 | A2:4',
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
@@ -1194,7 +1207,7 @@ const unit: Unit = {
   goal: 'Tocar as três formas da escala menor, resolver cadências em menor, dar nome completo aos intervalos e reconhecer maior e menor de ouvido.',
   technique: 'Escalas menores de Lá, Mi e Ré (natural, harmônica e melódica), uma oitava nas lições e duas oitavas na meta da unidade, mãos separadas, em colcheias de 45 rumo a 69 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l34, l35, l36, l37, l38, l39, l40, l41],
-  songs: [furElise, paganini, moonlight, mountainKing, triplets, twMajor, twMinor],
+  songs: [furElise, paganini, moonlight, mountainKing, twMajor, twMinor],
   final: {
     songId: 'u05-fur-elise',
     brief: 'O tema A de Für Elise, a música mais famosa em Lá menor: o vaivém Mi–Ré♯ (a sensível de Mi, o V), a mão esquerda em meio-arpejo (Lá–Mi–Lá e Mi–Mi–Sol♯) e o Sol♯ da menor harmônica que puxa de volta para o Lá. Escrito em 3/4 com valores dobrados para a leitura ficar mais fácil; o som é o mesmo.',
