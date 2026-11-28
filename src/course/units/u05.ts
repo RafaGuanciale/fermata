@@ -331,6 +331,10 @@ const l36: Lesson = {
     'Consigo tocar qualquer 2ª, 3ª, 6ª e 7ª maior ou menor, e 4ª, 5ª e 8ª justas, acima de uma nota dada.',
     'Consigo distinguir de ouvido 3ª maior de 5ª justa e 4ª justa de 8ª.',
   ],
+  music: [
+    { piece: 'jaws', why: 'O tema de Tubarão é só duas notas no grave, Mi e Fá, indo e voltando cada vez mais rápido: a 2ª menor, o menor intervalo do piano, virou o som do perigo.' },
+    { piece: 'smoke-on-the-water', why: 'O riff de Smoke on the Water anda por 3ª menor (Sol–Si♭) e 2ª maior (Si♭–Dó), e a guitarra toca tudo em 4ªs justas paralelas: dá para tocar com o polegar e o dedo 4 da direita, a forma da 4ª justa.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -406,6 +410,16 @@ Uma âncora que ajuda: **Amazing Grace** começa com uma 4ª justa (na versão d
 Neste exercício o app toca a partir de uma nota e você toca as duas notas do intervalo que ouviu.`,
     },
     { kind: 'exercise', id: 'l36-ouvido', exercise: items('3M, 5J, 4J ou 8J de ouvido', 'Ouça e toque as duas notas. Os quatro intervalos são bem diferentes entre si.', earContrast, 12, 55, 84, 0.85, 'off') },
+    {
+      kind: 'text',
+      title: 'Intervalos nas músicas da lição',
+      body: `Toda música é feita de intervalos, e algumas ficaram famosas por um só.
+
+- **Tubarão** (Jaws, John Williams): Mi e Fá, alternados no grave. É uma **2ª menor**, 1 semitom. Toque Mi2 e Fá2 com a esquerda, devagar e depois cada vez mais rápido: o filme inteiro cabe nesse intervalo.
+- **Smoke on the Water** (Deep Purple): o riff começa em Sol, sobe uma **3ª menor** até Si♭ e uma **2ª maior** até Dó. Na guitarra, cada nota vem com a **4ª justa** abaixo dela (Ré–Sol, Fá–Si♭, Sol–Dó). No piano, segure a 4ª com os dedos 1 e 4 da direita e ande com a mão inteira: a forma não muda, só a posição.
+
+Use os nomes completos ao estudar: "3ª menor", "4ª justa". Ouvir e dar nome ao mesmo tempo é o que faz o ouvido aprender.`,
+    },
     { kind: 'exercise', id: 'l36-quiz', exercise: quiz('Qualidade dos intervalos', 'Sete perguntas rápidas.', QUALITY) },
   ],
   review: [ivAbove, ivSpell, earContrast, choice(QUALITY, 'qualidade')],
@@ -461,6 +475,10 @@ const l37: Lesson = {
     'Consigo construir intervalos aumentados e diminutos, e reconhecer o trítono como 4ª aumentada ou 5ª diminuta.',
     'Consigo construir intervalos abaixo de uma nota e dizer a inversão de qualquer intervalo pela regra do 9.',
     'Consigo distinguir de ouvido 3ª menor de 3ª maior, e 4ª justa de trítono e de 5ª justa, com pelo menos 80% de acerto.',
+  ],
+  music: [
+    { piece: 'star-wars', why: 'A fanfarra de Star Wars salta uma 5ª justa da tônica para cima e, no fim da frase, desce uma 4ª justa da tônica aguda para a mesma 5ª: o intervalo e a sua inversão, a regra do 9 desta lição, em oito notas.' },
+    { piece: 'jaws', why: 'Tubarão de novo, agora pelo outro lado: a 2ª menor (Mi–Fá) invertida vira 7ª maior (Fá–Mi), a dissonância mais aberta. Toque as duas e compare.' },
   ],
   blocks: [
     {
@@ -542,6 +560,15 @@ O último exercício é o mais difícil: o app toca um intervalo a partir de uma
     { kind: 'exercise', id: 'l37-tercas', exercise: items('3ª menor ou maior, uma depois da outra', 'Ouça e toque as duas notas.', earThirds, 10, 55, 84, 0.8, 'off') },
     { kind: 'exercise', id: 'l37-quartas', exercise: items('4ª justa, trítono ou 5ª justa', 'Ouça e toque as duas notas.', earFourths, 12, 55, 84, 0.8, 'off') },
     { kind: 'exercise', id: 'l37-outra-raiz', exercise: items('Desafio: em outra raiz', 'Ouça o intervalo e toque o mesmo intervalo a partir da nota pedida.', earOther, 8, 55, 84, 0.75, 'off') },
+    {
+      kind: 'text',
+      title: 'A inversão na fanfarra de Star Wars',
+      body: `O tema principal de **Star Wars** (John Williams) começa com três notas rápidas e um salto: a **tônica**, e uma **5ª justa acima**. Num arranjo em Sol maior: três Ré rápidos, **Sol**, e o **Ré** de cima. Depois a melodia desce Dó, Si, Lá e chega no **Sol agudo**, que cai de novo no Ré: agora é uma **4ª justa descendo**. (O filme é em Si♭; a partitura que você importar pode estar em outro tom, e os intervalos são os mesmos.)
+
+Sol–Ré subindo é 5ª justa; Ré–Sol (o Sol de cima) é 4ª justa. É a regra do 9: 5 + 4 = 9, e justo continua justo. O mesmo par de notas, uma oitava trocada de lugar.
+
+Importe a partitura e toque só a direita, devagar, dizendo o nome de cada salto. As três notas rápidas do começo são uma **tercina**, que você aprende na lição 39: por enquanto, toque de ouvido.`,
+    },
     { kind: 'exercise', id: 'l37-quiz', exercise: quiz('Aumentado, diminuto e inversão', 'Oito perguntas rápidas.', AUG_DIM, 0.75) },
   ],
   review: [ivAug, ivBelow, earThirds, earFourths, choice(AUG_DIM, 'inversao')],
