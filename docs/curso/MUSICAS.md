@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3 e 4: feitas. Unidades 5 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3, 4 e 5: feitas. Unidades 6 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -36,12 +36,13 @@ Unidades 3 e 4: feitas. Unidades 5 a 12: a fazer (as rodadas seguem este mapa). 
 | 4 | 31 | Blues em Dó · Hound Dog · Johnny B. Goode | App · importar | Blues de 12 compassos |
 | 4 | 32 | Ode to Joy em Ré · Canon in D | App | Ré maior |
 | 4 | 33 | Canon, Eine kleine em Sol, Let It Be, Hound Dog | — | Marco 1: recital |
-| 5 | 34 | Swan Lake (tema) · Imperial March | App · importar | Menor natural |
+| 5 | 34 | Swan Lake (tema) · Imperial March | App, **pendente** (sem fonte aberta legível: o Mutopia não tem o op. 20) · importar | Menor natural |
 | 5 | 35 | Für Elise (tema A) · Caprice nº 24 (Paganini, tema) · Love Theme de The Godfather | App (Mutopia tem os dois) · importar | Menor harmônica |
+| 5 | 40 | In the Hall of the Mountain King (Grieg), em Lá menor | App (Mutopia) | Graus em menor, 7 natural |
 | 5 | 36–37 | Star Wars e Jaws (motivos) · Smoke on the Water | importar | Intervalos |
 | 5 | 38 | Zombie · Caruso · The Final Countdown | importar | Acordes menores |
 | 5 | 39 | Moonlight Sonata, arranjo fácil · Star Wars Main Theme | App (DCML/Mutopia) · importar | Tercinas |
-| 5 | 41 | Game of Thrones Theme · Für Elise A + Moonlight fácil | importar · App | Projeto |
+| 5 | 41 | Game of Thrones Theme · Für Elise A + Moonlight fácil · Ode to Joy em Dó maior e menor (no lugar de Twinkle) | importar · App | Projeto e homônimo |
 | 6 | 43 | Canon in D, completo | App | Inversões |
 | 6 | 44 | Can You Feel the Love Tonight | importar | Condução com inversões |
 | 6 | 45 | Jump | importar | Acordes sus |
@@ -79,7 +80,7 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 |---|---|---|
 | 3 | pronta | 2026-11-27 |
 | 4 | pronta | 2026-11-27 |
-| 5 | em construção | 2026-11-27 23:20 |
+| 5 | pronta | 2026-11-27 23:23 |
 | 6 | a fazer | |
 | 7 | a fazer | |
 | 8 | a fazer | |

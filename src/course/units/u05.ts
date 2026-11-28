@@ -1,4 +1,7 @@
 // Unidade 5 — Modo menor e intervalos com qualidade (lições 34 a 41). Projeto final: Für Elise, tema A (Lá menor).
+// Músicas no app: Für Elise, Caprice nº 24 (Paganini), Moonlight Sonata fácil, In the Hall of the Mountain King e Ode to Joy
+// em Dó maior e menor; para importar (src/course/pieces.ts): Imperial March, Godfather, Jaws, Smoke on the Water, Star Wars,
+// Zombie, Caruso, The Final Countdown e Game of Thrones.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
@@ -910,39 +913,41 @@ const mountainKing: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-// Twinkle, Twinkle (melodia folclórica francesa, "Ah! vous dirai-je, maman"): a mesma melodia em Dó maior e em Dó menor (lição 41).
-const TW_MAJ = 'C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | G4 G4 F4 F4 | E4 E4 D4:2 | C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2';
-const TW_MIN = 'C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2 | G4 G4 F4 F4 | Eb4 Eb4 D4:2 | G4 G4 F4 F4 | Eb4 Eb4 D4:2 | C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2';
-type Fn = 'T' | 'S' | 'D';
-const TW_HARM: [Fn, Fn][] = [['T', 'T'], ['S', 'T'], ['S', 'T'], ['D', 'T'], ['T', 'D'], ['T', 'D'], ['T', 'D'], ['T', 'D'], ['T', 'T'], ['S', 'T'], ['S', 'T'], ['D', 'T']];
-const VOICE_MAJ: Record<Fn, string> = { T: 'C3+E3+G3', S: 'C3+F3+A3', D: 'B2+F3+G3' };
-const VOICE_MIN: Record<Fn, string> = { T: 'C3+Eb3+G3', S: 'C3+F3+Ab3', D: 'B2+F3+G3' };
-const twLeft = (v: Record<Fn, string>) => TW_HARM.map(([a, b]) => `${v[a]}:2 ${v[b]}:2`).join(' | ');
+// Ode to Joy (Beethoven, 9ª Sinfonia, 1824), em Dó maior e no homônimo Dó menor (lição 41). A melodia, com a pontuada
+// original, é a mesma da Unidade 4 (u04-ode-pontuada, conferida na edição da 9ª Sinfonia); em menor, só o Mi vira Mi♭
+// (a melodia não passa por Lá nem Si). Arranjo do Fermata: I e V7 (i e V7) em mínimas na esquerda, posição próxima.
+const ODE_MAJ = 'E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4:1.5 D4:0.5 D4:2 | E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4:1.5 C4:0.5 C4:2';
+const ODE_MIN = ODE_MAJ.replace(/E4/g, 'Eb4');
+type Fn = 'T' | 'D';
+const ODE_HARM: [Fn, Fn][] = [['T', 'T'], ['D', 'D'], ['T', 'T'], ['T', 'D'], ['T', 'T'], ['D', 'D'], ['T', 'T'], ['D', 'T']];
+const VOICE_MAJ: Record<Fn, string> = { T: 'C3+E3+G3', D: 'B2+F3+G3' };
+const VOICE_MIN: Record<Fn, string> = { T: 'C3+Eb3+G3', D: 'B2+F3+G3' };
+const odeLeft = (v: Record<Fn, string>, bars = 8) => ODE_HARM.slice(0, bars).map(([a, b]) => `${v[a]}:2 ${v[b]}:2`).join(' | ');
 
-const twMajor: SongSpec = {
-  id: 'u05-brilha-maior',
-  title: 'Twinkle, Twinkle em Dó maior',
-  composer: 'melodia folclórica francesa',
-  arrangement: 'arranjo do Fermata: I, IV e V7 em mínimas na mão esquerda, posição próxima',
-  bpm: 72,
+const odeMajor: SongSpec = {
+  id: 'u05-ode-maior',
+  title: 'Ode to Joy em Dó maior',
+  composer: 'Ludwig van Beethoven (9ª Sinfonia)',
+  arrangement: 'arranjo do Fermata: os 8 primeiros compassos com o ritmo original; I e V7 em mínimas na mão esquerda, posição próxima',
+  bpm: 108,
   beatsPerBar: 4,
   fifths: 0,
-  right: TW_MAJ,
-  left: twLeft(VOICE_MAJ),
+  right: ODE_MAJ,
+  left: odeLeft(VOICE_MAJ),
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
 
-const twMinor: SongSpec = {
-  id: 'u05-brilha-menor',
-  title: 'Twinkle, Twinkle em Dó menor',
-  composer: 'melodia folclórica francesa',
-  arrangement: 'arranjo do Fermata: a mesma melodia no homônimo menor (harmônica), com i, iv e V7 em mínimas',
-  bpm: 66,
+const odeMinor: SongSpec = {
+  id: 'u05-ode-menor',
+  title: 'Ode to Joy em Dó menor',
+  composer: 'Ludwig van Beethoven (9ª Sinfonia)',
+  arrangement: 'arranjo do Fermata: a mesma melodia no homônimo menor (só o Mi vira Mi♭), com i e V7 em mínimas; o Si do G7 fica natural, a sensível',
+  bpm: 96,
   beatsPerBar: 4,
   fifths: -3,
-  right: TW_MIN,
-  left: twLeft(VOICE_MIN),
+  right: ODE_MIN,
+  left: odeLeft(VOICE_MIN),
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
@@ -983,6 +988,10 @@ const l40: Lesson = {
     'Consigo reconhecer os 7 graus de Dó maior depois de uma cadência, com 85% de acerto.',
     'Consigo reconhecer os graus de Lá menor, inclusive a sensível, depois de uma cadência menor.',
     'Consigo repetir de ouvido uma melodia de 4 a 5 notas, com saltos, em maior e em menor.',
+    'Consigo tocar o tema de In the Hall of the Mountain King dizendo os graus de cada nota.',
+  ],
+  music: [
+    { song: 'u05-montanha', why: 'O tema de Grieg é a escala menor subindo grau por grau (1, 2, 3, 4, 5) e depois pulando entre o 3 e o 5. No fim da frase aparece o 7 natural, que não puxa para a casa: os graus de ouvido desta lição, numa melodia que todo mundo conhece.' },
   ],
   blocks: [
     {
@@ -1055,6 +1064,20 @@ Para quem tira música de ouvido, esse é o passo mais importante: transformar s
     },
     { kind: 'exercise', id: 'l40-ditado-maior', exercise: items('Ditado em Dó maior', 'O app toca 4 ou 5 notas, com saltos. Repita nas mesmas teclas.', echoMajor, 8, 55, 79, 0.8, 'off') },
     { kind: 'exercise', id: 'l40-ditado-menor', exercise: items('Ditado em Lá menor', 'Agora em menor, com o Sol♯ e o Fá. Repita nas mesmas teclas.', echoMinor, 8, 55, 79, 0.8, 'off') },
+    {
+      kind: 'text',
+      title: 'A música da lição: In the Hall of the Mountain King',
+      body: `**In the Hall of the Mountain King** (Grieg, Peer Gynt, 1875) é uma marcha de duendes que começa baixinho e acelera até explodir. O app traz o tema em **Lá menor** (Grieg escreveu em Si menor, bem no grave), com o ritmo original. Leia a melodia pelos graus:
+
+- Compasso 1: **1 2 3 4 5**, depois **3** e **5** (Lá, Si, Dó, Ré, Mi, Dó, Mi). A escala menor subindo e o salto entre 3 e 5.
+- Compasso 2: notas de fora do tom, que dão o ar de duende. Primeiro o **Ré♯** (meio tom abaixo do Mi, como o do Für Elise) com o 2 (Si); depois o 4 (Ré) com o **Si♭**, o 2 abaixado meio tom.
+- Compasso 3: a escala de novo, agora até o **8** (o Lá de cima).
+- Compasso 4: **7 natural** (Sol), 5, 3, 5 e o 7 longo. É o Sol sem sustenido: ele não puxa para a casa, e a frase fica suspensa, pedindo a repetição.
+
+Cante os números enquanto toca. Quando tocar a frase de novo, sem olhar, o ouvido já vai saber o caminho.`,
+    },
+    { kind: 'exercise', id: 'l40-montanha', exercise: quickTimed('O tema de Grieg, mão direita', 'Os 4 primeiros compassos, de 72 a 120 BPM. Diga os graus por dentro.', () => melodyTask(`${MK_1} | G5:0.5 E5:0.5 C5:0.5 E5:0.5 G5:2`, { bpm: 72 }), { ladder: { from: 72, to: 120, step: 8 } }) },
+    { kind: 'song', songId: 'u05-montanha', why: 'O tema duas vezes, com o vaivém de Lá e Mi na esquerda.' },
     { kind: 'exercise', id: 'l40-quiz', exercise: quiz('Graus em menor', 'Três perguntas rápidas.', EAR_MINOR, 0.66) },
   ],
   review: [earMajor7, earMinor, echoMinor, choice(EAR_MINOR, 'graus-menor')],
@@ -1076,9 +1099,9 @@ function twoOctaves(tonic: Midi): string {
   return `${all.slice(0, 8).join(' ')} | ${all.slice(8, 16).join(' ')} | ${all.slice(16, 24).join(' ')} | ${all.slice(24).join(' ')} ${sci(tonic)}:2`;
 }
 
-const TW_MAJ_A = 'C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2';
-const TW_MIN_A = 'C4 C4 G4 G4 | Ab4 Ab4 G4:2 | F4 F4 Eb4 Eb4 | D4 D4 C4:2';
-const TW_MIN_LEFT_A = 'C3+Eb3+G3:2 C3+Eb3+G3:2 | C3+F3+Ab3:2 C3+Eb3+G3:2 | C3+F3+Ab3:2 C3+Eb3+G3:2 | B2+F3+G3:2 C3+Eb3+G3:2';
+const ODE_MAJ_A = ODE_MAJ.split(' | ').slice(0, 4).join(' | ');
+const ODE_MIN_A = ODE_MIN.split(' | ').slice(0, 4).join(' | ');
+const ODE_MIN_LEFT_A = odeLeft(VOICE_MIN, 4);
 
 const l41: Lesson = {
   n: 41,
@@ -1087,8 +1110,14 @@ const l41: Lesson = {
   minutes: 60,
   objectives: [
     'Consigo passar no checkpoint misto da unidade 5, sem dicas.',
-    'Consigo passar uma melodia de maior para o homônimo menor (harmônica) e acompanhá-la com i, iv e V7.',
+    'Consigo passar uma melodia de maior para o homônimo menor (harmônica) e acompanhá-la com i e V7.',
     'Consigo tocar Lá menor harmônica em 2 oitavas, mãos separadas, a pelo menos 52 BPM em colcheias.',
+  ],
+  music: [
+    { song: 'u05-fur-elise', why: 'O projeto final da unidade: o tema A de Für Elise, com as duas mãos.' },
+    { song: 'u05-ode-menor', why: 'O projeto da lição: a Ode to Joy que você toca desde a Unidade 1, passada para Dó menor. Só uma nota muda na melodia, e a música vira outra.' },
+    { song: 'u05-moonlight', why: 'A Moonlight Sonata fácil da lição 39 entra na revisão: tercinas iguais, em Dó♯ menor.' },
+    { piece: 'game-of-thrones', why: 'O tema de Game of Thrones é o homônimo em ação: o motivo começa em Dó menor (com Mi♭) e, ao se repetir, troca o Mi♭ por Mi natural, Dó maior, sem mudar o desenho. Depois volta ao menor.' },
   ],
   blocks: [
     {
@@ -1112,28 +1141,28 @@ Passar uma melodia de maior para o homônimo menor é trocar a cor sem mudar o d
 
 A armadura de Dó menor tem 3 bemóis (Si♭, Mi♭, Lá♭), a de Mi♭ maior, sua relativa. Como a harmônica usa Si natural, ele aparece escrito com bequadro.
 
-Gustav Mahler fez exatamente isso no 3º movimento da Sinfonia nº 1 (1888): pegou a canção infantil "Frère Jacques" e a transformou numa marcha fúnebre em menor. A melodia é a mesma; o efeito é outro mundo.`,
+Gustav Mahler fez exatamente isso no 3º movimento da Sinfonia nº 1 (1888): pegou a canção "Frère Jacques" e a transformou numa marcha fúnebre em menor. O tema de **Game of Thrones** faz o caminho num instante: o mesmo motivo com Mi♭ (menor) e logo com Mi (maior). Hoje você faz isso com a **Ode to Joy**: como a melodia só usa Dó, Ré, Mi, Fá e Sol, a única nota que muda é o **Mi**, que vira **Mi♭**. A melodia é a mesma; o efeito é outro mundo.`,
     },
     {
       kind: 'example',
-      title: 'Twinkle, Twinkle nos dois modos',
+      title: 'Ode to Joy nos dois modos',
       steps: [
-        { say: 'Em Dó maior, com C e F na esquerda.', play: { bpm: 96, steps: [[60, 48, 52, 55], [60], [67, 48, 52, 55], [67], [69, 53, 57, 60], [69], [67, 48, 52, 55]].map((midis, i) => ({ midis, beats: i === 6 ? 2 : 1 })) } },
-        { say: 'Em Dó menor: Lá♭ no lugar de Lá, Cm e Fm no lugar de C e F. O Mi♭ aparece logo depois, no compasso 3.', keys: [63, 68], play: { bpm: 88, steps: [[60, 48, 51, 55], [60], [67, 48, 51, 55], [67], [68, 53, 56, 60], [68], [67, 48, 51, 55]].map((midis, i) => ({ midis, beats: i === 6 ? 2 : 1 })) } },
+        { say: 'Em Dó maior, com C e G7 na esquerda.', play: { bpm: 96, steps: [[64, 48, 52, 55], [64], [65, 48, 52, 55], [67], [67, 47, 53, 55], [65], [64, 47, 53, 55], [62]].map((midis) => ({ midis, beats: 1 })) } },
+        { say: 'Em Dó menor: Mi♭ no lugar de Mi e Cm no lugar de C. O G7 continua igual, com o Si natural.', keys: [63], play: { bpm: 88, steps: [[63, 48, 51, 55], [63], [65, 48, 51, 55], [67], [67, 47, 53, 55], [65], [63, 47, 53, 55], [62]].map((midis) => ({ midis, beats: 1 })) } },
       ],
     },
-    { kind: 'exercise', id: 'l41-maior', exercise: quickTimed('A melodia em Dó maior', 'Os 4 primeiros compassos de Twinkle, Twinkle, mão direita, a 72 BPM.', () => melodyTask(TW_MAJ_A, { bpm: 72 }), { reps: 2 }) },
-    { kind: 'exercise', id: 'l41-menor', exercise: quickTimed('A mesma melodia em Dó menor', 'Agora com Mi♭ e Lá♭, a 72 BPM. A pauta já tem a armadura de 3 bemóis.', () => melodyTask(TW_MIN_A, { bpm: 72, fifths: -3 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l41-maior', exercise: quickTimed('A melodia em Dó maior', 'Os 4 primeiros compassos da Ode to Joy, mão direita, a 72 BPM.', () => melodyTask(ODE_MAJ_A, { bpm: 72 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l41-menor', exercise: quickTimed('A mesma melodia em Dó menor', 'Agora com Mi♭, a 72 BPM. A pauta já tem a armadura de 3 bemóis.', () => melodyTask(ODE_MIN_A, { bpm: 72, fifths: -3 }), { reps: 2 }) },
     {
       kind: 'callout',
       tone: 'erro',
       title: 'esquecer um grau no caminho',
-      body: 'O erro típico é abaixar o 3º grau e esquecer o 6º (tocar Lá em vez de Lá♭ no compasso 2), ou abaixar demais e trocar o Si natural do G7 por Si♭. Antes de tocar, diga em voz alta as três notas que mudam e a que não muda: Mi♭, Lá♭, Si natural.',
+      body: 'O erro típico é deixar escapar um Mi natural (o compasso 4 começa com ele, na pontuada) ou abaixar demais e trocar o Si natural do G7 por Si♭. Em outras músicas, o 6º grau também muda (Lá vira Lá♭). Antes de tocar, diga em voz alta: Mi♭ na melodia, Mi♭ no acorde de Dó menor, Si natural no G7.',
     },
     { kind: 'exercise', id: 'l41-homonimos', exercise: quiz('Homônimos', 'Três perguntas rápidas.', HOMONYMS, 0.66) },
-    { kind: 'exercise', id: 'l41-acordes', exercise: quickTimed('i, iv e V7 com pedal legato', 'Melodia em Dó menor com os acordes da esquerda em mínimas (Cm, Fm, G7), a 60 BPM. Troque o pedal logo depois de cada acorde.', () => twoHandTask(TW_MIN_A, TW_MIN_LEFT_A, { bpm: 60, fifths: -3, caption: 'Esquerda: Cm Cm | Fm Cm | Fm Cm | G7 Cm, em posição próxima.' }), { reps: 2, pedal: 'legato' }) },
-    { kind: 'song', songId: 'u05-brilha-maior', why: 'A versão em Dó maior inteira, para comparar.' },
-    { kind: 'song', songId: 'u05-brilha-menor', why: 'A versão em Dó menor inteira: é a música do projeto.' },
+    { kind: 'exercise', id: 'l41-acordes', exercise: quickTimed('i e V7 com pedal legato', 'Melodia em Dó menor com os acordes da esquerda em mínimas (Cm e G7), a 60 BPM. Troque o pedal logo depois de cada acorde.', () => twoHandTask(ODE_MIN_A, ODE_MIN_LEFT_A, { bpm: 60, fifths: -3, caption: 'Esquerda: Cm Cm | G7 G7 | Cm Cm | Cm G7, em posição próxima.' }), { reps: 2, pedal: 'legato' }) },
+    { kind: 'song', songId: 'u05-ode-maior', why: 'A versão em Dó maior, 8 compassos, para comparar.' },
+    { kind: 'song', songId: 'u05-ode-menor', why: 'A versão em Dó menor: é a música do projeto.' },
     {
       kind: 'text',
       title: 'A meta técnica: 2 oitavas',
@@ -1159,7 +1188,7 @@ Os dois exercícios abaixo treinam exatamente esses trechos, devagar.`,
     },
     { kind: 'exercise', id: 'l41-fe-md', exercise: quickTimed('Für Elise, começo, só a direita', 'Do vaivém Mi–Ré♯ até o Dó, a 50 BPM. Duas passadas boas.', () => melodyTask(`r:2 E5:0.5 D#5:0.5 | ${FE_A} | A4 r:0.5 C4:0.5 E4:0.5 A4:0.5 | B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5 | C5:3`, { bpm: 50, beatsPerBar: 3 }), { reps: 2 }) },
     { kind: 'exercise', id: 'l41-fe-maos', exercise: quickTimed('Für Elise, a passagem entre as mãos', 'Três compassos com as duas mãos, a 50 BPM. A esquerda toca Lá, Mi, Lá; a direita continua Dó, Mi, Lá. Duas passadas boas.', () => twoHandTask('A4 r:0.5 C4:0.5 E4:0.5 A4:0.5 | B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5 | C5:3', 'A2:0.5 E3:0.5 A3:0.5 r:1.5 | E2:0.5 E3:0.5 G#3:0.5 r:1.5 | A2:0.5 E3:0.5 A3:2', { bpm: 50, beatsPerBar: 3, caption: 'Esquerda: Lá2, Mi3, Lá3 | Mi2, Mi3, Sol♯3 | Lá2, Mi3, Lá3.' }), { reps: 2 }) },
-    { kind: 'song', songId: 'u05-fur-elise', why: 'O projeto final da unidade: Für Elise, tema A. Mão direita sozinha no modo Estudar, depois a esquerda, depois juntas a 50 BPM até chegar em 60.' },
+    { kind: 'song', songId: 'u05-fur-elise', why: 'O projeto final da unidade: Für Elise, tema A. Mão direita sozinha no modo Estudar, depois a esquerda, depois juntas: comece por volta de 60 BPM e suba aos poucos até o alvo, 120, perto das gravações.' },
   ],
   review: [relKeys, allForms, ivAbove, ivBelow, earMinor, minorDegrees],
   checkpoint: [
@@ -1179,10 +1208,10 @@ Os dois exercícios abaixo treinam exatamente esses trechos, devagar.`,
   ],
   project: {
     title: 'Mesma melodia, dois modos',
-    brief: `Toque **Twinkle, Twinkle** inteira (12 compassos) em **Dó maior** com I, IV e V7, e depois em **Dó menor** (harmônica) com i, iv e V7, **com pedal legato** a cada acorde. As duas versões seguidas, como uma pequena música em duas partes.`,
+    brief: `Toque os 8 primeiros compassos da **Ode to Joy** em **Dó maior** com I e V7, e depois em **Dó menor** (harmônica) com i e V7, **com pedal legato** a cada acorde. As duas versões seguidas, como uma pequena música em duas partes.`,
     steps: [
-      'Toque a versão maior no "Tocar a música" até passar a 72 BPM.',
-      'Escreva (ou diga) as notas que mudam na versão menor: Mi → Mi♭, Lá → Lá♭; o Si do G7 fica natural.',
+      'Toque a versão maior no "Tocar a música", começando devagar, até passar com 85% das notas.',
+      'Escreva (ou diga) as notas que mudam na versão menor: Mi → Mi♭ na melodia e no acorde de Dó; o Si do G7 fica natural.',
       'Toque a melodia menor só com a direita, depois os acordes só com a esquerda.',
       'Junte as mãos devagar e acrescente o pedal legato: troque logo depois de cada acorde.',
       'Toque as duas versões em sequência e grave. Ouça: o que muda no clima? Onde a sensível (Si) aparece?',
@@ -1190,12 +1219,12 @@ Os dois exercícios abaixo treinam exatamente esses trechos, devagar.`,
     ],
     rubric: [
       'As duas versões passaram com 85% ou mais das notas.',
-      'Na versão menor, nenhum Mi ou Lá natural escapou, e o G7 manteve o Si natural.',
+      'Na versão menor, nenhum Mi natural escapou, e o G7 manteve o Si natural.',
       'O pedal ficou limpo: sem lama nas trocas e sem pedal preso no fim.',
       'Dá para ouvir a diferença de cor entre as versões, não só de notas.',
       'A escala de Lá menor harmônica em 2 oitavas passou a 52 BPM ou mais.',
     ],
-    exercise: { kind: 'timed', title: 'Twinkle, Twinkle em Dó menor com pedal', how: 'Os 12 compassos, duas mãos, a 60 BPM, pedal legato.', gen: () => twoHandTask(twMinor.right, twMinor.left!, { bpm: 60, fifths: -3 }), reps: 1, window: 100, pass: { accuracy: 0.85 }, pedal: 'legato' },
+    exercise: { kind: 'timed', title: 'Ode to Joy em Dó menor com pedal', how: 'Os 8 compassos, duas mãos, a 60 BPM, pedal legato.', gen: () => twoHandTask(odeMinor.right, odeMinor.left!, { bpm: 60, fifths: -3 }), reps: 1, window: 100, pass: { accuracy: 0.85 }, pedal: 'legato' },
   },
   exit: [earMinor, ivBelow, choice([...RELATIVE, ...FORMS, ...AUG_DIM, ...EAR_MINOR, ...HOMONYMS])],
 };
@@ -1207,10 +1236,10 @@ const unit: Unit = {
   goal: 'Tocar as três formas da escala menor, resolver cadências em menor, dar nome completo aos intervalos e reconhecer maior e menor de ouvido.',
   technique: 'Escalas menores de Lá, Mi e Ré (natural, harmônica e melódica), uma oitava nas lições e duas oitavas na meta da unidade, mãos separadas, em colcheias de 45 rumo a 69 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l34, l35, l36, l37, l38, l39, l40, l41],
-  songs: [furElise, paganini, moonlight, mountainKing, twMajor, twMinor],
+  songs: [furElise, paganini, moonlight, mountainKing, odeMajor, odeMinor],
   final: {
     songId: 'u05-fur-elise',
-    brief: 'O tema A de Für Elise, a música mais famosa em Lá menor: o vaivém Mi–Ré♯ (a sensível de Mi, o V), a mão esquerda em meio-arpejo (Lá–Mi–Lá e Mi–Mi–Sol♯) e o Sol♯ da menor harmônica que puxa de volta para o Lá. Escrito em 3/4 com valores dobrados para a leitura ficar mais fácil; o som é o mesmo.',
+    brief: 'O tema A de Für Elise, a música mais famosa em Lá menor: o vaivém Mi–Ré♯ (a sensível de Mi, o V), a mão esquerda em meio-arpejo (Lá–Mi–Lá e Mi–Mi–Sol♯) e o Sol♯ da menor harmônica que puxa de volta para o Lá. Escrito em 3/4 contando as colcheias (no original, 3/8 com semicolcheias), com o mesmo ritmo; o alvo, 120 BPM, é o andamento das gravações.',
   },
 };
 
