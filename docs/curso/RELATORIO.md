@@ -2,6 +2,12 @@
 
 ## Noite de 2026-11-27
 
+- **03:09 (já dia 28, em andamento)** — Unidade 12, "Arranjo, forma e repertório": troca de músicas **em construção**.
+  - **Lição 90 (forma)**: **Für Elise** completa (é um rondó, ABACA), **Minuet in G** (binário) e **Let It Be** (verso, refrão e solo).
+  - **Lição 91 (arranjo solo)**: a **Ode to Joy em arranjo solo** (como antes) e **Bohemian Rhapsody**, a parte da balada.
+  - Para testar: os cartões de música no começo das lições 90 e 91.
+  - Músicas protegidas novas desta rodada, para você baixar: nenhuma até agora (Bohemian Rhapsody e Let It Be já estavam no catálogo).
+
 - **02:09 às 02:23 (já dia 28)** — Unidade 11, que agora se chama **"Jazz e pop ao piano"**: troca **pronta**. Saíram o baião, a bossa, o choro e o tango (e as três músicas inventadas pelo app); todas as 8 lições (82 a 89) começam com as músicas que ensinam.
   - **Lição 82 (nova, baladas pop)**: **Imagine**, **Hallelujah** e **Someone Like You**. Dois desenhos de mão esquerda (Dó–Sol–Dó–Sol e o arpejo que sobe até a décima), acordes com o baixo invertido (G/B, C/E) e as duas mãos juntas a 80 BPM.
   - **Lição 83 (tensões)**: **Wonderwall** e **Fly Me to the Moon**.

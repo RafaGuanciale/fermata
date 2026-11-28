@@ -252,6 +252,11 @@ const l90: Lesson = {
     'Consigo reconhecer de ouvido a forma de uma sequência de frases.',
     'Consigo tocar a progressão típica de cada seção em Dó e em Sol.',
   ],
+  music: [
+    { song: 'u09-fur-elise', why: 'Für Elise é um rondó: o tema A, o famoso, volta três vezes, com dois episódios diferentes no meio (B e C). ABACA, a forma desta lição, numa música que você já toca.' },
+    { song: 'u09-minueto', why: 'O Minuet in G é binário: duas partes, cada uma repetida (AABB). No app você toca a parte A, que para no Ré (o V) no compasso 8 e fecha em Sol no 16; no original ela se repete e a parte B passeia por Ré maior antes de voltar.' },
+    { piece: 'let-it-be', why: 'Let It Be é canção pop de manual: intro no piano, verso, refrão que repete a letra, um solo no meio e o refrão de volta. Ouça marcando as seções com letras.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -326,6 +331,10 @@ const l91: Lesson = {
     'Consigo tocar a melodia na voz de cima da direita, com uma nota do acorde por baixo nos tempos fortes.',
     'Consigo tocar décimas (fundamental e 3ª uma oitava acima) na esquerda.',
     'Consigo tocar a Ode to Joy em arranjo solo com 90% das notas e a direita acima da esquerda.',
+  ],
+  music: [
+    { song: 'u12-ode-solo', why: 'A Ode to Joy em arranjo solo: a melodia no topo da direita, uma nota do acorde por baixo nos tempos fortes e décimas na esquerda. É o modelo desta lição, compasso a compasso.' },
+    { piece: 'bohemian', why: 'A parte da balada de Bohemian Rhapsody é piano e voz: Freddie Mercury acompanhava a si mesmo com acordes na direita e o baixo na esquerda. Ao piano solo, a melodia vai para o topo da direita, como na Ode.' },
   ],
   blocks: [
     {
