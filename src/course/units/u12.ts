@@ -1067,6 +1067,8 @@ const l97: Lesson = {
     { piece: 'comptine', why: "A Comptine d'un autre été, de Yann Tiersen (do filme Amélie), é ostinato puro: a esquerda repete o mesmo desenho em colcheias e a direita flutua por cima. Ela está no seu caminho de repertório." },
     { piece: 'interstellar', why: 'O tema de Interstellar, de Hans Zimmer, é um desenho curto que gira sem parar enquanto a música cresce por baixo: o ostinato desta lição, no lugar mais famoso das trilhas recentes.' },
     { piece: 'river-flows', why: 'River Flows in You, de Yiruma, apoia tudo em arpejos da esquerda que giram pelos mesmos quatro acordes; a melodia canta por cima, como num tema de trilha.' },
+    { piece: 'sadness-and-sorrow', why: 'Sadness and Sorrow, de Naruto, na sua partitura: a esquerda repete o arpejo em colcheias enquanto a direita canta devagar por cima. O ostinato numa trilha de anime.' },
+    { piece: 'nuvole-bianche', why: 'Nuvole Bianche, de Ludovico Einaudi, é ostinato do começo ao fim: o mesmo desenho volta na esquerda e a direita insiste nas mesmas notas, crescendo aos poucos. Está em Fá menor, com quatro bemóis.' },
   ],
   blocks: [
     {
@@ -1291,6 +1293,7 @@ const l99: Lesson = {
     { song: 'u12-gymnopedie', why: 'A Gymnopédie No. 1 é o projeto final: esta lição prepara a esquerda (o salto do baixo ao acorde) e a melodia longa, separadas.' },
     { song: 'u09-fur-elise', why: 'Für Elise completa junta quase tudo do curso: menor harmônica, pedal, a parte B em Fá maior e a parte C com o baixo repetido. É a revisão em forma de música.' },
     { song: 'u06-canone', why: 'O Canon in D, na versão longa da unidade 6, revisa acordes invertidos, condução e as semicolcheias do violino. Toque uma vez por semana depois do curso para não perder.' },
+    { piece: 'canon-d', why: 'Canon in D completo, da sua partitura com MusicXML: o mesmo ciclo de oito acordes do começo ao fim, com as variações cada vez mais rápidas por cima. É o fecho do Canon que você começou na unidade 4.' },
   ],
   blocks: [
     {

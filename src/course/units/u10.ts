@@ -734,7 +734,7 @@ const l79: Lesson = {
     'Consigo reconhecer IV × iv de ouvido e tirar progressões com empréstimo.',
   ],
   music: [
-    { piece: 'creep', why: 'Creep, do Radiohead, é G – B – C – Cm em loop: o Dó menor no fim (o iv, emprestado do modo menor) é o que dá a cor triste a cada volta.' },
+    { piece: 'dan-dan', why: 'Sorriso Resplandecente, na sua partitura em Dó: no fim da primeira parte a cifra passa por B♭ e A♭, o ♭VII e o ♭VI emprestados de Dó menor, antes de chegar no Dó maior. Logo depois, a segunda parte vai de vez para o menor.' },
     { song: 'u10-santos', why: 'When the Saints original: no compasso 13, troque o F da esquerda por Fm e ouça o iv emprestado na mesma melodia.' },
   ],
   blocks: [
@@ -802,11 +802,9 @@ No exercício abaixo, a direita toca a melodia (Mi–Sol, Sol–Fá, pausa e Mi�
     {
       kind: 'text',
       title: 'Na música',
-      body: `**Creep** (Radiohead, 1992) é a progressão de empréstimo modal mais conhecida do rock: **G – B – C – Cm**, em Sol maior. O **C** é o IV; o **Cm** é o **iv**, emprestado de Sol menor. A troca de C para Cm muda uma nota só: o Mi desce para Mi♭. É esse meio tom que faz o fim de cada volta soar triste.
+      body: `**Sorriso Resplandecente**, a abertura de Dragon Ball GT, usa empréstimo modal na sua partitura, em Dó maior: no fim da primeira parte a cifra faz **B♭ – G/D – A♭ – B♭ – C**. O **B♭** é o **♭VII** e o **A♭** é o **♭VI**, os dois emprestados de Dó menor. O **♭VI – ♭VII – I** é a chegada épica de trilhas de anime e de games: a música parece subir em degraus até o acorde maior. Logo depois, a segunda parte vai de vez para Dó menor (Fm, Cm): o empréstimo preparou a mudança.
 
-(O **B** do segundo compasso também é de fora do tom: é o III maior, a dominante secundária do vi, assunto da lição 74.)
-
-Toque o loop com tríades na direita e a fundamental na esquerda, e depois faça o mesmo em Dó: C – E – F – Fm.`,
+Toque o trecho com tríades na direita e a fundamental na esquerda. Depois faça o empréstimo mais simples, **IV × iv**, em Dó: C – F – Fm – C. A troca de F para Fm muda uma nota só, o Lá desce para Lá♭, e é esse meio tom que soa triste.`,
     },
   ],
   review: [borrowed, earIViv, choice(BORROW_Q, 'emprestimo')],
@@ -857,7 +855,7 @@ const l80: Lesson = {
     'Consigo tocar uma frase um tom acima lendo a pauta no tom original, a 72 BPM.',
   ],
   music: [
-    { piece: 'whole-new-world', why: 'A Whole New World, de Aladdin, muda de tom perto do fim: a canção sobe e o último refrão volta mais alto. É a modulação a serviço da emoção, o truque favorito da Disney e do pop.' },
+    { piece: 'you-ll-be-in-my-heart', why: "You'll Be in My Heart, de Tarzan, na sua partitura: começa em Fá maior, passa para Ré maior pelo A7 e, perto do fim, sobe mais um tom, para Mi maior. Duas modulações numa canção da Disney." },
   ],
   blocks: [
     {
@@ -927,9 +925,9 @@ Para tocar assim, você precisa **transpor em tempo real**: ler na pauta em Dó 
     {
       kind: 'text',
       title: 'Na música',
-      body: `Em canções, a modulação mais comum é a **direta**: no último refrão, a música sobe um tom ou um semitom, sem preparação, e a energia sobe junto. **A Whole New World** (Alan Menken, 1992) usa a mudança de tom perto do fim para o dueto chegar ao ponto mais alto.
+      body: `Em canções, a modulação mais comum é a **direta**: no último refrão, a música sobe um tom ou um semitom, sem preparação, e a energia sobe junto. **You'll Be in My Heart** (Phil Collins, 1999, de Tarzan) faz isso na sua partitura: depois de ir de Fá para Ré, a parte final sobe de Ré para Mi, direto. A primeira mudança é preparada: o **A7**, a dominante de Ré, chega antes da armadura nova.
 
-Na partitura que você importar, procure a armadura nova e ache o acorde em que a mudança acontece. Pergunte: há um acorde-pivô (que existe nos dois tons) ou a música simplesmente muda? Depois toque o refrão nos dois tons, pensando em graus.`,
+Na partitura, ache as duas armaduras novas e o acorde em que cada mudança acontece. Pergunte: há um acorde-pivô (que existe nos dois tons) ou a música simplesmente muda? Depois toque o refrão nos dois tons, pensando em graus.`,
     },
   ],
   review: [modulate, choice(MOD_Q.slice(0, 5), 'modulacao')],

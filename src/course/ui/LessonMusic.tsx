@@ -9,7 +9,7 @@ import type { Piece } from '../../db/db';
 import { PlayIcon, PlusIcon, SearchIcon, UploadIcon } from '../../components/Icons';
 import { savePiece } from '../../repertoire/repo';
 import { findSong } from '..';
-import { findCoursePiece, museScoreSearch, pieceInRepertoire, pieceState, type CoursePiece } from '../pieces';
+import { findCoursePiece, museScoreSearch, pieceInRepertoire, pieceState, type CoursePiece, type PieceState } from '../pieces';
 import type { LessonMusic } from '../types';
 
 function SongCard({ id, why, background }: { id: string; why: string; background: unknown }) {
@@ -31,6 +31,13 @@ function SongCard({ id, why, background }: { id: string; why: string; background
     </li>
   );
 }
+
+const STATE_TEXT: Record<PieceState, string> = {
+  pronta: 'Sua partitura está no repertório, com MusicXML para tocar junto.',
+  'so-pdf': 'Você tem o PDF. Para tocar junto, falta o MusicXML.',
+  'sem-partitura': 'Já está no seu repertório, falta a partitura.',
+  fora: 'Música protegida: a partitura vem da sua conta. Ache um arranjo fácil e importe.',
+};
 
 function PieceCard({ cp, why, pieces, background }: { cp: CoursePiece; why: string; pieces: Piece[]; background: unknown }) {
   const [busy, setBusy] = useState(false);
@@ -59,7 +66,7 @@ function PieceCard({ cp, why, pieces, background }: { cp: CoursePiece; why: stri
         <h3 className="lessonMusic__title">{cp.title}</h3>
         <p className="lessonMusic__why">{why}</p>
         <p className="lessonMusic__state">
-          {state === 'pronta' ? 'Sua partitura está no repertório.' : state === 'sem-partitura' ? 'Já está no seu repertório, falta a partitura (MusicXML).' : 'Música protegida: a partitura vem da sua conta. Ache um arranjo fácil e importe o MusicXML.'}
+          {STATE_TEXT[state]}
         </p>
         {error && <p className="lessonMusic__error" role="alert">{error}</p>}
       </div>
@@ -70,10 +77,15 @@ function PieceCard({ cp, why, pieces, background }: { cp: CoursePiece; why: stri
             Tocar junto
           </Link>
         )}
-        {state === 'sem-partitura' && piece?.id !== undefined && (
+        {state === 'so-pdf' && piece?.id !== undefined && (
+          <Link className="button button-primary button-small" to={`/repertorio/peca/${piece.id}`}>
+            Ver a partitura
+          </Link>
+        )}
+        {(state === 'sem-partitura' || state === 'so-pdf') && piece?.id !== undefined && (
           <Link className="button button-secondary button-small" to={`/repertorio/peca/${piece.id}/editar`}>
             <UploadIcon className="button__icon" />
-            Importar a partitura
+            {state === 'so-pdf' ? 'Importar o MusicXML' : 'Importar a partitura'}
           </Link>
         )}
         {state === 'fora' && (

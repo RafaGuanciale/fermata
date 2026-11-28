@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Piece } from '../db/db';
-import { COURSE_PIECES, findCoursePiece, museScoreSearch, pieceInRepertoire, pieceState } from './pieces';
+import { COURSE_PIECES, coursePieceRows, findCoursePiece, missingLine, museScoreSearch, pieceInRepertoire, pieceState } from './pieces';
 import { UNITS, findSong } from '.';
 
 const piece = (title: string, extra: Partial<Piece> = {}): Piece => ({
@@ -30,6 +30,30 @@ describe('músicas protegidas do curso', () => {
     expect(pieceState(piece('Love Me Do'))).toBe('sem-partitura');
     expect(pieceState(piece('Love Me Do', { scoreFileId: 4 }))).toBe('pronta');
     expect(pieceState(piece('Love Me Do', { scoreFileUid: 'x' }))).toBe('pronta');
+    expect(pieceState(piece('Love Me Do', { fileId: 2 }))).toBe('so-pdf');
+    expect(pieceState(piece('Love Me Do', { fileUid: 'y' }))).toBe('so-pdf');
+  });
+
+  it('com dois arranjos, vale o que tem MusicXML, depois o com PDF, depois o de título igual', () => {
+    const nem = findCoursePiece('nothing-else-matters')!;
+    const list = [piece('Nothing Else Matters, outro arranjo', { id: 1, fileId: 5 }), piece('Nothing Else Matters', { id: 2, fileId: 6, scoreFileId: 7 })];
+    expect(pieceInRepertoire(nem, list)?.id).toBe(2);
+    expect(pieceInRepertoire(nem, [piece('Nothing Else Matters, fácil', { id: 3 }), piece('Nothing Else Matters, outro', { id: 4, fileId: 1 })])?.id).toBe(4);
+    const hp = findCoursePiece('hes-a-pirate')!;
+    expect(pieceInRepertoire(hp, [piece("He's a Pirate, arranjo Lupin", { id: 8, fileId: 1 }), piece("He's a Pirate", { id: 9, fileId: 2 })])?.id).toBe(9);
+  });
+
+  it('lista as músicas do curso na ordem das lições, com o que falta de cada uma', () => {
+    const rows = coursePieceRows(UNITS, [piece('Let It Be', { id: 1, fileId: 1, scoreFileId: 2 }), piece('Yesterday', { id: 2, fileId: 3 })]);
+    const firsts = rows.map((r) => r.lessons[0].n);
+    expect(firsts).toEqual([...firsts].sort((a, b) => a - b));
+    expect(new Set(rows.map((r) => r.cp.id)).size).toBe(rows.length);
+    const byId = Object.fromEntries(rows.map((r) => [r.cp.id, r]));
+    expect(byId['let-it-be'].state).toBe('pronta');
+    expect(byId['let-it-be'].lessons.length).toBeGreaterThan(3);
+    expect(missingLine(byId['let-it-be'])).toBeNull();
+    expect(missingLine(byId.yesterday)).toBe('Yesterday (The Beatles) - XML');
+    expect(missingLine(byId['love-me-do'])).toBe('Love Me Do (The Beatles) - Partitura - XML');
   });
 
   it('a busca no MuseScore vai com o texto codificado', () => {

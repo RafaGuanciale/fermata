@@ -32,6 +32,7 @@ import { useAccount } from './sync/account';
 const SheetViewerPage = lazy(() => import('./pages/SheetViewerPage'));
 const PracticeHubPage = lazy(() => import('./pages/PracticeHubPage'));
 const CourseLessonPage = lazy(() => import('./pages/CourseLessonPage'));
+const CoursePiecesPage = lazy(() => import('./pages/CoursePiecesPage'));
 const CourseUnitPage = lazy(() => import('./pages/CourseUnitPage'));
 const CourseFocusPage = lazy(() => import('./pages/CourseFocusPage'));
 const ReferencePage = lazy(() => import('./pages/ReferencePage'));
@@ -183,6 +184,7 @@ export default function App() {
             <Route path="/repertorio/categoria/:slug" element={<CategoryPage />} />
             <Route path="/repertorio/musicos" element={<MusiciansPage />} />
             <Route path="/repertorio/caminho" element={<PathPage />} />
+            <Route path="/repertorio/curso" element={<CoursePiecesPage />} />
             <Route path="/repertorio/peca/:id" element={<PiecePage />} />
             <Route path="/repertorio/peca/:id/editar" element={<PieceFormPage />} />
             <Route path="/conta" element={<AccountPage />} />

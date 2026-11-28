@@ -1,7 +1,7 @@
 // Unidade 6 — Tríades, inversões e condução de vozes (lições 42 a 49). Projeto final: canção em I–V–vi–IV pela cifra (melodia original).
 // Músicas: Canon in D (versão longa) e Greensleeves no app; Oh! Darling, Can You Feel the Love Tonight, Let It Be, Jump,
-// Hallelujah, Can't Help Falling in Love, He's a Pirate, Imagine, Con te partirò, Interstellar, Hedwig's Theme e
-// A Whiter Shade of Pale para importar (docs/curso/MUSICAS.md).
+// Hallelujah, Can't Help Falling in Love, He's a Pirate, Nothing Else Matters, Imagine, Con te partirò, Interstellar, Hedwig's Theme,
+// A Whiter Shade of Pale e Stairway to Heaven para importar (docs/curso/MUSICAS.md).
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { chordQualityByEar, chordSequence, choice, inversionChord, mix, playChord, spellTriadChoice, type ChoiceQuestion } from '../gens';
@@ -619,6 +619,7 @@ const l46: Lesson = {
     { piece: 'hallelujah', why: 'Hallelujah, de Leonard Cohen, é a balada em 6/8 mais tocada ao piano. A letra fala dos próprios acordes que a música está tocando, e a esquerda balança em dois grupos de três.' },
     { piece: 'cant-help-falling', why: "Can't Help Falling in Love, do Elvis, balança em três por tempo, como o 6/8: conte em grupos, não colcheia por colcheia, e a valsa lenta aparece." },
     { piece: 'hes-a-pirate', why: "He's a Pirate, de Piratas do Caribe, é o 6/8 rápido: dois tempos fortes por compasso, galopando. Muitas partituras escrevem em 6/8; algumas em 3/4 rápido, que se sente igual." },
+    { piece: 'nothing-else-matters', why: 'Nothing Else Matters, do Metallica, na sua partitura com MusicXML: é 6/8 quase do começo ao fim (alguns compassos são 9/8 ou 3/8). A introdução é o arpejo de Mi menor em colcheias sobre o Mi grave: conte 1-2-3, 4-5-6 e toque junto com o app, bem devagar no começo.' },
   ],
   blocks: [
     {
@@ -840,6 +841,7 @@ const l48: Lesson = {
   music: [
     { piece: 'whiter-shade', why: 'A Whiter Shade of Pale, do Procol Harum, é o baixo descendente desta lição: o órgão desce a escala de Dó, um grau por vez, com os acordes invertidos por cima, num desenho que lembra o Bach.' },
     { piece: 'hedwig', why: "O tema de Hedwig, de Harry Potter, é feito de notas cromáticas: a melodia escorrega por semitons fora da escala, e é isso que soa como mágica. Bom para o dedilhado da cromática." },
+    { piece: 'stairway', why: 'A introdução de Stairway to Heaven, do Led Zeppelin, é a cromática no baixo: Lá, Sol♯, Sol, Fá♯ e Fá, meio tom por vez, sob o arpejo de Lá menor. É o baixo descendente desta lição, por semitons.' },
   ],
   blocks: [
     {
@@ -896,12 +898,14 @@ Na direita, subindo de Dó: 1 3 1 3 1 **2** 3 1 3 1 3 1 **2**. Descendo, as mesm
     { kind: 'exercise', id: 'l48-quiz', exercise: quiz('Baixo e cromática', 'Cinco perguntas rápidas.', BASS_CHROMA) },
     {
       kind: 'text',
-      title: 'As músicas da lição: A Whiter Shade of Pale e o tema de Hedwig',
+      title: 'As músicas da lição: A Whiter Shade of Pale, o tema de Hedwig e Stairway to Heaven',
       body: `**A Whiter Shade of Pale** (Procol Harum, 1967) é o baixo descendente mais famoso do rock. Na introdução de órgão, o baixo desce a escala nota a nota enquanto os acordes de cima quase não se mexem, o mesmo C – G/B – Am – Am/G – F... do exercício desta lição. Toque primeiro só o baixo, depois junte a direita conduzida.
 
 O **tema de Hedwig** (John Williams, 2001) é a cromática a serviço da melodia: ela usa notas fora da escala de Mi menor, a meio tom das notas da escala, e o efeito é misterioso. Na partitura, marque cada nota com acidente e aplique o dedilhado da cromática (3 nas pretas) nesses trechos.
 
-As duas são protegidas: importe as partituras no Repertório pelos cartões do começo da lição.`,
+A introdução de **Stairway to Heaven** (Led Zeppelin, 1971) junta as duas ideias: o baixo desce de Lá por semitons (Lá, Sol♯, Sol, Fá♯, Fá) enquanto o arpejo de Lá menor continua por cima. Toque só o baixo com o dedilhado da cromática, depois junte o arpejo.
+
+As três são protegidas: a partitura vem da sua conta, pelos cartões do começo da lição.`,
     },
   ],
   review: [descending, slashChords, choice(BASS_CHROMA, 'cromatica')],

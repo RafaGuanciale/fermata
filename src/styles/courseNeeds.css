@@ -1,0 +1,103 @@
+/* Músicas do curso: o que falta de cada partitura que as lições usam, uma linha por música. */
+
+.courseNeeds {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.courseNeeds__head {
+  display: grid;
+  gap: 2px;
+  margin-bottom: var(--space-3);
+}
+
+.courseNeeds__count {
+  font: 600 14px/20px var(--font-body);
+  color: var(--text-muted);
+}
+
+.courseNeeds__hint {
+  margin: 0;
+  font: 400 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.courseNeeds__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.courseNeeds__main {
+  min-width: 0;
+}
+
+.courseNeeds__title {
+  margin: 0;
+  font: 600 16px/22px var(--font-body);
+  color: var(--text);
+}
+
+.courseNeeds__meta {
+  margin: 0;
+  font: 400 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.courseNeeds__lesson {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.courseNeeds__lesson:hover {
+  color: var(--text);
+}
+
+.courseNeeds__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-3);
+  flex-shrink: 0;
+}
+
+.courseNeeds__status {
+  min-height: 18px;
+  margin: var(--space-2) 0 0;
+  font: 600 13px/18px var(--font-body);
+  color: var(--text-muted);
+}
+
+.courseNeeds__text {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font: 400 13px/20px var(--font-body);
+  color: var(--text);
+  white-space: pre-wrap;
+  user-select: all;
+}
+
+@media (max-width: 720px) {
+  .courseNeeds__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .courseNeeds__actions {
+    justify-content: flex-start;
+  }
+}

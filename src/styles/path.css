@@ -21,6 +21,24 @@
   background: color-mix(in srgb, var(--color-petrol) 10%, var(--color-off-white));
 }
 
+/* Segundo cartão (Músicas do curso): neutro, para o do caminho continuar em destaque. */
+.pathBanner-quiet {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.pathBanner + .pathBanner-quiet {
+  margin-top: var(--space-3);
+}
+
+.pathBanner-quiet:hover {
+  background: color-mix(in srgb, var(--color-petrol) 12%, var(--surface));
+}
+
+:root[data-theme="light"] .pathBanner-quiet {
+  background: var(--surface);
+}
+
 .pathBanner__eyebrow {
   font: 600 11px/14px var(--font-body);
   letter-spacing: 0.1em;

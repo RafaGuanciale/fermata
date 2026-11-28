@@ -6,6 +6,8 @@ import { CATEGORIES, STATUS_LABEL, STATUS_ORDER, countLabel, matchesQuery, music
 import PhotoCard from '../components/PhotoCard';
 import { nextOnPath, pathItems } from '../repertoire/path';
 import { syncPath } from '../repertoire/repo';
+import { UNITS } from '../course';
+import { coursePieceRows } from '../course/pieces';
 import PieceList from '../components/PieceList';
 import { PlusIcon, SearchIcon, UploadIcon } from '../components/Icons';
 
@@ -26,6 +28,9 @@ export default function RepertoirePage() {
   const items = pathItems(all);
   const next = nextOnPath(items);
   const done = items.filter((i) => i.state === 'aprendida').length;
+  const courseRows = coursePieceRows(UNITS, all);
+  const toGet = courseRows.filter((r) => r.state === 'fora' || r.state === 'sem-partitura').length;
+  const noXml = courseRows.filter((r) => r.state === 'so-pdf').length;
 
   return (
     <>
@@ -63,6 +68,14 @@ export default function RepertoirePage() {
           <span className="pathBanner__eyebrow">Seu caminho · {done} de {items.length} aprendidas</span>
           <span className="pathBanner__title">Agora: {next.song.title}</span>
           <span className="pathBanner__meta">Dez músicas da primeira semana até Clair de lune. Ver o caminho</span>
+        </Link>
+      )}
+
+      {!searching && (
+        <Link className="pathBanner pathBanner-quiet" to="/repertorio/curso">
+          <span className="pathBanner__eyebrow">Músicas do curso · {courseRows.length - toGet - noXml} de {courseRows.length} prontas</span>
+          <span className="pathBanner__title">{toGet} para pegar, {noXml} sem MusicXML</span>
+          <span className="pathBanner__meta">As partituras que as lições usam e o que falta em cada uma. Ver a lista</span>
         </Link>
       )}
 

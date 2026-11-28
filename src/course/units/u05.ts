@@ -1,7 +1,7 @@
 // Unidade 5 — Modo menor e intervalos com qualidade (lições 34 a 41). Projeto final: Für Elise, tema A (Lá menor).
 // Músicas no app: Für Elise, Caprice nº 24 (Paganini), Moonlight Sonata fácil, In the Hall of the Mountain King e Ode to Joy
 // em Dó maior e menor; para importar (src/course/pieces.ts): Imperial March, Godfather, Jaws, Smoke on the Water, Star Wars,
-// Zombie, Caruso, The Final Countdown e Game of Thrones.
+// Zombie, Caruso, Hotel California e Game of Thrones.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
@@ -614,7 +614,7 @@ const l38: Lesson = {
   music: [
     { piece: 'zombie', why: 'Zombie, dos Cranberries, é a música inteira sobre quatro acordes: Mi menor, Dó, Sol e Ré. É o mesmo desenho do Am – F – C – G desta lição (i – VI – III – VII), só que em Mi menor.' },
     { piece: 'caruso', why: 'Caruso, de Lucio Dalla, cantada por Pavarotti e Bocelli, é uma balada em Ré menor: o i e o iv menores, e o V maior puxando de volta para a casa.' },
-    { piece: 'final-countdown', why: 'O riff de teclado de The Final Countdown é em Fá♯ menor e anda sobre tríades menores e maiores, uma por compasso: bom para treinar a mão esquerda em fundamentais enquanto a direita toca o riff.' },
+    { piece: 'hotel-california', why: 'Hotel California, dos Eagles, na sua partitura em Lá menor: a cifra passa por Am, E, G, D, F, C, Dm e E, um acorde a cada dois compassos. Toque a fundamental na esquerda e a tríade na direita, e repare no Mi maior: é o V da menor harmônica, da lição 35.' },
   ],
   blocks: [
     {

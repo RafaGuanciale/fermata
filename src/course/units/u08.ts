@@ -409,7 +409,7 @@ const l61: Lesson = {
     'Consigo 3 passadas limpas a 54 BPM em tercinas, com variação abaixo de 35 ms.',
   ],
   music: [
-    { piece: 'sweet-child', why: "A introdução de Sweet Child O' Mine é um arpejo de oito notas que se repete, mudando só a primeira nota quando o acorde muda: no piano, é o treino perfeito para a mão andar sem esticar." },
+    { piece: 'nothing-else-matters', why: 'A introdução de Nothing Else Matters é um arpejo de Mi menor que se repete (Sol, Si, Mi, Si, Sol sobre o Mi grave): a direita fica numa posição só e a esquerda segura o baixo. É o arpejo desta lição numa música que você quer tocar inteira.' },
     { song: 'u07-preludio', why: 'O Prelude in C de Bach é arpejo do começo ao fim: um acorde quebrado por compasso, as duas mãos dividindo as notas. Com a técnica de ondas desta lição, as semicolcheias ficam leves.' },
   ],
   blocks: [
@@ -473,7 +473,7 @@ Junte arpejo e escala do mesmo tom no mesmo dia: Dó maior escala + arpejo, no d
       title: 'Arpejo com música',
       body: `Duas músicas para levar o arpejo do exercício para o repertório:
 
-- **Sweet Child O' Mine** (Guns N' Roses): a introdução é um riff de guitarra em arpejo, oito notas que se repetem; quando o acorde muda, só a primeira nota muda. No piano, a direita faz o riff numa posição só e a esquerda segura a fundamental. A posição fica parada: quem anda é o braço, entre um acorde e outro.
+- **Nothing Else Matters** (Metallica): a introdução é o arpejo de Mi menor da guitarra, Sol, Si, Mi, Si, Sol, sobre o Mi grave, em 6/8. No piano, a direita faz o arpejo numa posição só e a esquerda segura a fundamental. A posição fica parada: quem anda é o braço, quando o acorde muda.
 - **Prelude in C** (Bach, Unidade 7): cada compasso é um acorde em arpejo, a esquerda com as duas notas de baixo e a direita com as três de cima. Toque o compasso 1 com a técnica de ondas: a mão chega em cada grupo já na posição.`,
     },
     {
@@ -533,7 +533,7 @@ const l62: Lesson = {
   ],
   music: [
     { piece: 'great-balls', why: 'Great Balls of Fire, do Jerry Lee Lewis, é piano de rock and roll: colcheias com swing, acordes martelados e a harmonia do blues. Depois desta lição, ouça como o swing empurra a música.' },
-    { piece: 'friend-in-me', why: "You've Got a Friend in Me, de Toy Story, é uma canção em swing: o piano toca longa-curta o tempo todo e a cifra traz acordes 7. Toque a cifra com shells e as colcheias balançando." },
+    { piece: 'new-york', why: 'New York, New York, de Frank Sinatra, na sua partitura marcada swing: melodia com a cifra de C, Am, Dm e G7. Toque a cifra com shells na esquerda e as colcheias balançando, longa-curta.' },
     { song: 'u08-entertainer', why: 'The Entertainer, de Scott Joplin, é o projeto da unidade. Nesta lição você começa pela direita e pelo oom-pah da esquerda, separados; na lição 65 junta as mãos.' },
   ],
   blocks: [
@@ -821,6 +821,7 @@ const l65: Lesson = {
     { song: 'u08-entertainer', why: 'The Entertainer, o ragtime de Scott Joplin, é o projeto da unidade: a direita sincopada em semicolcheias e o oom-pah na esquerda, agora com as mãos juntas.' },
     { song: 'u07-preludio', why: 'O Prelude in C de Bach é a música clássica do recital: o campo harmônico em arpejos, com as tétrades invertidas da lição 60.' },
     { piece: 'let-it-be', why: 'Let It Be pela cifra é a canção pop do recital: o arranjo que você fez na Unidade 6, agora com tétrades onde couber.' },
+    { piece: 'nothing-else-matters', why: 'Nothing Else Matters inteira, da sua partitura com MusicXML, é a meta deste marco: o arpejo da lição 61 e o 6/8 da lição 46 numa música só. Comece pela introdução e pelo verso no Tocar junto, mãos separadas, e suba o andamento em escada.' },
   ],
   blocks: [
     {

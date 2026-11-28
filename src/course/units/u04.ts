@@ -1,6 +1,6 @@
 // Unidade 4 — Escala maior, armaduras e pedal legato (lições 25 a 33). Projeto final: Canon in D (Pachelbel), simplificado.
-// Músicas: Joy to the World, Ode to Joy (em Dó e em Ré), Canon in D e Blues em Dó no app; Hey Jude, Let It Be, Raiders March,
-// Seven Nation Army, Under the Sea, Jurassic Park Theme, Hound Dog, Johnny B. Goode e Hallelujah para importar (src/course/pieces.ts).
+// Músicas: Joy to the World, Ode to Joy (em Dó e em Ré), Canon in D e Blues em Dó no app; Yesterday, Blackbird, Let It Be,
+// Raiders March, My Heart Will Go On, Under the Sea, Hound Dog, Johnny B. Goode e Hallelujah para importar (src/course/pieces.ts).
 // A lição 33 é o Marco 1: checkpoint das unidades 1 a 4 e mini-recital.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
@@ -267,7 +267,8 @@ const l27: Lesson = {
     'Consigo tocar as escalas de Sol e de Fá maior a 60 BPM, mãos separadas.',
   ],
   music: [
-    { piece: 'hey-jude', why: 'Hey Jude está em Fá maior: o Si♭ da armadura aparece na melodia e no acorde de B♭. O verso é I–V–I–IV, os acordes primários que você já conhece, e a coda do "na na na" é uma das mais cantadas do rock.' },
+    { piece: 'yesterday', why: 'Yesterday, dos Beatles, está em Fá maior, como esta lição: o Si♭ da armadura aparece logo na melodia. O seu arranjo é para as duas mãos, com a esquerda simples.' },
+    { piece: 'blackbird', why: 'Blackbird, dos Beatles, está em Sol maior: o Fá♯ da armadura vale a música inteira. O compasso muda no caminho (3/4, 2/4, 4/4): conte os tempos de cada um antes de tocar.' },
   ],
   blocks: [
     {
@@ -564,7 +565,7 @@ const l29: Lesson = {
   music: [
     { piece: 'let-it-be', why: 'A melodia de Let It Be é cheia de notas que entram antes do tempo: a síncope desta lição, numa balada lenta. Agora dá para tocar a música inteira.' },
     { piece: 'raiders-march', why: 'A marcha do Indiana Jones é o ritmo pontuado em estado puro: longa-curta, longa-curta, como um passo de herói.' },
-    { piece: 'seven-nation-army', why: 'O riff mais cantado dos estádios: sete notas, com a pontuada logo no começo. Cabe numa mão só.' },
+    { piece: 'my-heart-will-go-on', why: 'My Heart Will Go On, de Titanic, no seu arranjo fácil em Dó: a primeira parte abre com semínima pontuada e colcheia, e no compasso seguinte vem a síncope (semínima, mínima, semínima), a nota longa que entra fora do tempo forte.' },
     { piece: 'under-the-sea', why: 'O refrão de Under the Sea é calipso: a síncope é o que faz a música balançar.' },
   ],
   blocks: [
@@ -634,7 +635,7 @@ const l30: Lesson = {
   ],
   music: [
     { song: 'u04-canone', why: 'Canon in D é o lugar clássico do pedal legato: acordes encadeados, um a cada mínima, que precisam soar ligados sem misturar.' },
-    { piece: 'jurassic-park', why: 'O tema de Jurassic Park é feito de acordes longos e solenes: troque o pedal logo depois de cada acorde novo e ouça o som crescer sem embolar.' },
+    { piece: 'my-heart-will-go-on', why: 'A introdução de My Heart Will Go On, no seu arranjo, é Lá menor, Sol, Fá e Sol em acordes longos na esquerda: troque o pedal logo depois de cada acorde novo e ouça o som crescer sem embolar.' },
   ],
   blocks: [
     {

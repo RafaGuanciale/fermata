@@ -1,6 +1,6 @@
 // Unidade 7 — Campo harmônico, funções e cadências (lições 50 a 57). Projeto final: Prelude in C, BWV 846 (Bach), inteiro.
 // Músicas: Prelude in C e 'O sole mio no app; Canon in D, Ode to Joy, Joy to the World e Minuet in G de outras unidades;
-// Heart and Soul, Stand By Me, Beauty and the Beast, Let It Be, Don't Stop Believin', Hit the Road Jack e Once Upon a Dream para importar.
+// Heart and Soul, Stand By Me, Beauty and the Beast, Let It Be, Numb, Hit the Road Jack e Once Upon a Dream para importar.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
@@ -440,7 +440,7 @@ const l54: Lesson = {
   ],
   music: [
     { piece: 'let-it-be', why: 'Let It Be é I – V – vi – IV em Dó (C – G – Am – F): a progressão do pop na forma mais pura.' },
-    { piece: 'dont-stop-believin', why: "Don't Stop Believin', do Journey, abre com o piano tocando I – V – vi – IV em loop: a mesma progressão de Let It Be, em Mi maior e em ritmo de rock." },
+    { piece: 'numb', why: 'Numb, do Linkin Park, na sua partitura em Lá maior: F♯m – D – A – E em loop, ou vi – IV – I – V. São os quatro acordes de Let It Be, começando pelo vi: o mesmo material soa escuro.' },
     { piece: 'hit-the-road-jack', why: 'Hit the Road Jack, do Ray Charles, é a cadência andaluza do começo ao fim: Lá menor, Sol, Fá, Mi, com o baixo descendo e o Mi maior pedindo para recomeçar.' },
   ],
   blocks: [
@@ -497,10 +497,10 @@ O exercício mede a condução como na lição 44: no máximo 2 semitons além d
     {
       kind: 'text',
       title: 'As músicas da lição: três progressões famosas',
-      body: `- **Let It Be** (The Beatles, 1970) e **Don't Stop Believin'** (Journey, 1981) são a mesma progressão, I – V – vi – IV, em tons e estilos diferentes: uma balada em Dó, um rock em Mi. Toque as duas e diga os graus em voz alta.
+      body: `- **Let It Be** (The Beatles, 1970) é I – V – vi – IV em Dó: C – G – Am – F. **Numb** (Linkin Park, 2003) usa os mesmos quatro graus começando pelo vi, em Lá maior: F♯m – D – A – E (vi – IV – I – V). Começar pelo acorde menor muda a cor da música inteira. Toque as duas e diga os graus em voz alta.
 - **Hit the Road Jack** (Ray Charles, 1961) é a andaluza: Am – G – F – E, sem parar. A esquerda desce Lá, Sol, Fá, Mi; a direita pode conduzir como no exercício acima.
 
-As três são protegidas: importe as partituras no Repertório (Let It Be você já tem da Unidade 4).`,
+As três são protegidas: a partitura vem da sua conta (Let It Be e Numb já estão no seu repertório).`,
     },
   ],
   review: [popEar, royalLead, choice(PROG_Q, 'progressoes')],
