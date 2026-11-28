@@ -85,6 +85,13 @@ export const COURSE_PIECES: CoursePiece[] = [
   p('moonlight-1', 'Moonlight Sonata, 1º movimento', ['Ludwig van Beethoven'], 'Inteira', 'Clássica', ['classico'], 'Moonlight Sonata 1st movement piano', ['sonata ao luar', 'mondscheinsonate'], 'avancado'),
   p('toccata', 'Toccata and Fugue in D minor', ['Johann Sebastian Bach'], 'Abertura', 'Clássica', ['classico'], 'Toccata and Fugue in D minor piano', ['toccata e fuga', 'bwv 565'], 'intermediario'),
   p('whole-new-world', 'A Whole New World', ['Alan Menken'], 'Inteira', 'Disney', ['filmes'], 'A Whole New World easy piano', ['aladdin']),
+  // Unidade 11
+  p('someone-like-you', 'Someone Like You', ['Adele'], 'Verso e refrão', 'Pop', ['pop-rock'], 'Someone Like You Adele easy piano'),
+  p('wonderwall', 'Wonderwall', ['Oasis'], 'Verso e refrão', 'Rock', ['pop-rock'], 'Wonderwall Oasis easy piano'),
+  p('pink-panther', 'The Pink Panther Theme', ['Henry Mancini'], 'Tema', 'Filme', ['filmes'], 'Pink Panther theme easy piano', ['pink panther', 'pantera cor-de-rosa']),
+  p('so-what', 'So What', ['Miles Davis'], 'Tema', 'Jazz', ['pop-rock'], 'So What Miles Davis piano', ['kind of blue']),
+  p('eleanor-rigby', 'Eleanor Rigby', ['The Beatles'], 'Verso e refrão', 'Rock', ['pop-rock'], 'Eleanor Rigby easy piano'),
+  p('norwegian-wood', 'Norwegian Wood', ['The Beatles'], 'Verso', 'Rock', ['pop-rock'], 'Norwegian Wood Beatles easy piano', ['this bird has flown']),
   // Unidade 12
   p('bohemian', 'Bohemian Rhapsody', ['Queen'], 'Balada', 'Rock', ['pop-rock'], 'Bohemian Rhapsody piano ballad', [], 'intermediario'),
   p('paganini-18', 'Rhapsody on a Theme of Paganini, Variação 18', ['Sergei Rachmaninoff'], 'Inteira', 'Clássica', ['classico'], 'Rachmaninoff Variation 18 piano', ['variation 18', 'variacao 18'], 'avancado'),

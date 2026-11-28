@@ -2,6 +2,10 @@
 
 ## Noite de 2026-11-27
 
+- **02:09 (já dia 28), em andamento** — Unidade 11, "Jazz e pop ao piano": as lições 83 (tensões) e 84 (voicings sem fundamental) já começam com as músicas: **Wonderwall** e **Fly Me to the Moon** na 83, **Autumn Leaves** e **Fly Me to the Moon** na 84. O resto da unidade está sendo reescrito.
+  - Músicas protegidas novas até aqui:
+    - Wonderwall (Oasis) - Partitura - XML
+
 - **01:44 às 01:55 (já dia 28)** — Unidade 11, "Jazz e pop ao piano": comecei e devolvi para a próxima rodada, sem mexer no app. A troca reescreve cinco das oito lições (as de baião, bossa, choro, samba e tango) e precisa de uma música final de domínio público com partitura conferida. A transcrição de Scarborough Fair que achei é outra melodia (a de Cecil Sharp, 1916), não a que todo mundo conhece; o Maple Leaf Rag do Mutopia é a próxima tentativa. Nada para testar desta parte.
 
 - **01:40 às 01:43 (já dia 28)** — Unidade 10, "Harmonia cromática": troca de músicas **pronta**. Todas as 8 lições (74 a 81) começam com as músicas que ensinam, e cada uma ganhou um trecho "Na música" explicando onde o assunto aparece nela.

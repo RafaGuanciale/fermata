@@ -539,6 +539,10 @@ const l83: Lesson = {
     'Consigo montar acordes com tensão pela cifra, como C7M(9) e G7(13).',
     'Consigo ler uma chuva de cifras com tensões com 85% de acerto e menos de 6 s por acorde.',
   ],
+  music: [
+    { piece: 'wonderwall', why: 'Wonderwall, do Oasis, é Em7 – G – Dsus4 – A7sus4 com o Cadd9 no refrão: duas notas (Ré e Sol) ficam soando em cima de todos os acordes e viram 9ª, 4ª ou 7ª conforme o baixo muda. É a tensão no pop, sem nenhum jazz.' },
+    { piece: 'fly-me', why: 'Fly Me to the Moon na versão do Sinatra com o Count Basie: os acordes do ciclo de quintas vêm cheios de 9ª e 13ª. Toque a cifra da sua partitura com as tensões desta lição.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -593,7 +597,7 @@ A cifra brasileira põe a tensão entre parênteses: **C7M(9)**, **G7(13)**, **A
     {
       kind: 'text',
       title: 'Chuva de cifras',
-      body: `Na roda de bossa ou de choro, ninguém espera você montar o acorde nota por nota. O treino agora é de **velocidade**: a cifra aparece e a mão já vai.
+      body: `Numa jam ou num ensaio de banda, ninguém espera você montar o acorde nota por nota. O treino agora é de **velocidade**: a cifra aparece e a mão já vai.
 
 Um método que acelera: leia a cifra em duas camadas. Primeiro a **tétrade** (C7M, G7, Dm7), que você já toca desde a unidade 8. Depois a **tensão**, que é uma nota só, quase sempre perto da fundamental (a 9ª é um tom acima dela; a 13ª, um tom acima da 5ª). Assim o acorde de 5 notas vira "tétrade + 1".
 
@@ -620,13 +624,17 @@ const l84: Lesson = {
     'Consigo encadear o ii–V–I sem fundamental em seis tons, andando no máximo o caminho mais curto + 2 semitons.',
     'Consigo tocar o ii–V–I com a fundamental na esquerda e o voicing na direita, no tempo.',
   ],
+  music: [
+    { piece: 'autumn-leaves', why: 'Autumn Leaves é uma fila de ii–V–I (Cm7 – F7 – B♭7M, depois o menor): com os voicings sem fundamental desta lição, a direita passa a música inteira quase sem sair do lugar enquanto a esquerda toca o baixo.' },
+    { piece: 'fly-me', why: 'Fly Me to the Moon desce pelo ciclo de quintas (Am7 – Dm7 – G7 – C7M): é o encadeamento A → B → A da lição, compasso a compasso.' },
+  ],
   blocks: [
     {
       kind: 'text',
       title: 'Tirar a fundamental',
       body: `Num grupo, o baixista já toca a fundamental. Se o pianista toca de novo, a nota sobra e o som embola. A solução dos pianistas de jazz e de bossa (Bill Evans e Wynton Kelly popularizaram) é o **voicing sem fundamental** (*rootless*): a direita (ou a esquerda, num grupo) toca **3ª, 7ª e duas tensões ou a 5ª**, quatro notas numa mão só.
 
-Sozinho ao piano, você faz o papel dos dois: a **esquerda toca a fundamental** grave e a **direita, o voicing**. É o som "aberto" de piano de bossa.
+Sozinho ao piano, você faz o papel dos dois: a **esquerda toca a fundamental** grave e a **direita, o voicing**. É o som "aberto" do piano de jazz.
 
 Os voicings do ii–V–I maior:
 
