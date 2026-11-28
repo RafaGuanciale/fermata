@@ -41,7 +41,7 @@ export const COURSE_PIECES: CoursePiece[] = [
   // Unidade 5
   p('imperial-march', 'Imperial March', ['John Williams'], 'Tema', 'Filme', ['filmes'], 'Imperial March Star Wars easy piano', ['marcha imperial']),
   p('godfather', 'Love Theme from The Godfather', ['Nino Rota'], 'Tema', 'Filme', ['filmes'], 'Godfather Love Theme easy piano', ['godfather', 'speak softly love']),
-  p('star-wars-jaws', 'Star Wars e Jaws (motivos)', ['John Williams'], 'Motivo', 'Filme', ['filmes'], 'Jaws theme easy piano'),
+  p('jaws', 'Jaws Theme', ['John Williams'], 'Motivo', 'Filme', ['filmes'], 'Jaws theme easy piano', ['tubarao', 'jaws']),
   p('smoke-on-the-water', 'Smoke on the Water', ['Deep Purple'], 'Riff', 'Rock', ['pop-rock'], 'Smoke on the Water easy piano'),
   p('zombie', 'Zombie', ['The Cranberries'], 'Refrão', 'Rock', ['pop-rock'], 'Zombie Cranberries easy piano'),
   p('caruso', 'Caruso', ['Lucio Dalla'], 'Refrão', 'Ópera pop', ['pop-rock'], 'Caruso Lucio Dalla easy piano'),

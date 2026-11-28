@@ -102,6 +102,9 @@ const l34: Lesson = {
     'Consigo tocar Lá menor natural com o dedilhado certo, mãos separadas, em colcheias a 60 BPM.',
     'Consigo ouvir se um acorde é maior ou menor e tocar a mesma qualidade sobre outra nota.',
   ],
+  music: [
+    { piece: 'imperial-march', why: 'A Marcha Imperial, do Darth Vader, é o tema em menor mais famoso do cinema. Ela está em Sol menor, e a cor sombria vem dos graus abaixados que você aprende hoje: a 3ª e a 6ª menores.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -194,6 +197,13 @@ Como na escala maior, o que conta é soar **igual**: o polegar se prepara cedo e
     { kind: 'exercise', id: 'l34-md', exercise: quickTimed('Lá menor natural, mão direita', 'Colcheias, subindo e descendo, de 45 a 60 BPM. Variação até 40 ms.', () => scaleTask('A', 'natural', 45), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
     { kind: 'exercise', id: 'l34-me', exercise: quickTimed('Lá menor natural, mão esquerda', 'A partir do Lá2, dedilhado 5 4 3 2 1 3 2 1. De 45 a 60 BPM.', () => scaleTask('A', 'natural', 45, 'esquerda'), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
     { kind: 'exercise', id: 'l34-quiz', exercise: quiz('Relativa e menor natural', 'Seis perguntas rápidas.', RELATIVE) },
+    {
+      kind: 'text',
+      title: 'A música da lição: a Marcha Imperial',
+      body: `A **Marcha Imperial** (John Williams, de Star Wars) está em **Sol menor**. A armadura é a da relativa, **Si♭ maior**: Si♭ e Mi♭. Ouça a abertura: três notas iguais na tônica (Sol), e logo o **Mi♭**, o 6º grau da menor natural, que desce para o Sol. É esse 6º grau menor, meio tom acima do 5º, que deixa o tema pesado.
+
+Como ela é protegida, o app não traz as notas: importe a partitura no Repertório (o cartão no começo da lição tem a busca no MuseScore). Toque primeiro só a mão direita, devagar, e procure na melodia o Si♭ (a 3ª menor de Sol) e o Mi♭ (a 6ª menor).`,
+    },
   ],
   review: [relKeys, majMinEar, naturalScales, choice(RELATIVE, 'menor-natural')],
   checkpoint: [
@@ -212,6 +222,11 @@ const l35: Lesson = {
     'Consigo tocar as três formas da menor (natural, harmônica e melódica) em Lá, Mi e Ré.',
     'Consigo explicar por que a harmônica existe: a sensível faz o V ficar maior.',
     'Consigo resolver V–i e V7–i em Lá, Ré e Mi menor, sempre com o V maior.',
+  ],
+  music: [
+    { song: 'u05-fur-elise', why: 'Für Elise está em Lá menor e vive da sensível: o Sol♯ da menor harmônica puxa de volta para o Lá, e o Ré♯ do vaivém é a sensível de Mi, o V. É o projeto final da unidade.' },
+    { song: 'u05-paganini', why: 'O tema do Caprice nº 24 de Paganini alterna Lá menor e Mi maior, i e V, compasso a compasso: o Sol♯ do segundo compasso é a sensível da harmônica. Rachmaninoff, Brahms e Liszt fizeram variações sobre ele.' },
+    { piece: 'godfather', why: 'O tema de amor de O Poderoso Chefão é uma valsa lenta em menor, com a sensível subindo para a tônica nos finais de frase.' },
   ],
   blocks: [
     {
@@ -284,6 +299,19 @@ Resumo das três formas de Lá menor:
     { kind: 'exercise', id: 'l35-escala', exercise: quickTimed('Lá menor harmônica, mão direita', 'Colcheias, subindo e descendo com o Sol♯ nos dois sentidos. De 45 a 60 BPM, variação até 40 ms.', () => scaleTask('A', 'harmonica', 45), { ladder: { from: 45, to: 60, step: 5 }, evenness: 40 }) },
     { kind: 'exercise', id: 'l35-melodica', exercise: quickTimed('Lá menor melódica, mão direita', 'Sobe com Fá♯ e Sol♯, desce natural, a 54 BPM. Duas passadas boas.', () => scaleTask('A', 'melodica', 54), { reps: 2, evenness: 40 }) },
     { kind: 'exercise', id: 'l35-quiz', exercise: quiz('As formas da menor', 'Seis perguntas rápidas.', FORMS) },
+    {
+      kind: 'text',
+      title: 'A harmônica em duas músicas',
+      body: `Duas músicas famosas em **Lá menor** mostram a sensível trabalhando.
+
+**Caprice nº 24**, de Paganini (1820), escrito para violino. O tema tem 4 compassos que se repetem e depois 8: o compasso 1 desenha o **Lá menor** (Lá, Dó, Si, Lá) e o compasso 2 responde com o **Mi maior**, o V: Mi, **Sol♯**, Fá♯, Mi. Sem o Sol♯ da harmônica, a resposta perde a força. O ritmo é o original: colcheia, pausa de semicolcheia e um grupo de semicolcheias, rápido como um violino (a semicolcheia é metade da colcheia: quatro por tempo; o desenho se repete, então dá para pegar de ouvido).
+
+**Für Elise**, de Beethoven: o vaivém **Mi–Ré♯** abre a música, e no arpejo que sobe na volta (Mi, **Sol♯**, Si) a sensível puxa para o Lá. Ela é o projeto final da unidade; você estuda os trechos na lição 41.
+
+O alvo do Caprice é 100 BPM, perto das gravações. Comece bem devagar no exercício abaixo e suba aos poucos.`,
+    },
+    { kind: 'exercise', id: 'l35-paganini', exercise: quickTimed('Caprice nº 24: os 4 primeiros compassos', 'Mão direita, de 50 a 100 BPM, com o ritmo original. O Sol♯ do compasso 2 é a sensível.', () => melodyTask(PAG_A, { bpm: 50, beatsPerBar: 2 }), { window: 60, ladder: { from: 50, to: 100, step: 5 } }) },
+    { kind: 'song', songId: 'u05-paganini', why: 'O tema inteiro, com o baixo na esquerda tocado pelo app ou por você.' },
   ],
   review: [allForms, fiveMinor, cadMinor, choice(FORMS, 'formas-menor')],
   checkpoint: [
@@ -737,14 +765,16 @@ Toque primeiro só o ritmo na tecla Lá, depois as notas devagar. A tercina tem 
 
 // ---------- músicas ----------
 
-// Für Elise (Beethoven, 1810), tema A. Arranjo do Fermata: 3/4 com valores dobrados.
+// Für Elise (Beethoven, 1810), tema A. Notas conferidas na edição do Mutopia (public/library/fur-elise.mxl, compassos 1 a 9).
+// Arranjo do Fermata: escrito em 3/4 contando as colcheias (no original, 3/8 com semicolcheias): as proporções e o
+// som são os mesmos, e o alvo de 120 BPM aqui é a colcheia de Beethoven a 120, perto das gravações.
 const FE_A = 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5';
 const furElise: SongSpec = {
   id: 'u05-fur-elise',
   title: 'Für Elise, tema A',
   composer: 'Ludwig van Beethoven',
-  arrangement: 'arranjo do Fermata: em 3/4 com os valores dobrados (colcheias no lugar das semicolcheias), só o tema A, final em Lá; mão esquerda em meio-arpejo; pedal a critério do aluno',
-  bpm: 60,
+  arrangement: 'arranjo do Fermata: só o tema A, final em Lá; escrito em 3/4 contando as colcheias (no original, 3/8 com semicolcheias), com o mesmo ritmo; o alvo é perto do andamento das gravações; pedal a critério do aluno',
+  bpm: 120,
   beatsPerBar: 3,
   fifths: 0,
   right: `r:2 E5:0.5 D#5:0.5 | ${FE_A} | A4 r:0.5 C4:0.5 E4:0.5 A4:0.5 | B4 r:0.5 E4:0.5 G#4:0.5 B4:0.5 | C5 r:0.5 E4:0.5 E5:0.5 D#5:0.5 | ${FE_A} | A4 r:0.5 C4:0.5 E4:0.5 A4:0.5 | B4 r:0.5 E4:0.5 C5:0.5 B4:0.5 | A4:3`,
@@ -753,7 +783,79 @@ const furElise: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-// Melodia original do Fermata para as tercinas (lição 39).
+// Caprice nº 24 (Paganini, op. 1, 1820), o tema. Notas conferidas na edição do Mutopia (Caprice_24.ly, digitada por
+// Samuel Rummel a partir da Ricordi, 1836; CC BY-SA 4.0). Arranjo do Fermata: o tema do violino na mão direita, no tom e
+// no ritmo originais, com a repetição dos 4 primeiros compassos escrita; a esquerda só com o baixo de cada compasso.
+const PAG_A = 'A4:0.5 r:0.25 A4:0.25 A4:0.25 C5:0.25 B4:0.25 A4:0.25 | E5:0.5 r:0.25 E4:0.25 E4:0.25 G#4:0.25 F#4:0.25 E4:0.25 | A4:0.5 r:0.25 A4:0.25 A4:0.25 C5:0.25 B4:0.25 A4:0.25 | E5:1 E4:0.5 r:0.5';
+const PAG_B = 'A5:0.5 r:0.25 A5:0.25 A5:0.25 Bb5:0.25 A5:0.25 G5:0.25 | F5:0.5 r:0.25 D5:0.25 D5:0.25 F5:0.25 E5:0.25 D5:0.25 | G5:0.5 r:0.25 G5:0.25 G5:0.25 A5:0.25 G5:0.25 F5:0.25 | E5:0.5 r:0.25 C5:0.25 C5:0.25 E5:0.25 D5:0.25 C5:0.25 | F5:0.5 r:0.25 B4:0.25 B4:0.25 D5:0.25 C5:0.25 B4:0.25 | E5:0.5 r:0.25 A4:0.25 A4:0.25 C5:0.25 B4:0.25 A4:0.25 | F4:0.5 r:0.25 D#5:0.25 E4:0.25 E5:0.25 D5:0.25 B4:0.25 | A4:1 A3:0.5 r:0.5';
+const PAG_A_L = 'A2:2 | E2:2 | A2:2 | E2:2';
+const PAG_B_L = 'A2:2 | D3:2 | G2:2 | C3:2 | B2:2 | A2:2 | E2:2 | A2:2';
+const paganini: SongSpec = {
+  id: 'u05-paganini',
+  title: 'Caprice No. 24, tema',
+  composer: 'Niccolò Paganini (op. 1)',
+  arrangement: 'arranjo do Fermata: o tema do violino na mão direita, no tom e no ritmo originais, com a repetição escrita; a esquerda toca só o baixo de cada compasso. O alvo é perto das gravações (Quasi presto)',
+  bpm: 100,
+  beatsPerBar: 2,
+  fifths: 0,
+  right: `${PAG_A} | ${PAG_A} | ${PAG_B}`,
+  left: `${PAG_A_L} | ${PAG_A_L} | ${PAG_B_L}`,
+  hands: 'direita',
+  pass: { accuracy: 0.85 },
+};
+
+// Moonlight Sonata (Beethoven, op. 27 nº 2, 1801), 1º movimento, compassos 1 a 9. Notas conferidas na edição da DCML
+// (public/library/moonlight-sonata-1.mxl). Arranjo fácil do Fermata: nos compassos 1 a 4, as tercinas na direita e as
+// oitavas do baixo na esquerda, como no original; quando a melodia entra (compasso 5), a direita fica só com a melodia
+// e a esquerda assume as tercinas na mesma altura, sem o baixo. No último compasso, o baixo Mi do original.
+const MOON_TRI = (a: string, b: string, c: string) => `${a}:1/3 ${b}:1/3 ${c}:1/3`;
+const MOON_INTRO = [
+  [MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4')].join(' '),
+  [MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4')].join(' '),
+  [MOON_TRI('A3', 'C#4', 'E4'), MOON_TRI('A3', 'C#4', 'E4'), MOON_TRI('A3', 'D4', 'F#4'), MOON_TRI('A3', 'D4', 'F#4')].join(' '),
+  [MOON_TRI('G#3', 'B#3', 'F#4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'D#4'), MOON_TRI('F#3', 'B#3', 'D#4')].join(' '),
+].join(' | ');
+const MOON_TRI_LEFT = [
+  [MOON_TRI('E3', 'G#3', 'C#4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4')].join(' '),
+  [MOON_TRI('G#3', 'D#4', 'F#4'), MOON_TRI('G#3', 'D#4', 'F#4'), MOON_TRI('G#3', 'D#4', 'F#4'), MOON_TRI('G#3', 'D#4', 'F#4')].join(' '),
+  [MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('G#3', 'C#4', 'E4'), MOON_TRI('A3', 'C#4', 'F#4'), MOON_TRI('A3', 'C#4', 'F#4')].join(' '),
+  [MOON_TRI('G#3', 'B3', 'E4'), MOON_TRI('G#3', 'B3', 'E4'), MOON_TRI('A3', 'B3', 'D#4'), MOON_TRI('A3', 'B3', 'D#4')].join(' '),
+].join(' | ');
+const moonlight: SongSpec = {
+  id: 'u05-moonlight',
+  title: 'Moonlight Sonata, 1º movimento (arranjo fácil)',
+  composer: 'Ludwig van Beethoven (op. 27 nº 2)',
+  arrangement: 'arranjo fácil do Fermata: compassos 1 a 9 no tom e no ritmo originais; na introdução, tercinas na direita e oitavas na esquerda; quando a melodia entra, as tercinas passam para a esquerda e o baixo sai. O alvo é perto das gravações (Adagio sostenuto)',
+  bpm: 54,
+  beatsPerBar: 4,
+  fifths: 4,
+  right: `${MOON_INTRO} | r:3 G#4:0.75 G#4:0.25 | G#4:3 G#4:0.75 G#4:0.25 | G#4:2 A4:2 | G#4:2 F#4:1 B4:1 | E4:1 r:3`,
+  left: `C#2+C#3:4 | B1+B2:4 | A1+A2:2 F#1+F#2:2 | G#1+G#2:2 G#1+G#2:2 | ${MOON_TRI_LEFT} | E2+E3:4`,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+// In the Hall of the Mountain King (Grieg, Peer Gynt, op. 46 nº 4, 1875). Notas conferidas na edição do Mutopia para piano
+// do próprio Grieg (Dans_l_antre_du_roi_de_la_montagne.ly, compassos 2 a 9; domínio público). Arranjo do Fermata: o tema,
+// que no original fica bem no grave em Si menor, passa para Lá menor no meio do teclado (um tom abaixo, três oitavas
+// acima), com o ritmo original; a esquerda faz o mesmo vaivém de fundamental e 5ª do original, em semínimas.
+const MK_1 = 'A4:0.5 B4:0.5 C5:0.5 D5:0.5 E5:0.5 C5:0.5 E5 | D#5:0.5 B4:0.5 D#5 D5:0.5 Bb4:0.5 D5 | A4:0.5 B4:0.5 C5:0.5 D5:0.5 E5:0.5 C5:0.5 E5:0.5 A5:0.5';
+const MK_L = 'A2 E3 A2 E3 | A2 E3 A2 E3 | A2 E3 A2 E3 | C3 G3 C3 G3';
+const mountainKing: SongSpec = {
+  id: 'u05-montanha',
+  title: 'In the Hall of the Mountain King',
+  composer: 'Edvard Grieg (Peer Gynt, op. 46 nº 4)',
+  arrangement: 'arranjo do Fermata: o tema em Lá menor (o original é em Si menor, no grave), com o ritmo original; a esquerda alterna fundamental e 5ª como no original. Grieg marca 138 BPM; o alvo aqui é 120',
+  bpm: 120,
+  beatsPerBar: 4,
+  fifths: 0,
+  right: `${MK_1} | G5:0.5 E5:0.5 C5:0.5 E5:0.5 G5:2 | ${MK_1} | G5:0.5 E5:0.5 C5:0.5 E5:0.5 G4+G5:2`,
+  left: `${MK_L} | ${MK_L}`,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+// Melodia original do Fermata para as tercinas (lição 39): fica só como exercício.
 const triplets: SongSpec = {
   id: 'u05-tercinas',
   title: 'Tercinas em Lá menor',
@@ -1065,7 +1167,7 @@ const unit: Unit = {
   goal: 'Tocar as três formas da escala menor, resolver cadências em menor, dar nome completo aos intervalos e reconhecer maior e menor de ouvido.',
   technique: 'Escalas menores de Lá, Mi e Ré (natural, harmônica e melódica), uma oitava nas lições e duas oitavas na meta da unidade, mãos separadas, em colcheias de 45 rumo a 69 BPM, com variação abaixo de 40 ms (referência: RCM Level 1). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l34, l35, l36, l37, l38, l39, l40, l41],
-  songs: [furElise, triplets, twMajor, twMinor],
+  songs: [furElise, paganini, moonlight, mountainKing, triplets, twMajor, twMinor],
   final: {
     songId: 'u05-fur-elise',
     brief: 'O tema A de Für Elise, a música mais famosa em Lá menor: o vaivém Mi–Ré♯ (a sensível de Mi, o V), a mão esquerda em meio-arpejo (Lá–Mi–Lá e Mi–Mi–Sol♯) e o Sol♯ da menor harmônica que puxa de volta para o Lá. Escrito em 3/4 com valores dobrados para a leitura ficar mais fácil; o som é o mesmo.',

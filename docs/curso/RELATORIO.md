@@ -1,5 +1,16 @@
 # Relatório das rodadas noturnas do curso
 
+## Noite de 2026-11-27
+
+- **23:10 (em andamento)** — Unidade 5, "Modo menor e intervalos": troca de músicas começou. Prontas até agora as lições 34 e 35.
+  - **Lição 34**: a música da lição é a **Marcha Imperial** (Star Wars), para importar.
+  - **Lição 35**: **Für Elise** (tema A, notas conferidas na edição do Mutopia que já está no app; o alvo subiu para perto das gravações), o **tema do Caprice nº 24 de Paganini** (novo no app, notas da edição do Mutopia, ritmo original, alvo 100 BPM) e o **tema de amor de O Poderoso Chefão**, para importar.
+  - Pendente: **Swan Lake** (lição 34). Não achei uma fonte aberta que esta rodada conseguisse ler (o site com a transcrição foi bloqueado) e não escrevo notas de memória.
+  - Para testar: o exercício novo do Caprice nº 24 na lição 35 (começa a 50 BPM e sobe até 100).
+  - Músicas protegidas novas desta rodada (o catálogo já existia; esta é a lista para você baixar):
+    - Imperial March (John Williams) - Partitura - XML
+    - Love Theme from The Godfather (Nino Rota) - Partitura - XML
+
 ## Noite de 2026-10-11
 
 - **03:37 (já dia 12)** — Unidade 12, "Arranjo, forma e repertório", **pronta**: entraram as duas últimas lições, e **o curso agora tem as 100 lições no ar**.
