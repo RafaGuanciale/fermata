@@ -436,6 +436,11 @@ const l54: Lesson = {
     'Consigo ditar essas progressões tocando, com 85% de acerto.',
     'Consigo tocar a Royal Road conduzida em dois tons sorteados.',
   ],
+  music: [
+    { piece: 'let-it-be', why: 'Let It Be é I – V – vi – IV em Dó (C – G – Am – F): a progressão do pop na forma mais pura.' },
+    { piece: 'dont-stop-believin', why: "Don't Stop Believin', do Journey, abre com o piano tocando I – V – vi – IV em loop: a mesma progressão de Let It Be, em Mi maior e em ritmo de rock." },
+    { piece: 'hit-the-road-jack', why: 'Hit the Road Jack, do Ray Charles, é a cadência andaluza do começo ao fim: Lá menor, Sol, Fá, Mi, com o baixo descendo e o Mi maior pedindo para recomeçar.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -487,6 +492,14 @@ O exercício mede a condução como na lição 44: no máximo 2 semitons além d
     { kind: 'exercise', id: 'l54-royal', exercise: items('Royal Road conduzida', 'Tom sorteado. Três notas por acorde; notas comuns ficam.', royalLead, 6, 48, 84, 0.85) },
     { kind: 'exercise', id: 'l54-andaluza', exercise: items('Andaluza conduzida', 'Lá, Ré ou Mi menor. O último acorde é maior (com a sensível).', andaluzaLead, 6, 48, 84, 0.85) },
     { kind: 'exercise', id: 'l54-quiz', exercise: quiz('Progressões', 'Cinco perguntas rápidas.', PROG_Q) },
+    {
+      kind: 'text',
+      title: 'As músicas da lição: três progressões famosas',
+      body: `- **Let It Be** (The Beatles, 1970) e **Don't Stop Believin'** (Journey, 1981) são a mesma progressão, I – V – vi – IV, em tons e estilos diferentes: uma balada em Dó, um rock em Mi. Toque as duas e diga os graus em voz alta.
+- **Hit the Road Jack** (Ray Charles, 1961) é a andaluza: Am – G – F – E, sem parar. A esquerda desce Lá, Sol, Fá, Mi; a direita pode conduzir como no exercício acima.
+
+As três são protegidas: importe as partituras no Repertório (Let It Be você já tem da Unidade 4).`,
+    },
   ],
   review: [popEar, royalLead, choice(PROG_Q, 'progressoes')],
   checkpoint: [
@@ -531,6 +544,9 @@ const l55: Lesson = {
   objectives: [
     'Consigo tocar Dó, Sol e Fá maior e Lá menor harmônica em 2 oitavas, mãos juntas em movimento paralelo.',
     'Consigo 3 passadas limpas seguidas a 60 BPM em colcheias, com variação abaixo de 35 ms e as mãos juntas em ±50 ms.',
+  ],
+  music: [
+    { song: 'u04-joy', why: 'Joy to the World começa com a escala de Dó maior inteira, descendo do Dó5 ao Dó4. Depois de tocar 2 oitavas, a melodia vira escala com ritmo: o mesmo dedilhado, agora com música.' },
   ],
   blocks: [
     {
