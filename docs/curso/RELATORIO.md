@@ -2,15 +2,19 @@
 
 ## Noite de 2026-11-27
 
-- **00:10 (já dia 28)** — Unidade 6, "Tríades, inversões e condução": troca de músicas **em andamento** (lições 42 a 47 prontas).
+- **00:10 às 00:20 (já dia 28)** — Unidade 6, "Tríades, inversões e condução": troca de músicas **pronta**. Todas as 8 lições (42 a 49) começam com as músicas que ensinam.
   - **Lição 42 (os quatro tipos de tríade)**: **Oh! Darling** (Beatles), para importar: ela abre com um acorde aumentado.
   - **Lição 43 (inversões)**: o **Canon in D** volta numa **versão longa** (novo no app, notas da edição do Mutopia feita a partir do original no IMSLP): os oito acordes com inversões na introdução e as oito primeiras variações do violino no ritmo original, com a descida famosa em semicolcheias, alvo 54 BPM. Exercício novo: os acordes do Cânone invertidos na direita com o baixo na esquerda (46 a 54 BPM).
   - **Lição 44 (condução de vozes)**: **Let It Be** (C – G – Am – F, o mesmo I–V–vi–IV da lição; você já tem a partitura da Unidade 4) e **Can You Feel the Love Tonight**, para importar.
   - **Lição 45 (sus2, sus4, add9)**: **Jump** (Van Halen), para importar: o riff é feito de suspensões que resolvem.
-  - **Lição 46 (6/8)**: **Greensleeves** agora inteira (as duas partes, 16 compassos) e no **ritmo original**, com a pontuada e a semicolcheia (antes as pontuadas viravam notas iguais, o que quebrava a regra). Notas conferidas na versão do Mutopia, que é de domínio público. Para importar: **Hallelujah** (você já tem da Unidade 4), **Can't Help Falling in Love** e **He's a Pirate**.
+  - **Lição 46 (6/8)**: **Greensleeves** agora inteira (as duas partes, 16 compassos) e no **ritmo original**, com a pontuada e a semicolcheia (antes as pontuadas viravam notas iguais, o que quebrava a sua regra). Notas conferidas na versão do Mutopia, de domínio público. Para importar: **Hallelujah** (você já tem da Unidade 4), **Can't Help Falling in Love** e **He's a Pirate**.
   - **Lição 47 (padrões de mão esquerda)**: **Imagine**, **Con te partirò** e **Interstellar**, para importar, cada uma mostrando um padrão de esquerda.
+  - **Lição 48 (baixo que anda e cromática)**: **A Whiter Shade of Pale** (o baixo descendente mais famoso do rock) e o **tema de Hedwig** (Harry Potter), para importar.
+  - **Lição 49 (projeto)**: **Let It Be** pela cifra e o **Canon in D** de novo. O projeto continua sendo a "Canção em quatro acordes" (melodia inventada pelo app, agora só como treino), com um passo novo: fazer o mesmo arranjo em Let It Be.
+  - Pendente: **Funiculì, Funiculà** e o **Lacrimosa** de Mozart (lição 46). O Mutopia não tem as duas e não escrevo notas de memória.
+  - Para decidir: quer que o projeto final da unidade passe a ser o **Canon in D** em versão longa, no lugar da canção inventada? Hoje ele está como música das lições 43 e 49.
   - Para testar: o exercício novo da lição 43, a versão longa do Cânone no "Tocar a música" (veja se as semicolcheias dos compassos 11 a 14 ficam tocáveis devagar) e Greensleeves na lição 46 (o exercício de 4 compassos e a música inteira: a pontuada precisa soar longa-curta).
-  - Músicas protegidas novas até aqui:
+  - Músicas protegidas novas da Unidade 6, para você baixar:
     - Oh! Darling (The Beatles) - Partitura - XML
     - Can You Feel the Love Tonight (Elton John) - Partitura - XML
     - Jump (Van Halen) - Partitura - XML
@@ -19,6 +23,8 @@
     - Imagine (John Lennon) - Partitura - XML
     - Con te partirò (Andrea Bocelli) - Partitura - XML
     - Interstellar (Hans Zimmer) - Partitura - XML
+    - A Whiter Shade of Pale (Procol Harum) - Partitura - XML
+    - Hedwig's Theme (John Williams) - Partitura - XML
 
 - **23:10 às 23:23** — Unidade 5, "Modo menor e intervalos": troca de músicas **pronta**. Todas as 8 lições (34 a 41) começam com as músicas que ensinam.
   - **Lição 34**: a música da lição é a **Marcha Imperial** (Star Wars), para importar.

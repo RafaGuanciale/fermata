@@ -837,6 +837,10 @@ const l48: Lesson = {
     'Consigo tocar progressões com baixo descendente (C – G/B – Am – Am/G – F – C/E – Dm – G), com o baixo certo em cada acorde.',
     'Consigo tocar a escala cromática de uma oitava, mãos separadas, em colcheias a 69 BPM, com variação abaixo de 35 ms.',
   ],
+  music: [
+    { piece: 'whiter-shade', why: 'A Whiter Shade of Pale, do Procol Harum, é o baixo descendente desta lição: o órgão desce a escala de Dó, um grau por vez, com os acordes invertidos por cima, num desenho que lembra o Bach.' },
+    { piece: 'hedwig', why: "O tema de Hedwig, de Harry Potter, é feito de notas cromáticas: a melodia escorrega por semitons fora da escala, e é isso que soa como mágica. Bom para o dedilhado da cromática." },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -890,6 +894,15 @@ Na direita, subindo de Dó: 1 3 1 3 1 **2** 3 1 3 1 3 1 **2**. Descendo, as mesm
     { kind: 'exercise', id: 'l48-cromatica-md', exercise: quickTimed('Cromática, mão direita', 'De Dó4 a Dó5 e de volta, em colcheias, de 50 a 69 BPM. Variação até 35 ms.', () => melodyTask(chromaticLine(60), { bpm: 50 }), { ladder: { from: 50, to: 69, step: 5 }, evenness: 35 }) },
     { kind: 'exercise', id: 'l48-cromatica-me', exercise: quickTimed('Cromática, mão esquerda', 'De Dó3 a Dó4 e de volta, de 50 a 69 BPM.', () => melodyTask(chromaticLine(48), { bpm: 50, clef: 'bass' }), { ladder: { from: 50, to: 69, step: 5 }, evenness: 35 }) },
     { kind: 'exercise', id: 'l48-quiz', exercise: quiz('Baixo e cromática', 'Cinco perguntas rápidas.', BASS_CHROMA) },
+    {
+      kind: 'text',
+      title: 'As músicas da lição: A Whiter Shade of Pale e o tema de Hedwig',
+      body: `**A Whiter Shade of Pale** (Procol Harum, 1967) é o baixo descendente mais famoso do rock. Na introdução de órgão, o baixo desce a escala nota a nota enquanto os acordes de cima quase não se mexem, o mesmo C – G/B – Am – Am/G – F... do exercício desta lição. Toque primeiro só o baixo, depois junte a direita conduzida.
+
+O **tema de Hedwig** (John Williams, 2001) é a cromática a serviço da melodia: ela usa notas fora da escala de Mi menor, a meio tom das notas da escala, e o efeito é misterioso. Na partitura, marque cada nota com acidente e aplique o dedilhado da cromática (3 nas pretas) nesses trechos.
+
+As duas são protegidas: importe as partituras no Repertório pelos cartões do começo da lição.`,
+    },
   ],
   review: [descending, slashChords, choice(BASS_CHROMA, 'cromatica')],
   checkpoint: [
@@ -908,6 +921,10 @@ const l49: Lesson = {
     'Consigo passar no checkpoint misto da unidade 6, sem dicas.',
     'Consigo tocar uma canção em I–V–vi–IV a partir do lead sheet, com dois padrões de mão esquerda, introdução e final.',
     'Consigo conduzir as vozes da progressão com no máximo 2 semitons a mais que o caminho mais curto.',
+  ],
+  music: [
+    { piece: 'let-it-be', why: 'Let It Be é o lead sheet em I–V–vi–IV mais famoso que existe: com a cifra e a melodia, faça nela o mesmo arranjo do projeto (introdução, dois padrões de esquerda, final).' },
+    { song: 'u06-canone', why: 'O Canon in D é o avô do I–V–vi–IV: Ré, Lá, Si menor... são os três primeiros acordes da progressão pop. Toque a versão longa de novo e ouça o parentesco.' },
   ],
   blocks: [
     {
@@ -943,6 +960,14 @@ Dois toques que fazem diferença: troque o pedal a cada acorde (pedal legato) e 
     },
     { kind: 'exercise', id: 'l49-conducao', exercise: items('Condução em 4 tons', 'I–V–vi–IV conduzido em tom sorteado. Meta: 7 de 8.', leadAny, 8, 48, 84, 0.875, 'off') },
     { kind: 'song', songId: 'u06-cancao', why: 'O projeto final: a canção com o arranjo escrito. Depois de passar, toque pelo lead sheet com o seu próprio arranjo.' },
+    {
+      kind: 'text',
+      title: 'O mesmo roteiro numa música de verdade',
+      body: `A Canção em quatro acordes é o treino com o arranjo escrito. O passo seguinte é fazer o mesmo numa música que todo mundo conhece: **Let It Be** (The Beatles), em Dó, com a mesma progressão C – G – Am – F. Use a partitura que você importou na Unidade 4 só como lead sheet: leia a melodia e a cifra e invente a esquerda com os padrões da lição 47.
+
+O **Canon in D** fecha a unidade como começou na lição 43: os acordes Ré – Lá – Si menor são o I–V–vi em Ré maior, o mesmo começo da progressão pop, trezentos anos antes.`,
+    },
+    { kind: 'song', songId: 'u06-canone', why: 'A versão longa do Cânone, para tocar de novo agora que você conhece a progressão.' },
   ],
   review: [chordsAll, inv1, leadAny, colorChords, descending],
   checkpoint: [
@@ -969,6 +994,7 @@ Dois toques que fazem diferença: troque o pedal a cada acorde (pedal legato) e 
       'Escolha seus dois padrões de esquerda (um para A, outro para B) e uma introdução de 2 ou 4 compassos.',
       'Toque o seu arranjo inteiro, com pedal legato, e grave.',
       'Ouça e confira a rubrica.',
+      'Faça o mesmo arranjo com Let It Be pela cifra (C – G – Am – F), a partitura importada servindo só de lead sheet.',
     ],
     rubric: [
       'A canção escrita passou com 90% das notas a 72 BPM.',

@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3, 4 e 5: feitas. Unidades 6 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3 a 6: feitas. Unidades 7 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -43,12 +43,14 @@ Unidades 3, 4 e 5: feitas. Unidades 6 a 12: a fazer (as rodadas seguem este mapa
 | 5 | 38 | Zombie · Caruso · The Final Countdown | importar | Acordes menores |
 | 5 | 39 | Moonlight Sonata, arranjo fácil · Star Wars Main Theme | App (DCML/Mutopia) · importar | Tercinas |
 | 5 | 41 | Game of Thrones Theme · Für Elise A + Moonlight fácil · Ode to Joy em Dó maior e menor (no lugar de Twinkle) | importar · App | Projeto e homônimo |
-| 6 | 43 | Canon in D, completo | App | Inversões |
-| 6 | 44 | Can You Feel the Love Tonight | importar | Condução com inversões |
+| 6 | 42 | Oh! Darling | importar | Tríade aumentada |
+| 6 | 43 | Canon in D, versão longa (8 variações do violino I, Mutopia) | App | Inversões |
+| 6 | 44 | Let It Be · Can You Feel the Love Tonight | importar | Condução com inversões |
 | 6 | 45 | Jump | importar | Acordes sus |
-| 6 | 46 | Hallelujah (Leonard Cohen) · Can't Help Falling in Love · He's a Pirate · Funiculì, Funiculà · Lacrimosa (Mozart) | importar · App | Compasso composto (Hallelujah é 6/8, com a letra falando dos próprios acordes) |
+| 6 | 46 | Greensleeves (inteira, ritmo original) · Hallelujah (Leonard Cohen) · Can't Help Falling in Love · He's a Pirate; Funiculì, Funiculà e Lacrimosa (Mozart) **pendentes** (sem fonte aberta: o Mutopia não tem as duas) | App · importar | Compasso composto (Hallelujah é 6/8, com a letra falando dos próprios acordes) |
 | 6 | 47 | Interstellar · Con te partirò · Imagine | importar | Melodia sobre acompanhamento |
-| 6 | 48 | Hedwig's Theme | importar | Cromatismo |
+| 6 | 48 | A Whiter Shade of Pale · Hedwig's Theme | importar | Baixo descendente e cromatismo |
+| 6 | 49 | Let It Be pela cifra · Canon in D | importar · App | Projeto pop pela cifra |
 | 7 | 50 | Canon in D, analisado | App | Campo harmônico |
 | 7 | 52 | Stand By Me · Beauty and the Beast | importar | Funções |
 | 7 | 56 | O sole mio · Once Upon a Dream · Minuet in G | App · importar · App | Frase e período |
@@ -81,7 +83,7 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 3 | pronta | 2026-11-27 |
 | 4 | pronta | 2026-11-27 |
 | 5 | pronta | 2026-11-27 23:23 |
-| 6 | em construção | 2026-11-28 00:18 |
+| 6 | pronta | 2026-11-28 00:19 |
 | 7 | a fazer | |
 | 8 | a fazer | |
 | 9 | a fazer | |
