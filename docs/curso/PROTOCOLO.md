@@ -43,7 +43,7 @@ Cada unidade tem `songs` (todas as músicas usadas) e `final` (o projeto final: 
 | 8 | The Entertainer (Joplin) simplificado + blues de 12 compassos |
 | 9 | Minuet in G, BWV Anh. 114 |
 | 10 | Clementi, Sonatina Op. 36 nº 1, 1º movimento (trecho) |
-| 11 | Odeon (Ernesto Nazareth, 1909), simplificado, com groove brasileiro na mão esquerda. Não use músicas protegidas (Asa Branca e bossa nova são protegidas) |
+| 11 | Maple Leaf Rag (Scott Joplin, 1899), tema A (desde 28/11/2026 a unidade é "Jazz e pop ao piano") |
 | 12 | Gymnopédie nº 1 (Satie) + arranjo próprio |
 
 Regras das músicas:

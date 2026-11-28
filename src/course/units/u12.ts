@@ -979,7 +979,7 @@ const l97: Lesson = {
 
 O **Tema de jogo** do app (original) usa o desenho mais simples: **fundamental, 5ª, oitava, 5ª**, duas vezes por compasso, sobre Am – F – C – G.
 
-Como no baião, o ostinato precisa ficar **automático** antes de a melodia entrar. Toque a esquerda sozinha até poder conversar enquanto toca.`,
+Como no padrão de balada da lição 82, o ostinato precisa ficar **automático** antes de a melodia entrar. Toque a esquerda sozinha até poder conversar enquanto toca.`,
     },
     {
       kind: 'exercise',
@@ -1134,7 +1134,7 @@ const FINAL_Q: ChoiceQuestion[] = [
   { q: 'O D♭7 indo para C é o subV7 porque…', options: ['Tem o mesmo trítono (Fá–Si/Dó♭) do G7', 'Tem a mesma fundamental do G7', 'É o IV de Lá♭'], answer: 0, why: 'O trítono é o que resolve. D♭7 e G7 compartilham Fá e Si (Dó♭), e o baixo desce por semitom.' },
   { q: 'A forma AABA tem…', options: ['Uma ponte (B) entre as voltas do A', 'Um refrão que volta cinco vezes', 'Duas partes repetidas'], answer: 0, why: 'É a canção de 32 compassos: 8 + 8 + 8 (ponte) + 8.' },
   { q: 'Na recapitulação de uma sonata em Dó, o tema 2 vem em…', options: ['Dó maior', 'Sol maior', 'Lá menor'], answer: 0, why: 'Na exposição ele estava no V; a recapitulação resolve tudo no I.' },
-  { q: 'O baião na esquerda divide o compasso em…', options: ['3 + 3 + 2 semicolcheias', '2 + 2 + 2 + 2', '4 + 4'], answer: 0, why: 'O ritmo da zabumba em 2/4: colcheia pontuada, colcheia pontuada, colcheia (longa, longa, curta).' },
+  { q: 'O Charleston do comping de jazz ataca…', options: ['No 1 e no "e" do 2', 'Nos quatro tempos', 'Só no 3'], answer: 0, why: 'Semínima pontuada e colcheia, com o "e" atrasado pelo swing (lição 85).' },
 ];
 
 const ROADMAP_Q: ChoiceQuestion[] = [
@@ -1170,7 +1170,7 @@ const l99: Lesson = {
 
 - **Unidades 1 a 4**: teclado, pulso, pauta dupla, intervalos, os primeiros acordes pela cifra, a escala maior, as armaduras e o pedal. Marco 1 na lição 33.
 - **Unidades 5 a 8**: o modo menor, intervalos com nome completo, tríades e inversões, condução de vozes, campo harmônico e cadências, tétrades, blues e improviso. Marco 2 na lição 65.
-- **Unidades 9 a 12**: leitura clássica e textura, harmonia cromática (secundárias, subV, empréstimo), o Brasil ao piano (baião, bossa, choro, tensões) e, agora, forma, arranjo e repertório.
+- **Unidades 9 a 12**: leitura clássica e textura, harmonia cromática (secundárias, subV, empréstimo), jazz e pop ao piano (baladas, tensões, voicings, swing) e, agora, forma, arranjo e repertório.
 
 Esta lição é a revisão de tudo, **intercalada**: cada bloco mistura habilidades de unidades diferentes, como no aquecimento das lições. A lição 100 é o recital.`,
     },
@@ -1279,7 +1279,7 @@ const l100: Lesson = {
   minutes: 60,
   objectives: [
     'Consigo tocar a abertura da Gymnopédie nº 1 com 95% das notas, mãos juntas, com pedal.',
-    'Consigo apresentar um recital de 3 músicas: uma clássica, uma de trilha e uma brasileira.',
+    'Consigo apresentar um recital de 3 músicas: uma clássica, uma de trilha e uma de jazz ou ragtime.',
     'Consigo escrever um arranjo próprio e a análise harmônica de uma das músicas.',
     'Consigo comparar as gravações das lições 1, 33, 65 e 100 e dizer o que mudou.',
   ],
@@ -1292,7 +1292,7 @@ const l100: Lesson = {
 1. **Recital** de 3 músicas, gravado em sequência:
    - **clássica**: a **Gymnopédie nº 1** (abertura, nesta lição) ou, se preferir, o Prelude in E minor (lição 95) ou o Minuet in G (unidade 9);
    - **trilha**: o **Tema de jogo** (lição 97) ou a trilha que você transcreveu;
-   - **brasileira**: o **Tanguinho** ou a **Bossa em Fá** (unidade 11).
+   - **jazz ou ragtime**: o **Maple Leaf Rag** (unidade 11) ou o seu arranjo solo de um standard.
 2. **Arranjo próprio** de uma melodia, com intro e final.
 3. **Análise harmônica escrita** de uma das músicas.
 4. **Comparação** com as gravações das lições 1, 33 e 65.
@@ -1383,7 +1383,7 @@ Termine com uma reflexão curta: o que mudou mais, o que ainda falta e qual é a
   ],
   project: {
     title: 'Recital final: três mundos, um arranjo e uma análise',
-    brief: 'Grave em sequência, sem recomeçar, uma música clássica (a Gymnopédie nº 1 ou outra do curso), uma de trilha (o Tema de jogo ou a sua transcrição) e uma brasileira (o Tanguinho ou a Bossa em Fá). Depois, toque o seu arranjo próprio, escreva a análise harmônica de uma das músicas e compare as gravações das lições 1, 33, 65 e 100.',
+    brief: 'Grave em sequência, sem recomeçar, uma música clássica (a Gymnopédie nº 1 ou outra do curso), uma de trilha (o Tema de jogo ou a sua transcrição) e uma de jazz ou ragtime (o Maple Leaf Rag ou o seu arranjo de um standard). Depois, toque o seu arranjo próprio, escreva a análise harmônica de uma das músicas e compare as gravações das lições 1, 33, 65 e 100.',
     steps: [
       'Passe as três músicas no "Tocar a música" com 95% das notas no andamento escolhido.',
       'Escreva o mapa e a cifra do arranjo próprio (forma, intro, turnaround, final, uma cor) e ensaie.',

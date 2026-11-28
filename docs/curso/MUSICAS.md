@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3 a 10: feitas. Unidades 11 e 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3 a 11: feitas. Unidade 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -82,7 +82,14 @@ Unidades 3 a 10: feitas. Unidades 11 e 12: a fazer (as rodadas seguem este mapa)
 | 10 | 79 | Creep · When the Saints (Fm no compasso 13) | importar · App | Empréstimo modal |
 | 10 | 80 | A Whole New World | importar | Modulação |
 | 10 | 81 | When the Saints, original e rearmonizada | App | Projeto |
-| 11 | 82–89 | **Unidade 11 vira "Jazz e pop ao piano"** (decisão do Rafael, 27/11/2026). Mantém os conceitos (tensões, voicings sem fundamental, comping, modos, forma) e troca o Brasil por jazz e pop. Sugestão de roteiro: 82 padrões de balada pop na esquerda (Imagine, Hallelujah), 83 tensões (add9, 7M(9), 13), 84 voicings sem fundamental, 85 comping de jazz em swing (The Pink Panther Theme), 86 modos como cores (Eleanor Rigby dórico, Scarborough Fair dórico, Norwegian Wood mixolídio), 87 standard com melodia e comping (Fly Me to the Moon, Autumn Leaves), 88 pop rearmonizado com voicings modernos (Let It Be com add9, sus e baixo invertido), 89 projeto: arranjo solo de um standard ou de uma pop. Baião, Bossa em Fá e Tanguinho saem. Domínio público possível: Scarborough Fair (tradicional), St. Louis Blues (W. C. Handy, 1914), Maple Leaf Rag (Joplin) | App · importar | Jazz e pop |
+| 11 | 82 | Imagine · Hallelujah · Someone Like You | importar | Padrões de esquerda da balada e baixo invertido |
+| 11 | 83 | Wonderwall · Fly Me to the Moon | importar | Tensões (add9, sus, 9ª e 13ª) |
+| 11 | 84 | Autumn Leaves · Fly Me to the Moon | importar | Voicings sem fundamental |
+| 11 | 85 | The Pink Panther Theme · Fly Me to the Moon · Sweet Georgia Brown | importar | Comping em swing (Charleston e two-feel) |
+| 11 | 86 | So What · Eleanor Rigby · Norwegian Wood | importar | Modos como cores (dórico, mixolídio) |
+| 11 | 87 | Fly Me to the Moon · Autumn Leaves · When the Saints rearmonizada (unidade 10) | importar · App | Standard: forma, notas-guia e comping |
+| 11 | 88 | Let It Be · A Whiter Shade of Pale · Hallelujah | importar | Pop rearmonizado (baixo invertido, add9, sus, 7M) |
+| 11 | 89 | Maple Leaf Rag, tema A (Mutopia) · Fly Me to the Moon · Let It Be | App · importar | Projeto: arranjo solo e ragtime |
 | 12 | 91 | Bohemian Rhapsody (balada) | importar | Arranjo solo |
 | 12 | 94 | Prelúdio Op. 28 nº 4 (Chopin) | App (Mutopia) | Pedal no romântico |
 | 12 | 95 | Nocturne Op. 9 nº 2 · Clair de lune (abertura) · Rhapsody on a Theme of Paganini, Var. 18 | App (Mutopia, `public/library`) · importar | Romântico e impressionista |
@@ -102,5 +109,5 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 8 | pronta | 2026-11-28 01:22 |
 | 9 | pronta | 2026-11-28 01:39 |
 | 10 | pronta | 2026-11-28 01:43 |
-| 11 | em construção | 2026-11-28 02:15 |
+| 11 | pronta | 2026-11-28 02:23 |
 | 12 | a fazer | |

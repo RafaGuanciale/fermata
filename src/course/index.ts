@@ -21,7 +21,7 @@ export const PLAN: { n: number; title: string; goal: string }[] = [
   { n: 8, title: 'Tétrades, blues e improviso', goal: 'Tocar tétrades e improvisar sobre um blues.' },
   { n: 9, title: 'Leitura clássica e textura', goal: 'Ler e tocar peças clássicas com duas vozes.' },
   { n: 10, title: 'Harmonia cromática', goal: 'Usar dominantes secundárias, ii–V, subV e empréstimo.' },
-  { n: 11, title: 'Brasil ao piano', goal: 'Tocar baião, bossa e voicings modernos.' },
+  { n: 11, title: 'Jazz e pop ao piano', goal: 'Acompanhar baladas pop e standards com tensões, voicings e swing.' },
   { n: 12, title: 'Arranjo, forma e repertório', goal: 'Arranjar e apresentar um recital próprio.' },
 ];
 

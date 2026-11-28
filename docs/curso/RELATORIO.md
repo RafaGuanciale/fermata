@@ -2,9 +2,25 @@
 
 ## Noite de 2026-11-27
 
-- **02:09 (já dia 28), em andamento** — Unidade 11, "Jazz e pop ao piano": as lições 83 (tensões) e 84 (voicings sem fundamental) já começam com as músicas: **Wonderwall** e **Fly Me to the Moon** na 83, **Autumn Leaves** e **Fly Me to the Moon** na 84. O resto da unidade está sendo reescrito.
-  - Músicas protegidas novas até aqui:
+- **02:09 às 02:23 (já dia 28)** — Unidade 11, que agora se chama **"Jazz e pop ao piano"**: troca **pronta**. Saíram o baião, a bossa, o choro e o tango (e as três músicas inventadas pelo app); todas as 8 lições (82 a 89) começam com as músicas que ensinam.
+  - **Lição 82 (nova, baladas pop)**: **Imagine**, **Hallelujah** e **Someone Like You**. Dois desenhos de mão esquerda (Dó–Sol–Dó–Sol e o arpejo que sobe até a décima), acordes com o baixo invertido (G/B, C/E) e as duas mãos juntas a 80 BPM.
+  - **Lição 83 (tensões)**: **Wonderwall** e **Fly Me to the Moon**.
+  - **Lição 84 (voicings sem fundamental)**: **Autumn Leaves** e **Fly Me to the Moon**.
+  - **Lição 85 (nova, acompanhamento de jazz)**: **The Pink Panther Theme**, Fly Me to the Moon e Sweet Georgia Brown. A direita toca o ritmo "Charleston" (no 1 e logo antes do 3, em swing) e a esquerda o baixo em duas notas por compasso, de 80 a 104 BPM.
+  - **Lição 86 (modos)**: **So What** (Miles Davis, Ré dórico), **Eleanor Rigby** e **Norwegian Wood**.
+  - **Lição 87 (nova, standard)**: Fly Me to the Moon, Autumn Leaves e When the Saints rearmonizada. Forma da música, uma melodia simples sobre os acordes do ciclo de quintas e o acompanhamento em swing.
+  - **Lição 88 (nova, pop rearmonizado)**: **Let It Be**, **A Whiter Shade of Pale** e Hallelujah. O baixo descendo Dó, Si, Lá, Sol... primeiro com os acordes simples, depois com add9, sus e 7M.
+  - **Lição 89 (projeto)**: o **Maple Leaf Rag** de Scott Joplin, novo no app (tema A, edição original de 1899 do Mutopia, no tom e no ritmo originais, alvo 80 BPM), mais um arranjo solo seu de Fly Me to the Moon ou Let It Be.
+  - Na Unidade 12, os textos que falavam do baião e do Tanguinho agora falam da balada, do swing e do Maple Leaf Rag.
+  - Pendente: Scarborough Fair (ficaria bem nos modos) não entrou, porque não achei uma fonte da melodia que todo mundo conhece.
+  - Para testar: o Maple Leaf Rag no "Tocar a música" da lição 89 (a mão direita desce para o grave nos compassos 7 e 8, como no original; veja se a partitura fica legível) e o swing da lição 85 (o segundo acorde do compasso deve cair logo antes do tempo 3, não no meio).
+  - Músicas protegidas novas da Unidade 11, para você baixar:
+    - Someone Like You (Adele) - Partitura - XML
     - Wonderwall (Oasis) - Partitura - XML
+    - The Pink Panther Theme (Henry Mancini) - Partitura - XML
+    - So What (Miles Davis) - Partitura - XML
+    - Eleanor Rigby (The Beatles) - Partitura - XML
+    - Norwegian Wood (The Beatles) - Partitura - XML
 
 - **01:44 às 01:55 (já dia 28)** — Unidade 11, "Jazz e pop ao piano": comecei e devolvi para a próxima rodada, sem mexer no app. A troca reescreve cinco das oito lições (as de baião, bossa, choro, samba e tango) e precisa de uma música final de domínio público com partitura conferida. A transcrição de Scarborough Fair que achei é outra melodia (a de Cecil Sharp, 1916), não a que todo mundo conhece; o Maple Leaf Rag do Mutopia é a próxima tentativa. Nada para testar desta parte.
 

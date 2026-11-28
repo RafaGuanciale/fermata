@@ -1,10 +1,11 @@
-// Unidade 11 — Brasil ao piano e voicings modernos (lições 82 a 89). Projeto final: Tanguinho (original, no estilo de Nazareth).
-// Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
-// Músicas protegidas (Asa Branca, bossa nova, Villa-Lobos) ficam só citadas no texto; o repertório tocado é original.
+// Unidade 11 — Jazz e pop ao piano (lições 82 a 89). Projeto final: Maple Leaf Rag, tema A (Scott Joplin, 1899).
+// Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md. Músicas: docs/curso/MUSICAS.md.
+// Até 27/11/2026 esta unidade era "Brasil ao piano" (baião, bossa, choro); o Rafael trocou por jazz e pop. As músicas protegidas
+// (Imagine, Fly Me to the Moon, So What...) entram só pelo catálogo (src/course/pieces.ts); o código só tem domínio público.
 
 import { chordLabel, choice, echo, keyName, mix, nearestVoicing, parseChord, playChord, spellInterval, spellScale, type ChoiceQuestion } from '../gens';
 import { PC_NAMES, n, pcOf, pick, ptName, shuffle } from '../music';
-import { melodyTask, rhythmTask, sci, twoHandTask } from '../tasks';
+import { melodyTask, rhythmTask, sci, swingBeat, swingTwoHands, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Accept, Exercise, ItemGen, Lesson, Rng, SongSpec, TimedTask, Unit } from '../types';
 
@@ -217,52 +218,62 @@ function rootlessHands(rng: Rng, bpm: number, keys = RL_KEYS): TimedTask {
   return twoHandTask(`${r} | ${r}`, `${l} | ${l}`, { bpm, fifths: k.fifths, caption: `${keyName(k.key)} maior: ${names.join(' – ')}. Esquerda: ${bass.map((m) => ptIn(m, flats)).join(', ')}.` });
 }
 
-// ---------- grooves ----------
+// ---------- balada pop (lição 82) ----------
 
-/** Baião na esquerda (3 + 3 + 2 semicolcheias): fundamental, 5ª acima, fundamental. */
-const baiaoBar = (root: string) => {
-  const r = n(root);
-  return `${root}:0.75 ${sci(r + 7)}:0.75 ${root}:0.5`;
+/** I–V–vi–IV em Dó: a fundamental da esquerda e a tríade da direita (posição perto do Dó4). */
+const POP_ROOTS: Record<string, Midi> = { C: n('C3'), G: n('G2'), Am: n('A2'), F: n('F2') };
+const POP_RH: Record<string, string> = { C: 'E4+G4+C5', G: 'D4+G4+B4', Am: 'E4+A4+C5', F: 'F4+A4+C5' };
+const POP_CHART = ['C', 'G', 'Am', 'F'];
+
+/** Padrão 1 da balada: 1-5-8-5 em colcheias, duas vezes no compasso. */
+const octBar = (c: string) => {
+  const r = POP_ROOTS[c];
+  return rep(`${sci(r)}:0.5 ${sci(r + 7)}:0.5 ${sci(r + 12)}:0.5 ${sci(r + 7)}:0.5`, 2).replace(/ \| /g, ' ');
 };
+/** Padrão 2: arpejo com a décima, 1-5-8-10-8-5-8-5. */
+const arpBar = (c: string) => {
+  const r = POP_ROOTS[c];
+  const tenth = r + (c === 'Am' ? 15 : 16);
+  return [r, r + 7, r + 12, tenth, r + 12, r + 7, r + 12, r + 7].map((m) => `${sci(m)}:0.5`).join(' ');
+};
+const blockBar = (c: string) => rep(`${POP_RH[c]}:1`, 4).replace(/ \| /g, ' ');
 
-/** Bossa: direita em dois compassos (1, "e" do 2, 4 | 2, "e" do 3); esquerda com a fundamental e a 5ª abaixo, longa-curta. */
-function bossaBars(upper: Midi[], root: Midi): { r: string; l: string } {
-  const c = upper.map(sci).join('+');
-  const f = sci(root - 5);
-  const b = sci(root);
-  return {
-    r: `${c}:1.5 ${c}:1.5 ${c}:1 | r:1 ${c}:1.5 ${c}:1.5`,
-    l: `${b}:1.5 ${b}:0.5 ${f}:1.5 ${f}:0.5 | ${b}:1.5 ${b}:0.5 ${f}:1.5 ${f}:0.5`,
-  };
+const POP_CAPTION = 'C | G | Am | F (I – V – vi – IV), duas vezes.';
+
+// ---------- swing e comping (lições 85, 87 e 89) ----------
+
+/** Ritmo no swing: as colcheias do contratempo caem no último terço do tempo. */
+function swingRhythm(text: string, opts: { bpm: number; caption: string }): TimedTask {
+  const base = rhythmTask(text, { bpm: opts.bpm, caption: opts.caption });
+  return { ...base, events: base.events.map((e) => ({ ...e, beat: swingBeat(e.beat) })), swing: true };
 }
 
-/** ii (2 compassos), V (2) e I (4) em bossa, num tom sorteado: 8 compassos, `cycles` vezes. */
-function bossaTask(rng: Rng, bpm: number, cycles = 1, keys = RL_KEYS.filter((x) => ['C', 'F', 'Bb', 'G'].includes(x.key))): TimedTask {
+/** Charleston na direita (no 1 e no "e" do 2) com um acorde; two-feel na esquerda (fundamental no 1, a 5ª do acorde embaixo no 3). */
+const charleston = (c: string) => `${c}:1.5 ${c}:0.5 r:2`;
+const twoFeel = (root: Midi) => `${sci(root)}:2 ${sci(root - 5)}:2`;
+
+/** ii (1 compasso), V (1) e I (2) em swing, num tom sorteado: voicings sem fundamental no Charleston e o baixo em two-feel. */
+function swingComp(rng: Rng, bpm: number, cycles = 1, keys = RL_KEYS.filter((x) => ['C', 'F', 'Bb', 'G'].includes(x.key))): TimedTask {
   const k = pick(rng, keys);
   const { upper } = rootlessChain(k.pc);
   // Fundamental entre Mi2 e Ré♯3, para a 5ª abaixo caber e a direita (de Fá3 para cima) ficar livre.
   const roots = (['ii', 'V', 'I'] as Role[]).map((x) => 40 + ((k.pc + ROOTLESS[x].deg - 40 + 120) % 12));
-  const parts = [bossaBars(upper[0], roots[0]), bossaBars(upper[1], roots[1]), bossaBars(upper[2], roots[2]), bossaBars(upper[2], roots[2])];
+  const chord = (i: number) => upper[i].map(sci).join('+');
+  const r = [charleston(chord(0)), charleston(chord(1)), charleston(chord(2)), charleston(chord(2))].join(' | ');
+  const l = [twoFeel(roots[0]), twoFeel(roots[1]), twoFeel(roots[2]), twoFeel(roots[2])].join(' | ');
   const flats = k.fifths < 0 || k.key === 'C';
   const names = (['ii', 'V', 'I'] as Role[]).map((x) => chordLabel(symbolOf(k.pc, x, flats)));
-  const r = Array.from({ length: cycles }, () => parts.map((p) => p.r).join(' | ')).join(' | ');
-  const l = Array.from({ length: cycles }, () => parts.map((p) => p.l).join(' | ')).join(' | ');
-  return twoHandTask(r, l, {
+  return swingTwoHands(rep(r, cycles), rep(l, cycles), {
     bpm,
     fifths: k.fifths,
-    caption: `${keyName(k.key)} maior: ${names[0]} (2 compassos), ${names[1]} (2), ${names[2]} (4). Esquerda: fundamental longa-curta, depois a 5ª abaixo longa-curta.`,
+    caption: `${keyName(k.key)} maior: ${names[0]} | ${names[1]} | ${names[2]} | ${names[2]}. Direita no Charleston (1 e o "e" do 2, em swing); esquerda: fundamental no 1, a 5ª do acorde embaixo no 3.`,
   });
 }
-
-// ---------- comping de uma cifra (lição 87) ----------
 
 /** Qualidade da cifra → voicing sem fundamental (m7 como o ii, 7 como o V, 7M como o I). */
 const RL_BY_Q: Record<string, Role> = { m7: 'ii', '7': 'V', '7M': 'I' };
 
-/**
- * Comping de bossa sobre uma cifra (um acorde por compasso): direita com voicings sem fundamental conduzidos,
- * no desenho de dois compassos; esquerda com a fundamental e a 5ª abaixo, longa-curta.
- */
+/** Comping em swing sobre uma cifra (um acorde por compasso): voicings sem fundamental conduzidos no Charleston, baixo em two-feel. */
 function chartComping(chart: string[], opts: { bpm: number; fifths: number; caption: string }): TimedTask {
   const parsed = chart.map((c) => {
     const m = /^([A-G](?:#|b)?)(m7|7M|7)$/.exec(c)!;
@@ -277,120 +288,119 @@ function chartComping(chart: string[], opts: { bpm: number; fifths: number; capt
   const ls: string[] = [];
   parsed.forEach((p, i) => {
     if (i > 0) cur = nearestVoicing(cur, p.pcs);
-    const c = cur.map(sci).join('+');
-    rs.push(i % 2 === 0 ? `${c}:1.5 ${c}:1.5 ${c}:1` : `r:1 ${c}:1.5 ${c}:1.5`);
-    const root = 40 + ((p.root - 40 + 120) % 12);
-    ls.push(`${sci(root)}:1.5 ${sci(root)}:0.5 ${sci(root - 5)}:1.5 ${sci(root - 5)}:0.5`);
+    rs.push(charleston(cur.map(sci).join('+')));
+    ls.push(twoFeel(40 + ((p.root - 40 + 120) % 12)));
   });
-  return twoHandTask(rs.join(' | '), ls.join(' | '), { bpm: opts.bpm, fifths: opts.fifths, caption: opts.caption });
+  return swingTwoHands(rs.join(' | '), ls.join(' | '), { bpm: opts.bpm, fifths: opts.fifths, caption: opts.caption });
 }
+
+/** O ciclo de quintas em Lá menor (o caminho de Fly Me to the Moon e de Autumn Leaves, com Dm7 no lugar do meio-diminuto). */
+const CYCLE_CHART = ['Am7', 'Dm7', 'G7', 'C7M', 'F7M', 'Dm7', 'E7', 'Am7'];
+const CYCLE_CAPTION = 'Am7 | Dm7 | G7 | C7M | F7M | Dm7 | E7 | Am7. Direita: voicings sem fundamental no Charleston. Esquerda: fundamental e a 5ª embaixo.';
+const cycleTask = (bpm: number) => () => chartComping(CYCLE_CHART, { bpm, fifths: 0, caption: CYCLE_CAPTION });
+
+/** Melodia de notas-guia (3ª ou 7ª de cada acorde, andando por grau) sobre shells no Charleston. */
+const GUIDE_R = ['G4:4', 'F4:4', 'F4:4', 'E4:4', 'E4:4', 'F4:4', 'G#4:4', 'A4:4'];
+const SHELLS = ['A2+G3', 'D3+F3', 'G2+F3', 'C3+E3', 'F2+E3', 'D3+F3', 'E2+D3', 'A2+G3'];
+const guideTask = (bpm: number) => () =>
+  swingTwoHands(GUIDE_R.join(' | '), SHELLS.map((s) => charleston(s)).join(' | '), {
+    bpm,
+    caption: 'Direita: Sol, Fá, Fá, Mi, Mi, Fá, Sol♯, Lá (a 7ª ou a 3ª de cada acorde). Esquerda: shells no Charleston: Lá–Sol, Ré–Fá, Sol–Fá, Dó–Mi, Fá–Mi, Ré–Fá, Mi–Ré, Lá–Sol.',
+  });
+
+// ---------- pop rearmonizado (lição 88) ----------
+
+/** C | G/B | Am | Am7/G | F | C/E | Dm7 | G: o baixo desce por grau, a direita fica perto do Dó4. */
+const DESC_L = ['C3:4', 'B2:4', 'A2:4', 'G2:4', 'F2:4', 'E2:4', 'D2:4', 'G2:4'];
+const DESC_PLAIN = ['C4+E4+G4', 'B3+D4+G4', 'C4+E4+A4', 'C4+E4+A4', 'C4+F4+A4', 'C4+E4+G4', 'C4+F4+A4', 'B3+D4+G4'].map((c) => rep(`${c}:1`, 4).replace(/ \| /g, ' '));
+/** A mesma linha com add9, 7M, sus e o m7(9) sem fundamental da lição 84. */
+const DESC_COLOR = [
+  'E4+G4+D5:2 E4+G4+D5:2', 'D4+G4+A4:2 D4+G4+A4:2', 'C4+E4+G4:2 C4+E4+G4:2', 'C4+E4+A4:2 C4+E4+A4:2',
+  'C4+E4+A4:2 C4+E4+A4:2', 'D4+G4+C5:2 D4+G4+C5:2', 'C4+E4+F4+A4:2 C4+E4+F4+A4:2', 'C4+D4+F4:2 B3+D4+F4:2',
+];
+const descTask = (color: boolean, bpm: number) => () =>
+  twoHandTask((color ? DESC_COLOR : DESC_PLAIN).join(' | '), DESC_L.join(' | '), {
+    bpm,
+    caption: color
+      ? 'Cadd9 | Gadd9/B | Am7 | Am7/G | F7M | Cadd9/E | Dm7(9) | G7sus4 → G7. Esquerda: Dó, Si, Lá, Sol, Fá, Mi, Ré, Sol.'
+      : 'C | G/B | Am | Am/G | F | C/E | Dm7 | G. Esquerda: Dó, Si, Lá, Sol, Fá, Mi, Ré, Sol (uma semibreve por compasso).',
+  });
+
+const BASS_MOTIFS = [
+  [n('C3'), n('B2'), n('A2'), n('G2')], [n('C3'), n('B2'), n('Bb2'), n('A2')], [n('F2'), n('E2'), n('D2'), n('G2')],
+  [n('A2'), n('G2'), n('F#2'), n('F2'), n('E2')], [n('G2'), n('A2'), n('B2'), n('C3')], [n('C3'), n('B2'), n('A2'), n('G2'), n('F2'), n('E2')],
+  [n('D3'), n('C3'), n('B2'), n('A2'), n('G2')], [n('E2'), n('F2'), n('F#2'), n('G2')],
+];
+const bassEar = echo({ motifs: BASS_MOTIFS, bpm: 84, skill: 'linha-de-baixo-ouvido' });
 
 // ---------- músicas ----------
 
-// Baião em Dó: melodia original do Fermata, com a 7ª menor (Si♭) do som nordestino. 2/4.
-const BAIAO_CHORDS = ['C3', 'C3', 'Bb2', 'C3', 'C3', 'C3', 'G2', 'C3', 'F2', 'F2', 'C3', 'C3', 'F2', 'Bb2', 'C3', 'C3'];
-const BAIAO_R = [
-  'C5:0.75 Bb4:0.75 G4:0.5', 'A4:0.5 G4:0.5 E4:1', 'F4:0.75 G4:0.75 Bb4:0.5', 'G4:2',
-  'C5:0.75 Bb4:0.75 G4:0.5', 'A4:0.5 Bb4:0.5 C5:1', 'D5:0.75 B4:0.75 F4:0.5', 'E4:1 r:1',
-  'A4:0.75 C5:0.75 A4:0.5', 'Bb4:0.5 A4:0.5 F4:1', 'G4:0.75 Bb4:0.75 G4:0.5', 'E4:1 r:1',
-  'A4:0.75 C5:0.75 D5:0.5', 'D5:0.5 C5:0.5 Bb4:1', 'Bb4:0.75 G4:0.75 E4:0.5', 'C4:1 r:1',
+// Maple Leaf Rag (Scott Joplin, 1899; domínio público), primeira parte (tema A) com a anacruse. Fonte: Mutopia Project,
+// JoplinS/maple/maple.ly (Chris Sawer, a partir da reprodução da edição original de 1899, domínio público); alturas absolutas
+// tiradas com o `ly rel2abs` do python-ly, sem rodar o LilyPond. Arranjo do Fermata: tom (Lá♭ maior), 2/4 e ritmo originais,
+// com as semicolcheias e a síncope; a direita toca a nota de cima das oitavas e dos acordes; na esquerda, as oitavas do baixo
+// viram a nota de baixo e os acordes ficam como na edição; a nota ligada pela barra vira nota + pausa (o motor não liga
+// compassos), e o Mi♭ do compasso 2 (semínima ligada a semicolcheia, figura que o motor não escreve) vira semínima e pausa;
+// a parte toca uma vez, com a segunda casa, e o último baixo (que leva ao tema B) vira pausa. Dó♭ e Fá♭ da edição estão
+// escritos como Si e Mi (mesma tecla).
+const MAPLE_A1 = 'r:0.25 Ab4:0.25 Eb5:0.25 Ab4:0.25 C5:0.25 Eb5:0.5 G4:0.25';
+const MAPLE_R = [
+  'r:2',
+  MAPLE_A1, 'Eb5:0.25 G4:0.25 Bb4:0.25 Eb5:1 r:0.25',
+  MAPLE_A1, 'Eb5:0.25 G4:0.25 Bb4:0.25 Eb5:0.75 r:0.25 Eb5:0.25',
+  'r:0.25 Ab4:0.25 B4:0.25 E5:0.25 r:0.25 Eb5:0.25 r:0.25 Eb5:0.25', 'r:0.25 Ab4:0.25 B4:0.25 E5:0.25 r:0.25 Eb5:0.25 r:0.5',
+  'r:0.25 Ab2:0.25 B2:0.25 Ab3:0.25 r:0.25 Ab3:0.25 B3:0.25 Ab4:0.25', 'r:0.25 Ab4:0.25 B4:0.25 Ab5:0.25 r:0.25 Ab5:0.25 B5:0.25 Ab6:0.25',
+  'Ab6:0.5 Ab6:0.5 Ab6:0.5 Ab6:0.25 Ab6:0.25', 'r:0.25 Eb6:0.25 F6:0.25 C6:0.25 Eb6:0.25 F6:0.5 Ab5:0.25',
+  'r:0.25 Bb5:0.25 B5:0.25 Ab5:0.25 Bb5:0.25 C6:0.5 Ab5:0.25', 'C6:0.25 Ab5:0.25 Bb5:0.5 Ab5:0.5 r:0.25 Ab5:0.25',
+  'r:0.5 Ab5:0.5 Ab5:0.5 Ab5:0.25 Ab5:0.25', 'r:0.25 Eb5:0.25 F5:0.25 C5:0.25 Eb5:0.25 F5:0.5 Ab4:0.25',
+  'r:0.25 Bb4:0.25 B4:0.25 Ab4:0.25 Bb4:0.25 C5:0.5 Ab4:0.25', 'C5:0.25 Ab4:0.25 Bb4:0.5 Ab4:0.5 r:0.5',
 ];
-const BAIAO_L = BAIAO_CHORDS.map((c, i) => (i === BAIAO_CHORDS.length - 1 ? 'C3:1 r:1' : baiaoBar(c)));
+const AB = 'Eb3+Ab3+C4';
+const EB7 = 'Eb3+G3+Db4';
+const MAPLE_L = [
+  'r:1.5 Eb2:0.5',
+  `Ab2:0.5 ${AB}:0.5 ${AB}:0.5 A2:0.5`, `Bb2:0.5 ${EB7}:0.5 ${EB7}:0.5 Eb2:0.5`,
+  `Ab2:0.5 ${AB}:0.5 ${AB}:0.5 A2:0.5`, `Bb2:0.5 ${EB7}:0.5 ${EB7}:0.5 Eb2:0.5`,
+  'E2:1 Eb2:0.5 Eb2:0.5', 'E2:1 Eb2:0.5 r:0.5',
+  'Ab1:0.5 r:0.5 Ab2:0.5 r:0.5', 'Ab3:0.5 r:0.5 Ab4:0.5 r:0.5',
+  rep('D4+F4+Ab4+B4:0.5', 4).replace(/ \| /g, ' '), rep('Eb4+Ab4+C5:0.5', 4).replace(/ \| /g, ' '),
+  'E4+Ab4+B4:0.5 E4+Ab4+B4:0.5 Eb4+Ab4+C5:0.5 Eb4+Ab4+C5:0.5', 'Eb4+Ab4+C5:0.5 Eb4+G4+Db5:0.5 Ab4+C5:0.5 r:0.5',
+  rep('D3+F3+Ab3+B3:0.5', 4).replace(/ \| /g, ' '), rep(`${AB}:0.5`, 4).replace(/ \| /g, ' '),
+  `E3+Ab3+B3:0.5 E3+Ab3+B3:0.5 ${AB}:0.5 ${AB}:0.5`, `${AB}:0.5 ${EB7}:0.5 Ab3+C4:0.5 r:0.5`,
+];
+/** Compassos `from` a `to` (contando a anacruse como compasso 0). */
+const mapleBars = (from: number, to: number) => ({ r: MAPLE_R.slice(from, to + 1).join(' | '), l: MAPLE_L.slice(from, to + 1).join(' | ') });
+const mapleTask = (from: number, to: number, bpm: number, caption?: string) => () => {
+  const b = mapleBars(from, to);
+  return twoHandTask(b.r, b.l, { bpm, beatsPerBar: 2, fifths: -4, caption });
+};
 
-const baiao: SongSpec = {
-  id: 'u11-baiao',
-  title: 'Baião em Dó',
-  composer: 'Fermata (melodia original)',
-  arrangement: 'melodia original na direita, com Si♭ (a 7ª menor nordestina); esquerda no baião 3 + 3 + 2: fundamental, 5ª acima e fundamental',
+const maple: SongSpec = {
+  id: 'u11-maple',
+  title: 'Maple Leaf Rag, tema A',
+  composer: 'Scott Joplin',
+  arrangement: 'arranjo do Fermata a partir da edição original de 1899 (Mutopia): tom, 2/4 e ritmo originais, com as semicolcheias e a síncope; a direita toca a nota de cima das oitavas; a esquerda faz o baixo numa nota só e os acordes da edição; a nota ligada pela barra (e o Mi♭ longo do compasso 2) vira nota e pausa; o tema A uma vez, com a segunda casa',
   bpm: 80,
   beatsPerBar: 2,
-  fifths: 0,
-  right: BAIAO_R.join(' | '),
-  left: BAIAO_L.join(' | '),
-  hands: 'duas',
-  pass: { accuracy: 0.85 },
-};
-
-// Bossa em Fá: melodia original do Fermata. Esquerda em shells (1-7-3 ou 1-3-7) no ritmo longa-curta da bossa.
-const SH: Record<string, string> = {
-  F7M: 'F2+E3+A3', Gm7: 'G2+F3+Bb3', C7: 'C3+E3+Bb3', Am7: 'A2+G3+C4', D7: 'D3+F#3+C4', Bb7M: 'Bb2+A3+D4', Bbm6: 'Bb2+Db3+G3',
-};
-const shell2 = (c: string) => `${SH[c]}:1.5 ${SH[c]}:1 ${SH[c]}:1.5`;
-const shellSplit = (a: string, b: string) => `${SH[a]}:1.5 ${SH[a]}:0.5 ${SH[b]}:2`;
-const BOSSA_R = [
-  'C5:1.5 A4:0.5 G4:1 A4:1', 'E5:1.5 D5:0.5 C5:2', 'Bb4:1.5 A4:0.5 G4:1 F4:1', 'E4:1 G4:1 Bb4:1.5 A4:0.5',
-  'r:1 C5:1 E5:1 D5:1', 'C5:1.5 A4:0.5 F#4:2', 'G4:1 Bb4:1 E4:1 G4:1', 'F4:3 r:1',
-  'D5:1.5 C5:0.5 A4:2', 'Db5:1.5 C5:0.5 Bb4:2', 'C5:1.5 B4:0.5 A4:1 G4:1', 'F#4:1 A4:1 C5:1.5 Bb4:0.5',
-  'r:1 A4:1 Bb4:1 D5:1', 'C5:1.5 Bb4:0.5 G4:2', 'A4:1 G4:1 E4:1 G4:1', 'F4:2 r:2',
-];
-const BOSSA_L = [
-  shell2('F7M'), shell2('F7M'), shell2('Gm7'), shell2('C7'), shell2('Am7'), shell2('D7'), shellSplit('Gm7', 'C7'), shell2('F7M'),
-  shell2('Bb7M'), shell2('Bbm6'), shell2('Am7'), shell2('D7'), shell2('Gm7'), shell2('C7'), shellSplit('Gm7', 'C7'), `${SH.F7M}:4`,
-];
-
-const bossa: SongSpec = {
-  id: 'u11-bossa',
-  title: 'Bossa em Fá',
-  composer: 'Fermata (melodia original)',
-  arrangement: 'melodia original com antecipações na direita; esquerda em shells no ritmo da bossa (1, "e" do 2 e "e" do 3). Forma A (8 compassos) e B (8), com o B♭m6 emprestado no compasso 10',
-  bpm: 72,
-  beatsPerBar: 4,
-  fifths: -1,
-  right: BOSSA_R.join(' | '),
-  left: BOSSA_L.join(' | '),
-  hands: 'duas',
-  pass: { accuracy: 0.85 },
-};
-
-// Tanguinho: tango brasileiro original do Fermata, no estilo de Ernesto Nazareth. 2/4, esquerda em habanera (3 + 1 + 2 + 2).
-const TANGO_BAR: Record<string, string> = {
-  C: 'C3:0.75 E3+G3:0.25 G2:0.5 E3+G3:0.5',
-  G7: 'G2:0.75 B2+F3:0.25 D2:0.5 B2+F3:0.5',
-  A7: 'A2:0.75 C#3+G3:0.25 E2:0.5 C#3+G3:0.5',
-  Dm: 'D3:0.75 F3+A3:0.25 A2:0.5 F3+A3:0.5',
-};
-const TANGO_CHORDS = ['C', 'G7', 'G7', 'C', 'C', 'A7', 'Dm', 'Dm', 'Dm', 'G7', 'C', 'A7', 'Dm', 'G7', 'C', 'C'];
-const TANGO_R = [
-  'E5:0.25 D5:0.25 C5:0.25 E5:0.25 G5:0.5 E5:0.5', 'F5:0.75 D5:0.25 B4:0.5 G4:0.5', 'F4:0.25 G4:0.25 B4:0.25 D5:0.25 F5:0.5 E5:0.5', 'E5:0.75 C5:0.25 G4:1',
-  'E5:0.25 D5:0.25 C5:0.25 E5:0.25 G5:0.5 C6:0.5', 'Bb5:0.75 A5:0.25 G5:0.5 E5:0.5', 'F5:0.75 E5:0.25 D5:1', 'A4:0.25 C#5:0.25 D5:0.25 F5:0.25 A5:1',
-  'A5:0.75 F5:0.25 D5:0.5 F5:0.5', 'G5:0.75 F5:0.25 D5:0.5 B4:0.5', 'C5:0.25 D5:0.25 E5:0.25 G5:0.25 C6:0.5 G5:0.5', 'A5:0.75 G5:0.25 E5:0.5 C#5:0.5',
-  'D5:0.75 F5:0.25 A5:0.5 F5:0.5', 'B4:0.75 D5:0.25 F5:0.5 D5:0.5', 'E5:0.25 D5:0.25 C5:0.25 B4:0.25 C5:0.5 G4:0.5', 'C5:1 r:1',
-];
-const TANGO_L = TANGO_CHORDS.map((c, i) => (i === TANGO_CHORDS.length - 1 ? 'C3:1 r:1' : TANGO_BAR[c]));
-
-const tanguinho: SongSpec = {
-  id: 'u11-tanguinho',
-  title: 'Tanguinho',
-  composer: 'Fermata (original, no estilo de Ernesto Nazareth)',
-  arrangement: 'tango brasileiro original: melodia em semicolcheias na direita; esquerda em habanera (baixo, acorde, baixo, acorde) com as secundárias A7 e G7',
-  bpm: 60,
-  beatsPerBar: 2,
-  fifths: 0,
-  right: TANGO_R.join(' | '),
-  left: TANGO_L.join(' | '),
+  fifths: -4,
+  right: MAPLE_R.join(' | '),
+  left: MAPLE_L.join(' | '),
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
 
 // ---------- geradores reaproveitados ----------
 
-const mixoScale = modeScale({ tonics: ['C4', 'G4', 'D4', 'F4', 'A4'], modes: ['mixolídio', 'nordestina'] });
 const compound = compoundInterval({ from: ['C4', 'D4', 'E4', 'F4', 'G3', 'A3', 'Bb3'], ivs: ['9m', '9M', '9A', '11J', '11A', '13m', '13M'] });
 const TENSION_SYMBOLS = ['C7M(9)', 'F7M(9)', 'G7(13)', 'D7(13)', 'Dm7(9)', 'Am7(9)', 'G7(b9)', 'E7(b9)', 'A7(#9)', 'G7(#9)', 'F7M(#11)', 'C7M(#11)', 'A7(b13)', 'E7(b13)', 'Bb7(9)', 'C6(9)', 'Dm7(11)'];
 const tensions = playChord({ symbols: TENSION_SYMBOLS, low: 48, high: 84, omitFifth: true, skill: 'tensoes' });
 const rlChord = rootlessChord({ keys: RL_KEYS.map((x) => x.key), roles: ['ii', 'V', 'I'], forms: ['A', 'B'] });
 const rlSeq = rootlessSeq({ keys: RL_KEYS.map((x) => x.key), lead: 2 });
+const slashChords = playChord({ symbols: ['C', 'G/B', 'Am', 'Am7/G', 'F', 'C/E', 'Dm7', 'G', 'F/A', 'Em'], low: 36, high: 84, skill: 'baixo-invertido' });
+const popChords = playChord({ symbols: ['Cadd9', 'Gsus4', 'G/B', 'Am7', 'F7M', 'C/E', 'Dm7', 'Fadd9', 'Am7/G', 'Dsus4', 'Em7', 'F/A'], low: 36, high: 84, skill: 'cifras-pop' });
+
 
 // ---------- perguntas ----------
-
-const BAIAO_Q: ChoiceQuestion[] = [
-  { q: 'O desenho do baião em 2/4, em semicolcheias, é…', options: ['3 + 3 + 2', '2 + 2 + 2 + 2', '4 + 4'], answer: 0, why: 'Oito semicolcheias divididas em 3 + 3 + 2: ataques no 1, na última semicolcheia do 1 e no "e" do 2.' },
-  { q: 'O som nordestino, sobre um acorde maior, vem principalmente de…', options: ['A 7ª menor (em Dó, o Si♭)', 'A 3ª menor', 'A 6ª menor'], answer: 0, why: 'Maior com 7ª menor é o mixolídio. A escala nordestina ainda sobe a 4ª (Fá♯).' },
-  { q: 'Dó mixolídio tem as mesmas notas de…', options: ['Fá maior', 'Sol maior', 'Dó maior'], answer: 0, why: 'Dó, Ré, Mi, Fá, Sol, Lá, Si♭: a escala de Fá maior começando no 5º grau.' },
-  { q: 'A escala nordestina em Dó é…', options: ['Dó, Ré, Mi, Fá♯, Sol, Lá, Si♭', 'Dó, Ré, Mi♭, Fá, Sol, Lá♭, Si♭', 'Dó, Ré, Mi, Fá, Sol, Lá, Si'], answer: 0, why: 'Maior com 4ª aumentada (lídio) e 7ª menor (mixolídio).' },
-  { q: 'Quem levou o baião para o país inteiro, nos anos 1940?', options: ['Luiz Gonzaga, com Humberto Teixeira', 'Tom Jobim', 'Ernesto Nazareth'], answer: 0, why: 'Luiz Gonzaga, com a sanfona, a zabumba e o triângulo.' },
-  { q: 'Em Dó, o acorde de Si♭ é o…', options: ['♭VII, emprestado do mixolídio', 'V7', 'vii°'], answer: 0, why: 'No campo de Dó maior o 7º grau é Si diminuto; o Si♭ maior vem do modo com 7ª menor.' },
-];
 
 const TENSION_Q: ChoiceQuestion[] = [
   { q: 'A 9ª é…', options: ['A 2ª uma oitava acima', 'A 7ª uma oitava acima', 'A 3ª uma oitava acima'], answer: 0, why: '9 = 2 + 7: a mesma letra da 2ª, na oitava de cima.' },
@@ -412,121 +422,108 @@ const ROOTLESS_Q: ChoiceQuestion[] = [
 
 // ---------- lições ----------
 
+const POP_Q: ChoiceQuestion[] = [
+  { q: 'Na balada pop ao piano, a esquerda costuma…', options: ['Fazer o baixo e o movimento (1-5-8, arpejo), enquanto a direita segura os acordes ou a melodia', 'Tocar a melodia', 'Ficar parada no tempo 1'], answer: 0, why: 'A esquerda faz o papel do baixo e da guitarra base; a direita, o dos acordes e da voz.' },
+  { q: 'G/B é…', options: ['O acorde de Sol com o Si no baixo', 'Sol e Si tocados juntos, sem mais nada', 'Um acorde de Si'], answer: 0, why: 'A letra antes da barra é o acorde; a de depois, a nota do baixo. Aqui o baixo é a 3ª do Sol: a 1ª inversão.' },
+  { q: 'Por que C – G/B – Am soa tão "liso"?', options: ['O baixo desce por grau: Dó, Si, Lá', 'Porque os três acordes são maiores', 'Porque não tem baixo'], answer: 0, why: 'A inversão põe o Si no baixo, entre o Dó e o Lá: a linha anda um passo por vez.' },
+  { q: 'No arpejo 1-5-8-10 sobre Dó, a décima é…', options: ['Mi, a 3ª uma oitava acima', 'Ré', 'Si'], answer: 0, why: 'A 10ª é a 3ª + oitava: em Dó3, o Mi4. Ela diz se o acorde é maior ou menor.' },
+  { q: 'Em Am, a décima do arpejo 1-5-8-10 é…', options: ['Dó (10ª menor, 15 semitons)', 'Dó♯ (10ª maior)', 'Mi'], answer: 0, why: 'Lá menor tem a 3ª menor (Dó); a 10ª é a mesma nota uma oitava acima.' },
+  { q: 'I – V – vi – IV em Dó é…', options: ['C – G – Am – F', 'C – F – G – C', 'Am – F – C – G'], answer: 0, why: 'A progressão de centenas de canções pop (unidade 7). Am – F – C – G é a mesma, começando no vi.' },
+];
+
 const l82: Lesson = {
   n: 82,
   id: 'l82',
-  title: 'Baião',
+  title: 'Baladas pop: a mão esquerda',
   minutes: 60,
   objectives: [
-    'Consigo tocar o baião na esquerda (3 + 3 + 2) a 80 BPM, com as notas em ±50 ms.',
-    'Consigo tocar as escalas mixolídia e nordestina em cinco tons.',
-    'Consigo tocar o Baião em Dó com as duas mãos, 16 compassos, a 80 BPM.',
+    'Consigo tocar dois padrões de esquerda de balada (1-5-8 e arpejo com a décima) sobre I – V – vi – IV, a 80 BPM.',
+    'Consigo tocar acordes com o baixo invertido (G/B, C/E, Am7/G) pela cifra.',
+    'Consigo juntar os acordes da direita com o padrão da esquerda, 8 compassos no tempo.',
+  ],
+  music: [
+    { piece: 'imagine', why: 'Imagine, do John Lennon: o piano bate os acordes em semínimas (C – C7M – F) e a esquerda segura o baixo. É o padrão mais simples da balada, e o mais famoso.' },
+    { piece: 'hallelujah', why: 'Hallelujah, do Leonard Cohen, em 6/8: a esquerda quebra o acorde (C – Am) num movimento que não para, como o arpejo desta lição.' },
+    { piece: 'someone-like-you', why: 'Someone Like You, da Adele: o piano repete um acorde quebrado em colcheias do começo ao fim, com o baixo descendo (Lá – Sol♯ – Fá♯ – Ré). É o arpejo com baixo invertido desta lição, numa música inteira.' },
   ],
   blocks: [
     {
       kind: 'text',
-      title: 'O baião',
-      body: `O **baião** é o ritmo do sertão nordestino que Luiz Gonzaga e Humberto Teixeira levaram para o Brasil inteiro nos anos 1940. A formação clássica tem três instrumentos: **sanfona** (melodia e acordes), **zabumba** (o bumbo grave, com baqueta) e **triângulo** (o pulso agudo).
+      title: 'A esquerda faz a banda',
+      body: `Numa balada pop gravada com banda, o baixo toca a fundamental, a guitarra ou o teclado fazem o movimento e a voz canta. Ao piano solo, você divide isso entre as mãos:
 
-"Asa Branca" (1947) é o baião mais famoso, mas é música protegida: aqui você toca uma melodia original, escrita para treinar o mesmo groove.
+- a **esquerda** é o baixo e o movimento: a fundamental no tempo 1 e um desenho que não deixa o som morrer;
+- a **direita** segura os acordes (ou, mais tarde, a melodia).
 
-Ao piano, a **esquerda faz o papel da zabumba**. Ela repete um desenho de um compasso, um **ostinato**, enquanto a direita canta a melodia. Quando o ostinato fica automático, a melodia pode fazer o que quiser por cima.`,
+As baladas mais conhecidas usam poucos desenhos de esquerda. Em **Imagine**, os acordes vêm em semínimas; em **Hallelujah** e **Someone Like You**, o acorde é quebrado em colcheias. Com dois desenhos e a progressão **I – V – vi – IV** (C – G – Am – F, da unidade 7) você já acompanha boa parte do pop.`,
     },
     {
       kind: 'text',
-      title: 'A figura: 3 + 3 + 2',
-      body: `O baião é escrito em **2/4**: dois tempos de semínima por compasso. Divida o compasso em 8 semicolcheias e conte os números: "**1** 2 3 4 **5** 6 7 8" (o 1 e o 5 são os tempos). A zabumba toca nas semicolcheias **1, 4 e 7**, isto é, em grupos de **3 + 3 + 2**:
+      title: 'Padrão 1: 1-5-8',
+      body: `O primeiro desenho é o mais usado: **fundamental, 5ª e oitava**, e volta na 5ª, em colcheias. Em Dó: Dó3, Sol3, Dó4, Sol3, e de novo. A mão fica aberta, com o 5º dedo na fundamental, o 2º na 5ª e o polegar na oitava, e não sai do lugar no compasso.
 
-- ataque no **1** (dura 3 semicolcheias: uma colcheia pontuada);
-- ataque na **última semicolcheia do tempo 1** (dura 3 semicolcheias);
-- ataque no **"e" do tempo 2** (dura 2 semicolcheias: uma colcheia).
-
-Na partitura tradicional o segundo ataque aparece como semicolcheia ligada a uma colcheia. O app escreve a mesma coisa como duas colcheias pontuadas e uma colcheia: soa igual.
-
-Na esquerda, o desenho mais usado é **fundamental – 5ª acima – fundamental**. Em Dó: Dó3, Sol3, Dó3.`,
+Na troca de acorde, só o 5º dedo procura a nova fundamental; a mão vai junto, com o mesmo formato. Em C – G – Am – F: Dó3, Sol2, Lá2, Fá2.`,
     },
     {
       kind: 'example',
-      title: 'Ouvir o 3 + 3 + 2',
+      title: 'Os dois padrões',
       steps: [
-        { say: 'Primeiro, colcheias retas, para comparar: tudo no tempo e no "e".', play: { bpm: 80, steps: [n('C3'), n('G3'), n('C3'), n('G3'), n('C3'), n('G3'), n('C3'), n('G3')].map((m) => ({ midis: [m], beats: 0.5 })) } },
-        { say: 'Agora o **baião**: Dó (longo), Sol (longo), Dó (curto). Repare como o Sol chega "antes" do tempo 2.', play: { bpm: 80, steps: [0, 1].flatMap(() => [{ midis: [n('C3')], beats: 0.75 }, { midis: [n('G3')], beats: 0.75 }, { midis: [n('C3')], beats: 0.5 }]) }, keys: [n('C3'), n('G3')] },
-        { say: 'O mesmo desenho em Si♭ e em Sol: a mão só muda de casa.', play: { bpm: 80, steps: [{ midis: [n('Bb2')], beats: 0.75 }, { midis: [n('F3')], beats: 0.75 }, { midis: [n('Bb2')], beats: 0.5 }, { midis: [n('G2')], beats: 0.75 }, { midis: [n('D3')], beats: 0.75 }, { midis: [n('G2')], beats: 0.5 }, { midis: [n('C3')], beats: 2 }] } },
+        { say: 'Padrão 1 em Dó: Dó, Sol, Dó, Sol, duas vezes no compasso.', play: { bpm: 80, steps: [n('C3'), n('G3'), n('C4'), n('G3'), n('C3'), n('G3'), n('C4'), n('G3')].map((m) => ({ midis: [m], beats: 0.5 })) }, keys: [n('C3'), n('G3'), n('C4')] },
+        { say: 'Padrão 2 em Dó: Dó, Sol, Dó, **Mi** (a décima), e volta. A décima abre o som e diz que o acorde é maior.', play: { bpm: 80, steps: [n('C3'), n('G3'), n('C4'), n('E4'), n('C4'), n('G3'), n('C4'), n('G3')].map((m) => ({ midis: [m], beats: 0.5 })) }, keys: [n('C3'), n('G3'), n('C4'), n('E4')] },
+        { say: 'Agora com a direita: os acordes em semínimas em C – G – Am – F, e a esquerda andando 1-5-8-5 (aqui uma nota por tempo, para ouvir a soma).', play: { bpm: 80, steps: POP_CHART.flatMap((c) => [0, 1, 2, 3].map((i) => ({ midis: [POP_ROOTS[c] + [0, 7, 12, 7][i], ...POP_RH[c].split('+').map((x) => n(x))], beats: 1 }))) } },
       ],
+    },
+    {
+      kind: 'exercise',
+      id: 'l82-padrao1',
+      exercise: quickTimed('Padrão 1 na esquerda', 'Só a esquerda: 1-5-8-5 em colcheias, em C | G | Am | F, de 60 até 80 BPM. Janela de ±50 ms.', () => melodyTask(POP_CHART.map(octBar).join(' | '), { bpm: 60, clef: 'bass', caption: 'Dó–Sol–Dó–Sol | Sol–Ré–Sol–Ré | Lá–Mi–Lá–Mi | Fá–Dó–Fá–Dó.' }), { window: 50, ladder: { from: 60, to: 80, step: 4 } }),
     },
     {
       kind: 'callout',
       tone: 'erro',
-      title: 'endireitar o ritmo',
-      body: 'O erro mais comum é tocar o segundo ataque no "e" do tempo 1, como colcheia reta. Aí o baião vira marcha. O segundo ataque vem **uma semicolcheia depois** do "e": quase em cima do tempo 2, mas antes dele. Conte as semicolcheias em voz alta até o corpo aprender.',
-    },
-    {
-      kind: 'exercise',
-      id: 'l82-ritmo',
-      exercise: quickTimed('O 3 + 3 + 2 em qualquer tecla', 'Quatro compassos a 70 BPM, em qualquer tecla. Faça 2 passadas boas.', () => rhythmTask(rep('x:0.75 x:0.75 x:0.5', 4), { bpm: 70, beatsPerBar: 2, caption: 'Baião: colcheia pontuada, colcheia pontuada, colcheia. Conte as semicolcheias "1 2 3 4 5 6 7 8" e toque no 1, no 4 e no 7.' }), { reps: 2, window: 60 }),
-    },
-    {
-      kind: 'exercise',
-      id: 'l82-esquerda',
-      exercise: quickTimed('Zabumba na esquerda', 'A esquerda sozinha: Dó, Dó, Si♭, Dó, um compasso cada, de 64 até 80 BPM. Janela de ±50 ms.', () => melodyTask([baiaoBar('C3'), baiaoBar('C3'), baiaoBar('Bb2'), baiaoBar('C3')].join(' | '), { bpm: 64, beatsPerBar: 2, clef: 'bass', caption: 'Fundamental, 5ª acima, fundamental: Dó–Sol–Dó e Si♭–Fá–Si♭.' }), { window: 50, ladder: { from: 64, to: 80, step: 4 } }),
+      title: 'acentuar todas as colcheias',
+      body: 'O padrão de esquerda é fundo, não melodia. Se cada colcheia sai com a mesma força, a balada vira estudo de técnica. Ponha peso na fundamental do tempo 1 e deixe as outras notas leves, quase sopradas: o ouvido tem que sentir o baixo e a direita na frente.',
     },
     {
       kind: 'text',
-      title: 'O som nordestino: a 7ª menor',
-      body: `A melodia de baião tem um tempero que você reconhece de longe: sobre um acorde **maior**, ela usa a **7ª menor**. Em Dó, em vez de Si, aparece **Si♭**.
+      title: 'Padrão 2: o arpejo com a décima',
+      body: `O segundo desenho troca a volta na 5ª por uma subida até a **décima** (a 3ª uma oitava acima): **1-5-8-10**, e desce 8-5-8-5. Em Dó: Dó3, Sol3, Dó4, Mi4, Dó4, Sol3, Dó4, Sol3.
 
-Essa escala (maior com 7ª menor) é o modo **mixolídio**: Dó, Ré, Mi, Fá, Sol, Lá, Si♭. São as notas de Fá maior começando no Dó. Por isso o acorde de **Si♭** (o ♭VII) aparece tanto em baião: ele sai do próprio modo.
-
-Muitas melodias nordestinas vão além e sobem também a 4ª: Dó, Ré, Mi, **Fá♯**, Sol, Lá, **Si♭**. É a chamada **escala nordestina** (ou lídio-mixolídio): a 4ª aumentada do lídio com a 7ª menor do mixolídio. Na lição 86 você vai ver os modos como cores; aqui basta saber que a 7ª menor é a cor principal.`,
+A décima é a nota que diz a qualidade: em Dó maior ela é Mi; em Lá menor, Dó (10ª menor, 15 semitons). A mão precisa abrir mais. Se não alcançar, não estique: solte a fundamental depois de tocá-la e deixe o pulso girar até a décima. O pedal (unidade 4) segura o baixo por você.`,
     },
-    {
-      kind: 'keys',
-      low: 60,
-      high: 72,
-      lit: [60, 62, 64, 65, 67, 69, 70, 72],
-      labels: { 60: 'Dó', 62: 'Ré', 64: 'Mi', 65: 'Fá', 67: 'Sol', 69: 'Lá', 70: 'Si♭', 72: 'Dó' },
-      caption: 'Dó mixolídio: a escala de Dó maior com o Si♭. Na escala nordestina, o Fá vira Fá♯.',
-    },
-    { kind: 'exercise', id: 'l82-escalas', exercise: items('Mixolídio e nordestina', 'O app pede uma das duas escalas, em cinco tônicas. Suba uma oitava.', mixoScale, 8, 48, 84, 0.85, 'fade') },
     {
       kind: 'exercise',
-      id: 'l82-improviso',
-      exercise: {
-        kind: 'improv',
-        title: 'Improviso em Dó mixolídio',
-        how: 'O app toca C7 em loop. Improvise com Dó mixolídio (as brancas com Si♭ no lugar de Si), deixe respiros e termine no Dó. Use o Si♭ de propósito: é a cor.',
-        pcs: [0, 2, 4, 5, 7, 9, 10],
-        bars: 8,
-        bpm: 80,
-        beatsPerBar: 4,
-        backing: Array.from({ length: 8 }, () => [n('C3'), n('G3'), n('Bb3'), n('E4')]),
-        low: 60,
-        high: 84,
-        pass: { inSet: 0.9, restsPer4: 1, endOn: [0] },
-      },
+      id: 'l82-padrao2',
+      exercise: quickTimed('Arpejo com a décima', 'Só a esquerda, em C | G | Am | F, de 56 até 76 BPM. Janela de ±50 ms.', () => melodyTask(POP_CHART.map(arpBar).join(' | '), { bpm: 56, clef: 'bass', caption: 'Décimas: Mi (em C), Si (em G), Dó (em Am), Lá (em F).' }), { window: 50, ladder: { from: 56, to: 76, step: 4 } }),
     },
+    {
+      kind: 'text',
+      title: 'O baixo invertido',
+      body: `As baladas ao piano raramente deixam o baixo pular de fundamental em fundamental. Elas **invertem** um acorde para o baixo andar por grau. A cifra mostra isso com a barra: **G/B** é o Sol com o **Si no baixo**; **C/E**, o Dó com o Mi no baixo; **Am7/G**, o Lá menor com sétima e o Sol (a 7ª) no baixo.
+
+Em C – **G/B** – Am, o baixo desce Dó, Si, Lá: a mesma progressão, agora com uma linha. Você já viu inversões na unidade 6; aqui elas trabalham para a esquerda. A direita toca o acorde normal, e a esquerda toca a nota depois da barra.`,
+    },
+    { kind: 'exercise', id: 'l82-inversoes', exercise: items('Acordes com o baixo invertido', 'Toque o acorde da cifra. Quando houver barra, a nota mais grave é a que vem depois dela.', slashChords, 8, 36, 84, 0.85, 'fade') },
     {
       kind: 'text',
       title: 'Mãos juntas',
-      body: `No Baião em Dó a esquerda nunca muda de desenho: só muda de casa (Dó, Si♭, Sol, Fá). A direita tem duas figuras: a mesma colcheia pontuada da zabumba (a melodia "conversa" com o baixo) e colcheias retas.
+      body: `Junte os dois papéis: a direita toca as tríades em **semínimas**, perto do Dó4 (C: Mi, Sol, Dó; G: Ré, Sol, Si; Am: Mi, Lá, Dó; F: Fá, Lá, Dó), e a esquerda faz o **padrão 1**. Cada semínima da direita cai junto com uma colcheia da esquerda; a outra colcheia fica sozinha.
 
-Estude assim: primeiro a esquerda sozinha até não pensar nela; depois a direita sozinha, contando; por fim, juntas e devagar. Os ataques que caem juntos nas duas mãos (as semicolcheias 1, 4 e 7, nos compassos com colcheia pontuada) são as âncoras: se eles saírem juntos, o resto encaixa.
-
-O critério da tabela é tocar os **16 compassos com cada nota em ±50 ms**, a 80 BPM.`,
+Estude a esquerda até ela ir sozinha. Depois junte devagar, contando "1 e 2 e 3 e 4 e". A meta é **80 BPM**, o andamento de muitas baladas.`,
     },
     {
       kind: 'exercise',
       id: 'l82-maos',
-      exercise: quickTimed('Primeira frase, mãos juntas', 'Compassos 1 a 4, a 72 BPM, janela de ±50 ms. Duas passadas boas.', () => twoHandTask(BAIAO_R.slice(0, 4).join(' | '), BAIAO_L.slice(0, 4).join(' | '), { bpm: 72, beatsPerBar: 2, caption: 'Esquerda: Dó | Dó | Si♭ | Dó, no baião.' }), { reps: 2, window: 50 }),
+      exercise: quickTimed('Balada com as duas mãos', 'Acordes em semínimas na direita, padrão 1 na esquerda, 8 compassos, de 60 até 80 BPM. Janela de ±50 ms.', () => twoHandTask(rep(POP_CHART.map(blockBar).join(' | '), 2), rep(POP_CHART.map(octBar).join(' | '), 2), { bpm: 60, caption: `${POP_CAPTION} Esquerda no padrão 1 (1-5-8-5).` }), { window: 50, ladder: { from: 60, to: 80, step: 4 } }),
     },
-    { kind: 'song', songId: 'u11-baiao', why: 'A música da lição: 16 compassos de baião com a 7ª menor nordestina.' },
+    { kind: 'exercise', id: 'l82-quiz', exercise: quiz('Balada pop', 'Responda sem tocar.', POP_Q) },
   ],
-  review: [mixoScale, choice(BAIAO_Q, 'baiao')],
+  review: [slashChords, choice(POP_Q, 'pop')],
   checkpoint: [
-    quickTimed('Baião em Dó inteiro', 'Os 16 compassos, mãos juntas, a 80 BPM. Meta: 85% das notas em ±50 ms.', () => twoHandTask(BAIAO_R.join(' | '), BAIAO_L.join(' | '), { bpm: 80, beatsPerBar: 2 }), { window: 50 }),
-    items('Escalas do sertão', '8 escalas, sem dica. Meta: 7 de 8.', mixoScale, 8, 48, 84, 0.85, 'off'),
+    quickTimed('Balada no tempo', 'Acordes na direita e padrão 1 na esquerda, 8 compassos, a 80 BPM, sem dicas. Meta: 85% das notas em ±50 ms.', () => twoHandTask(rep(POP_CHART.map(blockBar).join(' | '), 2), rep(POP_CHART.map(octBar).join(' | '), 2), { bpm: 80 }), { window: 50 }),
+    items('Baixo invertido', '8 cifras, sem dica. Meta: 7 de 8.', slashChords, 8, 36, 84, 0.85, 'off'),
   ],
-  exit: [mixoScale, choice(BAIAO_Q, 'baiao')],
+  exit: [slashChords, choice(POP_Q, 'pop')],
 };
 
 const l83: Lesson = {
@@ -692,14 +689,6 @@ Dica de leitura: a 3ª do ii é o **4º grau** do tom e a 7ª do ii é a **tôni
   exit: [rlChord, choice(ROOTLESS_Q, 'rootless')],
 };
 
-const BOSSA_Q: ChoiceQuestion[] = [
-  { q: 'Síncope é…', options: ['Um ataque no tempo fraco (ou no contratempo) que se prolonga pelo tempo forte', 'Uma nota mais forte no tempo 1', 'Uma pausa no fim da frase'], answer: 0, why: 'O acento sai do lugar esperado: o ataque vem antes e o tempo forte fica "dentro" da nota.' },
-  { q: 'Antecipação é…', options: ['A nota ou o acorde seguinte chegar uma colcheia antes da barra', 'Tocar mais rápido que o metrônomo', 'Repetir o compasso anterior'], answer: 0, why: 'Na bossa, a melodia e o acorde do próximo compasso costumam entrar no "e" do 4.' },
-  { q: 'O desenho da direita, em dois compassos, ataca…', options: ['No 1, no "e" do 2 e no 4 | no 2 e no "e" do 3', 'Em todos os tempos', 'Só no 1 de cada compasso'], answer: 0, why: 'É um dos desenhos clássicos do violão de bossa transposto para o piano.' },
-  { q: 'Na esquerda, o baixo da bossa é…', options: ['Fundamental longa-curta, depois a 5ª abaixo longa-curta', 'Colcheias retas na fundamental', 'Um acorde inteiro no tempo 1'], answer: 0, why: 'Semínima pontuada e colcheia, como o surdo do samba "desacelerado".' },
-  { q: 'Quem fixou a "batida" da bossa nova no violão, no fim dos anos 1950?', options: ['João Gilberto', 'Luiz Gonzaga', 'Chiquinha Gonzaga'], answer: 0, why: 'Em gravações como "Chega de Saudade" (1958), com Tom Jobim nos arranjos.' },
-];
-
 const MODES_Q: ChoiceQuestion[] = [
   { q: 'A nota característica do lídio é…', options: ['A 4ª aumentada', 'A 7ª menor', 'A 2ª menor'], answer: 0, why: 'Lídio = maior com ♯4. Em Fá: Si natural.' },
   { q: 'A nota característica do dórico é…', options: ['A 6ª maior (num modo menor)', 'A 3ª maior', 'A 5ª diminuta'], answer: 0, why: 'Dórico = menor natural com a 6ª maior. Em Ré: Si natural.' },
@@ -707,14 +696,6 @@ const MODES_Q: ChoiceQuestion[] = [
   { q: 'Ré dórico e Fá lídio usam…', options: ['As mesmas teclas brancas, com centros diferentes', 'Notas completamente diferentes', 'Só as pretas'], answer: 0, why: 'São rotações de Dó maior. O que muda o som é o centro: a tônica que o vamp e o final afirmam.' },
   { q: 'Para o dórico soar dórico, e não Dó maior, o mais importante é…', options: ['Afirmar o Ré: vamp em Dm, frase terminando no Ré, a 6ª (Si) em tempo forte', 'Tocar rápido', 'Usar o pedal'], answer: 0, why: 'O modo depende do centro. Sem um centro claro, as brancas soam como Dó maior.' },
   { q: 'Frígio sobre Mi é…', options: ['Mi, Fá, Sol, Lá, Si, Dó, Ré', 'Mi, Fá♯, Sol, Lá, Si, Dó, Ré', 'Mi, Fá♯, Sol♯, Lá, Si, Dó♯, Ré♯'], answer: 0, why: 'Menor natural com a 2ª menor: o Fá natural logo acima do Mi.' },
-];
-
-const FORM_Q: ChoiceQuestion[] = [
-  { q: 'Na forma AABA de 32 compassos, o B (a ponte) tem…', options: ['8 compassos', '16 compassos', '4 compassos'], answer: 0, why: 'Quatro seções de 8: A, A, B, A.' },
-  { q: 'A ponte costuma…', options: ['Sair do tom (outro centro, outra região da melodia) e preparar a volta do A', 'Repetir o A igual', 'Ser só bateria'], answer: 0, why: 'É o contraste: na Bossa em Fá, o B começa no IV (B♭7M) e passa pelo iv emprestado.' },
-  { q: 'No compasso 10 da Bossa em Fá, o B♭m6 é…', options: ['O iv emprestado de Fá menor', 'O V7 de Fá', 'Um erro de cifra'], answer: 0, why: 'Si♭, Ré♭, Fá, Sol: o Ré♭ vem de Fá menor (unidade 10, empréstimo modal).' },
-  { q: 'No piano solo de bossa, a esquerda…', options: ['Toca shells no ritmo da bossa enquanto a direita canta', 'Fica parada', 'Dobra a melodia'], answer: 0, why: 'A esquerda faz o violão; a direita, a voz.' },
-  { q: 'A forma ABAC é…', options: ['A, B, A de novo e um final C diferente', 'Igual à AABA', 'Uma forma de fuga'], answer: 0, why: 'Muito comum em canções de 32 compassos: o C substitui a última repetição do A.' },
 ];
 
 const modes6 = modeScale({ tonics: ['C4', 'D4', 'F4', 'G4', 'A4'], modes: ['jônio', 'lídio', 'mixolídio', 'dórico', 'eólio', 'frígio'] });
@@ -753,95 +734,98 @@ const lydianImprov: Exercise = {
   pass: { inSet: 0.9, restsPer4: 1, endOn: [5] },
 };
 
-const BOSSA_CHART = ['F7M', 'F7M', 'Gm7', 'C7', 'Am7', 'D7', 'Gm7', 'C7'];
-const chartTask = (bpm: number) => () =>
-  chartComping(BOSSA_CHART, { bpm, fifths: -1, caption: 'Cifra do A: F7M(9) | F7M(9) | Gm7(9) | C7(13) | Am7(9) | D7(13) | Gm7(9) | C7(13). Esquerda: fundamental e 5ª abaixo.' });
+const SWING_Q: ChoiceQuestion[] = [
+  { q: 'Comping é…', options: ['Acompanhar com acordes curtos, deixando espaço para a melodia ou o solo', 'Tocar a melodia em oitavas', 'Improvisar a melodia'], answer: 0, why: 'Vem de "accompanying" e de "complementing": o acorde responde à melodia, não compete com ela.' },
+  { q: 'O ritmo Charleston ataca…', options: ['No 1 e no "e" do 2', 'Nos quatro tempos', 'Só no 4'], answer: 0, why: 'Semínima pontuada e colcheia: o ritmo da dança dos anos 1920 que virou o comping mais básico do jazz.' },
+  { q: 'No swing, o "e" do 2 cai…', options: ['No último terço do tempo 2', 'Exatamente no meio do tempo 2', 'No tempo 3'], answer: 0, why: 'As colcheias do swing são longa-curta, como tercina de semínima e colcheia (unidade 8).' },
+  { q: 'O baixo em two-feel toca…', options: ['Duas notas por compasso: a fundamental no 1 e outra nota do acorde no 3', 'Quatro notas por compasso', 'Só no tempo 1'], answer: 0, why: 'É o baixo "a dois", em mínimas. O walking bass, com quatro notas por compasso, vem depois.' },
+  { q: 'Na direita, o comping usa de preferência…', options: ['Os voicings sem fundamental da lição 84', 'A tríade com a fundamental embaixo', 'Oitavas'], answer: 0, why: 'A fundamental já está na esquerda; a direita fica com 3ª, 7ª e tensões, conduzidas.' },
+  { q: 'O tema da Pantera Cor-de-Rosa é famoso pelas…', options: ['Aproximações cromáticas (meio tom abaixo da nota-alvo) num swing lento', 'Escalas de tons inteiros', 'Oitavas rápidas'], answer: 0, why: 'Henry Mancini escreveu a melodia com notas que chegam por meio tom, sobre um swing preguiçoso.' },
+];
 
 const l85: Lesson = {
   n: 85,
   id: 'l85',
-  title: 'Bossa nova I: o comping',
+  title: 'Comping de jazz em swing',
   minutes: 60,
   objectives: [
-    'Consigo tocar o desenho de dois compassos da bossa na direita, no tempo.',
-    'Consigo tocar o baixo da bossa (fundamental e 5ª abaixo, longa-curta) na esquerda.',
-    'Consigo acompanhar um ii–V–I em bossa com as duas mãos, 16 compassos em ±50 ms.',
+    'Consigo tocar o ritmo Charleston em swing na direita, no tempo.',
+    'Consigo tocar o baixo em two-feel (fundamental e 5ª, em mínimas) na esquerda.',
+    'Consigo acompanhar um ii–V–I em swing com as duas mãos, 8 compassos em ±50 ms, com voicings sem fundamental.',
+  ],
+  music: [
+    { piece: 'pink-panther', why: 'The Pink Panther Theme, de Henry Mancini: um swing lento, com as notas chegando por meio tom. Toque a melodia na direita e, quando ela parar, responda com os acordes no Charleston desta lição.' },
+    { piece: 'fly-me', why: 'Fly Me to the Moon na versão do Sinatra com a orquestra do Count Basie: o piano de Basie é o mestre do comping curto e com espaço. Acompanhe a cifra da sua partitura com os voicings da lição 84 e o ritmo desta.' },
+    { piece: 'sweet-georgia', why: 'Sweet Georgia Brown (unidade 10) em swing: a cadeia D7 – G7 – C7 – F com o Charleston na direita e o two-feel na esquerda.' },
   ],
   blocks: [
     {
       kind: 'text',
-      title: 'A bossa nova',
-      body: `A **bossa nova** nasceu no Rio de Janeiro no fim dos anos 1950. A ideia de João Gilberto foi tirar o samba da escola de samba e pôr no violão: o polegar faz o **surdo** (o baixo) e os outros dedos fazem o **tamborim** (os acordes, em síncope). Tom Jobim juntou a isso a harmonia do jazz, com tétrades e tensões.
+      title: 'Swing e comping',
+      body: `Na unidade 8 você aprendeu o **swing**: as colcheias escritas iguais se tocam **longa-curta**, como uma tercina de semínima e colcheia. Agora o swing vai para os acordes.
 
-As canções de Jobim, Vinicius e companhia ainda são protegidas, então aqui você aprende o groove sobre progressões e, na lição 87, numa melodia original.
+**Comping** é o jeito do pianista de jazz acompanhar: acordes **curtos**, em poucos lugares do compasso, deixando espaço para quem canta ou sola. O nome vem de *accompanying* (acompanhar) e lembra *complementing* (completar): o acorde responde à melodia, não briga com ela. Count Basie e Red Garland ficaram famosos tocando pouco e no lugar certo.
 
-Ao piano, a divisão é a mesma do violão: a **esquerda é o polegar** (baixo) e a **direita são os dedos** (acordes). A harmonia da direita é a da lição 84: voicings sem fundamental.`,
+A harmonia da direita é a da lição 84: **voicings sem fundamental**. A esquerda faz o baixo.`,
     },
     {
       kind: 'text',
-      title: 'Síncope e antecipação',
-      body: `Duas palavras resumem o balanço da bossa:
+      title: 'O Charleston',
+      body: `O desenho de comping mais básico tem o nome de uma dança dos anos 1920, o **Charleston**: **um ataque no 1 e outro no "e" do 2**, e o resto do compasso em silêncio.
 
-- **Síncope**: um ataque fora do tempo (no "e") que continua soando por cima do tempo seguinte. O tempo forte fica "dentro" da nota, sem ataque.
-- **Antecipação**: o acorde (ou a nota da melodia) do compasso seguinte chega **uma colcheia antes** da barra, no "e" do 4.
+No swing, o "e" do 2 não cai no meio do tempo: cai no **último terço** dele, logo antes do 3. Conte "**1** - e - **2** - (e) **3** - **4**", com o "e" atrasado, e toque os dois ataques curtos, soltando a mão.
 
-O desenho da direita ocupa **dois compassos** e é o coração do comping. Conte em colcheias, "1 e 2 e 3 e 4 e":
-
-- 1º compasso: ataques no **1**, no **"e" do 2** e no **4**;
-- 2º compasso: ataques no **2** e no **"e" do 3**.
-
-Os ataques do "e" são síncopes: duram uma semínima pontuada e atravessam o tempo seguinte.`,
+O silêncio dos tempos 3 e 4 é parte do ritmo. É nele que a melodia respira.`,
     },
     {
       kind: 'example',
-      title: 'O desenho da direita',
+      title: 'Ouvir o Charleston',
       steps: [
-        { say: 'Num acorde só (Gm7(9) sem fundamental: Si♭, Ré, Fá, Lá), dois compassos do desenho.', play: { bpm: 72, steps: [{ midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1 }, { midis: [], beats: 1 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }, { midis: [n('Bb3'), n('D4'), n('F4'), n('A4')], beats: 1.5 }] }, keys: [n('Bb3'), n('D4'), n('F4'), n('A4')] },
-        { say: 'Agora a esquerda: Sol longo, Sol curto, Ré (a 5ª abaixo) longo, Ré curto.', play: { bpm: 72, steps: [{ midis: [n('G2')], beats: 1.5 }, { midis: [n('G2')], beats: 0.5 }, { midis: [n('D2')], beats: 1.5 }, { midis: [n('D2')], beats: 0.5 }] }, keys: [n('G2'), n('D2')] },
+        { say: 'Num acorde só (Dm7(9) sem fundamental: Fá, Lá, Dó, Mi), quatro compassos de Charleston, em swing: no 1 e logo antes do 3.', play: { bpm: 100, steps: [0, 1, 2, 3].flatMap(() => [{ midis: [n('F4'), n('A4'), n('C5'), n('E5')], beats: 5 / 3 }, { midis: [n('F4'), n('A4'), n('C5'), n('E5')], beats: 1 / 3 }, { midis: [], beats: 2 }]) }, keys: [n('F4'), n('A4'), n('C5'), n('E5')] },
+        { say: 'Agora a esquerda em two-feel: Ré no 1, Lá (a 5ª, embaixo) no 3.', play: { bpm: 100, steps: [0, 1].flatMap(() => [{ midis: [n('D3')], beats: 2 }, { midis: [n('A2')], beats: 2 }]) }, keys: [n('D3'), n('A2')] },
+        { say: 'Juntas: o baixo marca o 1 e o 3; a direita entra no 1 e responde no "e" do 2.', play: { bpm: 100, steps: [0, 1].flatMap(() => [{ midis: [n('D3'), n('F4'), n('A4'), n('C5'), n('E5')], beats: 5 / 3 }, { midis: [n('F4'), n('A4'), n('C5'), n('E5')], beats: 1 / 3 }, { midis: [n('A2')], beats: 2 }]) } },
       ],
     },
     {
       kind: 'exercise',
-      id: 'l85-direita',
-      exercise: quickTimed('O desenho em qualquer tecla', 'Quatro compassos (o desenho duas vezes), a 70 BPM, em qualquer tecla. Duas passadas boas.', () => rhythmTask(rep('x:1.5 x:1.5 x | r x:1.5 x:1.5', 2), { bpm: 70, caption: 'Bossa: 1, "e" do 2, 4 | 2, "e" do 3.' }), { reps: 2, window: 60 }),
+      id: 'l85-charleston',
+      exercise: quickTimed('O Charleston em qualquer tecla', 'Quatro compassos a 96 BPM, em qualquer tecla, em swing. Duas passadas boas.', () => swingRhythm(rep('x:1.5 x:0.5 r:2', 4), { bpm: 96, caption: 'Charleston: no 1 e no "e" do 2. No swing, o "e" cai no último terço do tempo, logo antes do 3.' }), { reps: 2, window: 60 }),
     },
     {
       kind: 'callout',
       tone: 'erro',
-      title: 'esperar o tempo para atacar',
-      body: 'Quem vem da música clássica tende a "puxar" a síncope para o tempo seguinte, e o desenho vira marcha. Toque o "e" de verdade e **não toque no tempo** que vem depois: ele fica dentro da nota. Conte as colcheias em voz alta; o metrônomo marca o que você não toca.',
+      title: 'tocar o "e" reto',
+      body: 'Quem vem da música clássica toca o "e" do 2 no meio do tempo, e o comping fica "quadrado". No swing ele chega **atrasado**, quase colado no 3. Cante "dum... ba-DAH" com o metrônomo e toque no "DAH". E solte o acorde logo: comping comprido vira parede.',
     },
     {
       kind: 'text',
-      title: 'O baixo: longa-curta',
-      body: `A esquerda imita o surdo: **fundamental** longa (semínima pontuada) e curta (colcheia), depois a **5ª abaixo** longa e curta. No Gm7: Sol, Sol, Ré, Ré. No C7: Dó, Dó, Sol, Sol.
+      title: 'O baixo em two-feel',
+      body: `Sem baixista, a esquerda faz o baixo. O jeito mais simples, e o que as bandas usam no primeiro chorus de muitos standards, é o **two-feel**: **duas notas por compasso**, em mínimas. A **fundamental no 1** e a **5ª do acorde, embaixo dela, no 3**. Em Dm7: Ré, Lá. Em G7: Sol, Ré. Em C7M: Dó, Sol.
 
-Por que a 5ª **abaixo**? Porque assim a esquerda fica grave e não esbarra nos voicings da direita, que começam perto do Fá3.
-
-A colcheia de cada par cai no "e" do 2 e no "e" do 4. No primeiro compasso do desenho, o "e" do 2 coincide com a direita; no segundo, as mãos não atacam juntas nenhuma vez. É essa conversa entre as mãos que dá o balanço.`,
+A esquerda fica grave (entre o Si1 e o Ré♯3) para não esbarrar nos voicings da direita, que começam perto do Fá3. Mais tarde, quando o two-feel estiver automático, ele vira *walking bass*: quatro notas por compasso.`,
     },
     {
       kind: 'exercise',
       id: 'l85-esquerda',
-      exercise: quickTimed('Baixo da bossa', 'Só a esquerda: Gm7 (2 compassos), C7 (1) e F7M (1), de 64 até 76 BPM, janela de ±50 ms.', () => melodyTask('G2:1.5 G2:0.5 D2:1.5 D2:0.5 | G2:1.5 G2:0.5 D2:1.5 D2:0.5 | C3:1.5 C3:0.5 G2:1.5 G2:0.5 | F2:1.5 F2:0.5 C2:1.5 C2:0.5', { bpm: 64, clef: 'bass', fifths: -1, caption: 'Fundamental longa-curta, 5ª abaixo longa-curta.' }), { window: 50, ladder: { from: 64, to: 76, step: 4 } }),
+      exercise: quickTimed('Two-feel na esquerda', 'Só a esquerda: Dm7 | G7 | C7M | C7M, de 80 até 104 BPM, janela de ±50 ms.', () => melodyTask('D3:2 A2:2 | G2:2 D2:2 | C3:2 G2:2 | C3:2 G2:2', { bpm: 80, clef: 'bass', caption: 'Fundamental no 1, a 5ª do acorde embaixo no 3: Ré–Lá, Sol–Ré, Dó–Sol.' }), { window: 50, ladder: { from: 80, to: 104, step: 8 } }),
     },
     {
       kind: 'text',
       title: 'Mãos juntas',
-      body: `Junte devagar. Primeiro só o primeiro compasso do desenho, em loop, até as duas mãos "conversarem" sem pensar: o 1 junto, o "e" do 2 junto, o 3 só na esquerda, o 4 só na direita e o "e" do 4 só na esquerda.
+      body: `Junte devagar. As duas mãos atacam juntas só no **1**; o "e" do 2 é só da direita e o 3 é só da esquerda. Essa conversa é o balanço.
 
-O exercício toca o **ii–V–I** num tom sorteado (Dó, Fá, Si♭ ou Sol): ii por 2 compassos, V por 2, I por 4. A direita usa os voicings sem fundamental conduzidos da lição 84. A pauta mostra a direita; a legenda diz a cifra.
+O exercício toca o **ii–V–I** num tom sorteado (Dó, Fá, Si♭ ou Sol): o ii por 1 compasso, o V por 1 e o I por 2. A direita usa os voicings sem fundamental conduzidos da lição 84, a esquerda faz o two-feel. A pauta mostra as duas mãos; a legenda diz a cifra.
 
-A tabela pede a pontuação **por mão**; o app ainda junta as duas na mesma conta. Se a passada cair, toque cada mão sozinha com o metrônomo para achar qual está fugindo.`,
+Se a passada cair, toque cada mão sozinha com o metrônomo para achar qual está fugindo.`,
     },
-    { kind: 'exercise', id: 'l85-maos', exercise: quickTimed('ii–V–I em bossa', '8 compassos, mãos juntas, a 64 BPM, janela de ±50 ms. Tom sorteado; duas passadas boas.', (rng) => bossaTask(rng, 64), { reps: 2, window: 50 }) },
-    { kind: 'exercise', id: 'l85-quiz', exercise: quiz('Bossa', 'Responda sem tocar.', BOSSA_Q) },
+    { kind: 'exercise', id: 'l85-maos', exercise: quickTimed('ii–V–I em swing', '8 compassos (o ii–V–I duas vezes), mãos juntas, de 80 até 104 BPM, janela de ±50 ms. Tom sorteado.', (rng) => swingComp(rng, 80, 2), { window: 50, ladder: { from: 80, to: 104, step: 8 } }) },
+    { kind: 'exercise', id: 'l85-quiz', exercise: quiz('Swing e comping', 'Responda sem tocar.', SWING_Q) },
   ],
-  review: [rlSeq, choice(BOSSA_Q, 'bossa')],
+  review: [rlSeq, choice(SWING_Q, 'swing')],
   checkpoint: [
-    quickTimed('Comping de bossa, 16 compassos', 'ii–V–I duas vezes num tom sorteado, a 70 BPM, sem dicas. Meta: 85% das notas em ±50 ms.', (rng) => bossaTask(rng, 70, 2), { window: 50 }),
+    quickTimed('Comping em swing, 8 compassos', 'ii–V–I duas vezes num tom sorteado, a 104 BPM, sem dicas. Meta: 85% das notas em ±50 ms.', (rng) => swingComp(rng, 104, 2), { window: 50 }),
   ],
-  exit: [rlChord, choice(BOSSA_Q, 'bossa')],
+  exit: [rlChord, choice(SWING_Q, 'swing')],
 };
 
 const l86: Lesson = {
@@ -854,6 +838,11 @@ const l86: Lesson = {
     'Consigo dizer de ouvido qual de dois modos parecidos foi tocado.',
     'Consigo improvisar em Ré dórico e Fá lídio sobre um vamp, com 90% das notas no modo e terminando na tônica.',
   ],
+  music: [
+    { piece: 'so-what', why: 'So What, do Miles Davis (Kind of Blue, 1959): 16 compassos de Ré dórico, a ponte meio tom acima, em Mi♭ dórico, e a volta. É o vamp de Ré dórico desta lição, e o tema que pôs os modos no centro do jazz.' },
+    { piece: 'eleanor-rigby', why: 'Eleanor Rigby, dos Beatles: Mi menor com a 6ª maior (o Dó♯) na melodia. É o dórico no pop, com a cor escura e ao mesmo tempo clara que a lição descreve.' },
+    { piece: 'norwegian-wood', why: 'Norwegian Wood, dos Beatles: Mi maior com a 7ª menor (o Ré natural). É o mixolídio, o maior "sem pressa de resolver".' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -864,7 +853,7 @@ O jeito útil é por **cor**: fixe a tônica e compare com a escala maior ou men
 
 - **Lídio**: maior com a **4ª aumentada**. Dó lídio: Fá♯.
 - **Jônio**: a escala maior.
-- **Mixolídio**: maior com a **7ª menor**. Dó mixolídio: Si♭ (o baião da lição 82).
+- **Mixolídio**: maior com a **7ª menor**. Dó mixolídio: Si♭ (Norwegian Wood, em Mi, usa o Ré natural).
 - **Dórico**: menor com a **6ª maior**. Dó dórico: Lá natural.
 - **Eólio**: a menor natural.
 - **Frígio**: menor com a **2ª menor**. Dó frígio: Ré♭.
@@ -930,246 +919,216 @@ Os dois usam só teclas brancas, e é isso que mostra que o modo é o centro, n�
   exit: [modes6, choice(MODES_Q, 'modos')],
 };
 
+const FORM_Q: ChoiceQuestion[] = [
+  { q: 'Na forma AABA de 32 compassos, o B (a ponte) tem…', options: ['8 compassos', '16 compassos', '4 compassos'], answer: 0, why: 'Quatro seções de 8: A, A, B, A.' },
+  { q: 'A ponte costuma…', options: ['Sair do tom (outro centro, outra região da melodia) e preparar a volta do A', 'Repetir o A igual', 'Ser só bateria'], answer: 0, why: 'É o contraste. Em So What, a ponte sobe meio tom (de Ré dórico para Mi♭ dórico) e volta.' },
+  { q: 'A forma ABAC é…', options: ['A, B, o A de novo e um final C diferente', 'Igual à AABA', 'Uma forma de fuga'], answer: 0, why: 'Muito comum em standards de 32 compassos: a segunda metade começa igual à primeira e termina diferente.' },
+  { q: 'Um chorus, no jazz, é…', options: ['Uma volta inteira pela forma da música', 'O refrão cantado', 'Um coro de vozes'], answer: 0, why: 'Tema (um chorus), solos (cada um com um ou mais chorus) e o tema de novo no fim.' },
+  { q: 'Notas-guia são…', options: ['A 3ª e a 7ª de cada acorde', 'A fundamental e a 5ª', 'As tensões'], answer: 0, why: 'Elas dizem a qualidade do acorde e andam por meio tom ou um tom de um acorde para o próximo (unidade 8).' },
+  { q: 'No piano solo de um standard, a esquerda…', options: ['Toca shells ou o baixo enquanto a direita canta a melodia', 'Fica parada', 'Dobra a melodia uma oitava abaixo'], answer: 0, why: 'A esquerda faz o papel do baixo e do comping; a direita, o da voz.' },
+];
+
 const l87: Lesson = {
   n: 87,
   id: 'l87',
-  title: 'Bossa nova II: melodia e forma',
+  title: 'Standard: melodia e comping',
   minutes: 60,
   objectives: [
-    'Consigo explicar as formas AABA e ABAC e achar as seções numa canção.',
-    'Consigo tocar a Bossa em Fá com melodia na direita e shells na esquerda, com 90% das notas.',
-    'Consigo acompanhar a cifra do A em bossa, com o groove em ±50 ms.',
+    'Consigo explicar as formas AABA e ABAC e achar as seções num standard.',
+    'Consigo tocar uma melodia de notas-guia na direita com shells no Charleston na esquerda, em swing.',
+    'Consigo acompanhar uma cifra de 8 compassos em swing, com voicings sem fundamental e o groove em ±50 ms.',
+  ],
+  music: [
+    { piece: 'fly-me', why: 'Fly Me to the Moon é o standard ideal para juntar melodia e comping: a melodia desce por grau enquanto a harmonia desce pelo ciclo de quintas. Toque a melodia na direita e os shells na esquerda, como nesta lição.' },
+    { piece: 'autumn-leaves', why: 'Autumn Leaves, com a cifra que você já conhece da unidade 10: aqui ela vira comping em swing, com os voicings sem fundamental na direita e o two-feel na esquerda.' },
+    { song: 'u10-santos-rearm', why: 'When the Saints, o standard de domínio público que já está no app com a partitura (unidade 10): toque a versão rearmonizada pensando no swing e nas notas-guia desta lição.' },
   ],
   blocks: [
     {
       kind: 'text',
-      title: 'A forma da canção',
-      body: `Quase toda canção de bossa, samba-canção e do repertório americano da mesma época tem **32 compassos**, em seções de 8:
+      title: 'A forma do standard',
+      body: `**Standard** é uma canção que virou repertório comum do jazz: músicas da Broadway, do cinema e do rádio dos anos 1920 a 1950, que todo músico sabe tocar numa jam. Quase todas têm **32 compassos**, em seções de 8:
 
 - **AABA**: o A aparece, repete, vem a **ponte** (B) e o A volta. A ponte muda de região: outro centro, a melodia mais aguda ou mais grave, e no fim prepara a volta do A.
-- **ABAC**: A, B, o A de novo e um **final novo** (C) no lugar da última repetição.
+- **ABAC**: A, B, o A de novo e um **final novo** (C). A segunda metade começa igual à primeira.
 
-Saber a forma é metade da leitura: se você sabe que o terceiro A é igual ao primeiro, só precisa ler 16 compassos de verdade.
+Saber a forma é metade da leitura: se o terceiro A é igual ao primeiro, você só precisa ler de verdade metade da partitura. Na sua partitura de Fly Me to the Moon, procure onde a melodia do começo volta.
 
-A **Bossa em Fá** (original do Fermata) é curta: um **A** de 8 compassos e um **B** de 8. O A vai do F7M ao Am7 – D7 (o D7 leva ao Gm7) e volta pelo ii–V de Fá; o B começa no IV (**B♭7M**) e passa pelo **B♭m6**, o iv emprestado da unidade 10.`,
+Uma volta inteira pela forma se chama **chorus**. Um arranjo de jazz típico é: o tema (um chorus), os solos e o tema de novo.`,
     },
     {
       kind: 'text',
-      title: 'Melodia e violão no mesmo piano',
-      body: `No piano solo de bossa, cada mão faz um papel: a **direita canta** a melodia e a **esquerda é o violão**, com shells (fundamental, 3ª e 7ª, da unidade 8) no ritmo da bossa: ataques no **1**, no **"e" do 2** e no **"e" do 3**.
+      title: 'Melodia e comping no mesmo piano',
+      body: `No piano solo, cada mão faz um papel: a **direita canta** a melodia e a **esquerda faz o comping**, com **shells** (fundamental e 3ª ou fundamental e 7ª, da unidade 8) no ritmo **Charleston** da lição 85.
 
-A melodia tem as **antecipações** da lição 85. No compasso 4, o Lá do "e" do 4 já é a fundamental do Am7 do compasso 5; no compasso 12, o Si♭ do "e" do 4 já é a 3ª do Gm7. A esquerda não antecipa: ela entra no 1 do compasso novo, e a melodia chega antes. Esse desencontro é o balanço.
+Para treinar isso sem uma melodia protegida, use uma **melodia de notas-guia**: a 3ª ou a 7ª de cada acorde, escolhidas para andar o mínimo. No ciclo **Am7 – Dm7 – G7 – C7M – F7M – Dm7 – E7 – Am7** (o caminho harmônico de Fly Me to the Moon e de Autumn Leaves): Sol (7ª de Am7), Fá (3ª de Dm7), Fá (7ª de G7), Mi (3ª de C7M), Mi (7ª de F7M), Fá (3ª de Dm7), Sol♯ (3ª de E7) e Lá.
 
-Toque a melodia sozinha primeiro, cantando junto. Depois a esquerda sozinha. Só então junte, trecho por trecho.`,
+Toque essa linha sozinha, cantando. Ela soa como uma melodia de verdade, porque muitas melodias de standard são exatamente isso: notas-guia enfeitadas.`,
     },
     {
       kind: 'exercise',
-      id: 'l87-a',
-      exercise: quickTimed('Compassos 1 a 4', 'Mãos juntas, a 60 BPM. Duas passadas boas.', () => twoHandTask(BOSSA_R.slice(0, 4).join(' | '), BOSSA_L.slice(0, 4).join(' | '), { bpm: 60, fifths: -1, caption: 'Esquerda em shells: F7M (Fá–Mi–Lá) | F7M | Gm7 (Sol–Fá–Si♭) | C7 (Dó–Mi–Si♭).' }), { reps: 2 }),
+      id: 'l87-guia',
+      exercise: quickTimed('Notas-guia e shells', 'Melodia em semibreves na direita, shells no Charleston na esquerda, em swing, de 80 até 104 BPM. Janela de ±50 ms.', guideTask(80), { window: 50, ladder: { from: 80, to: 104, step: 8 } }),
     },
     {
       kind: 'callout',
       tone: 'erro',
       title: 'a esquerda copiar o ritmo da direita',
-      body: 'Quando a melodia antecipa, a esquerda tende a ir junto e o groove some. Segure a esquerda no desenho dela (1, "e" do 2, "e" do 3) e deixe a melodia chegar antes sozinha. Se escorregar, toque só a esquerda com o metrônomo e cante a melodia por cima.',
+      body: 'Quando a melodia anda, a esquerda tende a ir junto e o comping some. Segure a esquerda no desenho dela (1 e o "e" do 2) e deixe a melodia fazer o que quiser por cima. Se escorregar, toque só a esquerda com o metrônomo e cante a melodia.',
     },
-    {
-      kind: 'exercise',
-      id: 'l87-b',
-      exercise: quickTimed('A ponte: compassos 9 a 12', 'Mãos juntas, a 60 BPM. Repare no Ré♭ do B♭m6 nas duas mãos.', () => twoHandTask(BOSSA_R.slice(8, 12).join(' | '), BOSSA_L.slice(8, 12).join(' | '), { bpm: 60, fifths: -1, caption: 'Esquerda: B♭7M (Si♭–Lá–Ré) | B♭m6 (Si♭–Ré♭–Sol) | Am7 (Lá–Sol–Dó) | D7 (Ré–Fá♯–Dó).' }), { reps: 2 }),
-    },
-    { kind: 'song', songId: 'u11-bossa', why: 'A música da lição: melodia original com antecipações e shells no ritmo da bossa.' },
     {
       kind: 'text',
       title: 'Acompanhar quem canta',
-      body: `Agora o outro papel: alguém canta (ou toca a melodia) e você **acompanha** pela cifra. É o comping da lição 85 sobre a cifra do A da Bossa em Fá, um acorde por compasso, com os voicings sem fundamental conduzidos na direita e o baixo longa-curta na esquerda.
+      body: `Agora o outro papel: alguém canta (ou sola) e você **acompanha** pela cifra. É o comping da lição 85 sobre o mesmo ciclo, um acorde por compasso: os **voicings sem fundamental conduzidos** na direita, no Charleston, e o **two-feel** na esquerda.
 
-Cifra: **F7M(9) | F7M(9) | Gm7(9) | C7(13) | Am7(9) | D7(13) | Gm7(9) | C7(13)**. O D7(13) é o V7/ii da unidade 10: ele leva ao Gm7.
+Cifra: **Am7 | Dm7 | G7 | C7M | F7M | Dm7 | E7 | Am7**. O E7 é o V7 de Lá menor: o Sol♯ dele puxa para o Lá.
 
-Meta da tabela: groove em **±50 ms**. Grave e cante a melodia por cima para conferir se o acompanhamento sustenta a canção.`,
+Meta: groove em **±50 ms**. Grave e cante a linha de notas-guia por cima para conferir se o acompanhamento sustenta a canção.`,
     },
-    { kind: 'exercise', id: 'l87-comping', exercise: quickTimed('Comping da cifra do A', '8 compassos, a 64 BPM, janela de ±50 ms. Duas passadas boas.', chartTask(64), { reps: 2, window: 50 }) },
-    { kind: 'exercise', id: 'l87-quiz', exercise: quiz('Forma e arranjo', 'Responda sem tocar.', FORM_Q) },
+    { kind: 'exercise', id: 'l87-comping', exercise: quickTimed('Comping da cifra', '8 compassos em swing, de 80 até 104 BPM, janela de ±50 ms.', cycleTask(80), { window: 50, ladder: { from: 80, to: 104, step: 8 } }) },
+    { kind: 'exercise', id: 'l87-quiz', exercise: quiz('Forma e standard', 'Responda sem tocar.', FORM_Q) },
   ],
   review: [choice(FORM_Q, 'forma'), rlSeq],
   checkpoint: [
-    quickTimed('A Bossa em Fá, seção A', 'Compassos 1 a 8, mãos juntas, a 66 BPM, sem dicas. Meta: 90% das notas.', () => twoHandTask(BOSSA_R.slice(0, 8).join(' | '), BOSSA_L.slice(0, 8).join(' | '), { bpm: 66, fifths: -1 }), { pass: { accuracy: 0.9 } }),
-    quickTimed('Comping no tempo', 'A cifra do A em bossa, a 70 BPM. Meta: 85% das notas em ±50 ms.', chartTask(70), { window: 50 }),
+    quickTimed('Notas-guia e shells', 'Os 8 compassos, mãos juntas, em swing, a 104 BPM, sem dicas. Meta: 90% das notas em ±50 ms.', guideTask(104), { window: 50, pass: { accuracy: 0.9 } }),
+    quickTimed('Comping no tempo', 'A cifra em swing, a 104 BPM. Meta: 85% das notas em ±50 ms.', cycleTask(104), { window: 50 }),
   ],
-  exit: [choice(FORM_Q, 'forma'), choice(BOSSA_Q, 'bossa')],
+  exit: [choice(FORM_Q, 'forma'), choice(SWING_Q, 'swing')],
 };
 
-const CHORO_Q: ChoiceQuestion[] = [
-  { q: 'No regional de choro, quem faz a baixaria?', options: ['O violão de 7 cordas', 'O pandeiro', 'A flauta'], answer: 0, why: 'A 7ª corda, mais grave, faz as linhas que ligam um acorde ao outro.' },
-  { q: 'Uma baixaria boa…', options: ['Chega na fundamental (ou na 3ª) do acorde novo no tempo 1', 'Termina sempre no meio do compasso', 'Usa só a fundamental'], answer: 0, why: 'Ela é uma ponte: o ponto de chegada é o acorde seguinte, no tempo forte.' },
-  { q: 'No samba, o surdo marca com mais força…', options: ['O tempo 2 do 2/4', 'O tempo 1', 'Só o contratempo'], answer: 0, why: 'O surdo de primeira bate no 2; é o "peso" característico do samba.' },
-  { q: 'Ernesto Nazareth chamava muitas de suas peças de…', options: ['Tango brasileiro', 'Bossa nova', 'Baião'], answer: 0, why: 'Odeon (1909), Brejeiro e outros: o choro escrito para piano, com a habanera na esquerda.' },
-  { q: 'O desenho da esquerda no tango brasileiro (habanera) é…', options: ['Baixo, acorde, baixo, acorde: 3 + 1 + 2 + 2 semicolcheias', '3 + 3 + 2 só no baixo', 'Quatro colcheias iguais'], answer: 0, why: 'Colcheia pontuada no baixo, semicolcheia no acorde, colcheia no baixo, colcheia no acorde.' },
-  { q: '"Três mãos" é…', options: ['A melodia no meio, com os polegares, e o acompanhamento em volta, acima e abaixo', 'Tocar com alguém ao lado', 'Usar o pedal tonal'], answer: 0, why: 'O efeito foi popularizado por Thalberg no século XIX e aparece em arranjos de choro ao piano.' },
+const REARM_Q: ChoiceQuestion[] = [
+  { q: 'Rearmonizar é…', options: ['Trocar ou enfeitar os acordes de uma música mantendo a melodia', 'Mudar a melodia', 'Tocar mais rápido'], answer: 0, why: 'A melodia continua; a harmonia ganha cor (tensões, inversões, empréstimos).' },
+  { q: 'Cadd9 é…', options: ['Dó, Mi, Sol com o Ré (a 9ª), sem 7ª', 'Dó, Mi, Sol, Si♭, Ré', 'Dó, Ré, Sol, sem a 3ª'], answer: 0, why: 'add9 acrescenta a 9ª à tríade e mantém a 3ª. Sem a 3ª seria sus2.' },
+  { q: 'Gsus4 resolve em G quando…', options: ['O Dó (a 4ª) desce para o Si (a 3ª)', 'O Sol sobe para o Lá', 'O Ré desce para o Dó'], answer: 0, why: 'A 4ª suspensa pede a 3ª: uma nota só anda (unidade 6).' },
+  { q: 'Uma linha de baixo que desce por grau, como em C – G/B – Am – Am7/G – F, é feita com…', options: ['Inversões: o acorde fica, o baixo troca de nota', 'Acordes diferentes em cada nota', 'O pedal'], answer: 0, why: 'G/B e Am7/G mantêm os acordes e põem no baixo a nota que continua a descida.' },
+  { q: 'Trocar F por F7M e Am por Am7 numa canção pop…', options: ['Deixa o som mais macio e "moderno" sem mudar a função', 'Muda o tom', 'Estraga a melodia sempre'], answer: 0, why: 'A 7ª acrescenta cor; o F7M continua sendo o IV e o Am7, o vi. Confira só se a melodia não bate meio tom acima de alguma nota.' },
+  { q: 'Em A Whiter Shade of Pale, o que faz a música soar "barroca"?', options: ['O baixo descendo por grau sob os acordes, como numa obra de Bach', 'O compasso 6/8', 'A escala de tons inteiros'], answer: 0, why: 'O órgão desce Dó, Si, Lá, Sol, Fá, Mi... com os acordes por cima: baixo invertido em sequência.' },
 ];
-
-const BAIXARIA_MOTIFS = [
-  [n('C3'), n('B2'), n('Bb2'), n('A2')], [n('G2'), n('A2'), n('B2'), n('C3')], [n('A2'), n('B2'), n('C#3'), n('D3')],
-  [n('D3'), n('C3'), n('B2'), n('A2'), n('G2')], [n('E2'), n('F2'), n('F#2'), n('G2')], [n('C3'), n('D3'), n('E3'), n('F3'), n('F#3'), n('G3')],
-  [n('F2'), n('F#2'), n('G2'), n('G#2'), n('A2')], [n('G3'), n('F3'), n('E3'), n('D3'), n('C3')],
-];
-const baixariaEar = echo({ motifs: BAIXARIA_MOTIFS, bpm: 84, skill: 'baixaria-ouvido' });
-
-const SAMBA_BAR: Record<string, [string, string]> = {
-  C: ['E4+G4+C5', 'C3:0.75 G2:0.25 G2:1'],
-  A7: ['E4+G4+C#5', 'A2:0.75 E2:0.25 E2:1'],
-  Dm: ['D4+F4+A4', 'D3:0.75 A2:0.25 A2:1'],
-  G7: ['D4+F4+B4', 'G2:0.75 D2:0.25 D2:1'],
-};
-const tamborim = (c: string) => `${c}:0.5 ${c}:0.25 ${c}:0.5 ${c}:0.25 ${c}:0.5`;
-const sambaTask = (bpm: number) => () => {
-  const seq = ['C', 'A7', 'Dm', 'G7', 'C', 'A7', 'Dm', 'G7'];
-  return twoHandTask(seq.map((c) => tamborim(SAMBA_BAR[c][0])).join(' | '), seq.map((c) => SAMBA_BAR[c][1]).join(' | '), {
-    bpm,
-    beatsPerBar: 2,
-    caption: 'C | A7 | Dm | G7, duas vezes. Esquerda: fundamental (pontuada), 5ª abaixo na última semicolcheia e no tempo 2.',
-  });
-};
 
 const l88: Lesson = {
   n: 88,
   id: 'l88',
-  title: 'Choro e samba',
+  title: 'Pop rearmonizado',
   minutes: 60,
   objectives: [
-    'Consigo tocar uma baixaria que liga os acordes e chega no tempo 1.',
-    'Consigo repetir de ouvido uma baixaria de 4 a 6 notas.',
-    'Consigo tocar o samba (tamborim na direita, surdo na esquerda) com 85% das notas em ±50 ms.',
-    'Consigo tocar a habanera do tango brasileiro na esquerda.',
+    'Consigo tocar uma progressão pop com o baixo descendo por inversões, 8 compassos no tempo.',
+    'Consigo trocar tríades por add9, sus, 7M e m7(9) sem mudar a função dos acordes.',
+    'Consigo repetir de ouvido uma linha de baixo de 4 a 6 notas.',
+  ],
+  music: [
+    { piece: 'let-it-be', why: 'Let It Be nas versões de piano: o baixo desce por inversões (C – G/B – Am...) e os acordes ganham add9 e sus. É a mesma música da unidade 4, agora com a harmonia desta lição.' },
+    { piece: 'whiter-shade', why: 'A Whiter Shade of Pale (unidade 6): a introdução do órgão é um baixo descendo por grau com os acordes por cima, a linha que esta lição ensina a fazer.' },
+    { piece: 'hallelujah', why: 'Hallelujah, da lição 82: depois desta lição, toque a sua partitura trocando C por Cadd9 e Am por Am7, e ouça como o mesmo acompanhamento fica mais aberto.' },
   ],
   blocks: [
     {
       kind: 'text',
-      title: 'O choro',
-      body: `O **choro** nasceu no Rio de Janeiro na segunda metade do século XIX, quando músicos brasileiros passaram a tocar polcas, valsas e schottisches europeus "do seu jeito", com síncope e improviso. O grupo típico é o **regional**: flauta ou bandolim na melodia, cavaquinho no centro do ritmo, violão de 6 e de **7 cordas** e pandeiro.
+      title: 'Rearmonizar uma canção pop',
+      body: `**Rearmonizar** é manter a melodia e mexer nos acordes. Na unidade 10 você rearmonizou com dominantes secundárias e empréstimos, o caminho do jazz. No pop, os pianistas preferem três ferramentas mais leves:
 
-Três nomes para guardar: **Chiquinha Gonzaga** (1847–1935), **Ernesto Nazareth** (1863–1934), que escreveu o choro para piano, e **Pixinguinha** (1897–1973). As obras de Chiquinha e Nazareth são de domínio público; as de Pixinguinha, ainda não.
+1. **Baixo invertido**: o acorde fica, o baixo troca de nota para descer (ou subir) por grau. C – **G/B** – Am – **Am7/G** – F.
+2. **Cor na tríade**: **add9** (Cadd9 = Dó, Mi, Sol + Ré), **sus** (Gsus4 → G) e **7M** ou **m7** (F7M, Am7). A função não muda: o F7M continua sendo o IV.
+3. **Voicing aberto**: a esquerda grave (só o baixo) e a direita com três ou quatro notas perto do Dó4, sem a fundamental se ela já está no baixo.
 
-A marca do choro que mais interessa ao pianista é a **baixaria**: a linha do violão de 7 cordas que caminha de um acorde para o próximo.`,
-    },
-    {
-      kind: 'text',
-      title: 'Baixaria: o caminho entre dois acordes',
-      body: `A baixaria preenche o fim de um compasso com uma linha no grave que **chega** no acorde seguinte, no tempo 1, na fundamental (às vezes na 3ª). Ela anda por **grau conjunto** e **cromatismo**:
-
-- de C para Am, descendo: Dó, **Si, Si♭**, Lá;
-- de A7 para Dm, subindo: Lá, **Si, Dó♯**, Ré (o Dó♯ é a sensível de Ré);
-- de G7 para C, subindo: Sol, **Lá, Si**, Dó.
-
-A regra de ouro: comece a linha **de trás para a frente**. Saiba onde ela tem que chegar e conte quantas notas cabem antes.`,
+Primeiro a versão de livro; depois a versão com cor. A melodia que você cantar por cima é a mesma nas duas.`,
     },
     {
       kind: 'example',
-      title: 'Três baixarias',
+      title: 'Da tríade à cor',
       steps: [
-        { say: 'C → Am, descendo pelo cromático: Dó, Si, Si♭, Lá.', play: { bpm: 72, steps: [{ midis: [n('C3')], beats: 1 }, { midis: [n('B2')], beats: 0.5 }, { midis: [n('Bb2')], beats: 0.5 }, { midis: [n('A2')], beats: 2 }] }, keys: [n('C3'), n('B2'), n('Bb2'), n('A2')] },
-        { say: 'A7 → Dm, subindo até a fundamental: Lá, Si, Dó♯, Ré.', play: { bpm: 72, steps: [{ midis: [n('A2')], beats: 1 }, { midis: [n('B2')], beats: 0.5 }, { midis: [n('C#3')], beats: 0.5 }, { midis: [n('D3')], beats: 2 }] }, keys: [n('A2'), n('B2'), n('C#3'), n('D3')] },
-        { say: 'G7 → C, em colcheias: Sol, Lá, Si, Ré e chega no Dó.', play: { bpm: 72, steps: [{ midis: [n('G2')], beats: 0.5 }, { midis: [n('A2')], beats: 0.5 }, { midis: [n('B2')], beats: 0.5 }, { midis: [n('D3')], beats: 0.5 }, { midis: [n('C3')], beats: 2 }] } },
+        { say: 'C, G/B, Am: o baixo desce Dó, Si, Lá; a direita quase não se mexe.', play: { bpm: 66, steps: [{ midis: [n('C3'), n('C4'), n('E4'), n('G4')], beats: 2 }, { midis: [n('B2'), n('B3'), n('D4'), n('G4')], beats: 2 }, { midis: [n('A2'), n('C4'), n('E4'), n('A4')], beats: 2 }] }, keys: [n('C3'), n('B2'), n('A2')] },
+        { say: 'Agora com cor: Cadd9 (Mi, Sol, Ré), Gadd9/B (Ré, Sol, Lá), Am7 (Dó, Mi, Sol).', play: { bpm: 66, steps: [{ midis: [n('C3'), n('E4'), n('G4'), n('D5')], beats: 2 }, { midis: [n('B2'), n('D4'), n('G4'), n('A4')], beats: 2 }, { midis: [n('A2'), n('C4'), n('E4'), n('G4')], beats: 2 }] } },
+        { say: 'G7sus4 → G7: o Dó desce para o Si. A suspensão atrasa a 3ª e faz a cadência respirar.', play: { bpm: 66, steps: [{ midis: [n('G2'), n('C4'), n('D4'), n('F4')], beats: 2 }, { midis: [n('G2'), n('B3'), n('D4'), n('F4')], beats: 2 }, { midis: [n('C3'), n('E4'), n('G4'), n('D5')], beats: 3 }] } },
       ],
     },
     {
       kind: 'exercise',
-      id: 'l88-baixaria',
-      exercise: quickTimed('Baixaria em C | A7 | Dm | G7 | C', 'Só a esquerda, em 2/4, de 60 até 72 BPM.', () => melodyTask('C3:1 B2:0.5 Bb2:0.5 | A2:1 B2:0.5 C#3:0.5 | D3:1 C3:0.5 B2:0.5 | G2:0.5 A2:0.5 B2:0.5 D3:0.5 | C3:2', { bpm: 60, beatsPerBar: 2, clef: 'bass', caption: 'C | A7 | Dm | G7 | C: cada linha chega na fundamental do acorde seguinte.' }), { ladder: { from: 60, to: 72, step: 4 } }),
+      id: 'l88-descida',
+      exercise: quickTimed('O baixo que desce', 'C | G/B | Am | Am/G | F | C/E | Dm7 | G: acordes em semínimas na direita, o baixo na esquerda, de 60 até 80 BPM.', descTask(false, 60), { window: 50, ladder: { from: 60, to: 80, step: 4 } }),
     },
     {
       kind: 'callout',
       tone: 'erro',
-      title: 'baixaria que não chega',
-      body: 'Uma linha bonita que termina no lugar errado vira nota perdida. Se faltar tempo, corte notas do começo, nunca do fim: a chegada na fundamental, no tempo 1, é o que o ouvido espera.',
+      title: 'mexer a direita junto com o baixo',
+      body: 'Com o baixo invertido, é a esquerda que anda. Se a direita pula para a posição fundamental de cada acorde, a linha some debaixo dos saltos. Deixe a direita perto do Dó4, mudando só as notas que precisam (de C para G/B, só o Dó e o Mi andam), e ouça o baixo descendo sozinho.',
     },
-    { kind: 'exercise', id: 'l88-ouvido', exercise: items('Baixaria de ouvido', 'O app toca uma linha de 4 a 6 notas no grave. Repita. Comece pela nota que ele diz.', baixariaEar, 8, 36, 60, 0.75, 'off') },
+    { kind: 'exercise', id: 'l88-cifras', exercise: items('Cifras do pop', 'Toque o acorde da cifra. Com barra, a nota de baixo é a de depois da barra.', popChords, 10, 36, 84, 0.85, 'fade') },
     {
       kind: 'text',
-      title: 'Samba: surdo e tamborim',
-      body: `O **samba** também é em **2/4**, e o peso dele está no **tempo 2**: é onde bate o surdo de primeira, o mais grave da bateria.
+      title: 'A mesma linha, com cor',
+      body: `Agora a versão rearmonizada da mesma progressão. O baixo é o mesmo (Dó, Si, Lá, Sol, Fá, Mi, Ré, Sol); a direita muda:
 
-Ao piano, a **esquerda é o surdo**: a fundamental no 1 (colcheia pontuada), a **5ª abaixo** na última semicolcheia do 1 e de novo no **2**, mais longa. Em Dó: Dó, Sol, Sol.
+- **Cadd9**: Mi, Sol, Ré. **Gadd9/B**: Ré, Sol, Lá.
+- **Am7** e **Am7/G**: Dó, Mi, Lá ou Dó, Mi, Sol. **F7M**: Dó, Mi, Lá sobre o Fá.
+- **Cadd9/E**: Ré, Sol, Dó. **Dm7(9)**: Dó, Mi, Fá, Lá, a forma B da lição 84.
+- **G7sus4 → G7**: Dó, Ré, Fá → Si, Ré, Fá.
 
-A **direita é o tamborim**: acordes curtos num desenho de semicolcheias. Contando as 8 semicolcheias do compasso ("1 2 3 4 5 6 7 8"), um desenho típico ataca nas semicolcheias **1, 3, 4, 6 e 7**. Há muitos outros: o importante é que o desenho se repita igual, como numa escola de samba.
-
-Toque os acordes da direita **leves e curtos**: o tamborim é agudo e seco. O peso fica na esquerda.`,
+Repare que a direita fica quase sempre com o Dó e o Mi presos: a cor vem do baixo andando por baixo deles. É o som de muito piano pop dos anos 1970 para cá.`,
     },
-    {
-      kind: 'exercise',
-      id: 'l88-tamborim',
-      exercise: quickTimed('Desenho do tamborim', 'Quatro compassos em qualquer tecla, a 56 BPM, janela de ±50 ms. Duas passadas boas.', () => rhythmTask(rep('x:0.5 x:0.25 x:0.5 x:0.25 x:0.5', 4), { bpm: 56, beatsPerBar: 2, caption: 'Tamborim: conte as semicolcheias "1 2 3 4 5 6 7 8" e toque no 1, 3, 4, 6 e 7.' }), { reps: 2, window: 50 }),
-    },
-    { kind: 'exercise', id: 'l88-samba', exercise: quickTimed('Samba com as duas mãos', 'Tamborim na direita e surdo na esquerda, 8 compassos, de 48 até 60 BPM, janela de ±50 ms.', sambaTask(48), { window: 50, ladder: { from: 48, to: 60, step: 4 } }) },
+    { kind: 'exercise', id: 'l88-cor', exercise: quickTimed('O baixo que desce, com cor', 'A versão rearmonizada, em mínimas na direita, de 60 até 80 BPM. Janela de ±50 ms.', descTask(true, 60), { window: 50, ladder: { from: 60, to: 80, step: 4 } }) },
     {
       kind: 'text',
-      title: '"Três mãos" (uma prévia)',
-      body: `Nos arranjos de choro para piano solo aparece um truque antigo, popularizado por Sigismond Thalberg no século XIX: a **melodia no meio do teclado**, tocada pelos polegares das duas mãos, com o baixo embaixo e os acordes ou arpejos em cima. Quem ouve tem a impressão de três mãos.
+      title: 'Ouvir a linha de baixo',
+      body: `Para rearmonizar de ouvido (ou tirar a harmonia de uma gravação), o primeiro passo é ouvir o **baixo**. Ele quase sempre anda por grau ou por cromatismo entre os acordes: Dó, Si, Lá, Sol; Fá, Mi, Ré, Sol; Dó, Si, Si♭, Lá.
 
-Ele exige equilíbrio (a melodia mais forte que tudo em volta) e pedal limpo, assuntos da unidade 12. Por ora, basta reconhecer o som e saber que ele existe.`,
+No exercício, o app toca uma linha de 4 a 6 notas no grave e você repete. Pense na direção primeiro (desce ou sobe?) e depois no tamanho de cada passo (meio tom ou um tom).`,
     },
-    {
-      kind: 'text',
-      title: 'Tango brasileiro: a habanera na esquerda',
-      body: `Nazareth chamava seus choros para piano de **tango brasileiro**. A esquerda deles tem um desenho fixo, a **habanera** (o mesmo ritmo do maxixe): em 2/4, contando semicolcheias, **3 + 1 + 2 + 2**.
-
-- **baixo** no 1 (colcheia pontuada);
-- **acorde** na última semicolcheia do 1;
-- **baixo** no 2 (colcheia), em geral a 5ª abaixo;
-- **acorde** no "e" do 2.
-
-Em Dó: Dó3, Mi3+Sol3, Sol2, Mi3+Sol3. A mão pula entre o grave e o meio: deixe o pulso solto e olhe para o baixo, que é o salto maior. A direita, por cima, corre em semicolcheias.
-
-O projeto final da unidade, o **Tanguinho**, usa exatamente esse desenho. Treine a primeira frase aqui.`,
-    },
-    {
-      kind: 'exercise',
-      id: 'l88-habanera',
-      exercise: quickTimed('Habanera na esquerda', 'Só a esquerda: C | G7 | G7 | C do Tanguinho, de 48 até 60 BPM.', () => melodyTask(TANGO_L.slice(0, 4).join(' | '), { bpm: 48, beatsPerBar: 2, clef: 'bass', caption: 'Baixo, acorde, baixo, acorde. C: Dó–(Mi Sol)–Sol–(Mi Sol). G7: Sol–(Si Fá)–Ré–(Si Fá).' }), { ladder: { from: 48, to: 60, step: 4 } }),
-    },
-    { kind: 'exercise', id: 'l88-tango', exercise: quickTimed('Tanguinho, primeira frase', 'Compassos 1 a 4 com as duas mãos, a 44 BPM. Duas passadas boas.', () => twoHandTask(TANGO_R.slice(0, 4).join(' | '), TANGO_L.slice(0, 4).join(' | '), { bpm: 44, beatsPerBar: 2, caption: 'Esquerda em habanera: C | G7 | G7 | C.' }), { reps: 2 }) },
-    { kind: 'exercise', id: 'l88-quiz', exercise: quiz('Choro e samba', 'Responda sem tocar.', CHORO_Q) },
+    { kind: 'exercise', id: 'l88-ouvido', exercise: items('Linha de baixo de ouvido', 'O app toca uma linha de 4 a 6 notas no grave. Repita. Comece pela nota que ele diz.', bassEar, 8, 36, 60, 0.75, 'off') },
+    { kind: 'exercise', id: 'l88-quiz', exercise: quiz('Pop rearmonizado', 'Responda sem tocar.', REARM_Q) },
   ],
-  review: [baixariaEar, choice(CHORO_Q, 'choro')],
+  review: [popChords, bassEar, choice(REARM_Q, 'rearmonizar')],
   checkpoint: [
-    quickTimed('Samba no tempo', '8 compassos, mãos juntas, a 60 BPM, sem dicas. Meta: 85% das notas em ±50 ms.', sambaTask(60), { window: 50 }),
-    items('Baixaria de ouvido', '6 linhas, sem dica. Meta: 5 de 6.', baixariaEar, 6, 36, 60, 0.8, 'off'),
+    quickTimed('Pop rearmonizado no tempo', 'A versão com cor, 8 compassos, a 80 BPM, sem dicas. Meta: 85% das notas em ±50 ms.', descTask(true, 80), { window: 50 }),
+    items('Cifras do pop', '10 cifras, sem dica. Meta: 9 de 10.', popChords, 10, 36, 84, 0.9, 'off'),
+    items('Linha de baixo de ouvido', '6 linhas, sem dica. Meta: 5 de 6.', bassEar, 6, 36, 60, 0.8, 'off'),
   ],
-  exit: [baixariaEar, choice(CHORO_Q, 'choro')],
+  exit: [popChords, choice(REARM_Q, 'rearmonizar')],
 };
 
-const allU11 = mix([tensions, rlChord, rlSeq, modes6, mixoScale, compound]);
-const allEarU11 = mix([modeEar, baixariaEar, choice([...BAIAO_Q, ...TENSION_Q, ...ROOTLESS_Q, ...BOSSA_Q, ...MODES_Q, ...CHORO_Q], 'brasil')]);
+const allU11 = mix([tensions, rlChord, rlSeq, modes6, compound, slashChords, popChords]);
+const allEarU11 = mix([modeEar, bassEar, choice([...POP_Q, ...TENSION_Q, ...ROOTLESS_Q, ...SWING_Q, ...MODES_Q, ...FORM_Q, ...REARM_Q], 'jazz-pop')]);
+
+const RAG_Q: ChoiceQuestion[] = [
+  { q: 'O Maple Leaf Rag foi publicado em…', options: ['1899, nos Estados Unidos', '1959, em Nova York', '1920, em Paris'], answer: 0, why: 'Por John Stark, em Sedalia, no Missouri. Virou o rag mais famoso de Scott Joplin.' },
+  { q: 'No ragtime, a esquerda…', options: ['Alterna baixo grave e acorde no meio do teclado, em colcheias', 'Toca a melodia', 'Faz arpejos de 2 oitavas'], answer: 0, why: 'É o "oom-pah" da marcha. Nos anos 1920 ele vira o stride, a base do piano de jazz solo.' },
+  { q: 'A síncope do ragtime está…', options: ['Na direita, com notas que chegam antes do tempo contra a esquerda regular', 'Na esquerda, que atrasa', 'No pedal'], answer: 0, why: 'A esquerda marca o tempo como uma banda de marcha; a direita "rasga" (to rag) o ritmo por cima.' },
+  { q: 'O tema A do Maple Leaf Rag está em…', options: ['Lá♭ maior', 'Dó maior', 'Ré♭ maior'], answer: 0, why: 'Quatro bemóis: Si♭, Mi♭, Lá♭ e Ré♭. O trio (a terceira parte) vai para Ré♭ maior.' },
+];
 
 const l89: Lesson = {
   n: 89,
   id: 'l89',
-  title: 'Checkpoint da unidade e projeto: Brasil ao piano',
+  title: 'Checkpoint da unidade e projeto: arranjo solo',
   minutes: 60,
   objectives: [
     'Consigo passar no checkpoint misto da unidade 11, sem dicas.',
-    'Consigo montar um arranjo solo curto (intro, melodia, ii–V e final) com voicings sem fundamental.',
-    'Consigo tocar o Tanguinho com as duas mãos, a 60 BPM.',
+    'Consigo montar um arranjo solo curto (intro, melodia, turnaround e final) de um standard ou de uma pop.',
+    'Consigo tocar o tema A do Maple Leaf Rag com as duas mãos, rumo a 80 BPM.',
+  ],
+  music: [
+    { song: 'u11-maple', why: 'O Maple Leaf Rag de Scott Joplin (1899), o rag mais famoso: a esquerda salta do baixo para o acorde, a direita sincopa por cima. É o avô do piano de jazz solo, e o projeto final da unidade.' },
+    { piece: 'fly-me', why: 'Para o arranjo solo: Fly Me to the Moon com intro no ii–V, a melodia na direita com shells na esquerda e um final com o I7M(9).' },
+    { piece: 'let-it-be', why: 'Ou, se preferir uma pop: Let It Be com o baixo invertido e a cor da lição 88, no mesmo roteiro de arranjo.' },
   ],
   blocks: [
     {
       kind: 'text',
       title: 'O que você já sabe',
-      body: `Em sete lições você passou pelos três grandes grooves do piano brasileiro: o **baião** (3 + 3 + 2, com a 7ª menor nordestina), a **bossa** (síncope, antecipação, baixo longa-curta) e o **choro e o samba** (baixaria, surdo e tamborim, a habanera do tango brasileiro).
+      body: `Em sete lições você passou pelos dois lados do piano popular: a **balada pop** (padrões de esquerda, baixo invertido, add9 e sus) e o **jazz** (tensões, voicings sem fundamental, comping em swing, notas-guia, forma do standard).
 
-No caminho entraram as ferramentas de harmonia moderna: **tensões** (9, 11, 13 e as alteradas), **voicings sem fundamental** (formas A e B) e os **modos como cores** sobre uma tônica fixa.
+No meio entraram os **modos como cores** sobre uma tônica fixa, de So What a Norwegian Wood.
 
-O checkpoint mistura tudo: acordes com tensão, voicings, modos, escalas, ouvido e os grooves no tempo.`,
+O checkpoint mistura tudo: acordes com tensão, voicings, modos, cifras do pop, ouvido e o comping no tempo.`,
     },
     {
       kind: 'text',
       title: 'Arranjo solo: o roteiro',
       body: `Um arranjo de piano solo de uma canção curta segue quase sempre o mesmo roteiro:
 
-1. **Intro** (2 a 4 compassos): um vamp no groove, por exemplo o ii–V do tom repetido (Gm7(9) – C7(13) em Fá), para o ouvinte entrar no balanço antes da melodia.
-2. **A melodia**, uma vez, com a esquerda fazendo o groove (shells na bossa, zabumba no baião).
+1. **Intro** (2 a 4 compassos): um vamp no groove, por exemplo o ii–V do tom repetido (Dm7(9) – G7(13) em Dó), para o ouvinte entrar no balanço antes da melodia.
+2. **A melodia**, uma vez, com a esquerda fazendo o acompanhamento: shells no Charleston num standard, o padrão 1-5-8 ou o arpejo numa balada.
 3. **Um ii–V de volta** (o turnaround) no fim da seção, para repetir ou ir para o final.
-4. **Final**: o I com tensão (F7M(9), C6(9)) segurado, ou o último ii–V repetido três vezes antes de parar.
+4. **Final**: o I com tensão (C7M(9), C6(9)) segurado, ou o último ii–V repetido três vezes antes de parar.
 
 Os voicings sem fundamental entram na intro e no turnaround, onde a direita está livre da melodia.`,
     },
@@ -1181,53 +1140,64 @@ Os voicings sem fundamental entram na intro e no turnaround, onde a direita est�
     },
     {
       kind: 'text',
-      title: 'O Tanguinho e a peça do Villa-Lobos',
-      body: `O projeto final é o **Tanguinho**, um tango brasileiro original do Fermata no estilo de Nazareth: semicolcheias na direita, habanera na esquerda e as secundárias da unidade 10 (**A7 → Dm** e **G7 → C**). O **Dó♯** que aparece na esquerda (no A7) e na direita (compassos 8 e 12) é a sensível de Ré: ele puxa para o Dm.
+      title: 'O Maple Leaf Rag',
+      body: `O projeto final é o **Maple Leaf Rag** (Scott Joplin, 1899), na edição original, no tom (**Lá♭ maior**, quatro bemóis), em 2/4 e no ritmo original. O app toca o **tema A** uma vez, com a anacruse.
 
-Dois trechos pedem atenção: os compassos 5 a 8 (a direita sobe até o Dó6, desce e fecha num arpejo de Ré menor subindo) e 13 a 16 (a cadência final). Treine cada um separado antes de tocar tudo.
+O ragtime é o avô do piano de jazz. A **esquerda** é uma banda de marcha: baixo grave no tempo, acorde no meio do teclado no contratempo, os saltos da lição 72. A **direita** "rasga" o ritmo por cima, com semicolcheias que chegam antes do tempo (*to rag*, rasgar). Nos anos 1920, essa esquerda vira o **stride** de James P. Johnson e Fats Waller.
 
-O plano previa também uma peça do *Guia Prático* de Villa-Lobos. Villa-Lobos morreu em 1959, e a obra dele só fica livre em 2030: por isso ela não entra no app. O Odeon, de Nazareth (1909, livre), fica para uma rodada com a partitura de domínio público à mão.`,
+Três trechos pedem atenção:
+
+- **compassos 1 a 4**: o desenho Lá♭ – Mi♭ – Lá♭ – Dó, com a síncope no Mi♭ do fim de cada grupo;
+- **compassos 7 e 8**: a direita desce para o grave e sobe em arpejo (Lá♭, Si, Lá♭) por três oitavas, como no original;
+- **compassos 9 a 12**: a direita no agudo e a esquerda em acordes no meio do teclado, começando pelo diminuto Ré, Fá, Lá♭, Si.
+
+Treine cada um separado, devagar, antes de tocar tudo. A nota ligada pela barra (o motor não liga compassos) vira nota e pausa.`,
     },
     {
       kind: 'exercise',
-      id: 'l89-tango-meio',
-      exercise: quickTimed('Tanguinho, compassos 5 a 8', 'Mãos juntas, a 48 BPM. Duas passadas boas.', () => twoHandTask(TANGO_R.slice(4, 8).join(' | '), TANGO_L.slice(4, 8).join(' | '), { bpm: 48, beatsPerBar: 2, caption: 'Esquerda: C | A7 (Lá–(Dó♯ Sol)–Mi–(Dó♯ Sol)) | Dm | Dm.' }), { reps: 2 }),
+      id: 'l89-maple-1',
+      exercise: quickTimed('Maple Leaf Rag, compassos 1 a 4', 'Mãos juntas, de 48 até 64 BPM. Janela de ±50 ms.', mapleTask(1, 4, 48, 'Esquerda: Lá♭ (baixo), acorde Mi♭–Lá♭–Dó, acorde, Lá | Si♭, acorde Mi♭–Sol–Ré♭, acorde, Mi♭.'), { window: 50, ladder: { from: 48, to: 64, step: 4 } }),
     },
     {
       kind: 'exercise',
-      id: 'l89-tango-fim',
-      exercise: quickTimed('Tanguinho, compassos 13 a 16', 'Mãos juntas, a 48 BPM. Duas passadas boas.', () => twoHandTask(TANGO_R.slice(12).join(' | '), TANGO_L.slice(12).join(' | '), { bpm: 48, beatsPerBar: 2, caption: 'Esquerda: Dm | G7 | C | Dó final.' }), { reps: 2 }),
+      id: 'l89-maple-7',
+      exercise: quickTimed('Maple Leaf Rag, compassos 5 a 8', 'Mãos juntas, a 48 BPM. A direita desce para o grave no compasso 7. Duas passadas boas.', mapleTask(5, 8, 48, 'Esquerda: Mi (o Fá♭ da edição) e Mi♭ | Mi e Mi♭ | Lá♭ grave e Lá♭ | Lá♭ e Lá♭ agudo.'), { reps: 2, window: 50 }),
     },
-    { kind: 'song', songId: 'u11-tanguinho', why: 'O projeto final: tango brasileiro com habanera na esquerda e semicolcheias na direita.' },
-    { kind: 'song', songId: 'u11-baiao', why: 'Revisão: o baião da lição 82, para o checkpoint de groove.' },
+    {
+      kind: 'exercise',
+      id: 'l89-maple-9',
+      exercise: quickTimed('Maple Leaf Rag, compassos 9 a 16', 'Mãos juntas, de 44 até 60 BPM. Janela de ±50 ms.', mapleTask(9, 16, 44, 'Esquerda: acordes em colcheias. 9 e 13: Ré–Fá–Lá♭–Si. 10 e 14: Mi♭–Lá♭–Dó. 11 e 15: Mi–Lá♭–Si, depois Mi♭–Lá♭–Dó.'), { window: 50, ladder: { from: 44, to: 60, step: 4 } }),
+    },
+    { kind: 'song', songId: 'u11-maple', why: 'O projeto final: o tema A do Maple Leaf Rag. O alvo é 80 BPM; comece no modo Estudar e suba devagar.' },
+    { kind: 'exercise', id: 'l89-quiz', exercise: quiz('Ragtime', 'Responda sem tocar.', RAG_Q) },
   ],
   review: [allU11, allEarU11],
   checkpoint: [
     items('Checkpoint da unidade', '20 perguntas misturadas das lições 82 a 88, sem dicas.', mix([allU11, allU11, allEarU11]), 20, 36, 88, 0.85, 'off'),
-    quickTimed('Baião no tempo', 'Compassos 1 a 8 do Baião em Dó, mãos juntas, a 80 BPM. Meta: 85% em ±50 ms.', () => twoHandTask(BAIAO_R.slice(0, 8).join(' | '), BAIAO_L.slice(0, 8).join(' | '), { bpm: 80, beatsPerBar: 2 }), { window: 50 }),
-    quickTimed('Bossa no tempo', 'ii–V–I em bossa, tom sorteado, a 70 BPM. Meta: 85% em ±50 ms.', (rng) => bossaTask(rng, 70), { window: 50 }),
+    quickTimed('Comping em swing', 'ii–V–I em swing, tom sorteado, a 104 BPM. Meta: 85% em ±50 ms.', (rng) => swingComp(rng, 104), { window: 50 }),
+    quickTimed('Maple Leaf Rag no tempo', 'Anacruse e compassos 1 a 8, mãos juntas, a 64 BPM. Meta: 85% em ±50 ms.', mapleTask(0, 8, 64), { window: 50 }),
   ],
   project: {
-    title: 'Brasil ao piano',
-    brief: `Monte um arranjo solo curto da Bossa em Fá (ou do Baião em Dó) seguindo o roteiro da lição: intro no groove, a melodia uma vez, um ii–V de volta e um final. Use voicings sem fundamental na intro e no turnaround. Depois toque o Tanguinho, o projeto final da unidade.`,
+    title: 'Arranjo solo',
+    brief: `Monte um arranjo solo curto de um standard (Fly Me to the Moon ou Autumn Leaves) ou de uma pop (Let It Be ou Hallelujah), com a sua partitura importada, seguindo o roteiro da lição: intro no groove, a melodia uma vez, um turnaround e um final. Depois toque o Maple Leaf Rag, o projeto final da unidade.`,
     steps: [
-      'Escolha a música (Bossa em Fá ou Baião em Dó) e toque-a no "Tocar a música" até passar.',
-      'Escreva a intro: 4 compassos de vamp (Gm7(9) – C7(13) na bossa; C – B♭ no baião, com o 3 + 3 + 2).',
-      'Toque a cifra do A em bossa com voicings sem fundamental (exercício abaixo), até passar.',
+      'Escolha a música e importe a partitura no Repertório (o cartão no começo da lição ajuda a achar).',
+      'Escreva a intro: 4 compassos de vamp (o ii–V do tom com voicings sem fundamental no standard; o I – V/7 – vi – IV com o padrão 1-5-8 na pop).',
+      'Toque a melodia na direita com o acompanhamento da esquerda: shells no Charleston (standard) ou padrão de balada (pop).',
       'Escreva um final: o I com tensão segurado, ou o último ii–V repetido três vezes.',
-      'Grave o arranjo inteiro: intro, melodia, ii–V e final.',
-      'Toque o Tanguinho no "Tocar a música", começando a 44 BPM e subindo até 60.',
+      'Grave o arranjo inteiro: intro, melodia, turnaround e final.',
+      'Toque o Maple Leaf Rag no "Tocar a música", começando a 48 BPM e subindo até 80.',
     ],
     rubric: [
       'O groove da esquerda não para quando a melodia entra.',
-      'A intro e o turnaround usam voicings sem fundamental conduzidos (a mão quase não pula).',
+      'A intro e o turnaround usam voicings sem fundamental conduzidos (a mão quase não pula) ou o baixo invertido.',
       'A melodia fica clara por cima do acompanhamento.',
       'O final soa como final: tônica com tensão, sem cortar seco.',
-      'O Tanguinho passa a 60 BPM com 85% das notas.',
+      'O Maple Leaf Rag passa a 80 BPM com 85% das notas.',
     ],
-    exercise: quickTimed('Comping da Bossa em Fá', 'A cifra do A em bossa, a 72 BPM, janela de ±50 ms.', chartTask(72), { window: 50 }),
+    exercise: quickTimed('Comping do ciclo', 'A cifra da lição 87 em swing, a 112 BPM, janela de ±50 ms.', cycleTask(112), { window: 50 }),
   },
-  exit: [allU11, choice([...TENSION_Q, ...ROOTLESS_Q, ...MODES_Q], 'brasil')],
+  exit: [allU11, choice([...TENSION_Q, ...ROOTLESS_Q, ...MODES_Q, ...SWING_Q], 'jazz-pop')],
 };
 
 // ---------- unidade ----------
@@ -1235,14 +1205,14 @@ O plano previa também uma peça do *Guia Prático* de Villa-Lobos. Villa-Lobos 
 const unit: Unit = {
   n: 11,
   id: 'u11',
-  title: 'Brasil ao piano',
-  goal: 'Tocar baião, bossa e choro ao piano, com tensões e voicings sem fundamental, e usar os modos como cores.',
-  technique: 'Grooves no metrônomo: baião (3 + 3 + 2) e bossa (longa-curta) na esquerda, de 64 rumo a 80 BPM, janela de ±50 ms. Use a escada de andamento do treino nos dias sem lição nova.',
+  title: 'Jazz e pop ao piano',
+  goal: 'Acompanhar baladas pop e standards de jazz ao piano, com padrões de esquerda, tensões, voicings sem fundamental, comping em swing e os modos como cores.',
+  technique: 'Comping no metrônomo: o padrão 1-5-8 da balada (60 rumo a 80 BPM) e o Charleston em swing com o two-feel na esquerda (80 rumo a 104 BPM), janela de ±50 ms. Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l82, l83, l84, l85, l86, l87, l88, l89],
-  songs: [baiao, bossa, tanguinho],
+  songs: [maple],
   final: {
-    songId: 'u11-tanguinho',
-    brief: 'Um tango brasileiro original no estilo de Ernesto Nazareth: semicolcheias na direita e, na esquerda, a habanera (baixo, acorde, baixo, acorde) que é o motor do choro e do maxixe. As secundárias A7 e G7 da unidade 10 dão o tempero. Comece a 44 BPM e suba até 60.',
+    songId: 'u11-maple',
+    brief: 'O tema A do Maple Leaf Rag (Scott Joplin, 1899), no tom e no ritmo originais: a esquerda salta do baixo para o acorde como uma banda de marcha, e a direita sincopa por cima. É o avô do piano de jazz solo. Comece a 48 BPM e suba até 80.',
   },
 };
 
