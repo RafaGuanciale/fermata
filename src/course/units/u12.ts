@@ -866,7 +866,14 @@ Satie (Gymnopédies, Gnossiennes) fica no meio do caminho: harmonias paradas, se
 
 // ---------- sonata, trilhas e improviso avançado ----------
 
-const THEME1 = 'C5 E5 G5 E5 | F5 D5 B4 G4 | C5 E5 G5 C6 | B5:2 G5:2';
+// Os dois temas da Sonata facile, K. 545, 1º movimento (Mozart, 1788; domínio público). Fonte: Mutopia Project,
+// MozartWA/KV545/K545-1 (Alejandro Sierra, a partir do IMSLP; edição CC BY-SA 3.0), alturas pelo `ly rel2abs` do
+// python-ly. Tema 1: compassos 1 a 4 (os mesmos da unidade 9). Tema 2: compassos 14 a 17, em Sol maior, sem a
+// acciaccatura e com o trinado do Sol como nota simples; a frase se repete igual.
+const THEME1 = 'C5:2 E5 G5 | B4:1.5 C5:0.25 D5:0.25 C5 r | A5:2 G5 C6 | G5 F5:0.5 E5:0.25 F5:0.25 E5 r';
+const K545_T2 = 'D6:0.5 B5:0.5 G5:1.5 A5:0.25 B5:0.25 A5:0.5 G5:0.5 | G5:0.75 F#5:0.25 F#5 r:2';
+const THEME2_K = `${K545_T2} | ${K545_T2}`;
+/** Tema curto do app para o ditado de ouvido: termina na tônica, para o ouvido decidir o tom pela última nota. */
 const THEME2_G = 'D5 B4 C5 A4 | B4 G4 A4 F#4 | G4 B4 D5 B4 | G4:4';
 const CADENCE_C: Listen['steps'] = [
   { midis: [n('C3'), n('E4'), n('G4'), n('C5')], beats: 1 }, { midis: [n('F3'), n('F4'), n('A4'), n('C5')], beats: 1 },
@@ -1009,6 +1016,10 @@ const l96: Lesson = {
     'Consigo tocar o tema 2 no V (exposição) e no I (recapitulação).',
     'Consigo dizer de ouvido se um tema voltou no I ou no V.',
   ],
+  music: [
+    { song: 'u09-k545', why: 'A Sonata facile, K. 545, de Mozart, é forma sonata em miniatura: tema 1 em Dó, as escalas da transição, o tema 2 em Sol. Os exercícios desta lição usam os dois temas dela.' },
+    { song: 'u03-eine-sol', why: 'O 1º movimento de Eine kleine Nachtmusik também é forma sonata: o tema que você toca desde a unidade 3 é o tema 1, em Sol maior; o tema 2, mais cantado, vem em Ré, o V.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -1032,16 +1043,16 @@ A **sonatina** (Clementi, Kuhlau) é a mesma forma em tamanho pequeno, com um de
       title: 'Os dois temas',
       body: `Os temas de uma sonata costumam contrastar: o **tema 1** é mais afirmativo (arpejos, ritmo marcado) e o **tema 2** mais cantado.
 
-Para treinar, o app usa dois temas originais. O **tema 1**, em Dó: Dó, Mi, Sol, Mi | Fá, Ré, Si, Sol | Dó, Mi, Sol, Dó | Si, Sol. O **tema 2**, na exposição, em **Sol maior** (com Fá♯): Ré, Si, Dó, Lá | Si, Sol, Lá, Fá♯ | Sol, Si, Ré, Si | Sol.
+A **Sonata facile, K. 545**, de Mozart, que você tocou na unidade 9, mostra isso bem. O **tema 1**, em Dó: Dó longo, Mi, Sol | Si, Dó–Ré–Dó | Lá longo, Sol, Dó | Sol, Fá–Mi–Fá, Mi. O **tema 2** (compasso 14), na exposição, em **Sol maior**: Ré, Si, Sol longo, Lá–Si–Lá–Sol | Sol, Fá♯. A frase para no Fá♯, a sensível de Sol, e se repete.
 
-Na recapitulação o tema 2 vem **uma 5ª abaixo**, em Dó: o Fá♯ vira Si, e a frase termina no Dó.`,
+Na recapitulação o tema 2 vem **uma 5ª abaixo**, em Dó: Sol, Mi, Dó… e a frase para no Si. Uma curiosidade desta sonata: a recapitulação começa com o tema 1 em **Fá** (o IV), não em Dó, uma liberdade famosa de Mozart; o tema 2 já volta no I, como manda a forma.`,
     },
-    { kind: 'exercise', id: 'l96-tema1', exercise: quickTimed('Tema 1 no I', 'Só a direita, a 84 BPM. Duas passadas boas.', () => melodyTask(THEME1, { bpm: 84 }), { reps: 2 }) },
-    { kind: 'exercise', id: 'l96-tema2', exercise: quickTimed('Tema 2 no V (exposição)', 'Em Sol maior, com Fá♯, a 84 BPM.', () => melodyTask(THEME2_G, { bpm: 84, fifths: 1 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l96-tema1', exercise: quickTimed('Tema 1 no I', 'Só a direita, compassos 1 a 4 da K. 545, a 84 BPM. Duas passadas boas.', () => melodyTask(THEME1, { bpm: 84, caption: 'Tema 1 da Sonata facile, em Dó maior.' }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l96-tema2', exercise: quickTimed('Tema 2 no V (exposição)', 'Compassos 14 a 17 da K. 545, em Sol maior, com Fá♯, a 84 BPM.', () => melodyTask(THEME2_K, { bpm: 84, fifths: 1, caption: 'Tema 2 da Sonata facile, em Sol maior: a frase para no Fá♯ e se repete.' }), { reps: 2 }) },
     {
       kind: 'exercise',
       id: 'l96-recap',
-      exercise: quickTimed('Tema 2 no I (recapitulação)', 'A pauta mostra o tema em Sol; toque-o uma 5ª abaixo, em Dó maior, a 80 BPM.', () => transposedTask(THEME2_G, -7, { bpm: 80, fifths: 1, caption: 'Leia em Sol, toque em Dó: cada nota uma 5ª justa abaixo. O Fá♯ vira Si.' }), { reps: 2 }),
+      exercise: quickTimed('Tema 2 no I (recapitulação)', 'A pauta mostra o tema 2 da K. 545 em Sol; toque-o uma 5ª abaixo, em Dó maior, a 80 BPM.', () => transposedTask(THEME2_K, -7, { bpm: 80, fifths: 1, caption: 'Leia em Sol, toque em Dó: cada nota uma 5ª justa abaixo. O Ré vira Sol, o Fá♯ vira Si.' }), { reps: 2 }),
     },
     {
       kind: 'callout',
@@ -1049,13 +1060,18 @@ Na recapitulação o tema 2 vem **uma 5ª abaixo**, em Dó: o Fá♯ vira Si, e 
       title: 'transpor nota por nota',
       body: 'Contar 7 semitons para cada nota é lento e erra. Pense em **graus**: o tema 2 começa no 5º grau (Ré em Sol; Sol em Dó) e anda pelos mesmos graus no tom novo. A mão faz o mesmo desenho, só em outra casa.',
     },
+    {
+      kind: 'text',
+      title: 'De ouvido: I ou V?',
+      body: 'Para o ditado, o app usa um tema curto próprio, que termina na tônica: assim a última nota diz o tom. Ouça a cadência de Dó, guarde o Dó por dentro e veja onde o tema pousa.',
+    },
     { kind: 'exercise', id: 'l96-ouvido', exercise: items('I ou V?', 'O app toca a cadência de Dó e depois o tema 2. Ele estava no I ou no V?', themeEar, 8, 48, 84, 0.75, 'off') },
     { kind: 'exercise', id: 'l96-quiz', exercise: quiz('Análise da forma', 'Responda sem tocar.', SONATA_Q, 0.85) },
   ],
   review: [themeEar, choice(SONATA_Q, 'sonata')],
   checkpoint: [
     items('I ou V, de ouvido', '8 temas, sem dica. Meta: 7 de 8.', themeEar, 8, 48, 84, 0.85, 'off'),
-    quickTimed('Recapitulação', 'O tema 2 em Dó, lendo em Sol, a 84 BPM, sem dicas.', () => transposedTask(THEME2_G, -7, { bpm: 84, fifths: 1 })),
+    quickTimed('Recapitulação', 'O tema 2 da K. 545 em Dó, lendo em Sol, a 84 BPM, sem dicas.', () => transposedTask(THEME2_K, -7, { bpm: 84, fifths: 1 })),
   ],
   exit: [themeEar, choice(SONATA_Q, 'sonata')],
 };
@@ -1069,6 +1085,11 @@ const l97: Lesson = {
     'Consigo tocar a Royal Road conduzida em quatro tons e reconhecê-la pelo baixo.',
     'Consigo tocar e reconhecer o ♭VI–♭VII–I e o "voo" lídio.',
     'Consigo tocar um ostinato de esquerda com a melodia por cima e transcrever frases curtas de ouvido.',
+  ],
+  music: [
+    { piece: 'comptine', why: "A Comptine d'un autre été, de Yann Tiersen (do filme Amélie), é ostinato puro: a esquerda repete o mesmo desenho em colcheias e a direita flutua por cima. Ela está no seu caminho de repertório." },
+    { piece: 'interstellar', why: 'O tema de Interstellar, de Hans Zimmer, é um desenho curto que gira sem parar enquanto a música cresce por baixo: o ostinato desta lição, no lugar mais famoso das trilhas recentes.' },
+    { piece: 'river-flows', why: 'River Flows in You, de Yiruma, apoia tudo em arpejos da esquerda que giram pelos mesmos quatro acordes; a melodia canta por cima, como num tema de trilha.' },
   ],
   blocks: [
     {
@@ -1095,9 +1116,9 @@ const l97: Lesson = {
     {
       kind: 'text',
       title: 'Ostinato na esquerda',
-      body: `Muitas trilhas de piano se apoiam num **ostinato**: a esquerda repete um desenho curto, em colcheias, e a melodia flutua por cima. Pense na "Comptine d'un autre été" de Tiersen ou no arpejo do "Prelude" de Final Fantasy (as duas protegidas; aqui, só como referência).
+      body: `Muitas trilhas de piano se apoiam num **ostinato**: a esquerda repete um desenho curto, em colcheias, e a melodia flutua por cima. Pense na "Comptine d'un autre été" de Tiersen ou no arpejo do "Prelude" de Final Fantasy (as duas protegidas: a Comptine está no seu caminho de repertório, para importar a partitura).
 
-O **Tema de jogo** do app (original) usa o desenho mais simples: **fundamental, 5ª, oitava, 5ª**, duas vezes por compasso, sobre Am – F – C – G.
+Para treinar o desenho antes das músicas de verdade, o **Tema de jogo** do app usa o mais simples: **fundamental, 5ª, oitava, 5ª**, duas vezes por compasso, sobre Am – F – C – G.
 
 Como no padrão de balada da lição 82, o ostinato precisa ficar **automático** antes de a melodia entrar. Toque a esquerda sozinha até poder conversar enquanto toca.`,
     },
@@ -1112,7 +1133,7 @@ Como no padrão de balada da lição 82, o ostinato precisa ficar **automático*
       title: 'o ostinato engolir a melodia',
       body: 'Oito colcheias por compasso fazem muito mais "barulho" que duas mínimas na direita. Toque o ostinato **piano** e igual, e a melodia **mezzo forte**. Se não der para ouvir a melodia na gravação, a esquerda está forte demais.',
     },
-    { kind: 'song', songId: 'u12-tema-jogo', why: 'A música da lição: melodia original em Lá menor sobre o ostinato.' },
+    { kind: 'song', songId: 'u12-tema-jogo', why: 'Um tema curto do app, em Lá menor, para treinar o ostinato com a melodia por cima antes da Comptine e de River Flows in You.' },
     {
       kind: 'text',
       title: 'Transcrever de ouvido',

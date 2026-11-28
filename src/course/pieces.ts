@@ -95,6 +95,8 @@ export const COURSE_PIECES: CoursePiece[] = [
   // Unidade 12
   p('always-love-you', 'I Will Always Love You', ['Dolly Parton', 'Whitney Houston'], 'Último refrão', 'Pop', ['pop-rock'], 'I Will Always Love You Whitney Houston easy piano', ['always love you']),
   p('bohemian', 'Bohemian Rhapsody', ['Queen'], 'Balada', 'Rock', ['pop-rock'], 'Bohemian Rhapsody piano ballad', [], 'intermediario'),
+  p('comptine', "Comptine d'un autre été", ['Yann Tiersen'], 'Inteira', 'Filme', ['filmes'], "Comptine d'un autre ete easy piano", ['comptine', 'amelie']),
+  p('river-flows', 'River Flows in You', ['Yiruma'], 'Inteira', 'Piano', ['pop-rock'], 'River Flows in You easy piano', ['river flows']),
   // Domínio público, sem notas no código: a partitura completa vem do caminho de repertório (public/library).
   p('clair-de-lune', 'Clair de lune', ['Claude Debussy'], 'Abertura', 'Clássica', ['classico'], 'Clair de lune Debussy piano', ['suite bergamasque'], 'avancado'),
   p('paganini-18', 'Rhapsody on a Theme of Paganini, Variação 18', ['Sergei Rachmaninoff'], 'Inteira', 'Clássica', ['classico'], 'Rachmaninoff Variation 18 piano', ['variation 18', 'variacao 18'], 'avancado'),

@@ -9,9 +9,13 @@
   - **Lição 93 (técnica)**: **Rondo alla Turca** (semicolcheias) e **Prelude in C** de Bach (arpejos).
   - **Lição 94 (pedal avançado)**: o **Prelúdio em Mi menor, Op. 28 nº 4, de Chopin**, novo no app e inteiro (25 compassos, edição Peters de 1879 do Mutopia, notas e ritmo originais, alvo 50 BPM), e a **Gymnopédie No. 1** da unidade 8.
   - **Lição 95 (romântico e impressionista)**: o Prelúdio de Chopin entrou no lugar do prelúdio inventado pelo app, nos exercícios e no checkpoint (agora a primeira metade, compassos 1 a 12, com 90% das notas); a **primeira frase do Noturno Op. 9 nº 2** de Chopin, nova no app (edição Schirmer de 1881 do Mutopia, em 12/8, alvo 66 BPM); **Clair de lune** (a partitura do seu caminho de repertório) e a **Variação 18 de Rachmaninoff**.
-  - Para testar: os cartões de música no começo das lições 90 a 95; o Prelúdio de Chopin no "Tocar a música" (a esquerda tem oito acordes por compasso; veja se a partitura fica legível) e o Noturno em 12/8 (o metrônomo deve bater a semínima pontuada).
+  - **Lição 96 (forma sonata)**: a **Sonata facile K. 545** de Mozart (unidade 9) e **Eine kleine Nachtmusik** (unidade 3). Os exercícios agora usam os dois temas de verdade da K. 545 (tema 1 em Dó, compassos 1 a 4; tema 2 em Sol, compassos 14 a 17, conferidos no Mutopia) no lugar dos temas inventados; só o ditado de ouvido continua com um tema curto do app, que termina na tônica.
+  - **Lição 97 (trilhas)**: **Comptine d'un autre été**, **Interstellar** e **River Flows in You** (as três do seu caminho de repertório). O "Tema de jogo" do app ficou só como treino do ostinato.
+  - Para testar: os cartões de música no começo das lições 90 a 97; o tema 2 da lição 96 lido em Sol e tocado em Dó; o Prelúdio de Chopin no "Tocar a música" (a esquerda tem oito acordes por compasso; veja se a partitura fica legível) e o Noturno em 12/8 (o metrônomo deve bater a semínima pontuada).
   - Músicas protegidas novas desta rodada, para você baixar:
     - I Will Always Love You (Whitney Houston) - Partitura - XML
+    - Comptine d'un autre été (Yann Tiersen) - Partitura - XML
+    - River Flows in You (Yiruma) - Partitura - XML
 
 - **02:09 às 02:23 (já dia 28)** — Unidade 11, que agora se chama **"Jazz e pop ao piano"**: troca **pronta**. Saíram o baião, a bossa, o choro e o tango (e as três músicas inventadas pelo app); todas as 8 lições (82 a 89) começam com as músicas que ensinam.
   - **Lição 82 (nova, baladas pop)**: **Imagine**, **Hallelujah** e **Someone Like You**. Dois desenhos de mão esquerda (Dó–Sol–Dó–Sol e o arpejo que sobe até a décima), acordes com o baixo invertido (G/B, C/E) e as duas mãos juntas a 80 BPM.
