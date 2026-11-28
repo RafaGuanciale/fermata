@@ -531,6 +531,11 @@ const l62: Lesson = {
     'Consigo tocar colcheias com swing (longa-curta, perto de 2:1) no tempo.',
     'Consigo acompanhar o blues com shells na esquerda e comping na direita.',
   ],
+  music: [
+    { piece: 'great-balls', why: 'Great Balls of Fire, do Jerry Lee Lewis, é piano de rock and roll: colcheias com swing, acordes martelados e a harmonia do blues. Depois desta lição, ouça como o swing empurra a música.' },
+    { piece: 'friend-in-me', why: "You've Got a Friend in Me, de Toy Story, é uma canção em swing: o piano toca longa-curta o tempo todo e a cifra traz acordes 7. Toque a cifra com shells e as colcheias balançando." },
+    { song: 'u08-entertainer', why: 'The Entertainer, de Scott Joplin, é o projeto da unidade. Nesta lição você começa pela direita e pelo oom-pah da esquerda, separados; na lição 65 junta as mãos.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -587,7 +592,7 @@ Comece a 72 BPM e só suba quando os dois ataques da direita estiverem seguros n
     {
       kind: 'text',
       title: 'Preparando The Entertainer',
-      body: `A música final da unidade é **The Entertainer**, de Scott Joplin (1902), um ragtime. Vale começar agora, devagar, em duas partes:\n\n- **A direita** tem o desenho Mi–Dó–Mi–Dó com saltos de 6ª e a **síncope**: o Dó cai no contratempo e fica. Toque o começo (até o compasso 5) só com a direita.\n- **A esquerda** faz o **oom-pah** do ragtime: baixo no tempo forte, acorde no fraco. O baixo é grave e o acorde fica no meio do teclado: olhe para o próximo destino antes de saltar.\n\nNa lição 65 você junta as duas mãos.`,
+      body: `A música final da unidade é **The Entertainer**, de Scott Joplin (1902), um ragtime em 2/4. O app usa o ritmo original, em **semicolcheias**: quatro por tempo. Vale começar agora, devagar, em duas partes:\n\n- **A direita** tem o desenho Mi–Dó–Mi–Dó com saltos de 6ª e a **síncope**: o Dó cai na última semicolcheia do compasso e fica. Toque a anacruse (Ré–Ré♯) e os 4 primeiros compassos só com a direita, começando a 40 BPM.\n- **Ragtime não tem swing**: as semicolcheias são retas, iguais. O balanço vem da síncope, não da divisão longa-curta.\n- **A esquerda** faz o **oom-pah** do ragtime em colcheias: baixo em cada tempo, acorde no contratempo. O baixo é grave e o acorde fica no meio do teclado: olhe para o próximo destino antes de saltar.\n\nNa lição 65 você junta as duas mãos.`,
     },
     { kind: 'exercise', id: 'l62-ent-md', exercise: quickTimed('The Entertainer, começo, direita', 'A anacruse e os 4 primeiros compassos, só a direita, em semicolcheias, de 40 a 56 BPM.', () => melodyTask(ENT_R5, { bpm: 40, beatsPerBar: 2 }), { ladder: { from: 40, to: 56, step: 8 }, window: 80 }) },
     { kind: 'exercise', id: 'l62-ent-me', exercise: quickTimed('The Entertainer, oom-pah na esquerda', 'Quatro compassos de baixo e acorde em colcheias, de 56 a 72 BPM.', () => melodyTask(ENT_L4, { bpm: 56, beatsPerBar: 2, clef: 'bass' }), { ladder: { from: 56, to: 72, step: 8 }, window: 80 }) },
@@ -620,6 +625,10 @@ const l63: Lesson = {
     'Consigo improvisar sobre o blues com 90% das notas na escala.',
     'Consigo chegar numa nota do acorde em pelo menos metade das trocas de acorde.',
   ],
+  music: [
+    { piece: 'another-one', why: 'O riff do baixo de Another One Bites the Dust, do Queen, usa só notas da pentatônica menor de Mi (Mi, Sol e Lá). Três notas, um ritmo marcante, e todo mundo reconhece: é a prova de que a pentatônica basta.' },
+    { piece: 'johnny-b-goode', why: 'A introdução de guitarra de Johnny B. Goode, do Chuck Berry, é feita de frases da pentatônica e da escala blues sobre o blues de 12 compassos. Tire uma frase de ouvido e toque no piano.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -630,7 +639,7 @@ const l63: Lesson = {
 - **Pentatônica menor de Lá**: **Lá, Dó, Ré, Mi, Sol**. As mesmas notas, com a casa no Lá (relativas, como na lição 34).
 - **Pentatônica menor de Dó**: **Dó, Mi♭, Fá, Sol, Si♭**.
 
-A pentatônica maior soa aberta, de música folclórica e pop. A menor é a base do rock e do blues.`,
+A pentatônica maior soa aberta, de música folclórica e pop. A menor é a base do rock e do blues: o riff do baixo de **Another One Bites the Dust** usa só três notas da pentatônica menor de Mi (Mi, Sol e Lá). Toque o riff na esquerda, devagar, e repare que nenhuma nota cria atrito.`,
     },
     {
       kind: 'text',
