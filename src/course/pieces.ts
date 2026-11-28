@@ -93,6 +93,7 @@ export const COURSE_PIECES: CoursePiece[] = [
   p('eleanor-rigby', 'Eleanor Rigby', ['The Beatles'], 'Verso e refrão', 'Rock', ['pop-rock'], 'Eleanor Rigby easy piano'),
   p('norwegian-wood', 'Norwegian Wood', ['The Beatles'], 'Verso', 'Rock', ['pop-rock'], 'Norwegian Wood Beatles easy piano', ['this bird has flown']),
   // Unidade 12
+  p('always-love-you', 'I Will Always Love You', ['Dolly Parton', 'Whitney Houston'], 'Último refrão', 'Pop', ['pop-rock'], 'I Will Always Love You Whitney Houston easy piano', ['always love you']),
   p('bohemian', 'Bohemian Rhapsody', ['Queen'], 'Balada', 'Rock', ['pop-rock'], 'Bohemian Rhapsody piano ballad', [], 'intermediario'),
   p('paganini-18', 'Rhapsody on a Theme of Paganini, Variação 18', ['Sergei Rachmaninoff'], 'Inteira', 'Clássica', ['classico'], 'Rachmaninoff Variation 18 piano', ['variation 18', 'variacao 18'], 'avancado'),
 ];

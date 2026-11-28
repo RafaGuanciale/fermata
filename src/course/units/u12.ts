@@ -411,6 +411,11 @@ const l92: Lesson = {
     'Consigo modular o último refrão um tom acima pelo V7 do tom novo.',
     'Consigo tocar uma melodia um tom acima lendo a original.',
   ],
+  music: [
+    { song: 'u12-ode-solo', why: 'O arranjo solo da Ode to Joy, da lição 91, ganha aqui o que falta para virar apresentação: uma intro, um turnaround que volta ao começo, a segunda vez um tom acima e um final.' },
+    { piece: 'fly-me', why: 'Fly Me to the Moon fecha a forma com um ii–V que devolve a música ao primeiro acorde: é o papel do turnaround. Nas gravações, ela termina com tag, a última frase repetida antes de resolver.' },
+    { piece: 'always-love-you', why: 'I Will Always Love You, na gravação de Whitney Houston, é o exemplo mais famoso do último refrão que sobe de tom: depois de uma pausa, a música recomeça mais alta e com mais energia.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -547,6 +552,10 @@ const l93: Lesson = {
     'Consigo tocar escalas maiores de 2 oitavas mãos juntas em semicolcheias a 50 BPM, com variação abaixo de 25 ms.',
     'Consigo tocar arpejos maiores de 2 oitavas mãos juntas em colcheias.',
     'Consigo montar tétrades em qualquer tom em menos de 3 s.',
+  ],
+  music: [
+    { song: 'u09-turca', why: 'O Rondo alla Turca corre em semicolcheias, quatro por tempo, com escalas curtas e passagens de polegar na direita: a técnica desta lição dentro de uma música que todo mundo reconhece.' },
+    { song: 'u07-preludio', why: 'O Prelude in C de Bach é um arpejo em semicolcheias do começo ao fim. Ele treina o que o arpejo de 2 oitavas pede: mão solta, punho na altura e notas iguais.' },
   ],
   blocks: [
     {
