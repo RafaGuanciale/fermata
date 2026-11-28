@@ -1,6 +1,6 @@
 // Unidade 4 — Escala maior, armaduras e pedal legato (lições 25 a 33). Projeto final: Canon in D (Pachelbel), simplificado.
 // Músicas: Joy to the World, Ode to Joy (em Dó e em Ré), Canon in D e Blues em Dó no app; Hey Jude, Let It Be, Raiders March,
-// Seven Nation Army, Under the Sea, Jurassic Park Theme, Hound Dog e Johnny B. Goode para importar (src/course/pieces.ts).
+// Seven Nation Army, Under the Sea, Jurassic Park Theme, Hound Dog, Johnny B. Goode e Hallelujah para importar (src/course/pieces.ts).
 // A lição 33 é o Marco 1: checkpoint das unidades 1 a 4 e mini-recital.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
@@ -153,9 +153,9 @@ O mesmo raciocínio, a partir do Fá: Fá, Sol, Lá e... de Lá para Si seria um
       title: 'A escala numa música',
       body: `Toque o começo de **Joy to the World** e repare: Dó, Si, Lá, Sol, Fá, Mi, Ré, Dó. É a escala de Dó maior inteira, descendo, com o ritmo de um hino. O primeiro tetracorde (Dó, Si, Lá, Sol) é "Joy to the world", e o segundo (Fá, Mi, Ré, Dó) é "the Lord is come".
 
-Por enquanto toque só a direita, com calma. O dedilhado da descida (5, 4, 3, 2, 1 e depois 3, 2, 1) é o assunto da próxima lição: hoje vale deixar a mão escorregar de uma posição para a outra.`,
+Por enquanto toque só a direita, com calma. O ritmo é o original: o "Joy" é longo e o "to the" vem rápido (pontuada e semicolcheia; a lição 29 explica a pontuada, mas o ouvido já conhece). O dedilhado da descida (5, 4, 3, 2, 1 e depois 3, 2, 1) é o assunto da próxima lição: hoje vale deixar a mão escorregar de uma posição para a outra.`,
     },
-    { kind: 'exercise', id: 'l25-joy', exercise: quickTimed('Joy to the World: a escala', 'Os 4 primeiros compassos, só a mão direita, a 66 BPM. Duas passadas boas.', () => melodyTask(JOY_SCALE, { bpm: 66 }), { reps: 2 }) },
+    { kind: 'exercise', id: 'l25-joy', exercise: quickTimed('Joy to the World: a escala', 'Os 4 primeiros compassos, só a mão direita. Começa a 60 BPM e sobe até 96 BPM.', () => melodyTask(JOY_SCALE, { bpm: 60, beatsPerBar: 2 }), { ladder: { from: 60, to: 96, step: 6 } }) },
     { kind: 'song', songId: 'u04-joy', why: 'A melodia inteira, para tocar junto com a partitura.' },
   ],
   review: [tetra, scalesWhite, choice(SCALE, 'escala-maior')],
@@ -246,7 +246,7 @@ Um bom teste: a escala deve soar **igual**, sem um "tropeço" no Fá. Os pianist
       title: 'o polegar em Joy to the World',
       body: 'Na descida do Dó5 ao Dó4, comece com o 5 no Dó5 e desça 5, 4, 3, 2, 1 até o Fá. No Mi, o dedo 3 passa por cima do polegar, e você termina 3, 2, 1 no Mi, Ré e Dó. É exatamente a passagem da escala, agora com música.',
     },
-    { kind: 'exercise', id: 'l26-joy', exercise: quickTimed('Joy to the World com a passagem do polegar', 'A melodia inteira, só a direita, de 60 a 76 BPM. Use o dedilhado da dica.', () => melodyTask(JOY_R, { bpm: 60 }), { ladder: { from: 60, to: 76, step: 4 } }) },
+    { kind: 'exercise', id: 'l26-joy', exercise: quickTimed('Joy to the World com a passagem do polegar', 'A melodia inteira, só a direita, de 60 a 96 BPM. Use o dedilhado da dica.', () => melodyTask(JOY_R, { bpm: 60, beatsPerBar: 2 }), { ladder: { from: 60, to: 96, step: 6 } }) },
   ],
   review: [choice(THUMB, 'dedilhado'), scalesWhite],
   checkpoint: [
@@ -394,7 +394,7 @@ const odeDotted: SongSpec = {
   title: 'Ode to Joy completa',
   composer: 'Ludwig van Beethoven',
   arrangement: 'arranjo do Fermata: a melodia inteira com o ritmo original (pontuadas e colcheias) e a mão esquerda em intervalos de I e V',
-  bpm: 76,
+  bpm: 108,
   beatsPerBar: 4,
   fifths: 0,
   right: ODE_FULL_R,
@@ -437,19 +437,18 @@ const odeD: SongSpec = {
 };
 
 // Joy to the World (hino "Antioch", melodia atribuída a Händel, arranjada por Lowell Mason em 1839). Notas da edição do
-// Mutopia Project (Steve Dunlop, em Ré, 2/4), transpostas para Dó, com os valores dobrados (4/4). Arranjo: a colcheia
-// pontuada com semicolcheia vira duas semínimas (a pontuada só chega na lição 29). A melodia começa com a escala de Dó
-// maior inteira, descendo.
-const JOY_R = 'C5:2 B4 A4 | G4:3 F4 | E4:2 D4:2 | C4:3 G4 | A4:3 A4 | B4:3 B4 | C5:3 C5 | C5 B4 A4 G4 | G4 F4 G4 C5 | C5 B4 A4 G4 | G4 F4 E4 E4 | E4 E4 E4 E4:0.5 F4:0.5 | G4:3 F4:0.5 E4:0.5 | D4 D4 D4 D4:0.5 E4:0.5 | F4:3 E4:0.5 D4:0.5 | C4 C5:2 A4 | G4 F4 E4 F4 | E4:2 D4:2 | C4:4';
-const JOY_SCALE = 'C5:2 B4 A4 | G4:3 F4 | E4:2 D4:2 | C4:4';
+// Mutopia Project (Steve Dunlop, em Ré, 2/4), transpostas para Dó, com o ritmo original: é o "Joy to the world" com a
+// pontuada que todo mundo reconhece. A melodia começa com a escala de Dó maior inteira, descendo.
+const JOY_R = 'C5 B4:0.75 A4:0.25 | G4:1.5 F4:0.5 | E4 D4 | C4:1.5 G4:0.5 | A4:1.5 A4:0.5 | B4:1.5 B4:0.5 | C5:1.5 C5:0.5 | C5:0.5 B4:0.5 A4:0.5 G4:0.5 | G4:0.75 F4:0.25 G4:0.5 C5:0.5 | C5:0.5 B4:0.5 A4:0.5 G4:0.5 | G4:0.75 F4:0.25 E4:0.5 E4:0.5 | E4:0.5 E4:0.5 E4:0.5 E4:0.25 F4:0.25 | G4:1.5 F4:0.25 E4:0.25 | D4:0.5 D4:0.5 D4:0.5 D4:0.25 E4:0.25 | F4:1.5 E4:0.25 D4:0.25 | C4:0.5 C5 A4:0.5 | G4:0.75 F4:0.25 E4:0.5 F4:0.5 | E4 D4 | C4:2';
+const JOY_SCALE = 'C5 B4:0.75 A4:0.25 | G4:1.5 F4:0.5 | E4 D4 | C4:2';
 
 const joy: SongSpec = {
   id: 'u04-joy',
   title: 'Joy to the World',
   composer: 'melodia atribuída a Georg Friedrich Händel, arranjo de Lowell Mason (1839)',
-  arrangement: 'arranjo do Fermata em Dó: a melodia inteira na mão direita, com os valores dobrados e sem pontuadas',
-  bpm: 84,
-  beatsPerBar: 4,
+  arrangement: 'arranjo do Fermata em Dó: a melodia inteira na mão direita, com o ritmo original (2/4). O alvo é o andamento de um coro',
+  bpm: 96,
+  beatsPerBar: 2,
   fifths: 0,
   right: JOY_R,
   hands: 'direita',
@@ -472,6 +471,7 @@ const l28: Lesson = {
   ],
   music: [
     { piece: 'let-it-be', why: 'Let It Be é I–V–vi–IV: Dó, Sol, Lá menor e Fá. O vi, o acorde do 6º grau, é o único novo, e você o aprende nesta lição. Com esses quatro acordes dá para tocar centenas de músicas.' },
+    { piece: 'hallelujah', why: 'Hallelujah, do Leonard Cohen, também vive em C, Am, F e G: Dó e Lá menor se alternando no começo, depois Fá e Sol. Ela é em compasso composto (6/8, contado em 2), que a Unidade 6 explica; por agora, toque de ouvido. A própria letra fala dos acordes que está usando: preste atenção quando ouvir.' },
   ],
   blocks: [
     {

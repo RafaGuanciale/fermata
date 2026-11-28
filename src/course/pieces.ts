@@ -54,6 +54,7 @@ export const COURSE_PIECES: CoursePiece[] = [
   p('cant-help-falling', "Can't Help Falling in Love", ['Elvis Presley'], 'Inteira', 'Rock and roll', ['pop-rock'], "Can't Help Falling in Love easy piano", ['cant help falling in love']),
   p('hes-a-pirate', "He's a Pirate", ['Klaus Badelt', 'Hans Zimmer'], 'Tema', 'Filme', ['filmes'], "He's a Pirate easy piano", ['hes a pirate', 'piratas do caribe']),
   p('interstellar', 'Interstellar', ['Hans Zimmer'], 'Tema', 'Filme', ['filmes'], 'Interstellar main theme easy piano'),
+  p('hallelujah', 'Hallelujah', ['Leonard Cohen'], 'Inteira', 'Pop', ['pop-rock'], 'Hallelujah Leonard Cohen easy piano'),
   p('con-te-partiro', 'Con te partirò', ['Andrea Bocelli'], 'Refrão', 'Ópera pop', ['pop-rock'], 'Con te partiro easy piano', ['time to say goodbye']),
   p('imagine', 'Imagine', ['John Lennon'], 'Inteira', 'Rock', ['pop-rock'], 'Imagine John Lennon easy piano'),
   p('hedwig', "Hedwig's Theme", ['John Williams'], 'Tema', 'Filme', ['filmes'], "Hedwig's Theme easy piano", ['hedwigs theme', 'harry potter']),

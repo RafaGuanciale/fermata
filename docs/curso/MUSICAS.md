@@ -6,9 +6,10 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 1. **Toda lição tem `music`** (`Lesson.music` em `src/course/types.ts`): de uma a quatro músicas, mostradas logo no começo da lição (página e modo foco) e listadas na página da unidade ("O que você vai tocar"). O `why` diz, em uma ou duas frases, o que aquela música tem a ver com a lição.
 2. **Música conhecida, não inventada.** O Rafael gosta de clássicos (Beethoven, Mozart, Bach, Chopin, Debussy, Paganini), ópera (Pavarotti, Bocelli), Elvis, Beatles, rock clássico, trilhas de filme e Disney clássica. Não usar cantigas infantis nem melodias originais do app como música da lição. As originais que já existem ficam só como material de exercício.
-3. **Domínio público vai no código** (`SongSpec` na unidade), com as notas **conferidas numa fonte** (Mutopia Project, IMSLP, corpus do music21, uma transcrição ABC identificada), nunca de memória. O comentário acima da música diz a fonte e o que o arranjo mudou. Simplificações valem, desde que respeitem "um conceito por vez": antes da lição 20 nada de colcheia, antes da 29 nada de semínima pontuada (vira duas semínimas ou os valores dobram), e assim por diante.
+3. **Domínio público vai no código** (`SongSpec` na unidade), com as notas **conferidas numa fonte** (Mutopia Project, IMSLP, corpus do music21, uma transcrição ABC identificada), nunca de memória. O comentário acima da música diz a fonte e o que o arranjo mudou.
+3a. **A música tem que ser reconhecível** (pedido do Rafael, 27/11/2026: "quero reconhecer, mesmo que tenha que treinar muito"). Mantenha o **ritmo original da melodia**: nunca dobrar valores nem trocar pontuada por notas iguais. Simplifique o resto (acordes da esquerda, oitava, tom), não o ritmo. O `bpm` da música (o alvo para passar) é perto do andamento das gravações; os exercícios da lição começam devagar e sobem em escada, e o resto do caminho fica no "Tocar a música". Se a música tem um ritmo que a lição ainda não ensinou (colcheia antes da 20, pontuada antes da 29), tudo bem: o texto avisa que é para tocar de ouvido e a lição certa explica depois.
 4. **Música protegida nunca vai no código** (o repositório é público e o site também). Ela entra no catálogo `src/course/pieces.ts` (só título, artista, trecho, tipo e o texto da busca no MuseScore) e a lição usa `{ piece: 'id', why }`. O Rafael importa o MusicXML no Repertório; a lição acha a música pelo título (ou por um apelido) e mostra "Tocar junto". Sem a partitura, o cartão mostra "Pôr no repertório", "Importar a partitura" e "Procurar no MuseScore".
-5. **A mesma música pode voltar mais difícil**: Eine kleine Nachtmusik em Dó com valores dobrados (lição 18), no ritmo original (20) e no tom original (21); Moonlight Sonata fácil (39) e original (77). Isso é progresso visível, não repetição.
+5. **A mesma música pode voltar mais difícil**: Eine kleine Nachtmusik em Dó de ouvido (lição 18), contada com as colcheias (20) e no tom original (21); Moonlight Sonata fácil (39) e original (77). Isso é progresso visível, não repetição.
 6. **Lista para o Rafael**: quando uma unidade nova ganhar músicas protegidas, avise a lista no formato "Música (artista) - Partitura - XML".
 
 ## Mapa por lição
@@ -18,10 +19,10 @@ Unidades 3 e 4: feitas. Unidades 5 a 12: a fazer (as rodadas seguem este mapa). 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
 | 3 | 17 | Jingle Bells | App | Acordes C, F e G |
-| 3 | 18 | Eine kleine Nachtmusik, em Dó (valores dobrados) | App | I–V7–I quebrado |
+| 3 | 18 | Eine kleine Nachtmusik, em Dó | App | I–V7–I quebrado |
 | 3 | 18 | La donna è mobile (Verdi) | App, **pendente** (corpus do music21, `verdi/laDonnaEMobile.mxl`) | I–V7 no acompanhamento |
 | 3 | 19 | Jingle Bells, com acordes | App | I–IV–V7 e cifra |
-| 3 | 20 | Eine kleine Nachtmusik, no ritmo original | App | Colcheias |
+| 3 | 20 | Eine kleine Nachtmusik, contada | App | Colcheias |
 | 3 | 20 | William Tell Overture, galope (Rossini) | App, **pendente** (falta fonte aberta) | Colcheias em staccato |
 | 3 | 21 | Eine kleine Nachtmusik, em Sol · Love Me Do | App · importar | Tom de Sol |
 | 3 | 22 | Silent Night · Love Me Tender | App · importar | Pedal direto |
@@ -29,6 +30,7 @@ Unidades 3 e 4: feitas. Unidades 5 a 12: a fazer (as rodadas seguem este mapa). 
 | 4 | 25–26 | Joy to the World | App | Escala e polegar |
 | 4 | 27 | Hey Jude | importar | Armadura de Fá |
 | 4 | 28–29 | Let It Be | importar | vi grau (Am) e síncope |
+| 4 | 28 | Hallelujah (Leonard Cohen) | importar | vi grau (Am), de ouvido em 6/8; volta na lição 46 |
 | 4 | 29 | Raiders March · Seven Nation Army · Under the Sea | importar | Pontuada e síncope |
 | 4 | 30 | Canon in D · Jurassic Park Theme | App · importar | Pedal legato |
 | 4 | 31 | Blues em Dó · Hound Dog · Johnny B. Goode | App · importar | Blues de 12 compassos |
@@ -43,7 +45,7 @@ Unidades 3 e 4: feitas. Unidades 5 a 12: a fazer (as rodadas seguem este mapa). 
 | 6 | 43 | Canon in D, completo | App | Inversões |
 | 6 | 44 | Can You Feel the Love Tonight | importar | Condução com inversões |
 | 6 | 45 | Jump | importar | Acordes sus |
-| 6 | 46 | Can't Help Falling in Love · He's a Pirate · Funiculì, Funiculà · Lacrimosa (Mozart) | importar · App | Compasso composto |
+| 6 | 46 | Hallelujah (Leonard Cohen) · Can't Help Falling in Love · He's a Pirate · Funiculì, Funiculà · Lacrimosa (Mozart) | importar · App | Compasso composto (Hallelujah é 6/8, com a letra falando dos próprios acordes) |
 | 6 | 47 | Interstellar · Con te partirò · Imagine | importar | Melodia sobre acompanhamento |
 | 6 | 48 | Hedwig's Theme | importar | Cromatismo |
 | 7 | 50 | Canon in D, analisado | App | Campo harmônico |

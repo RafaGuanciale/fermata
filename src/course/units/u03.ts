@@ -113,10 +113,11 @@ const NEAR = { I, IV, V7 };
 /** Raiz e 5ª em mínimas, em Dó (C: Dó–Sol, F: Fá–Dó, G7: Sol–Ré). */
 const FIFTHS: Record<string, string> = { I: 'C3:2 G3:2', IV: 'F2:2 C3:2', V7: 'G2:2 D3:2' };
 
-// Jingle Bells (James Lord Pierpont, 1857). Notas conferidas com a transcrição em ABC de B. Stephenson (Universidade de
-// Calgary), em Dó. Arranjo: colcheias e semínimas pontuadas viram semínimas (a unidade 3 ainda não pede nenhuma das duas).
-const JB_VERSE_R = 'G4 E5 D5 C5 | G4:3 G4 | G4 E5 D5 C5 | A4:4 | A4 F5 E5 D5 | B4:4 | G5 G5 F5 D5 | E5:4 | G4 E5 D5 C5 | G4:4 | G4 E5 D5 C5 | A4:3 A4 | A4 F5 E5 D5 | G5 G5 G5 G5 | A5 G5 F5 D5 | C5:2 r:2';
-const JB_CHORUS_R = 'E5 E5 E5:2 | E5 E5 E5:2 | E5 G5 C5 D5 | E5:4 | F5 F5 F5 F5 | F5 E5 E5 E5 | E5 D5 D5 E5 | D5:2 G5:2 | E5 E5 E5:2 | E5 E5 E5:2 | E5 G5 C5 D5 | E5:4 | F5 F5 F5 F5 | F5 E5 E5 E5 | G5 G5 F5 D5 | C5:4';
+// Jingle Bells (James Lord Pierpont, 1857). Notas e ritmo conferidos com a transcrição em ABC de B. Stephenson
+// (Universidade de Calgary), em Dó. Ritmo original: a pontuada de "jingle all the way" e as colcheias ficam, porque é
+// isso que faz a música ser reconhecível (o curso ensina a contar colcheia na lição 20 e a pontuada na 29).
+const JB_VERSE_R = 'G4 E5 D5 C5 | G4:3 G4:0.5 G4:0.5 | G4 E5 D5 C5 | A4:4 | A4 F5 E5 D5 | B4:4 | G5 G5 F5 D5 | E5:4 | G4 E5 D5 C5 | G4:4 | G4 E5 D5 C5 | A4:3 A4 | A4 F5 E5 D5 | G5 G5 G5:1.5 G5:0.5 | A5 G5 F5 D5 | C5:2 r:2';
+const JB_CHORUS_R = 'E5 E5 E5:2 | E5 E5 E5:2 | E5 G5 C5:1.5 D5:0.5 | E5:4 | F5 F5 F5:1.5 F5:0.5 | F5 E5 E5 E5:0.5 E5:0.5 | E5 D5 D5 E5 | D5:2 G5:2 | E5 E5 E5:2 | E5 E5 E5:2 | E5 G5 C5:1.5 D5:0.5 | E5:4 | F5 F5 F5:1.5 F5:0.5 | F5 E5 E5 E5:0.5 E5:0.5 | G5 G5 F5 D5 | C5:4';
 const JB_VERSE_DEG = ['I', 'I', 'I', 'IV', 'IV', 'V7', 'V7', 'I', 'I', 'I', 'I', 'IV', 'IV', 'V7', 'V7', 'I'];
 const JB_CHORUS_DEG = ['I', 'I', 'I', 'I', 'IV', 'I', 'V7', 'V7', 'I', 'I', 'I', 'I', 'IV', 'I', 'V7', 'I'];
 const JB_CHORUS_L = chordBars(JB_CHORUS_DEG, NEAR);
@@ -126,8 +127,8 @@ const jingle: SongSpec = {
   id: 'u03-jingle',
   title: 'Jingle Bells',
   composer: 'James Lord Pierpont (1857)',
-  arrangement: 'arranjo do Fermata em Dó: verso e refrão em semínimas na mão direita (sem colcheias nem pontuadas), um acorde por compasso (C, F e G7 em posição próxima) na esquerda',
-  bpm: 92,
+  arrangement: 'arranjo do Fermata em Dó: verso e refrão com o ritmo original na mão direita, um acorde por compasso (C, F e G7 em posição próxima) na esquerda',
+  bpm: 120,
   beatsPerBar: 4,
   fifths: 0,
   right: `${JB_VERSE_R} | ${JB_CHORUS_R}`,
@@ -136,20 +137,18 @@ const jingle: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-// Eine kleine Nachtmusik (Mozart, K. 525, 1787), abertura do 1º movimento. Notas do 1º violino da edição do Mutopia Project
-// (compassos 1 a 4, em Sol). Em Dó para a lição 18, com os valores dobrados (só semínimas e mínimas); no ritmo original
-// na lição 20 (colcheias) e no tom original, Sol, na lição 21. O último compasso (o acorde de chegada) é do arranjo.
-const EK_C_R = 'C5:2 r G4 | C5:2 r G4 | C5 G4 C5 E5 | G5:2 r:2 | F5:2 r D5 | F5:2 r D5 | F5 D5 B4 D5 | G4:2 r:2 | C5:4';
-const EK_C_L = `${I}:4 | ${I}:4 | ${I}:4 | ${I}:4 | ${V7}:4 | ${V7}:4 | ${V7}:4 | ${V7}:4 | ${I}:4`;
-const EK_C8_R = 'C5 r:0.5 G4:0.5 C5 r:0.5 G4:0.5 | C5:0.5 G4:0.5 C5:0.5 E5:0.5 G5 r | F5 r:0.5 D5:0.5 F5 r:0.5 D5:0.5 | F5:0.5 D5:0.5 B4:0.5 D5:0.5 G4 r | C5:4';
-const EK_C8_L = `${I}:4 | ${I}:4 | ${V7}:4 | ${V7}:4 | ${I}:4`;
+// Eine kleine Nachtmusik (Mozart, K. 525, 1787), abertura do 1º movimento. Notas e ritmo do 1º violino da edição do
+// Mutopia Project (compassos 1 a 4, em Sol), transpostos para Dó; no tom original, Sol, na lição 21. O último compasso (o
+// acorde de chegada) é do arranjo. Nunca dobrar os valores: a 84 BPM com valores dobrados ela fica irreconhecível.
+const EK_C_R = 'C5 r:0.5 G4:0.5 C5 r:0.5 G4:0.5 | C5:0.5 G4:0.5 C5:0.5 E5:0.5 G5 r | F5 r:0.5 D5:0.5 F5 r:0.5 D5:0.5 | F5:0.5 D5:0.5 B4:0.5 D5:0.5 G4 r | C5:4';
+const EK_C_L = `${I}:4 | ${I}:4 | ${V7}:4 | ${V7}:4 | ${I}:4`;
 
 const eineDo: SongSpec = {
   id: 'u03-eine-do',
   title: 'Eine kleine Nachtmusik',
   composer: 'Wolfgang Amadeus Mozart (K. 525)',
-  arrangement: 'arranjo do Fermata: abertura do 1º movimento em Dó, com os valores dobrados (semínimas e mínimas); Dó e G7 em posição próxima na esquerda',
-  bpm: 84,
+  arrangement: 'arranjo do Fermata: abertura do 1º movimento em Dó, no ritmo de Mozart; Dó e G7 em posição próxima na esquerda. O alvo é perto do andamento das gravações (Allegro)',
+  bpm: 132,
   beatsPerBar: 4,
   fifths: 0,
   right: EK_C_R,
@@ -158,23 +157,9 @@ const eineDo: SongSpec = {
   pass: { accuracy: 0.85 },
 };
 
-const eineDoOriginal: SongSpec = {
-  id: 'u03-eine-do-colcheias',
-  title: 'Eine kleine Nachtmusik, no ritmo original',
-  composer: 'Wolfgang Amadeus Mozart (K. 525)',
-  arrangement: 'arranjo do Fermata: abertura do 1º movimento em Dó, no ritmo de Mozart (com colcheias); Dó e G7 em posição próxima na esquerda',
-  bpm: 72,
-  beatsPerBar: 4,
-  fifths: 0,
-  right: EK_C8_R,
-  left: EK_C8_L,
-  hands: 'duas',
-  pass: { accuracy: 0.85 },
-};
-
 // Amazing Grace (melodia "New Britain", EUA, 1829): 3/4 com anacruse, I–IV–V7. Notas conferidas com a edição do Mutopia
-// Project (hinário, em Sol), transpostas para Dó. Arranjo: a semínima pontuada com colcheia vira duas semínimas.
-const AMAZING_R = 'r:2 G4 | C5:2 E5:0.5 C5:0.5 | E5:2 D5 | C5:2 A4 | G4:2 G4 | C5:2 E5:0.5 C5:0.5 | E5:2 D5 | G5:3 | E5 G5 E5 | G5:0.5 E5:0.5 C5:2 | G4 A4 C5 | C5:0.5 A4:0.5 G4:2 | G4 C5:2 | E5:0.5 C5:0.5 E5:2 | D5 C5:2 | C5:2 r';
+// Project (hinário, em Sol), transpostas para Dó, com o ritmo original.
+const AMAZING_R = 'r:2 G4 | C5:2 E5:0.5 C5:0.5 | E5:2 D5 | C5:2 A4 | G4:2 G4 | C5:2 E5:0.5 C5:0.5 | E5:2 D5 | G5:3 | E5 G5:1.5 E5:0.5 | G5:0.5 E5:0.5 C5:2 | G4 A4:1.5 C5:0.5 | C5:0.5 A4:0.5 G4:2 | G4 C5:2 | E5:0.5 C5:0.5 E5:2 | D5 C5:2 | C5:2 r';
 const AMAZING_L = `r:3 | ${I}:3 | ${I}:3 | ${IV}:3 | ${I}:3 | ${I}:3 | ${I}:3 | ${V}:3 | ${I}:3 | ${I}:3 | ${IV}:3 | ${I}:3 | ${I}:3 | ${I}:3 | ${V7}:3 | ${I}:2 r`;
 
 const amazing: SongSpec = {
@@ -290,10 +275,10 @@ const l18: Lesson = {
     'Consigo dizer o que é o tom de Dó maior e tocar qualquer grau da escala (1 a 7).',
     'Consigo tocar Dó e G7 em posição próxima na mão esquerda, movendo o mínimo.',
     'Consigo completar uma cadência V7–I de ouvido.',
-    'Consigo acompanhar Eine kleine Nachtmusik com I e V7 a 72 BPM.',
+    'Consigo acompanhar a abertura de Eine kleine Nachtmusik com I e V7, devagar.',
   ],
   music: [
-    { song: 'u03-eine-do', why: 'A abertura mais famosa de Mozart é literalmente um acorde de Dó quebrado e, depois, um G7 quebrado. É o I–V7 desta lição tocado por uma orquestra. Aqui ela vem em Dó, com valores longos; na lição 20 você toca no ritmo original e na 21, no tom em que Mozart escreveu.' },
+    { song: 'u03-eine-do', why: 'A abertura mais famosa de Mozart é literalmente um acorde de Dó quebrado e, depois, um G7 quebrado: o I–V7 desta lição, tocado por uma orquestra. Ela vem no ritmo de Mozart. O alvo (132 BPM) é perto das gravações; comece bem mais devagar e suba aos poucos.' },
   ],
   blocks: [
     {
@@ -386,15 +371,15 @@ Parta de **Dó3, Mi3, Sol3** (dedos 5, 3, 1). Para o G7:
 
 Em **Eine kleine Nachtmusik** a melodia avisa quando trocar. Nos quatro primeiros compassos ela desenha **Dó, Sol, Mi**: o acorde de Dó, quebrado. Nos quatro seguintes desenha **Fá, Ré, Si, Sol**: o G7, quebrado. A esquerda só confirma o que a direita já está dizendo: Dó embaixo do Dó, G7 embaixo do G7. No último compasso, as duas mãos chegam juntas em casa.
 
-Os valores aqui são o dobro dos de Mozart (ele escreveu colcheias onde você toca semínimas). É a mesma música, mais devagar no papel: na lição 20 ela volta com as colcheias.`,
+Ela tem **colcheias**, notas de meio tempo, que você aprende a contar na lição 20. Por enquanto, toque ouvindo: o app toca o trecho antes, e o desenho rápido do 2º compasso (Dó, Sol, Dó, Mi) é o "pa-ra-pa-ra" que todo mundo canta. Comece devagar: o andamento sobe a cada passada boa.`,
     },
-    { kind: 'exercise', id: 'l18-eine', exercise: quickTimed('Eine kleine Nachtmusik, duas mãos', 'Melodia na direita, Dó e G7 na esquerda. Começa a 60 BPM e sobe até 72 BPM.', () => twoHandTask(EK_C_R, EK_C_L, { bpm: 60, caption: 'Esquerda: Dó nos compassos 1 a 4, G7 nos compassos 5 a 8, Dó no último.' }), { ladder: { from: 60, to: 72, step: 4 } }) },
+    { kind: 'exercise', id: 'l18-eine', exercise: quickTimed('Eine kleine Nachtmusik, duas mãos', 'Melodia na direita, Dó e G7 na esquerda. Começa a 56 BPM e sobe até 80 BPM; o resto do caminho até o alvo fica no "Tocar a música".', () => twoHandTask(EK_C_R, EK_C_L, { bpm: 56, caption: 'Esquerda: Dó nos compassos 1 e 2, G7 no 3 e no 4, Dó no último.' }), { ladder: { from: 56, to: 80, step: 4 } }) },
     { kind: 'song', songId: 'u03-eine-do', why: 'A mesma abertura na pauta dupla, com os acordes escritos na clave de Fá.' },
     { kind: 'exercise', id: 'l18-quiz', exercise: quiz('Tom, graus e dominante', 'Sete perguntas rápidas.', DOMINANT) },
   ],
   review: [degreesC, chordsCG7, cadenceC, choice(DOMINANT, 'dominante')],
   checkpoint: [
-    quickTimed('Eine kleine Nachtmusik a 72 BPM', '9 compassos, duas mãos, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(EK_C_R, EK_C_L, { bpm: 72, caption: 'Esquerda: Dó nos compassos 1 a 4, G7 nos compassos 5 a 8, Dó no último.' }), { window: 80, pass: { accuracy: 0.9 } }),
+    quickTimed('Eine kleine Nachtmusik a 72 BPM', '5 compassos, duas mãos, sem dicas. Meta: 90% das notas, ±80 ms.', () => twoHandTask(EK_C_R, EK_C_L, { bpm: 72, caption: 'Esquerda: Dó nos compassos 1 e 2, G7 no 3 e no 4, Dó no último.' }), { window: 80, pass: { accuracy: 0.9 } }),
     { kind: 'items', title: 'Graus, acordes e cadências', how: 'Graus de Dó, os acordes Dó e G7 e cadências para completar, misturados com acordes da lição 17.', gen: mix([degreesC, chordsCG7, cadenceC, chordsCFG]), count: 12, low: 36, high: 84, labels: 'off', pass: { accuracy: 0.85 } },
   ],
   exit: [degreesC, chordsCG7, choice(DOMINANT, 'dominante')],
@@ -551,8 +536,8 @@ const eineSol: SongSpec = {
   id: 'u03-eine-sol',
   title: 'Eine kleine Nachtmusik, em Sol',
   composer: 'Wolfgang Amadeus Mozart (K. 525)',
-  arrangement: 'arranjo do Fermata: abertura do 1º movimento no tom original, Sol maior, no ritmo de Mozart; G e D7 em posição próxima na esquerda',
-  bpm: 72,
+  arrangement: 'arranjo do Fermata: abertura do 1º movimento no tom original, Sol maior, no ritmo de Mozart; G e D7 em posição próxima na esquerda. O alvo é perto do andamento das gravações (Allegro)',
+  bpm: 132,
   beatsPerBar: 4,
   fifths: 1,
   right: EK_G_R,
@@ -570,10 +555,10 @@ const l20: Lesson = {
     'Consigo contar e tocar colcheias a 80 BPM, dentro de ±60 ms.',
     'Consigo tocar três padrões de mão esquerda sobre I–IV–V–I: bloco, raiz com oitava e raiz com 5ª.',
     'Consigo manter um padrão na esquerda enquanto a direita toca a melodia.',
-    'Consigo tocar Eine kleine Nachtmusik no ritmo de Mozart, com as colcheias.',
+    'Consigo contar as colcheias de Eine kleine Nachtmusik e tocar a abertura a 100 BPM.',
   ],
   music: [
-    { song: 'u03-eine-do-colcheias', why: 'A abertura da lição 18 agora no ritmo que Mozart escreveu: as colcheias que você aprende hoje são as notas rápidas do "pa-ra-pa-ra-pam" do segundo compasso.' },
+    { song: 'u03-eine-do', why: 'A abertura da lição 18, agora contada: as colcheias que você aprende hoje são as notas rápidas do "pa-ra-pa-ra-pam" do segundo compasso. Suba o andamento rumo ao alvo de 132 BPM.' },
   ],
   blocks: [
     {
@@ -634,8 +619,8 @@ Toque cada padrão sobre **I–IV–V–I** até ele sair sem olhar. Os três tr
     { kind: 'exercise', id: 'l20-junto', exercise: quickTimed('Raiz e 5ª com a melodia', 'A primeira metade do refrão de Jingle Bells na direita; raiz e 5ª em mínimas na esquerda, a 60 BPM. Duas passadas boas.', () => twoHandTask(JB_CHORUS_R.split(' | ').slice(0, 8).join(' | '), JB_CHORUS_FIFTH.split(' | ').slice(0, 8).join(' | '), { bpm: 60, caption: 'Esquerda: Dó–Sol nos compassos 1 a 4 e 6, Fá–Dó no 5, Sol–Ré no 7 e no 8.' }), { reps: 2 }) },
     {
       kind: 'text',
-      title: 'Eine kleine Nachtmusik no ritmo original',
-      body: `Na lição 18 você tocou a abertura de Mozart com os valores dobrados. Agora ela volta como ele escreveu, com **colcheias**:
+      title: 'As colcheias de Eine kleine Nachtmusik',
+      body: `Na lição 18 você tocou a abertura de Mozart de ouvido. Agora dá para contar cada colcheia:
 
 - No 1º compasso: **Dó** (semínima), uma pausa de colcheia e **Sol** (colcheia), duas vezes. A pausa é curta: conte "**1** e **2** e", com o Sol no "e".
 - No 2º: quatro colcheias seguidas, **Dó, Sol, Dó, Mi**, e o **Sol** agudo em semínima. É o trecho que todo mundo canta.
@@ -643,8 +628,8 @@ Toque cada padrão sobre **I–IV–V–I** até ele sair sem olhar. Os três tr
 
 A esquerda segura um acorde por compasso, como antes. Conte em voz alta antes de juntar as mãos.`,
     },
-    { kind: 'exercise', id: 'l20-eine', exercise: quickTimed('Eine kleine Nachtmusik com colcheias', '5 compassos, duas mãos. Começa a 56 BPM e sobe até 72 BPM.', () => twoHandTask(EK_C8_R, EK_C8_L, { bpm: 56, caption: 'Esquerda: Dó nos compassos 1 e 2, G7 no 3 e no 4, Dó no último.' }), { ladder: { from: 56, to: 72, step: 4 } }) },
-    { kind: 'song', songId: 'u03-eine-do-colcheias', why: 'A abertura no ritmo original, para tocar junto com a partitura.' },
+    { kind: 'exercise', id: 'l20-eine', exercise: quickTimed('Eine kleine Nachtmusik contada', '5 compassos, duas mãos, contando "1 e 2 e". Começa a 72 BPM e sobe até 100 BPM.', () => twoHandTask(EK_C_R, EK_C_L, { bpm: 72, caption: 'Esquerda: Dó nos compassos 1 e 2, G7 no 3 e no 4, Dó no último.' }), { ladder: { from: 72, to: 100, step: 4 } }) },
+    { kind: 'song', songId: 'u03-eine-do', why: 'A abertura para tocar junto com a partitura, rumo ao alvo de 132 BPM.' },
     { kind: 'exercise', id: 'l20-quiz', exercise: quiz('Colcheias e padrões', 'Cinco perguntas rápidas.', EIGHTHS) },
   ],
   review: [choice(EIGHTHS, 'colcheias'), chordsCFG7],
@@ -760,9 +745,9 @@ C – F – G7 – C em Dó é **I – IV – V7 – I**. Em Sol, I – IV – V
 };
 
 // Silent Night ("Stille Nacht", Franz Xaver Gruber, 1818). Notas da edição do Mutopia Project (Daniel Widyanto, a partir
-// do manuscrito de Gruber, em Sol), transpostas para Dó. Arranjo: a semínima pontuada com colcheia vira duas semínimas
-// (a pontuada só chega na Unidade 4) e a esquerda toca um acorde por compasso, em mínima pontuada.
-const SN_R = 'G4 A4 G4 | E4:3 | G4 A4 G4 | E4:3 | D5:2 D5 | B4:3 | C5:2 C5 | G4:3 | A4:2 A4 | C5 B4 A4 | G4 A4 G4 | E4:3 | A4:2 A4 | C5 B4 A4 | G4 A4 G4 | E4:3 | D5:2 D5 | F5 D5 B4 | C5:2 C5 | E5:3 | C5 G4 E4 | G4 F4 D4 | C4:3';
+// do manuscrito de Gruber, em Sol), transpostas para Dó, com o ritmo original (a semínima pontuada do "Si-lent" fica:
+// sem ela a música perde o balanço). A esquerda toca um acorde por compasso, em mínima pontuada.
+const SN_R = 'G4:1.5 A4:0.5 G4 | E4:3 | G4:1.5 A4:0.5 G4 | E4:3 | D5:2 D5 | B4:3 | C5:2 C5 | G4:3 | A4:2 A4 | C5:1.5 B4:0.5 A4 | G4:1.5 A4:0.5 G4 | E4:3 | A4:2 A4 | C5:1.5 B4:0.5 A4 | G4:1.5 A4:0.5 G4 | E4:3 | D5:2 D5 | F5:1.5 D5:0.5 B4 | C5:2 C5 | E5:3 | C5 G4 E4 | G4:1.5 F4:0.5 D4 | C4:3';
 const SN_DEG = ['I', 'I', 'I', 'I', 'V7', 'V7', 'I', 'I', 'IV', 'IV', 'I', 'I', 'IV', 'IV', 'I', 'I', 'V7', 'V7', 'I', 'I', 'I', 'V7', 'I'];
 const SN_L = chordBars(SN_DEG, NEAR, 3);
 
@@ -770,7 +755,7 @@ const noite: SongSpec = {
   id: 'u03-noite',
   title: 'Silent Night',
   composer: 'Franz Xaver Gruber (1818)',
-  arrangement: 'arranjo do Fermata em Dó, 3/4: melodia em semínimas e mínimas (sem a pontuada) na direita, um acorde por compasso (C, F e G7 em posição próxima) na esquerda',
+  arrangement: 'arranjo do Fermata em Dó, 3/4: a melodia com o ritmo original na direita, um acorde por compasso (C, F e G7 em posição próxima) na esquerda',
   bpm: 84,
   beatsPerBar: 3,
   fifths: 0,
@@ -917,7 +902,7 @@ const jingleG: SongSpec = {
   title: 'Jingle Bells, refrão em Sol',
   composer: 'James Lord Pierpont (1857)',
   arrangement: 'arranjo do Fermata: o refrão em Sol maior, com G, C e D7 em posição próxima',
-  bpm: 92,
+  bpm: 120,
   beatsPerBar: 4,
   fifths: 1,
   right: JB_G_R,
@@ -931,7 +916,7 @@ const jingleF: SongSpec = {
   title: 'Jingle Bells, refrão em Fá',
   composer: 'James Lord Pierpont (1857)',
   arrangement: 'arranjo do Fermata: o refrão em Fá maior, com F, B♭ e C7 em posição próxima',
-  bpm: 92,
+  bpm: 120,
   beatsPerBar: 4,
   fifths: -1,
   right: JB_F_R,
@@ -1118,7 +1103,7 @@ const unit: Unit = {
   goal: 'Montar acordes maiores, acompanhar melodias com I, IV e V7 lendo cifra, em Dó, Sol e Fá, e usar o pedal.',
   technique: 'Trocas de acorde (C–F–G7) em posição próxima, acordes quebrados e padrões de mão esquerda em semínimas e colcheias, de 60 rumo a 96 BPM (referência: RCM Preparatory B). Nos dias sem lição nova, 5 minutos de chuva de cifras.',
   lessons: [l17, l18, l19, l20, l21, l22, l23, l24],
-  songs: [jingle, eineDo, eineDoOriginal, eineSol, noite, jingleG, jingleF, amazing],
+  songs: [jingle, eineDo, eineSol, noite, jingleG, jingleF, amazing],
   final: {
     songId: 'u03-amazing',
     brief: 'Amazing Grace em Dó, 3/4 com anacruse: a melodia na mão direita, uma oitava acima do Dó central, e um acorde por compasso na esquerda (I, IV, V e V7 em posição próxima). Junta o que a unidade ensinou: acordes primários, cifra, trocas no tempo e a anacruse da Unidade 2. No compasso 8 a mão direita sobe até o Sol5: prepare o salto no compasso anterior.',

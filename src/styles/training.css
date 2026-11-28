@@ -572,6 +572,31 @@ a.chip {
   font-variant-numeric: tabular-nums;
 }
 
+.scoreStage__bpmField {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  font: 600 15px/1.2 var(--font-body);
+}
+
+.scoreStage__bpmField input {
+  width: 3.4em;
+  min-height: 30px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line);
+  background: var(--surface-sunk);
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.scoreStage__bpmField input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
 .scoreStage__bpmValue small,
 .scoreStage__bpmValue .linkButton {
   font-size: 11px;

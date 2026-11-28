@@ -135,6 +135,38 @@ const shortScreen = () => typeof window !== 'undefined' && window.innerHeight < 
 const FINGERS_KEY = 'fermata-score-fingers';
 
 /** Toca uma música do repertório (pelo id da rota) ou uma música do curso (`song`). */
+const clampBpm = (b: number) => Math.min(220, Math.max(30, Math.round(b)));
+
+/** Andamento digitável: vale ao sair do campo ou com Enter (digitar "120" não passa por 1 e 12 no caminho). */
+function BpmField({ value, disabled, onCommit }: { value: number; disabled: boolean; onCommit: (v: number) => void }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const commit = () => {
+    if (draft === null) return;
+    const v = Number(draft.replace(',', '.'));
+    if (Number.isFinite(v) && v > 0) onCommit(clampBpm(v));
+    setDraft(null);
+  };
+  return (
+    <label className="scoreStage__bpmField">
+      <input
+        type="text"
+        inputMode="numeric"
+        value={draft ?? String(value)}
+        disabled={disabled}
+        aria-label="Andamento em BPM"
+        onFocus={(e) => e.target.select()}
+        onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, '').slice(0, 3))}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          if (e.key === 'Escape') setDraft(null);
+        }}
+      />
+      <span>BPM</span>
+    </label>
+  );
+}
+
 export default function ScorePracticePage({ onClose, song }: { onClose: () => void; song?: SongSpec }) {
   const id = Number(useParams().id);
   // A página de Progresso pode abrir direto num trecho difícil.
@@ -749,13 +781,17 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
               </div>
               {mode === 'junto' && (
                 <div className="scoreStage__bpm">
-                  <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => Math.max(30, b - 4))} aria-label="Mais devagar" disabled={busy}>
+                  <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => clampBpm(b - 1))} aria-label="Mais devagar" disabled={busy}>
                     <MinusIcon className="metronome__stepIcon" />
                   </button>
                   <span className="scoreStage__bpmValue">
-                    <strong>{bpm} BPM</strong>
+                    <BpmField value={bpm} disabled={busy} onCommit={(v) => setBpm(v)} />
                     {loaded?.song ? (
-                      <small>alvo para passar: {loaded.song.bpm} BPM</small>
+                      bpm === loaded.song.bpm ? <small>alvo para passar</small> : (
+                        <button className="linkButton" type="button" disabled={busy} onClick={() => setBpm(loaded.song!.bpm)}>
+                          alvo para passar: {loaded.song.bpm} BPM
+                        </button>
+                      )
                     ) : ideal !== null && (
                       bpm === ideal ? <small>ideal da música</small> : (
                         <button className="linkButton" type="button" onClick={() => void saveIdeal()}>
@@ -764,7 +800,7 @@ export default function ScorePracticePage({ onClose, song }: { onClose: () => vo
                       )
                     )}
                   </span>
-                  <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => Math.min(220, b + 4))} aria-label="Mais rápido" disabled={busy}>
+                  <button className="metronome__step metronome__step-round" type="button" onClick={() => setBpm((b) => clampBpm(b + 1))} aria-label="Mais rápido" disabled={busy}>
                     <PlusIcon className="metronome__stepIcon" />
                   </button>
                 </div>
