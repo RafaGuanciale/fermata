@@ -17,6 +17,7 @@ import RepertoirePage from './pages/RepertoirePage';
 import CategoryPage from './pages/CategoryPage';
 import MusiciansPage from './pages/MusiciansPage';
 import PieceFormPage from './pages/PieceFormPage';
+import BulkImportPage from './pages/BulkImportPage';
 import PiecePage from './pages/PiecePage';
 import StudyPage from './pages/StudyPage';
 import { findSong } from './course';
@@ -178,6 +179,7 @@ export default function App() {
             <Route path="/treino" element={<PracticeHubPage />} />
             <Route path="/repertorio" element={<RepertoirePage />} />
             <Route path="/repertorio/nova" element={<PieceFormPage />} />
+            <Route path="/repertorio/importar" element={<BulkImportPage />} />
             <Route path="/repertorio/categoria/:slug" element={<CategoryPage />} />
             <Route path="/repertorio/musicos" element={<MusiciansPage />} />
             <Route path="/repertorio/caminho" element={<PathPage />} />

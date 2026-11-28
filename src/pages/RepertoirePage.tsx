@@ -7,7 +7,7 @@ import PhotoCard from '../components/PhotoCard';
 import { nextOnPath, pathItems } from '../repertoire/path';
 import { syncPath } from '../repertoire/repo';
 import PieceList from '../components/PieceList';
-import { PlusIcon, SearchIcon } from '../components/Icons';
+import { PlusIcon, SearchIcon, UploadIcon } from '../components/Icons';
 
 export default function RepertoirePage() {
   const pieces = useLiveQuery(() => db.pieces.orderBy('updatedAt').reverse().toArray(), []);
@@ -34,10 +34,16 @@ export default function RepertoirePage() {
           <span className="page__eyebrow">O que você aprendeu e quer aprender</span>
           <h1 className="page__title">Repertório</h1>
         </div>
-        <Link className="button button-primary" to="/repertorio/nova">
-          <PlusIcon className="button__icon" />
-          Adicionar música
-        </Link>
+        <div className="page__actions">
+          <Link className="button button-secondary" to="/repertorio/importar">
+            <UploadIcon className="button__icon" />
+            Importar várias
+          </Link>
+          <Link className="button button-primary" to="/repertorio/nova">
+            <PlusIcon className="button__icon" />
+            Adicionar música
+          </Link>
+        </div>
       </header>
 
       <label className="field" htmlFor="busca-repertorio">
