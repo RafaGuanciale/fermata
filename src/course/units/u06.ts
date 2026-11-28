@@ -600,7 +600,8 @@ Como ela é protegida, importe a partitura no Repertório. Antes de tocar no and
 // Ritmos em 6/8, escritos em semínimas (colcheia = 0.5, compasso = 3).
 const R68 = ['x:1.5 x:1.5', 'x:1 x:0.5 x:1 x:0.5', 'x:0.5 x:0.5 x:0.5 x:1.5', 'x:1.5 x:0.5 x:0.5 x:0.5', 'x:0.5 x:0.5 x:0.5 x:0.5 x:0.5 x:0.5', 'x:3', 'x:1 x:0.5 x:1.5', 'x:1.5 x:1 x:0.5'];
 const R68_REST = ['x:1 r:0.5 x:1 r:0.5', 'x:1.5 r:1.5', 'r:0.5 x:0.5 x:0.5 x:1.5', 'x:0.5 x:0.5 x:0.5 r:1.5'];
-const GREEN_4 = 'C5:1 D5:0.5 E5:0.5 F5:0.5 E5:0.5 | D5:1 B4:0.5 G4:0.5 A4:0.5 B4:0.5 | C5:1 A4:0.5 A4:0.5 G#4:0.5 A4:0.5 | B4:1 G#4:0.5 E4:1.5';
+// Greensleeves no ritmo original (pontuada + semicolcheia), conferido na versão do Mutopia (ver a música, mais abaixo).
+const GREEN_4 = 'C5:1 D5:0.5 E5:0.75 F5:0.25 E5:0.5 | D5:1 B4:0.5 G4:0.75 A4:0.25 B4:0.5 | C5:1 A4:0.5 A4:0.75 G#4:0.25 A4:0.5 | B4:1.5 E4:1.5';
 const ROW_68 = ['C4:1 C4:0.5 C4:1 D4:0.5 | E4:1 D4:0.5 E4:1 F4:0.5 | G4:3 | G4:1.5 r:1.5', 'E4:0.5 F4:0.5 G4:0.5 G4:1.5 | A4:1 G4:0.5 F4:1.5 | E4:1 D4:0.5 C4:1.5 | C4:3', 'G4:1.5 E4:1.5 | F4:1 E4:0.5 D4:1.5 | E4:0.5 F4:0.5 G4:0.5 C5:1.5 | C5:3'];
 
 const l46: Lesson = {
@@ -612,6 +613,12 @@ const l46: Lesson = {
     'Consigo contar o 6/8 em 2, com o tempo na semínima pontuada.',
     'Consigo tocar ritmos em 6/8 com 85% das notas em ±60 ms.',
     'Consigo tocar uma balada em 6/8 com a 1ª e a 4ª colcheias mais fortes.',
+  ],
+  music: [
+    { song: 'u06-greensleeves', why: 'Greensleeves, a balada inglesa do século 16, é 6/8 do começo ao fim: dois tempos por compasso, cada um dividido em três, com a pontuada e a semicolcheia que dão o balanço. Agora inteira e no ritmo original.' },
+    { piece: 'hallelujah', why: 'Hallelujah, de Leonard Cohen, é a balada em 6/8 mais tocada ao piano. A letra fala dos próprios acordes que a música está tocando, e a esquerda balança em dois grupos de três.' },
+    { piece: 'cant-help-falling', why: "Can't Help Falling in Love, do Elvis, balança em três por tempo, como o 6/8: conte em grupos, não colcheia por colcheia, e a valsa lenta aparece." },
+    { piece: 'hes-a-pirate', why: "He's a Pirate, de Piratas do Caribe, é o 6/8 rápido: dois tempos fortes por compasso, galopando. Muitas partituras escrevem em 6/8; algumas em 3/4 rápido, que se sente igual." },
   ],
   blocks: [
     {
@@ -664,7 +671,7 @@ A balada desta lição é **Greensleeves**, uma melodia inglesa do século 16, e
     },
     { kind: 'exercise', id: 'l46-melodias', exercise: quickTimed('Melodias curtas em 6/8', 'Melodia sorteada em Dó, 4 compassos, tempo a 50 BPM. Conte em 2.', (rng) => compoundTask(pick(rng, ROW_68), { bpm: 50 }), { reps: 2, window: 60 }) },
     { kind: 'exercise', id: 'l46-green', exercise: quickTimed('Greensleeves, 4 compassos', 'Mão direita, de 44 a 54 BPM (semínima pontuada).', () => compoundTask(GREEN_4, { bpm: 44 }), { window: 60, ladder: { from: 44, to: 54, step: 5 } }) },
-    { kind: 'song', songId: 'u06-greensleeves', why: 'A primeira parte da balada (8 compassos), com raiz e 5ª na esquerda. No "Tocar a música" o clique marca os 2 tempos de cada compasso, na semínima pontuada.' },
+    { kind: 'song', songId: 'u06-greensleeves', why: 'A balada inteira, as duas partes (16 compassos), no ritmo original e com raiz e 5ª na esquerda. Atenção à pontuada com semicolcheia: ela é longa-curta, não duas notas iguais.' },
     {
       kind: 'exercise',
       id: 'l46-acento',
@@ -681,6 +688,17 @@ A balada desta lição é **Greensleeves**, uma melodia inglesa do século 16, e
       },
     },
     { kind: 'exercise', id: 'l46-quiz', exercise: quiz('Compasso composto', 'Cinco perguntas rápidas.', COMPOUND) },
+    {
+      kind: 'text',
+      title: 'As outras músicas da lição',
+      body: `Três músicas conhecidas que vivem em grupos de três, todas protegidas (importe as partituras no Repertório pelos cartões do começo da lição):
+
+- **Hallelujah** (Leonard Cohen, 1984): balada lenta. Bata o pé em 2 por compasso e deixe a esquerda rolar as três colcheias de cada tempo.
+- **Can't Help Falling in Love** (Elvis Presley, 1961): mais lenta ainda. O risco é contar em seis e a música arrastar; conte em grupos.
+- **He's a Pirate** (Piratas do Caribe, 2003): rápida. Aqui contar em seis é impossível: só dá para sentir os dois tempos fortes.
+
+Em todas, o teste é o mesmo do exercício de acento: a 1ª e a 4ª colcheias apoiadas, as outras leves.`,
+    },
   ],
   review: [choice(COMPOUND, 'composto'), colorChords],
   checkpoint: [
@@ -707,6 +725,11 @@ const l47: Lesson = {
     'Consigo tocar quatro padrões de mão esquerda sobre C – G – Am – F: alternado, meio-arpejo, arpejo contínuo e balada.',
     'Consigo ler um lead sheet (melodia + cifra) e escolher o padrão da esquerda.',
     'Consigo tocar a canção de 16 compassos (introdução e 14 de melodia) com arpejo na esquerda a 72 BPM, com 90% das notas, cada uma em ±50 ms do tempo.',
+  ],
+  music: [
+    { piece: 'imagine', why: 'Imagine, de John Lennon, é uma aula de padrão de mão esquerda: o piano repete o mesmo desenho do começo ao fim, alternando Dó e Fá, e a voz canta por cima. Tire a melodia pela cifra e escolha o padrão.' },
+    { piece: 'con-te-partiro', why: 'Con te partirò, de Bocelli, é a balada com arpejo contínuo: a esquerda (e às vezes a direita) espalha os acordes em colcheias enquanto a melodia segura notas longas.' },
+    { piece: 'interstellar', why: 'O tema de Interstellar, de Hans Zimmer, é um desenho repetido da direita sobre acordes longos da esquerda: independência das mãos, com cada uma no seu papel.' },
   ],
   blocks: [
     {
@@ -756,6 +779,17 @@ O exercício a seguir é a canção do projeto desta unidade: 16 compassos com i
     { kind: 'exercise', id: 'l47-cancao', exercise: quickTimed('A canção, 16 compassos', 'Melodia na direita, padrões na esquerda, de 60 a 72 BPM. Meta: 90% das notas, cada uma em ±50 ms do tempo.', () => twoHandTask(SONG_R, SONG_L, { bpm: 60, caption: 'Intro C G · A: C G Am F C G Am F (meio-arpejo) · B: C G Am F (balada) · G C.' }), { window: 50, pass: { accuracy: 0.9 }, ladder: { from: 60, to: 72, step: 6 } }) },
     { kind: 'song', songId: 'u06-cancao', why: 'A mesma canção com a partitura completa, a cascata e o modo Estudar.' },
     { kind: 'exercise', id: 'l47-quiz', exercise: quiz('Padrões e lead sheet', 'Quatro perguntas rápidas.', PATTERNS, 0.75) },
+    {
+      kind: 'text',
+      title: 'As músicas da lição: três padrões de esquerda',
+      body: `Cada música da lição mostra um dos padrões no mundo real. As três são protegidas: importe as partituras no Repertório pelos cartões do começo da lição.
+
+- **Imagine** (John Lennon, 1971): o padrão fixo. A esquerda repete o mesmo desenho e a música inteira se apoia nele. Comece por ele sozinho, até ficar automático.
+- **Con te partirò** (Andrea Bocelli, 1995): o arpejo contínuo. As colcheias não param, e a melodia de notas longas flutua por cima. Deixe a esquerda leve.
+- **Interstellar** (Hans Zimmer, 2014): os papéis trocados. A direita repete um desenho curto e a esquerda segura acordes longos. É o mesmo treino de independência, ao contrário.
+
+Com uma delas no repertório, faça o caminho desta lição: leia a cifra, toque só a esquerda, depois junte a melodia devagar.`,
+    },
   ],
   review: [choice(PATTERNS, 'padroes'), leadAny],
   checkpoint: [
@@ -948,18 +982,28 @@ Dois toques que fazem diferença: troque o pedal a cada acorde (pedal legato) e 
   exit: [leadAny, spellAll, choice([...TRIADS, ...INVERSIONS, ...VOICE, ...COLORS])],
 };
 
-// Greensleeves (melodia inglesa, século 16), simplificada em 6/8: colcheias no lugar das pontuadas.
+// Greensleeves (melodia inglesa, século 16). Fonte: Mutopia, Traditional/greensleeves (melodia do hino, a partir do
+// cyberhymnal.org, domínio público), em Mi menor; aqui transposta para Lá menor, com o ritmo da fonte (pontuada +
+// semicolcheia). As duas partes inteiras; a esquerda toca raiz e 5ª (Am, G, E e, no refrão, C).
+const GREEN_A = 'C5 D5:0.5 E5:0.75 F5:0.25 E5:0.5 | D5 B4:0.5 G4:0.75 A4:0.25 B4:0.5';
+const GREEN_END = 'C5:0.75 B4:0.25 A4:0.5 G#4:0.75 F#4:0.25 G#4:0.5';
 const greensleeves: SongSpec = {
   id: 'u06-greensleeves',
   title: 'Greensleeves',
   composer: 'melodia tradicional inglesa',
-  arrangement: 'arranjo do Fermata: em 6/8, colcheias iguais no lugar das figuras pontuadas, só a primeira parte (8 compassos); raiz e 5ª na esquerda',
+  arrangement: 'arranjo do Fermata em Lá menor sobre a versão do Mutopia (domínio público): a melodia inteira, as duas partes, no ritmo original; raiz e 5ª na esquerda; a anacruse vem depois de um compasso de espera',
   bpm: 81,
   beatsPerBar: 3,
   time: { beats: 6, beatType: 8 },
   fifths: 0,
-  right: `r:1.5 r:1 A4:0.5 | ${GREEN_4.replace(/E4:1\.5$/, 'E4:1 A4:0.5')} | C5:1 D5:0.5 E5:0.5 F5:0.5 E5:0.5 | D5:1 B4:0.5 G4:0.5 A4:0.5 B4:0.5 | C5:0.5 B4:0.5 A4:0.5 G#4:0.5 F#4:0.5 G#4:0.5 | A4:3`,
-  left: 'r:3 | A2+E3:3 | G2+D3:3 | A2+E3:3 | E2+B2:3 | A2+E3:3 | G2+D3:3 | A2+E3:1.5 E2+B2:1.5 | A2+E3:3',
+  right: [
+    'r:1.5 r:1 A4:0.5',
+    GREEN_A, 'C5 A4:0.5 A4:0.75 G#4:0.25 A4:0.5', 'B4:1.5 E4 A4:0.5',
+    GREEN_A, GREEN_END, 'A4:1.5 A4 r:0.5',
+    'G5:1.5 G5:0.75 F#5:0.25 E5:0.5', 'D5 B4:0.5 G4:0.75 A4:0.25 B4:0.5', 'C5 A4:0.5 A4:0.75 G#4:0.25 A4:0.5', 'B4 G#4:0.5 E4 r:0.5',
+    'G5:1.5 G5:0.75 F5:0.25 E5:0.5', 'D5 B4:0.5 G4:0.75 A4:0.25 B4:0.5', GREEN_END, 'A4:1.5 A4 r:0.5',
+  ].join(' | '),
+  left: 'r:3 | A2+E3:3 | G2+D3:3 | A2+E3:3 | E2+B2:3 | A2+E3:3 | G2+D3:3 | A2+E3:1.5 E2+B2:1.5 | A2+E3:3 | C3+G3:3 | G2+D3:3 | A2+E3:3 | E2+B2:3 | C3+G3:3 | G2+D3:3 | A2+E3:1.5 E2+B2:1.5 | A2+E3:3',
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
