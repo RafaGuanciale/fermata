@@ -2,6 +2,8 @@
 
 ## Noite de 2026-11-27
 
+- **01:44 às 01:55 (já dia 28)** — Unidade 11, "Jazz e pop ao piano": comecei e devolvi para a próxima rodada, sem mexer no app. A troca reescreve cinco das oito lições (as de baião, bossa, choro, samba e tango) e precisa de uma música final de domínio público com partitura conferida. A transcrição de Scarborough Fair que achei é outra melodia (a de Cecil Sharp, 1916), não a que todo mundo conhece; o Maple Leaf Rag do Mutopia é a próxima tentativa. Nada para testar desta parte.
+
 - **01:40 às 01:43 (já dia 28)** — Unidade 10, "Harmonia cromática": troca de músicas **pronta**. Todas as 8 lições (74 a 81) começam com as músicas que ensinam, e cada uma ganhou um trecho "Na música" explicando onde o assunto aparece nela.
   - **Lição 74 (dominantes secundárias)**: **Sweet Georgia Brown** (o tema dos Harlem Globetrotters: D7 – G7 – C7 – F, cada acorde puxando o próximo) e **When the Saints rearmonizada**.
   - **Lição 75 (ii–V–I nos 12 tons)**: **Fly Me to the Moon**, que desce pelo ciclo de quintas.
