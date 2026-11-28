@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3 a 11: feitas. Unidade 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3 a 12: feitas. "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -90,10 +90,17 @@ Unidades 3 a 11: feitas. Unidade 12: a fazer (as rodadas seguem este mapa). "App
 | 11 | 87 | Fly Me to the Moon · Autumn Leaves · When the Saints rearmonizada (unidade 10) | importar · App | Standard: forma, notas-guia e comping |
 | 11 | 88 | Let It Be · A Whiter Shade of Pale · Hallelujah | importar | Pop rearmonizado (baixo invertido, add9, sus, 7M) |
 | 11 | 89 | Maple Leaf Rag, tema A (Mutopia) · Fly Me to the Moon · Let It Be | App · importar | Projeto: arranjo solo e ragtime |
-| 12 | 91 | Bohemian Rhapsody (balada) | importar | Arranjo solo |
-| 12 | 94 | Prelúdio Op. 28 nº 4 (Chopin) | App (Mutopia) | Pedal no romântico |
-| 12 | 95 | Nocturne Op. 9 nº 2 · Clair de lune (abertura) · Rhapsody on a Theme of Paganini, Var. 18 | App (Mutopia, `public/library`) · importar | Romântico e impressionista |
-| 12 | 100 | Moonlight Sonata + Gymnopédie No. 1 + DAN DAN Kokoro Hikareteku; Clair de lune como meta | App · importar | Recital final |
+| 12 | 90 | Für Elise completa (rondó) · Minuet in G (binária) · Let It Be | App · App · importar | Forma |
+| 12 | 91 | Ode to Joy, arranjo solo · Bohemian Rhapsody (balada) | App · importar | Arranjo solo |
+| 12 | 92 | Ode to Joy, arranjo solo · Fly Me to the Moon · I Will Always Love You | App · importar | Intro, turnaround, modulação do último refrão, final |
+| 12 | 93 | Rondo alla Turca · Prelude in C | App (unidades 9 e 7) | Semicolcheias e arpejos |
+| 12 | 94 | Prelúdio Op. 28 nº 4 (Chopin), inteiro · Gymnopédie No. 1 (unidade 8) | App (Mutopia, Peters 1879) | Pedal no romântico |
+| 12 | 95 | Prelúdio Op. 28 nº 4 · Nocturne Op. 9 nº 2, primeira frase · Clair de lune (partitura do caminho) · Rhapsody on a Theme of Paganini, Var. 18 | App (Mutopia) · App (Mutopia, Schirmer 1881) · importar · importar | Romântico e impressionista |
+| 12 | 96 | Sonata facile K. 545 (temas 1 e 2 nos exercícios) · Eine kleine Nachtmusik | App (Mutopia) | Forma sonata |
+| 12 | 97 | Comptine d'un autre été · Interstellar · River Flows in You | importar | Ostinato e trilhas |
+| 12 | 98 | So What · Fly Me to the Moon · Autumn Leaves | importar | Quartais, upper structures, notas-alvo |
+| 12 | 99 | Gymnopédie No. 1 (preparo) · Für Elise completa · Canon in D | App | Revisão final |
+| 12 | 100 | Gymnopédie No. 1 · Moonlight Sonata, 1º movimento (partitura do caminho) · DAN DAN Kokoro Hikareteku; Clair de lune como meta | App · importar | Recital final |
 
 ## Andamento da troca de músicas
 
@@ -110,4 +117,4 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 9 | pronta | 2026-11-28 01:39 |
 | 10 | pronta | 2026-11-28 01:43 |
 | 11 | pronta | 2026-11-28 02:23 |
-| 12 | em construção | 2026-11-28 03:20 |
+| 12 | pronta | 2026-11-28 03:24 |

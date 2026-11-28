@@ -2,7 +2,7 @@
 
 ## Noite de 2026-11-27
 
-- **03:09 (já dia 28, em andamento)** — Unidade 12, "Arranjo, forma e repertório": troca de músicas **em construção**.
+- **03:09 às 03:24 (já dia 28)** — Unidade 12, "Arranjo, forma e repertório": troca de músicas **pronta**. Com ela, todas as unidades de 3 a 12 começam cada lição pelas músicas.
   - **Lição 90 (forma)**: **Für Elise** completa (é um rondó, ABACA), **Minuet in G** (binário) e **Let It Be** (verso, refrão e solo).
   - **Lição 91 (arranjo solo)**: a **Ode to Joy em arranjo solo** (como antes) e **Bohemian Rhapsody**, a parte da balada.
   - **Lição 92 (intro, turnaround e final)**: a Ode to Joy em arranjo solo, **Fly Me to the Moon** e **I Will Always Love You** (o último refrão que sobe de tom).
@@ -11,11 +11,17 @@
   - **Lição 95 (romântico e impressionista)**: o Prelúdio de Chopin entrou no lugar do prelúdio inventado pelo app, nos exercícios e no checkpoint (agora a primeira metade, compassos 1 a 12, com 90% das notas); a **primeira frase do Noturno Op. 9 nº 2** de Chopin, nova no app (edição Schirmer de 1881 do Mutopia, em 12/8, alvo 66 BPM); **Clair de lune** (a partitura do seu caminho de repertório) e a **Variação 18 de Rachmaninoff**.
   - **Lição 96 (forma sonata)**: a **Sonata facile K. 545** de Mozart (unidade 9) e **Eine kleine Nachtmusik** (unidade 3). Os exercícios agora usam os dois temas de verdade da K. 545 (tema 1 em Dó, compassos 1 a 4; tema 2 em Sol, compassos 14 a 17, conferidos no Mutopia) no lugar dos temas inventados; só o ditado de ouvido continua com um tema curto do app, que termina na tônica.
   - **Lição 97 (trilhas)**: **Comptine d'un autre été**, **Interstellar** e **River Flows in You** (as três do seu caminho de repertório). O "Tema de jogo" do app ficou só como treino do ostinato.
-  - Para testar: os cartões de música no começo das lições 90 a 97; o tema 2 da lição 96 lido em Sol e tocado em Dó; o Prelúdio de Chopin no "Tocar a música" (a esquerda tem oito acordes por compasso; veja se a partitura fica legível) e o Noturno em 12/8 (o metrônomo deve bater a semínima pontuada).
+  - **Lição 98 (improviso avançado)**: **So What**, **Fly Me to the Moon** e **Autumn Leaves**.
+  - **Lição 99 (revisão final)**: a **Gymnopédie No. 1** (preparo do projeto), **Für Elise** completa e o **Canon in D**.
+  - **Lição 100 (recital)**: a **Gymnopédie No. 1**, a **Moonlight Sonata** (a partitura do seu caminho), **DAN DAN Kokoro Hikareteku** (a de anime no recital, no lugar do "Tema de jogo") e **Clair de lune** como meta. O arranjo próprio agora parte de Greensleeves, 'O sole mio ou When the Saints (a "Valsa lenta" inventada saiu).
+  - Correção: a Gymnopédie do projeto final foi conferida com a partitura do Mutopia. O baixo do segundo acorde é o Ré mais grave (Ré2), não o Ré3, e a esquerda só tira o Fá♯ no compasso 9.
+  - Pendente: a "Royal Road" da lição 97 continua sem música de exemplo, porque não achei uma canção com essa sequência que eu pudesse confirmar; o checkpoint da lição 100 ainda pede o "Tema de jogo", porque DAN DAN depende da sua partitura importada.
+  - Para testar: os cartões de música no começo das lições 90 a 100; o tema 2 da lição 96 lido em Sol e tocado em Dó; a Gymnopédie da lição 100 com o baixo novo; o Prelúdio de Chopin no "Tocar a música" (a esquerda tem oito acordes por compasso; veja se a partitura fica legível) e o Noturno em 12/8 (o metrônomo deve bater a semínima pontuada).
   - Músicas protegidas novas desta rodada, para você baixar:
     - I Will Always Love You (Whitney Houston) - Partitura - XML
     - Comptine d'un autre été (Yann Tiersen) - Partitura - XML
     - River Flows in You (Yiruma) - Partitura - XML
+    - DAN DAN Kokoro Hikareteku (Field of View) - Partitura - XML
 
 - **02:09 às 02:23 (já dia 28)** — Unidade 11, que agora se chama **"Jazz e pop ao piano"**: troca **pronta**. Saíram o baião, a bossa, o choro e o tango (e as três músicas inventadas pelo app); todas as 8 lições (82 a 89) começam com as músicas que ensinam.
   - **Lição 82 (nova, baladas pop)**: **Imagine**, **Hallelujah** e **Someone Like You**. Dois desenhos de mão esquerda (Dó–Sol–Dó–Sol e o arpejo que sobe até a décima), acordes com o baixo invertido (G/B, C/E) e as duas mãos juntas a 80 BPM.
