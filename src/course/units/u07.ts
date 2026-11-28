@@ -248,6 +248,10 @@ const l52: Lesson = {
     'Consigo harmonizar um compasso de melodia escolhendo um acorde que contenha a nota do tempo forte.',
     'Consigo ouvir a diferença entre IV e ii, e entre I e vi, na mesma progressão.',
   ],
+  music: [
+    { piece: 'stand-by-me', why: 'Stand By Me gira em I – vi – IV – V do começo ao fim: tônica, tônica, subdominante, dominante. É o caminho T → S → D → T desta lição, com o vi fazendo o papel do I.' },
+    { piece: 'beauty-and-the-beast', why: 'Beauty and the Beast é uma balada da Disney que sai de casa e volta a cada frase: ouça o IV e o ii afastando, o V puxando e o I chegando no fim do refrão.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -300,6 +304,15 @@ Por isso harmonizar não tem uma resposta só. O exercício aceita qualquer acor
     },
     { kind: 'exercise', id: 'l52-harmonizar', exercise: items('Harmonize o compasso', 'Toque um acorde do campo de Dó que contenha a nota do tempo forte. Vários servem.', harmC, 12, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l52-quiz', exercise: quiz('Funções', 'Seis perguntas rápidas.', FUNCTION_Q) },
+    {
+      kind: 'text',
+      title: 'As músicas da lição: Stand By Me e Beauty and the Beast',
+      body: `**Stand By Me** (Ben E. King, 1961) é uma aula de funções em loop: **I – vi – IV – V**. Em Lá maior, como na gravação: A – F♯m – D – E. Escreva a função embaixo de cada acorde: **T – T – S – D**. O vi é tônica também (divide duas notas com o I), por isso a música não "sai de casa" de verdade até o IV.
+
+**Beauty and the Beast** (Alan Menken, 1991) é mais rica: tem o ii no lugar do IV em vários pontos e acordes de passagem. Com a partitura importada, marque T, S ou D sobre cada acorde da primeira frase e confira se o caminho fecha em T → S → D → T.
+
+As duas são protegidas: importe as partituras no Repertório pelos cartões do começo da lição.`,
+    },
   ],
   review: [harmC, subIVii, choice(FUNCTION_Q, 'funcoes')],
   checkpoint: [
@@ -336,6 +349,9 @@ const l53: Lesson = {
   objectives: [
     'Consigo tocar cadência perfeita, plagal, meia e deceptiva em qualquer tom maior até 2 acidentes.',
     'Consigo reconhecer de ouvido qual cadência fecha uma frase, com 85% de acerto.',
+  ],
+  music: [
+    { song: 'u04-ode-pontuada', why: 'A Ode to Joy é o exemplo perfeito de pontuação: a primeira frase para no Ré, sobre o V (meia cadência, uma vírgula), e a segunda termina no Dó, sobre o I (cadência perfeita, ponto final).' },
   ],
   blocks: [
     {
@@ -378,6 +394,16 @@ Entre meia e deceptiva, ouça o baixo: na meia, ele termina no **5º grau** (Sol
     },
     { kind: 'exercise', id: 'l53-ouvido', exercise: items('Que cadência foi?', 'Ouça a frase de 4 acordes e escolha a cadência do fim.', cadenceEar, 12, 48, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l53-quiz', exercise: quiz('Cadências', 'Seis perguntas rápidas.', CADENCE_Q) },
+    {
+      kind: 'text',
+      title: 'A música da lição: as cadências da Ode to Joy',
+      body: `Toque a **Ode to Joy** completa (a da Unidade 4, no ritmo original) e pare no fim de cada frase de 4 compassos:
+
+- **Compasso 4**: a melodia para no **Ré**, sobre o **G** (V). Meia cadência: a frase pergunta.
+- **Compasso 8**: a mesma frase volta e termina no **Dó**, sobre G → C (V → I). Cadência perfeita: ela responde.
+
+Agora toque o compasso 8 trocando o último acorde: em vez de C, um **Am** (o vi). É a cadência deceptiva: a frase promete o fim e engana. Ouça como a música parece pedir mais um compasso.`,
+    },
   ],
   review: [cadencePlay, cadenceEar, choice(CADENCE_Q, 'cadencias')],
   checkpoint: [

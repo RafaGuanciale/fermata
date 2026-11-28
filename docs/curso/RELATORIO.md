@@ -2,11 +2,15 @@
 
 ## Noite de 2026-11-27
 
-- **00:22 (já dia 28)** — Unidade 7, "Campo harmônico e funções": troca de músicas **em andamento** (lições 50 e 51 prontas).
+- **00:22 (já dia 28)** — Unidade 7, "Campo harmônico e funções": troca de músicas **em andamento** (lições 50 a 53 prontas).
   - **Lição 50 (campo harmônico)**: o **Canon in D** da Unidade 6, agora analisado: seis dos sete graus de Ré maior, um por tempo.
   - **Lição 51 (graus e transposição)**: **Heart and Soul**, para importar: o acompanhamento é I – vi – IV – V, bom para transpor pelos graus.
+  - **Lição 52 (funções)**: **Stand By Me** (I – vi – IV – V: tônica, tônica, subdominante, dominante) e **Beauty and the Beast**, para importar.
+  - **Lição 53 (cadências)**: a **Ode to Joy** completa da Unidade 4: a primeira frase para no V (meia cadência) e a segunda fecha no I (perfeita). O texto pede para trocar o último acorde por Lá menor e ouvir a deceptiva.
   - Músicas protegidas novas até aqui:
     - Heart and Soul (Hoagy Carmichael) - Partitura - XML
+    - Stand By Me (Ben E. King) - Partitura - XML
+    - Beauty and the Beast (Alan Menken) - Partitura - XML
 
 - **00:10 às 00:20 (já dia 28)** — Unidade 6, "Tríades, inversões e condução": troca de músicas **pronta**. Todas as 8 lições (42 a 49) começam com as músicas que ensinam.
   - **Lição 42 (os quatro tipos de tríade)**: **Oh! Darling** (Beatles), para importar: ela abre com um acorde aumentado.
