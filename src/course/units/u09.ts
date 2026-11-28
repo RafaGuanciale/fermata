@@ -682,6 +682,10 @@ const l70: Lesson = {
     'Consigo tocar um trinado de pelo menos 6 notas com variação abaixo de 30 ms.',
     'Consigo tocar a primeira parte do Minuet in G com 90% das notas.',
   ],
+  music: [
+    { song: 'u09-turca', why: 'O Rondo alla Turca de Mozart é feito de enfeites: o tema gira em volta das notas (Si–Lá–Sol♯–Lá é um grupeto escrito por extenso), há acciaccaturas antes dos acordes e um trinado antes do fim da frase.' },
+    { song: 'u09-minueto', why: 'O Minuet in G pede um trinado no compasso 15, como manda o estilo barroco: acrescente quando a música estiver segura.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -740,6 +744,25 @@ O arranjo do curso tem só a primeira parte, com a esquerda em notas longas. No 
     },
     { kind: 'exercise', id: 'l70-minueto-md', exercise: quickTimed('Minueto, mão direita', 'Os 16 compassos da direita, de 72 a 96 BPM.', () => melodyTask(MINUET_R, { bpm: 72, beatsPerBar: 3, fifths: 1 }), { ladder: { from: 72, to: 96, step: 8 }, pass: { accuracy: 0.9 } }) },
     { kind: 'song', songId: 'u09-minueto', why: 'O projeto final da unidade: o minueto com as duas mãos.' },
+    {
+      kind: 'text',
+      title: 'O Rondo alla Turca',
+      body: `O **Rondo alla Turca** é o 3º movimento da Sonata K. 331 de Mozart (1783), imitando as bandas militares turcas que estavam na moda em Viena. Três ornamentos estão nele:
+
+- **Grupeto escrito por extenso**: o tema começa com **Si–Lá–Sol♯–Lá** e depois **Ré–Dó–Si–Dó** e **Fá–Mi–Ré♯–Mi**: a nota principal com a vizinha de cima e a de baixo, em semicolcheias. É o grupeto da página anterior, só que Mozart escreveu as notas.
+- **Acciaccaturas**: nos compassos 5 a 7, duas notinhas (Sol–Lá) esmagadas antes de cada Si. O app não toca as notinhas; acrescente quando o resto estiver seguro.
+- **Trinado**: no compasso 23, no Si antes do fim. No app ele vira uma nota simples.
+
+A esquerda faz o "tambor" da banda: a nota grave e o acorde repetido em colcheias, leve.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'grupeto desigual',
+      body: 'O erro comum no tema é correr no Sol♯–Lá e chegar cedo no Dó. As quatro semicolcheias do grupeto são iguais, e o Dó do compasso seguinte cai no tempo. Conte "1 e 2 e" com o metrônomo.',
+    },
+    { kind: 'exercise', id: 'l70-turca', exercise: quickTimed('Rondo alla Turca, o tema', 'A anacruse e os 4 primeiros compassos, só a direita, de 60 a 96 BPM. Semicolcheias iguais.', () => melodyTask(TURCA_R.slice(0, 5).join(' | '), { bpm: 60, beatsPerBar: 2 }), { ladder: { from: 60, to: 96, step: 12 }, window: 80 }) },
+    { kind: 'song', songId: 'u09-turca', why: 'A primeira parte do Rondo alla Turca (A, B e A), no ritmo original. O alvo é 120 BPM; comece devagar no modo Estudar.' },
     { kind: 'exercise', id: 'l70-quiz', exercise: quiz('Ornamentos', 'Cinco perguntas rápidas.', ORN_Q) },
   ],
   review: [choice(ORN_Q, 'ornamentos')],
@@ -782,6 +805,10 @@ const l71: Lesson = {
     'Consigo tocar duas melodias independentes, uma em cada mão, com ritmos diferentes.',
     'Consigo tocar um cânone entre as mãos com 85% das notas certas.',
   ],
+  music: [
+    { song: 'u09-musette', why: 'Na Musette in D as duas mãos têm vida própria: a esquerda salta oitavas como a gaita de foles e às vezes imita a direita (compassos 3 e 7), enquanto a direita canta em semicolcheias.' },
+    { song: 'u09-minueto', why: 'No Minuet in G original, a esquerda é uma segunda melodia, não só acompanhamento. Toque cada mão cantando a outra, como manda esta lição.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -819,7 +846,18 @@ No cânone desta lição, a esquerda entra **2 compassos depois**, duas oitavas 
     },
     { kind: 'exercise', id: 'l71-me', exercise: quickTimed('A esquerda sozinha', 'A melodia uma oitava abaixo, de 72 a 88 BPM.', () => melodyTask(FJ.map(down).join(' | '), { bpm: 72, clef: 'bass' }), { ladder: { from: 72, to: 88, step: 8 } }) },
     { kind: 'exercise', id: 'l71-canone', exercise: quickTimed('O cânone, duas mãos', '10 compassos, de 66 a 84 BPM. Ouça as duas melodias.', () => twoHandTask(CANON_R, CANON_L, { bpm: 66, caption: 'A pauta mostra a direita. A esquerda entra no compasso 3 com a mesma melodia, duas oitavas abaixo.' }), { ladder: { from: 66, to: 84, step: 6 }, window: 80 }) },
-    { kind: 'song', songId: 'u09-canone', why: 'O cânone na pauta dupla: dá para ver a imitação.' },
+    {
+      kind: 'text',
+      title: 'Duas vozes na Musette',
+      body: `Na **Musette in D** (a mesma da lição 69), as duas mãos fazem coisas diferentes ao mesmo tempo:
+
+- Compassos 1 e 2: a esquerda repete **Ré2–Ré3** em colcheias (o bordão da gaita de foles) e a direita desce de Lá5 em semicolcheias.
+- Compassos 3 e 4: **imitação**. A esquerda toca exatamente o desenho da direita (Fá♯–Sol–Lá–Sol–Fá♯, Mi–Lá–Fá♯–Ré), uma oitava abaixo. Aqui as duas vozes andam juntas: é o ponto de apoio da coordenação.
+- Da segunda parte em diante, em Lá maior e Mi, a esquerda volta ao bordão e a direita ganha os saltos.
+
+Estude como no cânone: cada mão sozinha, cantando a outra, e depois juntas, devagar.`,
+    },
+    { kind: 'song', songId: 'u09-musette', why: 'A Musette inteira, agora para estudar: o alvo é 100 BPM.' },
     { kind: 'exercise', id: 'l71-quiz', exercise: quiz('Contraponto', 'Quatro perguntas rápidas.', CANON_Q, 0.75) },
   ],
   review: [choice(CANON_Q, 'contraponto')],
@@ -970,20 +1008,6 @@ O projeto é o **Minuet in G**, tocado e **analisado**. Analisar uma música é 
   exit: [strangeName, choice([...STRANGE_Q, ...ORN_Q])],
 };
 
-const canon: SongSpec = {
-  id: 'u09-canone',
-  title: 'Cânone de Frère Jacques',
-  composer: 'canção folclórica francesa',
-  arrangement: 'arranjo do Fermata: cânone entre as mãos, a esquerda entra 2 compassos depois, duas oitavas abaixo',
-  bpm: 84,
-  beatsPerBar: 4,
-  fifths: 0,
-  right: CANON_R,
-  left: CANON_L,
-  hands: 'duas',
-  pass: { accuracy: 0.85 },
-};
-
 const unit: Unit = {
   n: 9,
   id: 'u09',
@@ -991,7 +1015,7 @@ const unit: Unit = {
   goal: 'Reconhecer notas estranhas, equilibrar melodia e acompanhamento, conduzir quatro vozes, ler à primeira vista com as duas mãos, tocar ornamentos, duas vozes independentes e 2 contra 3.',
   technique: 'Escalas maiores em 2 oitavas, mãos juntas, de 60 rumo a 92 BPM em colcheias; trinados medidos (6 notas ou mais, variação abaixo de 30 ms) (referência: RCM Level 3). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l66, l67, l68, l69, l70, l71, l72, l73],
-  songs: [minuet, k545, coral, musette, turca, entertainerAB, furEliseFull, canon],
+  songs: [minuet, k545, coral, musette, turca, entertainerAB, furEliseFull],
   final: {
     songId: 'u09-minueto',
     brief: 'O Minuet in G do Caderno de Anna Magdalena Bach (hoje atribuído a Christian Petzold): dança em 3/4, melodia com notas de passagem e bordaduras, frases de 4 compassos, cadência no V no compasso 8 e no I no 16. Toque leve, com o primeiro tempo de cada compasso um pouco mais apoiado, como numa dança.',

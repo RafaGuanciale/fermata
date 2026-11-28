@@ -2,13 +2,15 @@
 
 ## Noite de 2026-11-27
 
-- **01:23 às 01:36 (já dia 28)** — Unidade 9, "Leitura clássica e textura": troca de músicas **em andamento** (lições 66 a 69 prontas).
+- **01:23 às 01:37 (já dia 28)** — Unidade 9, "Leitura clássica e textura": troca de músicas **em andamento** (lições 66 a 71 prontas).
   - **Lição 66 (notas estranhas)**: o **Minuet in G** (passagens e bordaduras) e **Für Elise** (a bordadura Mi–Ré♯–Mi do começo).
   - **Lição 67 (baixo de Alberti)**: a **Sonata facile de Mozart (K. 545)**, nova no app, compassos 1 a 12 no ritmo original (edição do Mutopia, alvo 120 BPM), no lugar da "Sonatina em Dó" que o app tinha inventado. Exercício novo: o tema com o equilíbrio entre as mãos medido (60 a 84 BPM). Para importar: **Nessun dorma**.
   - **Lição 68 (quatro vozes)**: o coral **O Haupt voll Blut und Wunden** de Bach (Paixão segundo São Mateus), novo no app, do corpus do music21: soprano e contralto na direita, tenor e baixo na esquerda, alvo 60 BPM.
   - **Lição 69 (primeira vista)**: a **Musette in D** (Caderno de Anna Magdalena Bach), nova no app, edição do Mutopia: para ler uma vez sem parar antes de estudar.
+  - **Lição 70 (ornamentos)**: o **Rondo alla Turca** de Mozart, novo no app (A, B e A, no ritmo original, alvo 120 BPM), e o **Minuet in G** com o trinado do compasso 15. Exercício novo: o tema na direita (60 a 96 BPM).
+  - **Lição 71 (duas vozes)**: a **Musette in D** (a esquerda imita a direita nos compassos 3 e 4) e o **Minuet in G**. O cânone de Frère Jacques ficou só como exercício.
   - Já entraram no app, para as próximas lições: o coral **O Haupt voll Blut und Wunden** de Bach (quatro vozes), a **Musette in D**, o **Rondo alla Turca** (primeira parte), **The Entertainer** com os temas A e B, e **Für Elise completa** (os 126 compassos). Todas com notas das edições do Mutopia ou do corpus do music21.
-  - Para testar: a Sonata facile na lição 67 (o exercício do tema e a música inteira no "Tocar a música"), o coral na lição 68 e a Musette na lição 69.
+  - Para testar: a Sonata facile na lição 67 (o exercício do tema e a música inteira no "Tocar a música"), o coral na lição 68, a Musette nas lições 69 e 71 e o Rondo alla Turca na lição 70.
   - Músicas protegidas novas até aqui:
     - Nessun dorma (Puccini, na voz de Pavarotti) - Partitura - XML (a obra é de domínio público, mas não achei uma edição aberta para conferir as notas; por isso ela entrou para importar)
 
