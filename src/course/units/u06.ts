@@ -1,4 +1,7 @@
 // Unidade 6 — Tríades, inversões e condução de vozes (lições 42 a 49). Projeto final: canção em I–V–vi–IV pela cifra (melodia original).
+// Músicas: Canon in D (versão longa) e Greensleeves no app; Oh! Darling, Can You Feel the Love Tonight, Let It Be, Jump,
+// Hallelujah, Can't Help Falling in Love, He's a Pirate, Imagine, Con te partirò, Interstellar, Hedwig's Theme e
+// A Whiter Shade of Pale para importar (docs/curso/MUSICAS.md).
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import { chordQualityByEar, chordSequence, choice, inversionChord, mix, playChord, spellTriadChoice, type ChoiceQuestion } from '../gens';
@@ -94,6 +97,9 @@ const l42: Lesson = {
     'Consigo soletrar uma tríade com a grafia certa (Fá♯ maior = Fá♯–Lá♯–Dó♯) e tocá-la.',
     'Consigo tocar 24 acordes sorteados com 90% de acerto e menos de 2,5 s por acorde.',
   ],
+  music: [
+    { piece: 'oh-darling', why: 'Oh! Darling, dos Beatles, abre com um acorde aumentado sozinho, antes da voz entrar: o som de pergunta sem resposta desta lição, que depois resolve num acorde maior.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -155,12 +161,51 @@ Outro: **E♭m** (Mi♭ menor): Mi♭, **Sol♭** (3ª menor), Si♭. Mais um: *
     { kind: 'exercise', id: 'l42-maiores-menores', exercise: items('Maiores e menores nas 12 tônicas', 'Toque o acorde da cifra com a fundamental embaixo. Inclui as tônicas pretas.', chords12, 16, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l42-dim-aum', exercise: items('Diminutas e aumentadas', 'Duas 3ªs menores ou duas 3ªs maiores sobre a fundamental.', chordsDimAug, 10, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l42-quiz', exercise: quiz('Os quatro tipos', 'Seis perguntas rápidas.', TRIADS) },
+    {
+      kind: 'text',
+      title: 'A música da lição: Oh! Darling',
+      body: `**Oh! Darling** (The Beatles, 1969) começa com um acorde só, segurado: um **aumentado**. Ouça a gravação e repare como ele fica no ar, pedindo para andar, até o acorde maior seguinte chegar. É a 5ª aumentada (8 semitons acima da fundamental) que dá essa sensação.
+
+Como ela é protegida, o app não traz as notas: importe a partitura no Repertório (o cartão no começo da lição tem a busca no MuseScore). Antes de tocar, procure o primeiro acorde na partitura e confira as duas 3ªs maiores empilhadas.`,
+    },
   ],
   review: [chordsAll, spellAll, earFour, choice(TRIADS, 'triades')],
   checkpoint: [
     items('24 acordes', 'Tríades sorteadas dos quatro tipos, sem dicas. Meta: 90% e menos de 2,5 s por acorde.', chordsAll, 24, 48, 72, 0.9, 'off', 2500),
   ],
   exit: [spellAll, choice(TRIADS, 'triades')],
+};
+
+// Canon in D (Johann Pachelbel, c. 1680). Fonte: Mutopia, "Canon per 3 Violini e Basso" (PachelbelJ/Canon_per_3_Violini_e_Basso,
+// edição de Michael Fischer v. Mollard a partir do IMSLP, CC BY 4.0): violino I dos compassos 3 a 18 e o baixo (violoncelo),
+// notas e ritmo como na edição. O arranjo pôs os acordes do baixo invertidos na direita nos compassos 1 e 2 (no original,
+// só o baixo toca) e um acorde final de Ré no lugar da continuação.
+const CANON_BASS6 = 'D3 A2 B2 F#2 | G2 D2 G2 A2';
+const CANON_CHORDS_R = 'F#4+A4+D5 E4+A4+C#5 F#4+B4+D5 F#4+A4+C#5 | G4+B4+D5 F#4+A4+D5 G4+B4+D5 E4+A4+C#5';
+const CANON_VIOLIN = [
+  'F#5 E5 D5 C#5', 'B4 A4 B4 C#5', 'D5 C#5 B4 A4', 'G4 F#4 G4 E4',
+  'D4:0.5 F#4:0.5 A4:0.5 G4:0.5 F#4:0.5 D4:0.5 F#4:0.5 E4:0.5', 'D4:0.5 B3:0.5 D4:0.5 A4:0.5 G4:0.5 B4:0.5 A4:0.5 G4:0.5',
+  'F#4:0.5 D4:0.5 E4:0.5 C#5:0.5 D5:0.5 F#5:0.5 A5:0.5 A4:0.5', 'B4:0.5 G4:0.5 A4:0.5 F#4:0.5 D4:0.5 D5:0.5 D5:0.75 C#5:0.25',
+  'D5:0.25 C#5:0.25 D5:0.25 D4:0.25 C#4:0.25 A4:0.25 E4:0.25 F#4:0.25 D4:0.25 D5:0.25 C#5:0.25 B4:0.25 C#5:0.25 F#5:0.25 A5:0.25 B5:0.25',
+  'G5:0.25 F#5:0.25 E5:0.25 G5:0.25 F#5:0.25 E5:0.25 D5:0.25 C#5:0.25 B4:0.25 A4:0.25 G4:0.25 F#4:0.25 E4:0.25 G4:0.25 F#4:0.25 E4:0.25',
+  'D4:0.25 E4:0.25 F#4:0.25 G4:0.25 A4:0.25 E4:0.25 A4:0.25 G4:0.25 F#4:0.25 B4:0.25 A4:0.25 G4:0.25 A4:0.25 G4:0.25 F#4:0.25 E4:0.25',
+  'D4:0.25 B3:0.25 B4:0.25 C#5:0.25 D5:0.25 C#5:0.25 B4:0.25 A4:0.25 G4:0.25 F#4:0.25 E4:0.25 B4:0.25 A4:0.25 B4:0.25 A4:0.25 G4:0.25',
+  'F#4:0.5 F#5:0.5 E5 r:0.5 D5:0.5 F#5', 'B5 A5 B5 C#6',
+  'D6:0.5 D5:0.5 C#5 r:0.5 B4:0.5 D5', 'D5:1.5 D5:0.5 D5:0.5 G5:0.5 E5:0.5 A5:0.5',
+].join(' | ');
+
+const canonLong: SongSpec = {
+  id: 'u06-canone',
+  title: 'Canon in D',
+  composer: 'Johann Pachelbel',
+  arrangement: 'versão longa do Fermata sobre a edição de Michael Fischer v. Mollard (Mutopia, CC BY 4.0): acordes invertidos na introdução, as oito primeiras variações do violino I no ritmo original e o baixo de 8 notas na esquerda; acorde final de Ré',
+  bpm: 54,
+  beatsPerBar: 4,
+  fifths: 2,
+  right: `${CANON_CHORDS_R} | ${CANON_VIOLIN} | F#4+A4+D5:4`,
+  left: `${Array(9).fill(CANON_BASS6).join(' | ')} | D2+D3:4`,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
 };
 
 /** Tríade quebrada subindo e descendo pelas inversões, em tercinas (uma tríade por tempo). */
@@ -182,6 +227,9 @@ const l43: Lesson = {
     'Consigo tocar qualquer tríade na posição fundamental, na 1ª e na 2ª inversão.',
     'Consigo ler cifra com barra (C/E, G/B) e pôr a nota certa no baixo.',
     'Consigo tocar tríades quebradas pelas inversões em tercinas a 50 BPM, sem parar.',
+  ],
+  music: [
+    { song: 'u06-canone', why: 'Os oito acordes do Canon in D cabem numa região só da mão direita quando você usa inversões: Ré na 1ª, Lá na 2ª, Si menor na 2ª. A versão longa começa assim e segue com as oito primeiras variações do violino, no ritmo original.' },
   ],
   blocks: [
     {
@@ -258,6 +306,20 @@ O dedilhado da direita é **1-3-5** na posição fundamental, **1-2-5** na 1ª i
     }, { ladder: { from: 40, to: 50, step: 5 }, window: 80 }) },
     { kind: 'exercise', id: 'l43-quebradas-me', exercise: quickTimed('Tríades quebradas, mão esquerda', 'Dó maior a partir do Dó2, dedilhado 5-3-1, 5-3-1, 5-2-1, de 40 a 50 BPM.', () => melodyTask(brokenInversions(36, 4), { bpm: 40, clef: 'bass' }), { ladder: { from: 40, to: 50, step: 5 }, window: 80 }) },
     { kind: 'exercise', id: 'l43-quiz', exercise: quiz('Inversões', 'Cinco perguntas rápidas.', INVERSIONS) },
+    {
+      kind: 'text',
+      title: 'A música da lição: o Cânone com inversões',
+      body: `No Canon in D da lição 30 você tocou o baixo e três variações. Agora ele volta inteiro na harmonia: os **oito acordes** (Ré, Lá, Si menor, Fá♯ menor, Sol, Ré, Sol, Lá), um por tempo, sobre o mesmo baixo.
+
+Na posição fundamental, a direita pularia o teclado todo. Com inversões ela fica parada em volta do Lá4:
+
+- **Ré** na 1ª inversão (Fá♯–Lá–Ré) · **Lá** na 2ª (Mi–Lá–Dó♯) · **Si menor** na 2ª (Fá♯–Si–Ré) · **Fá♯ menor** fundamental (Fá♯–Lá–Dó♯)
+- **Sol** fundamental (Sol–Si–Ré) · **Ré** na 1ª · **Sol** fundamental · **Lá** na 2ª
+
+O baixo na esquerda continua tocando a fundamental de cada acorde, então o ouvido escuta Ré, Lá, Si menor... A inversão fica só na direita: é o que deixa a mão quieta. Esses dois compassos são a introdução da música da lição; depois entram as variações do violino, no ritmo original (semínimas, colcheias e, nos compassos 11 a 14, a famosa descida em semicolcheias).`,
+    },
+    { kind: 'exercise', id: 'l43-canone', exercise: quickTimed('Os acordes do Cânone, invertidos', 'Direita nos oito acordes invertidos, esquerda no baixo, um acorde por tempo, dois ciclos de 46 a 54 BPM.', () => twoHandTask(`${CANON_CHORDS_R} | ${CANON_CHORDS_R} | F#4+A4+D5:4`, `${CANON_BASS6} | ${CANON_BASS6} | D3:4`, { bpm: 46, fifths: 2, caption: 'Direita: D (1ª inv.), A (2ª), Bm (2ª), F♯m, G, D (1ª), G, A (2ª). Esquerda: Ré, Lá, Si, Fá♯, Sol, Ré, Sol, Lá.' }), { window: 80, ladder: { from: 46, to: 54, step: 4 } }) },
+    { kind: 'song', songId: 'u06-canone', why: 'A versão longa: os acordes invertidos na introdução e as oito primeiras variações do violino sobre o baixo. Comece pelo modo Estudar, mãos separadas.' },
   ],
   review: [inv1, slashChords, choice(INVERSIONS, 'inversoes')],
   checkpoint: [
@@ -886,7 +948,7 @@ const unit: Unit = {
   goal: 'Montar e soletrar os quatro tipos de tríade, usar inversões e cifra com barra, encadear acordes conduzindo as vozes e acompanhar uma canção pela cifra.',
   technique: 'Tríades quebradas pelas inversões em tercinas (de 40 rumo a 60 BPM) e escala cromática de uma oitava em colcheias (de 50 rumo a 69 BPM, variação abaixo de 35 ms), mãos separadas; I–V–vi–IV conduzido em Dó, Sol, Fá e Ré (referência: RCM Level 1–2). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l42, l43, l44, l45, l46, l47, l48, l49],
-  songs: [popSong, greensleeves],
+  songs: [popSong, greensleeves, canonLong],
   final: {
     songId: 'u06-cancao',
     brief: 'Uma canção original em I–V–vi–IV (C – G – Am – F), escrita para o curso: a direita canta a melodia e a esquerda muda de padrão na parte B, do meio-arpejo para a balada 1-5-8-10. Toque também pela cifra, inventando o acompanhamento com os acordes conduzidos.',

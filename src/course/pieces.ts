@@ -49,6 +49,8 @@ export const COURSE_PIECES: CoursePiece[] = [
   p('star-wars', 'Star Wars Main Theme', ['John Williams'], 'Fanfarra', 'Filme', ['filmes'], 'Star Wars main theme easy piano', ['star wars']),
   p('game-of-thrones', 'Game of Thrones Theme', ['Ramin Djawadi'], 'Tema', 'Série', ['filmes'], 'Game of Thrones theme easy piano', ['game of thrones']),
   // Unidade 6
+  p('oh-darling', 'Oh! Darling', ['The Beatles'], 'Introdução e verso', 'Rock', ['pop-rock'], 'Oh Darling Beatles easy piano', ['oh darling']),
+  p('whiter-shade', 'A Whiter Shade of Pale', ['Procol Harum'], 'Introdução', 'Rock', ['pop-rock'], 'A Whiter Shade of Pale easy piano', ['whiter shade of pale']),
   p('can-you-feel', 'Can You Feel the Love Tonight', ['Elton John'], 'Refrão', 'Disney', ['filmes'], 'Can You Feel the Love Tonight easy piano'),
   p('jump', 'Jump', ['Van Halen'], 'Riff', 'Rock', ['pop-rock'], 'Jump Van Halen easy piano'),
   p('cant-help-falling', "Can't Help Falling in Love", ['Elvis Presley'], 'Inteira', 'Rock and roll', ['pop-rock'], "Can't Help Falling in Love easy piano", ['cant help falling in love']),
