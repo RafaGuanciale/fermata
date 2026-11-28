@@ -280,6 +280,10 @@ const l60: Lesson = {
     'Consigo seguir o ciclo diatônico de tétrades só com as notas-guia.',
     'Consigo tocar tétrades invertidas pela cifra com barra (G7/F, C7M/B, Dm7/C).',
   ],
+  music: [
+    { piece: 'when-you-wish', why: 'When You Wish Upon a Star é um standard de jazz: a cifra está cheia de ii7–V7 que levam ao I. Toque a melodia na direita e shells na esquerda, e siga as notas-guia de um acorde para o outro.' },
+    { song: 'u07-preludio', why: 'O Prelude in C de Bach é uma aula de tétrades invertidas: Dm7/C no compasso 2, G7/B no 3, C7M/B no 8. Volte a ele e diga a cifra com barra de cada compasso.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -361,6 +365,17 @@ Com notas-guia, o ciclo vira uma **escada descendente** de meios-tons e tons: em
     },
     { kind: 'exercise', id: 'l60-ciclo', exercise: items('O ciclo com notas-guia', '8 acordes, só 3ª e 7ª, conduzidas.', guideCycle, 4, 55, 84, 0.75) },
     { kind: 'exercise', id: 'l60-quiz', exercise: quiz('Shells e notas-guia', 'Cinco perguntas rápidas.', GUIDE_Q) },
+    {
+      kind: 'text',
+      title: 'Shells numa música de verdade',
+      body: `Volte a **When You Wish Upon a Star** e faça o arranjo que os pianistas de jazz fazem com um standard:
+
+1. **Esquerda**: o **shell** de cada acorde da cifra (fundamental, 3ª e 7ª), segurando o compasso inteiro.
+2. **Direita**: a melodia, sozinha.
+3. Nos **ii7–V7–I7M**, ouça as notas-guia descendo meio tom, uma de cada vez, como no exercício acima. Quando o shell 1-3-7 deixar a mão longe, troque para 1-7-3: a mão quase não sai do lugar.
+
+No **Prelude in C**, faça o caminho contrário: cada compasso é uma tétrade ou tríade quebrada. Toque as cinco notas de cada compasso juntas, como acorde, e diga a cifra com barra (Dm7/C, G7/B, C7M/B...). O baixo que desce de grau em grau é feito de inversões.`,
+    },
   ],
   review: [shells, guideIiVI, choice(GUIDE_Q, 'notas-guia')],
   checkpoint: [
@@ -392,6 +407,10 @@ const l61: Lesson = {
   objectives: [
     'Consigo tocar arpejos de Dó, Sol, Fá e Lá menor em 2 oitavas, mãos separadas, com o dedilhado certo.',
     'Consigo 3 passadas limpas a 54 BPM em tercinas, com variação abaixo de 35 ms.',
+  ],
+  music: [
+    { piece: 'sweet-child', why: "A introdução de Sweet Child O' Mine é um arpejo de oito notas que se repete, mudando só a primeira nota quando o acorde muda: no piano, é o treino perfeito para a mão andar sem esticar." },
+    { song: 'u07-preludio', why: 'O Prelude in C de Bach é arpejo do começo ao fim: um acorde quebrado por compasso, as duas mãos dividindo as notas. Com a técnica de ondas desta lição, as semicolcheias ficam leves.' },
   ],
   blocks: [
     {
@@ -448,6 +467,20 @@ Um teste: grave-se tocando devagar. Se a mão estiver aberta como um leque no mo
       body: `A meta desta lição é **54 BPM** em tercinas (cerca de 2,7 notas por segundo). A referência de nível pede **72 BPM**: como nas escalas, isso vem com semanas de trilho técnico, 5 minutos por dia, um arpejo por dia em rodízio, subindo 4 BPM a cada 3 passadas limpas.
 
 Junte arpejo e escala do mesmo tom no mesmo dia: Dó maior escala + arpejo, no dia seguinte Sol. É o formato dos exames de piano de todo o mundo, e por um bom motivo: escala e arpejo do mesmo tom são as duas metades da mesma tonalidade debaixo dos dedos.`,
+    },
+    {
+      kind: 'text',
+      title: 'Arpejo com música',
+      body: `Duas músicas para levar o arpejo do exercício para o repertório:
+
+- **Sweet Child O' Mine** (Guns N' Roses): a introdução é um riff de guitarra em arpejo, oito notas que se repetem; quando o acorde muda, só a primeira nota muda. No piano, a direita faz o riff numa posição só e a esquerda segura a fundamental. A posição fica parada: quem anda é o braço, entre um acorde e outro.
+- **Prelude in C** (Bach, Unidade 7): cada compasso é um acorde em arpejo, a esquerda com as duas notas de baixo e a direita com as três de cima. Toque o compasso 1 com a técnica de ondas: a mão chega em cada grupo já na posição.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'riff de guitarra com a mão esticada',
+      body: 'Na guitarra, o riff salta de corda; no piano, as notas ficam a mais de uma oitava em alguns acordes. Em vez de esticar entre o polegar e o mínimo, divida: a nota de baixo do riff vai para a esquerda, se precisar.',
     },
   ],
   review: [choice(ARP_Q, 'arpejos'), field7],
