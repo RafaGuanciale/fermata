@@ -7,7 +7,7 @@ import {
   playChord, qualityInterval, shellChord, tonicByEar, FIELD7, type ChoiceQuestion,
 } from '../gens';
 import { pick } from '../music';
-import { melodyTask, swingTask, swingTwoHands } from '../tasks';
+import { melodyTask, swingTask, swingTwoHands, twoHandTask } from '../tasks';
 import type { Midi } from '../../music/notes';
 import type { Exercise, ItemGen, Lesson, Rng, SongSpec, Unit } from '../types';
 
@@ -726,6 +726,10 @@ const l64: Lesson = {
     'Consigo ditar uma linha de baixo de 4 notas.',
     'Consigo ouvir uma melodia em Dó e tocá-la em outro tom.',
   ],
+  music: [
+    { piece: 'stand-by-me', why: 'Stand By Me tem a linha de baixo mais famosa do soul, repetida a música inteira: ótima para o passo 4 do método. Tire o baixo de ouvido antes de abrir a partitura e confira com ela.' },
+    { piece: 'hound-dog', why: 'Hound Dog, do Elvis, é um blues de 12 compassos: com a tônica e a forma da lição 62, os acordes (I7, IV7 e V7) saem quase sozinhos. Tire de ouvido e toque com shells.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -755,7 +759,12 @@ A melodia vem depois: com a tônica e os graus na cabeça (lição 40), cada not
 
 No exercício a seguir, o app toca uma frase em Dó e você toca **o mesmo desenho a partir de outra nota**. Pense nos graus (1, 2, 3, 5...) e reconstrua no tom novo, em vez de transportar tecla por tecla.
 
-Depois, faça o mesmo com uma música de verdade: escolha o refrão de uma canção que você goste, tire a melodia e os acordes com o método acima, e toque em outro tom. Não precisa escrever partitura: uma lista de graus e cifras basta.`,
+Depois, faça o mesmo com uma música de verdade. Duas boas para começar:
+
+- **Stand By Me**: a casa é a primeira nota do baixo. Tire a linha de baixo inteira (ela se repete) e, com o campo, descubra os quatro acordes. Depois toque em outro tom.
+- **Hound Dog**: é um blues de 12 compassos. Ache a tônica, confirme a forma da lição 62 e tire o refrão.
+
+Só depois abra a partitura que você importou e confira. Não precisa escrever partitura: uma lista de graus e cifras basta.`,
     },
     {
       kind: 'callout',
@@ -770,7 +779,7 @@ Depois, faça o mesmo com uma música de verdade: escolha o refrão de uma canç
       exercise: {
         kind: 'checklist',
         title: 'O seu refrão',
-        how: 'Escolha uma canção e siga os quatro passos. Marque o que conseguiu.',
+        how: 'Escolha uma canção (Stand By Me, Hound Dog ou outra que você goste) e siga os quatro passos. Marque o que conseguiu.',
         items: [
           'Achei a tônica e a qualidade (maior ou menor).',
           'Tirei o baixo do refrão.',
@@ -808,6 +817,11 @@ const l65: Lesson = {
     'Consigo improvisar dois chorus de blues com 90% das notas na escala.',
     'Consigo apresentar um recital de 4 músicas com análise harmônica escrita.',
   ],
+  music: [
+    { song: 'u08-entertainer', why: 'The Entertainer, o ragtime de Scott Joplin, é o projeto da unidade: a direita sincopada em semicolcheias e o oom-pah na esquerda, agora com as mãos juntas.' },
+    { song: 'u07-preludio', why: 'O Prelude in C de Bach é a música clássica do recital: o campo harmônico em arpejos, com as tétrades invertidas da lição 60.' },
+    { piece: 'let-it-be', why: 'Let It Be pela cifra é a canção pop do recital: o arranjo que você fez na Unidade 6, agora com tétrades onde couber.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -825,9 +839,9 @@ O Marco 2 tem as mesmas duas partes do primeiro:
       body: `Quatro músicas, em sequência, como numa apresentação:
 
 1. **Blues de 12 compassos**: shells na esquerda, **dois chorus** (duas voltas) de improviso na direita com a escala blues e notas-alvo. Exercício abaixo.
-2. **Canção pop pela cifra**: a **Canção em quatro acordes** (Unidade 6), com o seu arranjo.
+2. **Canção pop pela cifra**: **Let It Be**, com o seu arranjo da Unidade 6 (ou a Canção em quatro acordes, se preferir).
 3. **Música clássica**: o **Prelude in C** de Bach (Unidade 7), com pedal a cada compasso.
-4. **Ragtime**: **The Entertainer**, o projeto final desta unidade.
+4. **Ragtime**: **The Entertainer**, o projeto final desta unidade, no ritmo original.
 
 Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de cada compasso, as cadências e as funções (T, S, D). Para o Prelúdio, por exemplo: I – ii7 – V7 – I – vi – ... Compare a gravação com a do Marco 1.`,
     },
@@ -837,7 +851,25 @@ Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de c
       title: 'deixar a análise de lado',
       body: 'A análise escrita é metade do Marco: escrever os graus e as funções é o que transforma a música tocada em conhecimento que serve para a próxima.',
     },
-    { kind: 'song', songId: 'u08-entertainer', why: 'O ragtime do recital e o projeto final da unidade. Comece em 56 BPM no modo Estudar.' },
+    {
+      kind: 'text',
+      title: 'The Entertainer com as mãos juntas',
+      body: `Na lição 62 você treinou as mãos separadas. Agora junte, por partes:
+
+- **Anacruse e compassos 1 a 4**: a direita em semicolcheias, a esquerda em colcheias. Cada colcheia da esquerda cai junto com uma semicolcheia sim, outra não da direita: conte "1 e 2 e" e encaixe a direita.
+- **A síncope**: o Dó do fim do compasso 1 cai sozinho, entre dois ataques da esquerda. Não espere a esquerda para tocar.
+- Depois, os compassos 7 e 8: a direita sobe em Fá♯–Lá–Dó–Mi sobre o acorde de Ré, e a esquerda sobe pelo baixo Sol, Lá, Si para voltar ao tema.
+
+Comece a 40 BPM no exercício abaixo e no modo Estudar do "Tocar a música". O alvo da música é 72 BPM, o andamento das gravações ("not fast", pede Joplin na partitura).`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'correr no ragtime',
+      body: 'Joplin escreveu "not fast" no começo da partitura. O erro comum é acelerar nas semicolcheias e perder a síncope. Mantenha o oom-pah da esquerda firme como um relógio: ele é o pulso, e a direita dança em cima dele.',
+    },
+    { kind: 'exercise', id: 'l65-ent-juntas', exercise: quickTimed('The Entertainer, mãos juntas', 'A anacruse e os 4 primeiros compassos, mãos juntas, de 40 a 56 BPM.', () => twoHandTask(ENT_R5, ['r:2', ENT_L4].join(' | '), { bpm: 40, beatsPerBar: 2, caption: 'Esquerda em colcheias, baixo e acorde: Dó3 · Sol2 | Fá2 · Mi2 | Sol2 · Sol2 | Dó3 e dois acordes.' }), { ladder: { from: 40, to: 56, step: 8 }, window: 80 }) },
+    { kind: 'song', songId: 'u08-entertainer', why: 'O ragtime do recital e o projeto final da unidade, no ritmo original. Comece a 40 BPM no modo Estudar; o alvo é 72 BPM.' },
     { kind: 'song', songId: 'u08-blues', why: 'Um blues escrito, para aquecer a forma antes do improviso.' },
   ],
   review: [m2Minor, m2Iv, m2MinorChords, m2Inv, m2Field, seventhsMain, guideIiVI, m2Cad, m2Ear],
@@ -857,7 +889,7 @@ Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de c
   ],
   project: {
     title: 'Recital nº 2: blues e canção',
-    brief: `Toque em sequência, sem recomeçar: o **blues** com dois chorus improvisados (exercício abaixo), a **Canção em quatro acordes** pelo seu arranjo, o **Prelude in C** e **The Entertainer**. Grave tudo e escreva a análise harmônica de uma das músicas.`,
+    brief: `Toque em sequência, sem recomeçar: o **blues** com dois chorus improvisados (exercício abaixo), **Let It Be** pelo seu arranjo da cifra, o **Prelude in C** e **The Entertainer**. Grave tudo e escreva a análise harmônica de uma das músicas.`,
     steps: [
       'Passe The Entertainer e o Prelúdio no "Tocar a música" com 85% ou mais no andamento.',
       'Ensaie o blues: dois ciclos de shells sem errar a forma, depois com o improviso.',
@@ -983,7 +1015,7 @@ const unit: Unit = {
   songs: [gymnopedie, entertainer, bluesF],
   final: {
     songId: 'u08-entertainer',
-    brief: 'O tema A de The Entertainer, o ragtime de Scott Joplin (1902): melodia saltitante na direita e o "oom-pah" da esquerda (baixo no 1 e no 3, acorde no 2 e no 4). Junto com ele, o projeto pede um blues de 12 compassos com shells na esquerda e improviso na direita.',
+    brief: 'O tema A de The Entertainer, o ragtime de Scott Joplin (1902), no ritmo original em 2/4: melodia sincopada em semicolcheias na direita e o "oom-pah" da esquerda (baixo em cada tempo, acorde no contratempo). Junto com ele, o projeto pede um blues de 12 compassos com shells na esquerda e improviso na direita.',
   },
 };
 

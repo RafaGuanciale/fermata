@@ -2,16 +2,19 @@
 
 ## Noite de 2026-11-27
 
-- **01:10 às 01:19 (já dia 28)** — Unidade 8, "Tétrades, blues e improviso": troca de músicas **em andamento** (lições 58 a 63 prontas).
+- **01:10 às 01:22 (já dia 28)** — Unidade 8, "Tétrades, blues e improviso": troca de músicas **pronta**. Todas as 8 lições (58 a 65) começam com as músicas que ensinam.
   - **Lição 58 (as cinco tétrades)**: a **Gymnopédie No. 1** de Satie (nova no app, notas da edição do Mutopia que já está no app, compassos 1 a 21 no ritmo original, alvo 66 BPM). Ela balança entre G7M e D7M. Exercício novo: a introdução da esquerda (52 a 66 BPM).
   - **Lição 59 (campo em tétrades)**: **When You Wish Upon a Star**, para importar, tocada pela cifra em tétrades.
   - **Lição 60 (shells e notas-guia)**: **When You Wish Upon a Star** de novo, agora com shells na esquerda, e o **Prelude in C** de Bach (Unidade 7), cheio de tétrades invertidas (Dm7/C, G7/B, C7M/B).
   - **Lição 61 (arpejos)**: **Sweet Child O' Mine** (a introdução, para importar) e o **Prelude in C**, que é arpejo do começo ao fim.
   - **Lição 62 (blues e swing)**: **Great Balls of Fire** e **You've Got a Friend in Me**, para importar, e o começo de **The Entertainer** (direita e oom-pah separados).
   - **Lição 63 (pentatônica e escala blues)**: **Another One Bites the Dust** (o riff do baixo, três notas da pentatônica menor) e **Johnny B. Goode** (você já tem da Unidade 4), para importar.
+  - **Lição 64 (tirar de ouvido)**: **Stand By Me** (tire a linha de baixo) e **Hound Dog** (um blues de 12 compassos), que você já tem. A ideia é tirar de ouvido primeiro e só depois conferir com a partitura.
+  - **Lição 65 (Marco 2)**: **The Entertainer** com as mãos juntas (exercício novo, 40 a 56 BPM), o **Prelude in C** e **Let It Be** pela cifra. O recital agora pede Let It Be no lugar da canção inventada pelo app.
   - **The Entertainer** refeito no ritmo original (2/4, com as semicolcheias e a síncope; antes os valores eram dobrados, o que quebrava a sua regra), notas da edição original de 1902 no Mutopia, alvo 72 BPM. Os dois exercícios de preparo da lição 62 já usam a versão nova (direita de 40 a 56 BPM).
-  - Para testar: a Gymnopédie na lição 58 (veja se reconhece; o pedal segura o baixo) e o começo de The Entertainer na lição 62.
-  - Músicas protegidas novas até aqui:
+  - Pendente: nenhuma música. O Blues em Fá (melodia do app) ficou só como treino na lição 62.
+  - Para testar: a Gymnopédie na lição 58 (veja se reconhece; o pedal segura o baixo), o começo de The Entertainer na lição 62 e as mãos juntas na lição 65 (as semicolcheias começam a 40 BPM; no "Tocar a música" o alvo é 72).
+  - Músicas protegidas novas da Unidade 8, para você baixar:
     - When You Wish Upon a Star (Leigh Harline) - Partitura - XML
     - Sweet Child O' Mine (Guns N' Roses) - Partitura - XML
     - Great Balls of Fire (Jerry Lee Lewis) - Partitura - XML

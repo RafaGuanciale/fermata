@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3 a 7: feitas. Unidades 8 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3 a 8: feitas. Unidades 9 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -63,8 +63,9 @@ Unidades 3 a 7: feitas. Unidades 8 a 12: a fazer (as rodadas seguem este mapa). 
 | 8 | 59–60 | When You Wish Upon a Star | importar | Tétrades |
 | 8 | 61 | Sweet Child O' Mine (intro) | importar | Arpejos |
 | 8 | 62 | Great Balls of Fire · You've Got a Friend in Me | importar | Swing |
-| 8 | 63 | Another One Bites the Dust (riff do baixo) | importar | Pentatônica |
-| 8 | 65 | The Entertainer, tema A | App | Marco 2 |
+| 8 | 63 | Another One Bites the Dust (riff do baixo) · Johnny B. Goode | importar | Pentatônica |
+| 8 | 64 | Stand By Me · Hound Dog | importar | Tirar de ouvido |
+| 8 | 65 | The Entertainer, tema A, no ritmo original (Mutopia) · Prelude in C · Let It Be | App · importar | Marco 2 |
 | 9 | 67 | Nessun dorma · Sonata K. 545 | App (Mutopia tem a K. 545) | Melodia sobre acompanhamento, Alberti |
 | 9 | 70 | Rondo alla Turca (tema) | App (Mutopia) | Ornamentos |
 | 9 | 71 | Minuet in G · Musette in D | App | Duas vozes |
@@ -89,7 +90,7 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 5 | pronta | 2026-11-27 23:23 |
 | 6 | pronta | 2026-11-28 00:19 |
 | 7 | pronta | 2026-11-28 00:31 |
-| 8 | em construção | 2026-11-28 01:19 |
+| 8 | pronta | 2026-11-28 01:22 |
 | 9 | a fazer | |
 | 10 | a fazer | |
 | 11 | a fazer | |
