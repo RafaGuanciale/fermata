@@ -2,6 +2,25 @@
 
 ## Noite de 2026-11-27
 
+- **01:40 às 01:43 (já dia 28)** — Unidade 10, "Harmonia cromática": troca de músicas **pronta**. Todas as 8 lições (74 a 81) começam com as músicas que ensinam, e cada uma ganhou um trecho "Na música" explicando onde o assunto aparece nela.
+  - **Lição 74 (dominantes secundárias)**: **Sweet Georgia Brown** (o tema dos Harlem Globetrotters: D7 – G7 – C7 – F, cada acorde puxando o próximo) e **When the Saints rearmonizada**.
+  - **Lição 75 (ii–V–I nos 12 tons)**: **Fly Me to the Moon**, que desce pelo ciclo de quintas.
+  - **Lição 76 (ii–V–i menor)**: **Autumn Leaves**, que alterna o ii–V maior e o menor.
+  - **Lição 77 (diminutos)**: a **Moonlight Sonata, 1º movimento original** (a partitura completa que já está no seu repertório pelo caminho: o napolitano no compasso 3 e os diminutos perto do compasso 32) e a **Toccata and Fugue in D minor** de Bach, para importar.
+  - **Lição 78 (subV7)**: o final de **When the Saints rearmonizada** (Dm7 – D♭7 – C7M).
+  - **Lição 79 (empréstimo modal)**: **Creep** (G – B – C – Cm) e When the Saints com o Fm no compasso 13.
+  - **Lição 80 (modulação)**: **A Whole New World**, que muda de tom perto do fim.
+  - **Lição 81 (projeto)**: When the Saints, original e rearmonizada, como antes.
+  - Pendente: a melodia de When the Saints foi escrita antes da regra das fontes; vale conferir numa transcrição. A Toccata e a Moonlight original não entraram com notas no app (a Toccata é de órgão, com notas rápidas demais para o app escrever; a Moonlight original tem um ritmo que o app não consegue escrever junto com as tercinas), por isso vão pela partitura importada.
+  - Para testar: o cartão da Moonlight na lição 77 deve mostrar "Tocar junto" direto, porque a partitura já está no seu repertório. Se mostrar "Pôr no repertório", me avise.
+  - Músicas protegidas novas da Unidade 10, para você baixar:
+    - Sweet Georgia Brown (Ben Bernie, Maceo Pinkard e Kenneth Casey) - Partitura - XML
+    - Fly Me to the Moon (Frank Sinatra) - Partitura - XML
+    - Autumn Leaves (Joseph Kosma) - Partitura - XML
+    - Creep (Radiohead) - Partitura - XML
+    - Toccata and Fugue in D minor (Johann Sebastian Bach) - Partitura - XML
+    - A Whole New World (Alan Menken) - Partitura - XML
+
 - **01:23 às 01:39 (já dia 28)** — Unidade 9, "Leitura clássica e textura": troca de músicas **pronta**. Todas as 8 lições (66 a 73) começam com as músicas que ensinam.
   - **Lição 66 (notas estranhas)**: o **Minuet in G** (passagens e bordaduras) e **Für Elise** (a bordadura Mi–Ré♯–Mi do começo).
   - **Lição 67 (baixo de Alberti)**: a **Sonata facile de Mozart (K. 545)**, nova no app, compassos 1 a 12 no ritmo original (edição do Mutopia, alvo 120 BPM), no lugar da "Sonatina em Dó" que o app tinha inventado. Exercício novo: o tema com o equilíbrio entre as mãos medido (60 a 84 BPM). Para importar: **Nessun dorma**.

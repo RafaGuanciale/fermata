@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3 a 9: feitas. Unidades 10 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3 a 10: feitas. Unidades 11 e 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -74,8 +74,14 @@ Unidades 3 a 9: feitas. Unidades 10 a 12: a fazer (as rodadas seguem este mapa).
 | 9 | 71 | Musette in D · Minuet in G | App | Duas vozes |
 | 9 | 72 | The Entertainer, temas A e B (Mutopia) | App | Saltos |
 | 9 | 73 | Minuet in G (projeto) · Für Elise completa (`public/library`) | App | Projeto |
-| 10 | 77 | Moonlight Sonata, 1º movimento original · Toccata and Fugue in D minor (abertura) | App (`public/library`, Mutopia) | Diminutos, napolitano |
+| 10 | 74 | Sweet Georgia Brown · When the Saints rearmonizada | importar · App | Dominantes secundárias |
+| 10 | 75 | Fly Me to the Moon | importar | ii–V–I e ciclo de quintas |
+| 10 | 76 | Autumn Leaves | importar | ii–V–i menor |
+| 10 | 77 | Moonlight Sonata, 1º movimento original (catálogo aponta para a partitura do caminho, `public/library`) · Toccata and Fugue in D minor | importar · importar (órgão, fusas de 64 que o motor não escreve) | Diminutos, napolitano |
+| 10 | 78 | When the Saints rearmonizada (D♭7) | App | subV7 |
+| 10 | 79 | Creep · When the Saints (Fm no compasso 13) | importar · App | Empréstimo modal |
 | 10 | 80 | A Whole New World | importar | Modulação |
+| 10 | 81 | When the Saints, original e rearmonizada | App | Projeto |
 | 11 | 82–89 | **Unidade 11 vira "Jazz e pop ao piano"** (decisão do Rafael, 27/11/2026). Mantém os conceitos (tensões, voicings sem fundamental, comping, modos, forma) e troca o Brasil por jazz e pop. Sugestão de roteiro: 82 padrões de balada pop na esquerda (Imagine, Hallelujah), 83 tensões (add9, 7M(9), 13), 84 voicings sem fundamental, 85 comping de jazz em swing (The Pink Panther Theme), 86 modos como cores (Eleanor Rigby dórico, Scarborough Fair dórico, Norwegian Wood mixolídio), 87 standard com melodia e comping (Fly Me to the Moon, Autumn Leaves), 88 pop rearmonizado com voicings modernos (Let It Be com add9, sus e baixo invertido), 89 projeto: arranjo solo de um standard ou de uma pop. Baião, Bossa em Fá e Tanguinho saem. Domínio público possível: Scarborough Fair (tradicional), St. Louis Blues (W. C. Handy, 1914), Maple Leaf Rag (Joplin) | App · importar | Jazz e pop |
 | 12 | 91 | Bohemian Rhapsody (balada) | importar | Arranjo solo |
 | 12 | 94 | Prelúdio Op. 28 nº 4 (Chopin) | App (Mutopia) | Pedal no romântico |
@@ -95,6 +101,6 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 7 | pronta | 2026-11-28 00:31 |
 | 8 | pronta | 2026-11-28 01:22 |
 | 9 | pronta | 2026-11-28 01:39 |
-| 10 | em construção | 2026-11-28 01:40 |
+| 10 | pronta | 2026-11-28 01:43 |
 | 11 | a fazer | |
 | 12 | a fazer | |

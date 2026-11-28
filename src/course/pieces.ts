@@ -76,6 +76,14 @@ export const COURSE_PIECES: CoursePiece[] = [
   // Unidade 9 (Nessun dorma é de domínio público, mas a rodada não achou uma edição aberta para conferir as notas)
   p('nessun-dorma', 'Nessun dorma', ['Giacomo Puccini', 'Luciano Pavarotti'], 'Ária', 'Ópera', ['classico'], 'Nessun dorma easy piano', ['turandot']),
   // Unidade 10
+  p('sweet-georgia', 'Sweet Georgia Brown', ['Ben Bernie', 'Maceo Pinkard', 'Kenneth Casey'], 'Tema', 'Jazz', ['pop-rock'], 'Sweet Georgia Brown easy piano', ['harlem globetrotters']),
+  p('fly-me', 'Fly Me to the Moon', ['Bart Howard', 'Frank Sinatra'], 'Inteira', 'Jazz', ['pop-rock'], 'Fly Me to the Moon easy piano'),
+  p('autumn-leaves', 'Autumn Leaves', ['Joseph Kosma', 'Johnny Mercer'], 'Inteira', 'Jazz', ['pop-rock'], 'Autumn Leaves easy piano', ['les feuilles mortes']),
+  p('creep', 'Creep', ['Radiohead'], 'Verso e refrão', 'Rock', ['pop-rock'], 'Creep Radiohead easy piano'),
+  // Domínio público, mas sem notas no código: a do caminho de repertório já vem com a partitura (public/library), e a
+  // Toccata é de órgão, com fusas de 64 e fermatas que o motor não escreve.
+  p('moonlight-1', 'Moonlight Sonata, 1º movimento', ['Ludwig van Beethoven'], 'Inteira', 'Clássica', ['classico'], 'Moonlight Sonata 1st movement piano', ['sonata ao luar', 'mondscheinsonate'], 'avancado'),
+  p('toccata', 'Toccata and Fugue in D minor', ['Johann Sebastian Bach'], 'Abertura', 'Clássica', ['classico'], 'Toccata and Fugue in D minor piano', ['toccata e fuga', 'bwv 565'], 'intermediario'),
   p('whole-new-world', 'A Whole New World', ['Alan Menken'], 'Inteira', 'Disney', ['filmes'], 'A Whole New World easy piano', ['aladdin']),
   // Unidade 12
   p('bohemian', 'Bohemian Rhapsody', ['Queen'], 'Balada', 'Rock', ['pop-rock'], 'Bohemian Rhapsody piano ballad', [], 'intermediario'),

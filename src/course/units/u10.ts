@@ -141,6 +141,10 @@ const l74: Lesson = {
     'Consigo resolver cada secundária no seu alvo.',
     'Consigo achar a secundária pela nota alterada de uma melodia.',
   ],
+  music: [
+    { piece: 'sweet-georgia', why: 'Sweet Georgia Brown, o tema dos Harlem Globetrotters, é uma cadeia de dominantes secundárias: em Fá, D7 – G7 – C7 – F, cada acorde 7 é o V do próximo até chegar no I.' },
+    { song: 'u10-santos-rearm', why: 'When the Saints rearmonizada usa a mesma cadeia no meio: E7 → Am7, A7 → Dm7, G7 → C. Toque e ouça cada 7 puxando para o acorde seguinte.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -208,6 +212,13 @@ Com a mesma regra você harmoniza de ouvido: quando a melodia "sobe meio tom" pa
     { kind: 'exercise', id: 'l74-harmonizar', exercise: items('Harmonize com secundárias', 'A pauta mostra um compasso com uma nota alterada. Toque a secundária que cabe embaixo.', secHarm, 6, 48, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l74-ouvido', exercise: items('vi ou V7/ii?', 'O app toca I – ? – ii – V7 – I. Escute o segundo acorde: menor (vi) ou maior com 7ª, puxando para o ii (V7/ii)?', earSecondary, 8, 48, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l74-tons', exercise: items('Secundárias em cinco tons', 'Dó, Sol, Fá, Ré e Si♭. Três passos: alvo, 5ª acima, maior com 7ª.', secDom, 10, 48, 72, 0.85, 'fade') },
+    {
+      kind: 'text',
+      title: 'Na música',
+      body: `Sweet Georgia Brown (1925) é o exemplo mais famoso de dominantes secundárias em sequência. Em Fá maior, a harmonia fica quatro compassos em cada acorde: **D7** (V7 do Gm, o ii), **G7** (V7 do C), **C7** (V7 do F) e, enfim, **F**. Cada acorde é a dominante do próximo, e o ouvido vai sendo empurrado pelo ciclo de quintas até a tônica.
+
+Na partitura que você importar, procure esses quatro acordes e toque só a cifra, com a fundamental na esquerda e o acorde na direita. Ouça como o D7 já "pede" o G7 antes de ele chegar.`,
+    },
   ],
   review: [secDom, secResolve, choice(SECONDARY_Q, 'secundarias')],
   checkpoint: [
@@ -243,6 +254,9 @@ const l75: Lesson = {
     'Consigo tocar o ii7, o V7 e o I7M de qualquer um dos 12 tons.',
     'Consigo conduzir as notas-guia do ii–V–I em qualquer tom.',
     'Consigo tocar o ii–V–I com a fundamental na esquerda e as notas-guia na direita, a 80 BPM, com 90% no tempo.',
+  ],
+  music: [
+    { piece: 'fly-me', why: 'Fly Me to the Moon, que o Sinatra gravou com a orquestra do Count Basie, desce pelo ciclo de quintas do começo ao fim: Am7 – Dm7 – G7 – C7M. É o ii–V–I em sequência, numa canção que todo mundo canta.' },
   ],
   blocks: [
     {
@@ -301,6 +315,13 @@ Meta da tabela: **90% das notas no tempo a 80 BPM**. Comece pensando em voz alta
     },
     { kind: 'exercise', id: 'l75-maos', exercise: quickTimed('ii–V–I com as duas mãos', 'Esquerda na fundamental, direita nas notas-guia, a 80 BPM. Tom novo a cada passada boa; faça 4 seguidas.', (rng) => iiVIHands(rng, 80), { reps: 4, pass: { accuracy: 0.9 } }) },
     { kind: 'exercise', id: 'l75-quiz', exercise: quiz('ii–V–I e ciclo de quintas', 'Responda sem tocar.', IIVI_Q) },
+    {
+      kind: 'text',
+      title: 'Na música',
+      body: `**Fly Me to the Moon** (Bart Howard, 1954) é quase um exercício de ii–V–I com melodia. Em Dó, a primeira frase é **Am7 – Dm7 – G7 – C7M – F7M**: as fundamentais descem de 5ª em 5ª, e o Dm7 – G7 – C7M no meio é o ii–V–I desta lição. Depois a harmonia continua pelo ciclo (Bø – E7 – Am7), com o ii–V do tom relativo.
+
+Toque a cifra com as notas-guia (3ª e 7ª) na direita e a fundamental na esquerda. Depois transponha a primeira frase para Fá e para Si♭, pensando em graus: vi7 – ii7 – V7 – I7M.`,
+    },
   ],
   review: [iiVI, guideAll, choice(IIVI_Q, 'ii-v-i')],
   checkpoint: [
@@ -319,6 +340,9 @@ const l76: Lesson = {
     'Consigo montar o iiø, o V7(♭9) e o i de um tom menor.',
     'Consigo conduzir as notas-guia do ii–V–i em seis tons menores.',
     'Consigo distinguir de ouvido um ii–V–I maior de um ii–V–i menor.',
+  ],
+  music: [
+    { piece: 'autumn-leaves', why: 'Autumn Leaves é a aula completa de ii–V: alterna o ii–V–I maior (Cm7 – F7 – B♭7M) e o ii–V–i menor (Aø – D7 – Gm). É o standard que todo pianista de jazz aprende primeiro.' },
   ],
   blocks: [
     {
@@ -386,6 +410,16 @@ No i com 7ª menor, a sensível não sobe: ela desce para a 7ª. Se você quiser
       body: 'Para montar um ii–V secundário, ache o alvo, depois o V7 dele (uma 5ª acima) e depois o ii desse V (outra 5ª acima). Alvo maior: ii menor com 7ª. Alvo menor: ii meio-diminuto.',
     },
     { kind: 'exercise', id: 'l76-secundarios', exercise: items('ii–V secundários em Dó', 'Notas-guia de cada ii–V e do alvo.', guideSecondaryIiV, 6, 48, 84, 0.85, 'fade') },
+    {
+      kind: 'text',
+      title: 'Na música',
+      body: `**Autumn Leaves** (Joseph Kosma, 1945, com letra em inglês de Johnny Mercer) gira em Sol menor com dois ii–V que se alternam:
+
+- **Cm7 – F7 – B♭7M**: o ii–V–I **maior** de Si♭ (o relativo maior).
+- **Aø – D7 – Gm**: o ii–V–i **menor** desta lição, com o meio-diminuto e o V7 que vem da menor harmônica.
+
+Toque os dois em sequência, com shells na esquerda, e ouça a diferença de cor: o maior abre, o menor fecha. Na partitura importada, marque cada ii–V com um colchete, como fazem os músicos de jazz.`,
+    },
   ],
   review: [minorChords, guideMinor, choice(MINOR_Q, 'ii-v-i-menor')],
   checkpoint: [
@@ -442,6 +476,10 @@ const l77: Lesson = {
     'Consigo tocar o °7 de qualquer fundamental e reconhecer as inversões dele como outros °7.',
     'Consigo usar o °7 com função dominante, de passagem e auxiliar.',
     'Consigo tocar um arpejo de diminuta, mão direita, a 60 BPM em colcheias.',
+  ],
+  music: [
+    { piece: 'moonlight-1', why: 'O 1º movimento original da Moonlight Sonata (a partitura já está no seu repertório, pelo caminho): o Ré maior do compasso 3 é o napolitano (♭II), e os acordes diminutos aparecem nas passagens de tensão, perto do compasso 32 e no fim.' },
+    { piece: 'toccata', why: 'A abertura da Toccata and Fugue in D minor de Bach desce até um acorde diminuto (Dó♯–Mi–Sol–Si♭) arpejado sobre o Ré grave: o diminuto mais famoso da música.' },
   ],
   blocks: [
     {
@@ -506,6 +544,14 @@ Os três arpejos do exercício, um de cada conjunto, sobem uma oitava e voltam: 
     },
     { kind: 'exercise', id: 'l77-arpejo', exercise: quickTimed('Arpejo de diminuta', 'Colcheias, mão direita, de 48 até 60 BPM. Notas iguais: o app mede a regularidade.', dimArp(60), { ladder: { from: 48, to: 60, step: 4 }, evenness: 45 }) },
     { kind: 'exercise', id: 'l77-ouvido', exercise: items('°7, 7 ou ø de ouvido', 'Ouça o acorde e toque um da mesma qualidade sobre a fundamental pedida.', earDim, 8, 48, 72, 0.85, 'off') },
+    {
+      kind: 'text',
+      title: 'Na música',
+      body: `Duas músicas para ouvir os diminutos em ação:
+
+- **Moonlight Sonata, 1º movimento** (Beethoven, 1801): na unidade 5 você tocou o arranjo fácil dos 9 primeiros compassos. A partitura original inteira está no seu repertório (ela entrou pelo caminho de repertório). Procure o **Ré maior** do compasso 3, um acorde de fora do tom de Dó♯ menor: é o **napolitano** (♭II), que você vê no fim desta unidade. Os **diminutos** chegam no meio do movimento, perto do compasso 32, nas tercinas que sobem sobre o Sol♯ grave, e de novo no fim: toque devagar e diga o nome de cada um.
+- **Toccata and Fugue in D minor** (Bach): depois do famoso mordente no Lá e da descida, a mão constrói, nota por nota, o acorde **Dó♯°7** sobre o Ré do pedal. É a função de dominante do diminuto: o Dó♯ é a sensível de Ré menor.`,
+    },
   ],
   review: [dim7, dimSlash, choice(DIM_Q, 'diminutos')],
   checkpoint: [
@@ -564,6 +610,9 @@ const l78: Lesson = {
     'Consigo tocar o subV7, o subV7/V e o subV7/ii em cinco tons.',
     'Consigo tocar ii–subV–I com as duas mãos e reconhecer V7 × subV7 de ouvido.',
   ],
+  music: [
+    { song: 'u10-santos-rearm', why: 'When the Saints rearmonizada termina com Dm7 – D♭7 – C7M: o D♭7 é o subV7 desta lição, o trítono do G7 com o baixo descendo meio tom até o Dó.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -618,6 +667,13 @@ O mesmo vale para as secundárias: o A7 (V7/ii) pode virar **E♭7**, o D7 (V7/V
     { kind: 'exercise', id: 'l78-ouvido', exercise: items('V7 ou subV7?', 'O app toca ii – ? – I. Ouça o baixo: cai uma 5ª ou desce meio tom?', earSubV, 8, 48, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l78-baixo', exercise: items('Ditado do baixo', 'O app toca 3 a 5 acordes com V7, subV7 ou subV secundário. Toque a fundamental de cada um, em ordem.', subVByEar, 5, 36, 72, 0.8, 'off') },
     { kind: 'exercise', id: 'l78-quiz', exercise: quiz('Trítono e substituição', 'Responda sem tocar.', SUBV_Q) },
+    {
+      kind: 'text',
+      title: 'Na música',
+      body: `No fim de **When the Saints rearmonizada**, o penúltimo compasso tem **Dm7 – D♭7** e a música fecha em **C7M**. O D♭7 está no lugar do G7: os dois têm o mesmo trítono (Fá e Si, que no D♭7 se escreve Fá e Dó♭), e o baixo desce por meio tom, Ré – Ré♭ – Dó. Repare também na melodia: ela desce para o **Si**, a 7ª do D♭7 (Dó♭), em vez de ir direto ao Dó.
+
+Toque os dois finais seguidos: primeiro Dm7 – G7 – C, depois Dm7 – D♭7 – C. O segundo soa mais "jazz" porque o baixo anda cromático.`,
+    },
   ],
   review: [subV, earSubV, choice(SUBV_Q, 'subv')],
   checkpoint: [
@@ -676,6 +732,10 @@ const l79: Lesson = {
     'Consigo tocar iv, ♭VI, ♭VII e ♭III emprestados em Dó, Sol, Fá e Ré.',
     'Consigo rearmonizar uma frase trocando IV por iv.',
     'Consigo reconhecer IV × iv de ouvido e tirar progressões com empréstimo.',
+  ],
+  music: [
+    { piece: 'creep', why: 'Creep, do Radiohead, é G – B – C – Cm em loop: o Dó menor no fim (o iv, emprestado do modo menor) é o que dá a cor triste a cada volta.' },
+    { song: 'u10-santos', why: 'When the Saints original: no compasso 13, troque o F da esquerda por Fm e ouça o iv emprestado na mesma melodia.' },
   ],
   blocks: [
     {
@@ -739,6 +799,15 @@ No exercício abaixo, a direita toca a melodia (Mi–Sol, Sol–Fá, pausa e Mi�
     { kind: 'song', songId: 'u10-santos', why: 'A versão original. No compasso 13, experimente trocar o F da esquerda por Fm e escute a diferença.' },
     { kind: 'exercise', id: 'l79-ouvido', exercise: items('IV, iv ou os dois?', 'Ouça a cor do acorde antes da volta ao I.', earIViv, 8, 48, 72, 0.85, 'off') },
     { kind: 'exercise', id: 'l79-ditado', exercise: items('Ditado com empréstimo', 'O app toca 4 acordes; o primeiro é o I. Toque os acordes, em ordem, em qualquer posição.', borrowedByEar, 4, 48, 72, 0.75, 'off') },
+    {
+      kind: 'text',
+      title: 'Na música',
+      body: `**Creep** (Radiohead, 1992) é a progressão de empréstimo modal mais conhecida do rock: **G – B – C – Cm**, em Sol maior. O **C** é o IV; o **Cm** é o **iv**, emprestado de Sol menor. A troca de C para Cm muda uma nota só: o Mi desce para Mi♭. É esse meio tom que faz o fim de cada volta soar triste.
+
+(O **B** do segundo compasso também é de fora do tom: é o III maior, a dominante secundária do vi, assunto da lição 74.)
+
+Toque o loop com tríades na direita e a fundamental na esquerda, e depois faça o mesmo em Dó: C – E – F – Fm.`,
+    },
   ],
   review: [borrowed, earIViv, choice(BORROW_Q, 'emprestimo')],
   checkpoint: [
@@ -786,6 +855,9 @@ const l80: Lesson = {
     'Consigo dizer os tons vizinhos de um tom maior e achar um acorde pivô entre dois deles.',
     'Consigo tocar uma progressão que modula pelo pivô.',
     'Consigo tocar uma frase um tom acima lendo a pauta no tom original, a 72 BPM.',
+  ],
+  music: [
+    { piece: 'whole-new-world', why: 'A Whole New World, de Aladdin, muda de tom perto do fim: a canção sobe e o último refrão volta mais alto. É a modulação a serviço da emoção, o truque favorito da Disney e do pop.' },
   ],
   blocks: [
     {
@@ -852,6 +924,13 @@ Para tocar assim, você precisa **transpor em tempo real**: ler na pauta em Dó 
 - **Sexta aumentada**: em Lá menor, Fá no baixo e **Ré♯** em cima, a uma 6ª aumentada. As duas notas se afastam por semitom até a oitava **Mi–Mi** do V: Fá desce, Ré♯ sobe.`,
     },
     { kind: 'exercise', id: 'l80-quiz', exercise: quiz('Modulação e cromáticos', 'Responda sem tocar.', MOD_Q) },
+    {
+      kind: 'text',
+      title: 'Na música',
+      body: `Em canções, a modulação mais comum é a **direta**: no último refrão, a música sobe um tom ou um semitom, sem preparação, e a energia sobe junto. **A Whole New World** (Alan Menken, 1992) usa a mudança de tom perto do fim para o dueto chegar ao ponto mais alto.
+
+Na partitura que você importar, procure a armadura nova e ache o acorde em que a mudança acontece. Pergunte: há um acorde-pivô (que existe nos dois tons) ou a música simplesmente muda? Depois toque o refrão nos dois tons, pensando em graus.`,
+    },
   ],
   review: [modulate, choice(MOD_Q.slice(0, 5), 'modulacao')],
   checkpoint: [
@@ -905,6 +984,10 @@ const l81: Lesson = {
     'Consigo analisar cada troca de uma rearmonização (secundária, ii–V, subV, empréstimo).',
     'Consigo tocar When the Saints rearmonizada com as duas mãos, sem erro de acorde.',
     'Consigo tocar arpejos de V7 com cada mão a 80 BPM em colcheias.',
+  ],
+  music: [
+    { song: 'u10-santos-rearm', why: 'O projeto final: When the Saints com a harmonia da unidade inteira (ii–V, secundárias, iv emprestado e subV).' },
+    { song: 'u10-santos', why: 'A versão original, com I, IV e V7: o ponto de partida da rearmonização.' },
   ],
   blocks: [
     {
