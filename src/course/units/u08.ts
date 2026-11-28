@@ -107,6 +107,9 @@ const l58: Lesson = {
     'Consigo ler a cifra brasileira de tétrades e não confundir C7 com C7M, nem ø com °.',
     'Consigo tocar tétrades sorteadas nas 12 tônicas com 90% de acerto e menos de 3 s por acorde.',
   ],
+  music: [
+    { song: 'u08-gymnopedie', why: 'A Gymnopédie No. 1 de Satie balança entre dois acordes de 7ª maior, G7M e D7M, por 16 compassos. É a tétrade 7M fazendo música sozinha: sem dominante, nada pede para resolver, e o som flutua.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -158,6 +161,26 @@ As duas confusões mais comuns:
     { kind: 'exercise', id: 'l58-diminutas', exercise: items('ø e °7', 'Meio-diminutos e diminutos. Confira a 7ª.', halfDimDim, 10, 48, 72, 0.85) },
     { kind: 'exercise', id: 'l58-ouvido', exercise: items('7M ou 7, de ouvido', 'Ouça a tétrade e toque uma da mesma qualidade sobre a nota pedida.', earMaj7Dom, 10, 48, 84, 0.8, 'off') },
     { kind: 'exercise', id: 'l58-quiz', exercise: quiz('As cinco tétrades', 'Sete perguntas rápidas.', TETRADS) },
+    {
+      kind: 'text',
+      title: 'Satie: duas tétrades e uma melodia',
+      body: `A **Gymnopédie No. 1** (Erik Satie, 1888) começa com quatro compassos só da mão esquerda, em compasso 3/4, *Lent et douloureux* (lento e doloroso):
+
+- **Compasso 1**: Sol2 no tempo 1, e **Si–Ré–Fá♯** no tempo 2. Juntos, Sol–Si–Ré–Fá♯ = **G7M**.
+- **Compasso 2**: Ré2 no tempo 1, e **Lá–Dó♯–Fá♯** no tempo 2. Juntos, Ré–Fá♯–Lá–Dó♯ = **D7M**.
+
+Repare que o baixo e o acorde formam a tétrade juntos: a mão esquerda salta do baixo grave para as três notas de cima. A 7ª maior (Fá♯ no G7M, Dó♯ no D7M) é o que dá a cor suspensa. A melodia entra no compasso 5 e desce devagar sobre os mesmos dois acordes.
+
+Toque com o **pedal**: troque no tempo 1 de cada compasso, junto com o baixo. Assim o baixo continua soando enquanto a mão sobe para o acorde.`,
+    },
+    {
+      kind: 'callout',
+      tone: 'erro',
+      title: 'apressar o salto',
+      body: 'O salto do baixo para o acorde é longo (mais de uma oitava). O erro comum é encurtar o tempo 1 para chegar antes. Olhe para o acorde enquanto toca o baixo, solte o braço e chegue no tempo 2, nem antes nem depois. O pedal segura o baixo por você.',
+    },
+    { kind: 'exercise', id: 'l58-gymno', exercise: quickTimed('Gymnopédie: G7M e D7M na esquerda', 'Os 4 compassos de introdução, só a esquerda, de 52 a 66 BPM. Baixo no 1, acorde no 2. Use o pedal.', () => melodyTask([GYMNO_G, GYMNO_D, GYMNO_G, GYMNO_D].join(' | '), { bpm: 52, beatsPerBar: 3, clef: 'bass', fifths: 2, caption: 'G7M | D7M | G7M | D7M: Sol2 e Si–Ré–Fá♯; Ré2 e Lá–Dó♯–Fá♯.' }), { ladder: { from: 52, to: 66, step: 7 } }) },
+    { kind: 'song', songId: 'u08-gymnopedie', why: 'O início da Gymnopédie, compassos 1 a 21, no ritmo original. Comece no modo Estudar e suba o andamento aos poucos; o alvo é 66 BPM.' },
   ],
   review: [seventhsAll, earMaj7Dom, choice(TETRADS, 'tetrades')],
   checkpoint: [
@@ -174,6 +197,9 @@ const l59: Lesson = {
   objectives: [
     'Consigo montar o campo harmônico em tétrades de 6 tons maiores.',
     'Consigo reconhecer de ouvido 7M, 7, m7 e ø e tocar a mesma qualidade sobre outra nota.',
+  ],
+  music: [
+    { piece: 'when-you-wish', why: 'When You Wish Upon a Star, de Pinóquio, é uma balada da Disney escrita em tétrades do começo ao fim: 7M, m7 e 7. Toque a cifra com as quatro notas e ouça a cor que a 7ª dá a cada acorde.' },
   ],
   blocks: [
     {
@@ -224,6 +250,17 @@ Combinando: **7M** = maior + doce; **7** = maior + tenso, pedindo resolução; *
     },
     { kind: 'exercise', id: 'l59-ouvido', exercise: items('Qualidade da tétrade, em outra raiz', '7M, 7, m7 ou ø. Ouça e toque a mesma qualidade sobre a nota pedida, com a fundamental embaixo.', earTetrads, 12, 48, 84, 0.85, 'off') },
     { kind: 'exercise', id: 'l59-quiz', exercise: quiz('Campo em tétrades', 'Quatro perguntas rápidas.', FIELD7_Q, 0.75) },
+    {
+      kind: 'text',
+      title: 'When You Wish Upon a Star pela cifra',
+      body: `Canções da era de ouro da Disney, como **When You Wish Upon a Star** (Leigh Harline, 1940), foram escritas para a orquestra de estúdio, com a harmonia do jazz e do musical: os acordes vêm cheios de 7ª. Na partitura que você importar, a cifra vai mostrar tétrades como **Am7**, **Dm7** e **G7** (se o arranjo estiver em Dó): os graus vi7, ii7 e V7 do campo que você acabou de montar. Em outro tom, os graus são os mesmos.
+
+Como estudar:
+
+1. Toque só a cifra, um acorde por compasso, com as **quatro notas** na direita e a fundamental na esquerda.
+2. Diga o grau de cada acorde no campo do tom. Os que não couberem no campo (um acorde 7 fora do V, por exemplo) são dominantes secundárias, assunto da Unidade 10: por enquanto, só repare neles.
+3. Depois, a melodia na direita e a fundamental na esquerda. Na lição 60 você troca a fundamental pelo shell.`,
+    },
   ],
   review: [field7, earTetrads, choice(FIELD7_Q, 'campo-tetrades')],
   checkpoint: [
@@ -519,8 +556,8 @@ Comece a 72 BPM e só suba quando os dois ataques da direita estiverem seguros n
       title: 'Preparando The Entertainer',
       body: `A música final da unidade é **The Entertainer**, de Scott Joplin (1902), um ragtime. Vale começar agora, devagar, em duas partes:\n\n- **A direita** tem o desenho Mi–Dó–Mi–Dó com saltos de 6ª e a **síncope**: o Dó cai no contratempo e fica. Toque o começo (até o compasso 5) só com a direita.\n- **A esquerda** faz o **oom-pah** do ragtime: baixo no tempo forte, acorde no fraco. O baixo é grave e o acorde fica no meio do teclado: olhe para o próximo destino antes de saltar.\n\nNa lição 65 você junta as duas mãos.`,
     },
-    { kind: 'exercise', id: 'l62-ent-md', exercise: quickTimed('The Entertainer, começo, direita', 'Os 5 primeiros compassos, só a direita, de 50 a 66 BPM.', () => melodyTask(ENT_R5, { bpm: 50 }), { ladder: { from: 50, to: 66, step: 8 }, window: 80 }) },
-    { kind: 'exercise', id: 'l62-ent-me', exercise: quickTimed('The Entertainer, oom-pah na esquerda', 'Quatro compassos de baixo e acorde, de 56 a 72 BPM.', () => melodyTask(ENT_L4, { bpm: 56, clef: 'bass' }), { ladder: { from: 56, to: 72, step: 8 }, window: 80 }) },
+    { kind: 'exercise', id: 'l62-ent-md', exercise: quickTimed('The Entertainer, começo, direita', 'A anacruse e os 4 primeiros compassos, só a direita, em semicolcheias, de 40 a 56 BPM.', () => melodyTask(ENT_R5, { bpm: 40, beatsPerBar: 2 }), { ladder: { from: 40, to: 56, step: 8 }, window: 80 }) },
+    { kind: 'exercise', id: 'l62-ent-me', exercise: quickTimed('The Entertainer, oom-pah na esquerda', 'Quatro compassos de baixo e acorde em colcheias, de 56 a 72 BPM.', () => melodyTask(ENT_L4, { bpm: 56, beatsPerBar: 2, clef: 'bass' }), { ladder: { from: 56, to: 72, step: 8 }, window: 80 }) },
     { kind: 'exercise', id: 'l62-quiz', exercise: quiz('Blues e swing', 'Cinco perguntas rápidas.', BLUES_Q) },
   ],
   review: [shellsBlues, choice(BLUES_Q, 'blues-swing')],
@@ -800,30 +837,35 @@ Depois, a **análise escrita**: escolha uma das músicas e escreva os graus de c
 
 // ---------- músicas ----------
 
-// The Entertainer (Scott Joplin, 1902), tema A simplificado. Arranjo do Fermata: uma oitava abaixo, ritmo em colcheias retas, 13 compassos.
+// The Entertainer (Scott Joplin, 1902; domínio público). Fonte: Mutopia Project, JoplinS/entertainer/entertainer.ly
+// (Chris Sawer e Simon Albrecht, a partir da edição original de 1902, domínio público), compassos 4 (anacruse) a 19 e o
+// final da reprise (compasso 54). Arranjo do Fermata: tom, compasso 2/4 e ritmo originais, com as semicolcheias e a
+// síncope; a direita toca a nota de baixo das oitavas; na esquerda, as oitavas do baixo viram uma nota só e os acordes
+// ficam como na edição; a nota que atravessa a barra vira nota + pausa (o motor não liga compassos).
+const ENT_A = 'E4:0.25 C5:0.5 E4:0.25 C5:0.5 E4:0.25 C5:0.25';
+const ENT_B = 'E5:0.25 C5:0.25 D5:0.25 E5:0.5 B4:0.25 D5:0.5';
 const ENT_R = [
-  'r:3 D4:0.5 D#4:0.5',
-  'E4:0.5 C5 E4:0.5 C5 E4:0.5 C5:0.5',
-  'r:2 r:0.5 C5:0.5 D5:0.5 D#5:0.5',
-  'E5:0.5 C5:0.5 D5:0.5 E5 B4:0.5 D5',
-  'C5:3 D4:0.5 D#4:0.5',
-  'E4:0.5 C5 E4:0.5 C5 E4:0.5 C5:0.5',
-  'r r:0.5 A4:0.5 G4:0.5 F#4:0.5 A4:0.5 C5:0.5',
-  'E5:0.5 D5:0.5 C5:0.5 A4:0.5 D5:2',
-  'r:3 D4:0.5 D#4:0.5',
-  'E4:0.5 C5 E4:0.5 C5 E4:0.5 C5:0.5',
-  'r:2 r:0.5 C5:0.5 D5:0.5 D#5:0.5',
-  'E5:0.5 C5:0.5 D5:0.5 E5 B4:0.5 D5',
-  'C5:4',
+  'r:1.5 D4:0.25 D#4:0.25',
+  ENT_A, 'r r:0.25 C5:0.25 D5:0.25 D#5:0.25', ENT_B, 'C5:1.5 D4:0.25 D#4:0.25',
+  ENT_A, 'r:1.5 A4:0.25 G4:0.25', 'F#4:0.25 A4:0.25 C5:0.25 E5:0.5 D5:0.25 C5:0.25 A4:0.25', 'D5:1.5 D4:0.25 D#4:0.25',
+  ENT_A, 'r r:0.25 C5:0.25 D5:0.25 D#5:0.25', ENT_B, 'C5:1.5 C5:0.25 D5:0.25',
+  'E5:0.25 C5:0.25 D5:0.25 E5:0.5 C5:0.25 D5:0.25 C5:0.25', 'E5:0.25 C5:0.25 D5:0.25 E5:0.5 C5:0.25 D5:0.25 C5:0.25', ENT_B, 'C5 C5:0.5 r:0.5',
 ].join(' | ');
-const OOM = { C: 'C3 E3+G3', G7: 'G2 F3+B3', D7: 'D3 F#3+C4', G: 'G2 G3+B3' };
+/** Oom-pah: baixo no tempo, acorde no contratempo, em colcheias. */
+const OOM = {
+  C: 'C3:0.5 E3+G3+C4:0.5 G2:0.5 G3+Bb3+C4:0.5',
+  F: 'F2:0.5 A3+C4:0.5 E2:0.5 G3+C4:0.5',
+  G: 'G2:0.5 E3+G3+C4:0.5 G2:0.5 F3+G3+B3:0.5',
+};
 const ENT_L = [
-  'r:4',
-  `${OOM.C} ${OOM.C}`, `${OOM.C} ${OOM.C}`, `${OOM.C} ${OOM.G7}`, `${OOM.C} r:2`,
-  `${OOM.C} ${OOM.C}`, `${OOM.C} ${OOM.D7}`, `${OOM.G} ${OOM.G}`, `${OOM.G7} r:2`,
-  `${OOM.C} ${OOM.C}`, `${OOM.C} ${OOM.C}`, `${OOM.C} ${OOM.G7}`, 'C2+C3:4',
+  'r:2',
+  OOM.C, OOM.F, OOM.G, 'C3:0.5 E3+G3+C4:0.5 E3+G3+C4:0.5 G3+B3:0.5',
+  OOM.C, 'F2:0.5 A3+C4:0.5 E2:0.5 Eb2:0.5', 'D2:0.5 D3+F#3+A3+C4:0.5 D3:0.5 F#3+A3+C4:0.5', 'G3+B3:0.5 G2:0.5 A2:0.5 B2:0.5',
+  OOM.C, OOM.F, OOM.G, 'C3:0.5 E3+G3+C4:0.5 G3+C4+E4:0.5 r:0.5',
+  'C3:0.5 G3+C4+E4:0.5 Bb2:0.5 G3+C4+E4:0.5', 'A2:0.5 A3+C4+F4:0.5 Ab2:0.5 Ab3+C4+F4:0.5', 'G2:0.5 G3+C4+E4:0.5 G2:0.5 G3+B3:0.5', 'C3+G3+C4:0.5 G2:0.5 C2:0.5 r:0.5',
 ].join(' | ');
 
+/** Anacruse e os 4 primeiros compassos do tema. */
 const ENT_R5 = ENT_R.split(' | ').slice(0, 5).join(' | ');
 const ENT_L4 = ENT_L.split(' | ').slice(1, 5).join(' | ');
 
@@ -831,12 +873,37 @@ const entertainer: SongSpec = {
   id: 'u08-entertainer',
   title: 'The Entertainer, tema A',
   composer: 'Scott Joplin',
-  arrangement: 'arranjo do Fermata: valores dobrados (semicolcheia vira colcheia), síncope mantida; um compasso de pausa e 12 compassos; o Dó longo do original vira pausa depois do ataque; mão esquerda em baixo e acorde ("oom-pah")',
+  arrangement: 'arranjo do Fermata a partir da edição original de 1902 (Mutopia): tom, 2/4 e ritmo originais, com as semicolcheias e a síncope; a direita toca a nota de baixo das oitavas; a esquerda faz o "oom-pah" com o baixo numa nota só; a nota ligada pela barra vira nota e pausa',
   bpm: 72,
-  beatsPerBar: 4,
+  beatsPerBar: 2,
   fifths: 0,
   right: ENT_R,
   left: ENT_L,
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
+// Gymnopédie nº 1 (Erik Satie, 1888; domínio público). Fonte: public/library/gymnopedie-1.mxl (Mutopia Project, digitada
+// por Evin Robertson a partir da edição Dover), compassos 1 a 21: a introdução da esquerda e as duas primeiras frases.
+// Arranjo do Fermata: notas e ritmo originais; o baixo vale uma semínima e o pedal segura (no original ele dura o compasso);
+// a nota longa ligada pelas barras vira nota + pausas; no compasso 9 a esquerda deixa o Fá♯4 para a direita, que o segura.
+const GYMNO_R = ['r:3', 'r:3', 'r:3', 'r:3', 'r F#5 A5', 'G5 F#5 C#5', 'B4 C#5 D5', 'A4:3', 'F#4:3', 'r:3', 'r:3', 'r:3', 'r F#5 A5', 'G5 F#5 C#5', 'B4 C#5 D5', 'A4:3', 'C#5:3', 'F#5:3', 'E4:3', 'r:3', 'r:3'];
+const GYMNO_G = 'G2 B3+D4+F#4:2';
+const GYMNO_D = 'D2 A3+C#4+F#4:2';
+const GYMNO_L = [
+  ...Array.from({ length: 16 }, (_, i) => (i === 8 ? 'G2 B3+D4:2' : i % 2 === 0 ? GYMNO_G : GYMNO_D)),
+  'F#2 A3+C#4+F#4:2', 'B1 B3+D4+F#4:2', 'E2 G3+B3:2', 'E2 B3+D4+G4:2', 'D2 F3+A3+D4:2',
+];
+const gymnopedie: SongSpec = {
+  id: 'u08-gymnopedie',
+  title: 'Gymnopédie No. 1, início',
+  composer: 'Erik Satie',
+  arrangement: 'compassos 1 a 21 da edição do Mutopia, notas e ritmo originais; o baixo vale uma semínima e o pedal segura o compasso; a nota longa ligada pelas barras vira nota e pausas',
+  bpm: 66,
+  beatsPerBar: 3,
+  fifths: 2,
+  right: GYMNO_R.join(' | '),
+  left: GYMNO_L.join(' | '),
   hands: 'duas',
   pass: { accuracy: 0.85 },
 };
@@ -871,7 +938,7 @@ const unit: Unit = {
   goal: 'Montar e ouvir as cinco tétrades, usar shells e notas-guia no ii–V–I, tocar blues com swing e improvisar com a pentatônica mirando as notas do acorde.',
   technique: 'Arpejos de Dó, Sol, Fá e Lá menor em 2 oitavas, mãos separadas, em tercinas de 44 rumo a 72 BPM, variação abaixo de 35 ms (referência: RCM Level 2). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l58, l59, l60, l61, l62, l63, l64, l65],
-  songs: [entertainer, bluesF],
+  songs: [gymnopedie, entertainer, bluesF],
   final: {
     songId: 'u08-entertainer',
     brief: 'O tema A de The Entertainer, o ragtime de Scott Joplin (1902): melodia saltitante na direita e o "oom-pah" da esquerda (baixo no 1 e no 3, acorde no 2 e no 4). Junto com ele, o projeto pede um blues de 12 compassos com shells na esquerda e improviso na direita.',

@@ -2,6 +2,14 @@
 
 ## Noite de 2026-11-27
 
+- **01:10 às 01:16 (já dia 28)** — Unidade 8, "Tétrades, blues e improviso": troca de músicas **em andamento** (lições 58 e 59 prontas).
+  - **Lição 58 (as cinco tétrades)**: a **Gymnopédie No. 1** de Satie (nova no app, notas da edição do Mutopia que já está no app, compassos 1 a 21 no ritmo original, alvo 66 BPM). Ela balança entre G7M e D7M. Exercício novo: a introdução da esquerda (52 a 66 BPM).
+  - **Lição 59 (campo em tétrades)**: **When You Wish Upon a Star**, para importar, tocada pela cifra em tétrades.
+  - **The Entertainer** refeito no ritmo original (2/4, com as semicolcheias e a síncope; antes os valores eram dobrados, o que quebrava a sua regra), notas da edição original de 1902 no Mutopia, alvo 72 BPM. Os dois exercícios de preparo da lição 62 já usam a versão nova (direita de 40 a 56 BPM).
+  - Para testar: a Gymnopédie na lição 58 (veja se reconhece; o pedal segura o baixo) e o começo de The Entertainer na lição 62.
+  - Músicas protegidas novas até aqui:
+    - When You Wish Upon a Star (Leigh Harline) - Partitura - XML
+
 - **00:22 às 00:31 (já dia 28)** — Unidade 7, "Campo harmônico e funções": troca de músicas **pronta**. Todas as 8 lições (50 a 57) começam com as músicas que ensinam.
   - **Lição 50 (campo harmônico)**: o **Canon in D** da Unidade 6, agora analisado: seis dos sete graus de Ré maior, um por tempo.
   - **Lição 51 (graus e transposição)**: **Heart and Soul**, para importar: o acompanhamento é I – vi – IV – V, bom para transpor pelos graus.
