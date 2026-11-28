@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3 a 6: feitas. Unidades 7 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3 a 7: feitas. Unidades 8 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -51,10 +51,14 @@ Unidades 3 a 6: feitas. Unidades 7 a 12: a fazer (as rodadas seguem este mapa). 
 | 6 | 47 | Interstellar · Con te partirò · Imagine | importar | Melodia sobre acompanhamento |
 | 6 | 48 | A Whiter Shade of Pale · Hedwig's Theme | importar | Baixo descendente e cromatismo |
 | 6 | 49 | Let It Be pela cifra · Canon in D | importar · App | Projeto pop pela cifra |
-| 7 | 50 | Canon in D, analisado | App | Campo harmônico |
+| 7 | 50 | Canon in D, analisado (o da unidade 6) | App | Campo harmônico |
+| 7 | 51 | Heart and Soul | importar | Graus e transposição |
 | 7 | 52 | Stand By Me · Beauty and the Beast | importar | Funções |
-| 7 | 56 | O sole mio · Once Upon a Dream · Minuet in G | App · importar · App | Frase e período |
-| 7 | 57 | Prelude in C (Bach), completo | App (Mutopia) | Projeto |
+| 7 | 53 | Ode to Joy completa (unidade 4) | App | Cadências |
+| 7 | 54 | Let It Be · Don't Stop Believin' · Hit the Road Jack | importar | Progressões |
+| 7 | 55 | Joy to the World (unidade 4) | App | Escalas |
+| 7 | 56 | 'O sole mio (ABC de John Chambers) · Once Upon a Dream · Minuet in G (unidade 9) | App · importar · App | Frase e período |
+| 7 | 57 | Prelude in C (Bach), inteiro no ritmo original | App (Mutopia) | Projeto |
 | 8 | 58 | Gymnopédie No. 1, início | App (já em `public/library`) | Tétrades |
 | 8 | 59–60 | When You Wish Upon a Star | importar | Tétrades |
 | 8 | 61 | Sweet Child O' Mine (intro) | importar | Arpejos |
@@ -84,7 +88,7 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 4 | pronta | 2026-11-27 |
 | 5 | pronta | 2026-11-27 23:23 |
 | 6 | pronta | 2026-11-28 00:19 |
-| 7 | em construção | 2026-11-28 00:27 |
+| 7 | pronta | 2026-11-28 00:31 |
 | 8 | a fazer | |
 | 9 | a fazer | |
 | 10 | a fazer | |

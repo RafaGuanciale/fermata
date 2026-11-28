@@ -2,19 +2,24 @@
 
 ## Noite de 2026-11-27
 
-- **00:22 (já dia 28)** — Unidade 7, "Campo harmônico e funções": troca de músicas **em andamento** (lições 50 a 55 prontas).
+- **00:22 às 00:31 (já dia 28)** — Unidade 7, "Campo harmônico e funções": troca de músicas **pronta**. Todas as 8 lições (50 a 57) começam com as músicas que ensinam.
   - **Lição 50 (campo harmônico)**: o **Canon in D** da Unidade 6, agora analisado: seis dos sete graus de Ré maior, um por tempo.
   - **Lição 51 (graus e transposição)**: **Heart and Soul**, para importar: o acompanhamento é I – vi – IV – V, bom para transpor pelos graus.
-  - **Lição 52 (funções)**: **Stand By Me** (I – vi – IV – V: tônica, tônica, subdominante, dominante) e **Beauty and the Beast**, para importar.
-  - **Lição 53 (cadências)**: a **Ode to Joy** completa da Unidade 4: a primeira frase para no V (meia cadência) e a segunda fecha no I (perfeita). O texto pede para trocar o último acorde por Lá menor e ouvir a deceptiva.
+  - **Lição 52 (funções)**: **Stand By Me** (tônica, tônica, subdominante, dominante) e **Beauty and the Beast**, para importar.
+  - **Lição 53 (cadências)**: a **Ode to Joy** completa da Unidade 4: a primeira frase para no V (meia cadência) e a segunda fecha no I (perfeita).
   - **Lição 54 (progressões)**: **Let It Be**, **Don't Stop Believin'** (as duas em I – V – vi – IV) e **Hit the Road Jack** (a cadência andaluza), para importar.
   - **Lição 55 (escalas em 2 oitavas)**: **Joy to the World**, da Unidade 4: a melodia começa com a escala de Dó maior descendo.
-  - Músicas protegidas novas até aqui:
+  - **Lição 56 (frase e período)**: **'O sole mio** (novo no app, notas de uma transcrição identificada, em Dó maior, estrofe e refrão no ritmo original), **Once Upon a Dream** (para importar) e o **Minuet in G** da Unidade 9. Exercício novo: a estrofe de 'O sole mio, de 50 a 66 BPM.
+  - **Lição 57 (projeto)**: o **Prelude in C de Bach agora inteiro**, os 35 compassos, no ritmo original em semicolcheias (antes eram só 8 compassos com o desenho pela metade e em colcheias, o que quebrava a sua regra). Notas da edição do Mutopia. Dois exercícios: os compassos 1 e 2 (40 a 56 BPM) e os 8 primeiros (40 a 60 BPM).
+  - Pendente: a Royal Road (lição 54) ficou sem música de exemplo; não quis afirmar que uma abertura de anime usa essa progressão sem confirmar.
+  - Para testar: 'O sole mio na lição 56 (veja se reconhece a melodia no ritmo do app) e o Prelúdio inteiro na lição 57 (as semicolcheias começam a 40 BPM; no "Tocar a música" o alvo é 66). Na mão esquerda do Prelúdio o app solta as duas notas antes do tempo: segure com o pedal.
+  - Músicas protegidas novas da Unidade 7, para você baixar:
     - Heart and Soul (Hoagy Carmichael) - Partitura - XML
     - Stand By Me (Ben E. King) - Partitura - XML
     - Beauty and the Beast (Alan Menken) - Partitura - XML
     - Don't Stop Believin' (Journey) - Partitura - XML
     - Hit the Road Jack (Ray Charles) - Partitura - XML
+    - Once Upon a Dream (Sammy Fain, sobre Tchaikovsky) - Partitura - XML
 
 - **00:10 às 00:20 (já dia 28)** — Unidade 6, "Tríades, inversões e condução": troca de músicas **pronta**. Todas as 8 lições (42 a 49) começam com as músicas que ensinam.
   - **Lição 42 (os quatro tipos de tríade)**: **Oh! Darling** (Beatles), para importar: ela abre com um acorde aumentado.

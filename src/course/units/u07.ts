@@ -1,4 +1,6 @@
-// Unidade 7 — Campo harmônico, funções e cadências (lições 50 a 57). Projeto final: Prelude in C, BWV 846 (Bach), 8 primeiros compassos simplificados.
+// Unidade 7 — Campo harmônico, funções e cadências (lições 50 a 57). Projeto final: Prelude in C, BWV 846 (Bach), inteiro.
+// Músicas: Prelude in C e 'O sole mio no app; Canon in D, Ode to Joy, Joy to the World e Minuet in G de outras unidades;
+// Heart and Soul, Stand By Me, Beauty and the Beast, Let It Be, Don't Stop Believin', Hit the Road Jack e Once Upon a Dream para importar.
 // Plano: docs/curso/PLANO.md. Regras de escrita: docs/curso/PROTOCOLO.md.
 
 import {
@@ -605,6 +607,25 @@ const PERIOD_Q: ChoiceQuestion[] = [
   { q: 'Período duplo é…', options: ['Dois períodos seguidos: 16 compassos', 'Um período tocado duas vezes mais rápido', 'Duas mãos'], answer: 0, why: 'Quatro frases: as três primeiras terminam abertas ou com uma cadência mais fraca; só a última fecha de vez.' },
 ];
 
+// 'O sole mio (Eduardo di Capua, 1898). Fonte: transcrição ABC de John Chambers (folktunefinder.com, tune 18892),
+// em Lá maior e 2/4, com a cifra; aqui em Dó maior (uma 3ª menor acima). Ritmo da fonte; as apojaturas saíram e as
+// notas ligadas por cima da barra viram nota + pausa. Esquerda: raiz e 5ª da cifra da fonte, um acorde por compasso.
+const SOLE_VERSE = 'r:0.5 G5:0.5 F5:0.5 E5:0.5 | D5 C5 | C5:0.5 D5:0.5 E5:0.5 C5:0.5 | B4 A4 | r:0.5 B4:0.5 C5:0.5 D5:0.5 | B4:0.5 A4:0.5 A4 | r:0.5 B4:0.5 C5:0.5 D5:0.5 | A4:0.5 G4:0.5 G4 | r:0.5 G5:0.5 F5:0.5 E5:0.5 | D5 C5 | C5:0.5 D5:0.5 E5:0.5 C5:0.5 | B4 A4 | r:0.5 F5:0.5 E5:0.5 D5:0.5 | G5:0.5 E5:0.5 D5:0.5 C5:0.5 | D5:1.5 E5:0.5 | D5:0.5 C5:1.5';
+const SOLE_REFRAIN = 'r:0.5 C6:0.5 C6:0.5 B5:0.5 | G5 G5 | r:0.5 B5:0.5 B5:0.5 A5:0.5 | F5:2 | r:0.5 B5:0.5 B5:0.5 A5:0.5 | F5 F5 | r:0.5 D5:0.5 E5:0.5 F5:0.5 | G5:2 | r:1.5 G5:0.5 | Ab5:2 | r:0.5 F5:0.5 C6:0.75 Ab5:0.25 | G5 G5 | r:0.5 E5:0.5 D5:0.5 C5:0.5 | G5:2 | r:0.5 E5:0.5 D5:0.75 B4:0.25 | C5:2';
+const soleMio: SongSpec = {
+  id: 'u07-sole',
+  title: "'O sole mio",
+  composer: 'Eduardo di Capua',
+  arrangement: 'arranjo do Fermata em Dó maior sobre a transcrição de John Chambers: estrofe e refrão, sem as apojaturas; raiz e 5ª na esquerda, um acorde por compasso (C, Dm, G7 e, no refrão, Fm)',
+  bpm: 66,
+  beatsPerBar: 2,
+  fifths: 0,
+  right: `${SOLE_VERSE} | ${SOLE_REFRAIN}`,
+  left: 'C3+G3:2 | C3+G3:2 | C3+G3:2 | D3+A3:2 | D3+A3:2 | G2+D3:2 | G2+D3:2 | C3+G3:2 | C3+G3:2 | C3+G3:2 | C3+G3:2 | D3+A3:2 | D3+A3:2 | C3+G3:2 | G2+D3:2 | C3+G3:2 | C3+G3:2 | C3+G3:2 | C3+G3:2 | D3+A3:2 | D3+A3:2 | D3+A3:2 | G2+D3:2 | C3+G3:2 | C3+G3:2 | F2+C3:2 | F2+C3:2 | C3+G3:2 | C3+G3:2 | G2+D3:2 | G2+D3:2 | C3+G3:2',
+  hands: 'duas',
+  pass: { accuracy: 0.85 },
+};
+
 // Período de 8 compassos em Dó: antecedente termina no V, consequente no I.
 const PERIOD_R = 'E4 G4 C5 G4 | A4 F4 A4 C5 | G4 E4 C4 E4 | B3 C4 D4:2 | E4 G4 C5 G4 | A4 F4 A4 C5 | D5 B4 G4 F4 | E4 D4 C4:2';
 const PERIOD_L = 'C3+E3+G3:4 | C3+F3+A3:4 | C3+E3+G3:4 | B2+D3+G3:4 | C3+E3+G3:4 | C3+F3+A3:4 | B2+F3+G3:4 | C3+E3+G3:4';
@@ -631,6 +652,11 @@ const l56: Lesson = {
     'Consigo reconhecer antecedente e consequente num período de 8 compassos.',
     'Consigo harmonizar 8 compassos com acordes do campo, cadências no lugar certo e notas de passagem nos tempos fracos.',
     'Consigo completar o fim de uma frase de acordo com a cadência que ela pede.',
+  ],
+  music: [
+    { song: 'u07-sole', why: "A estrofe de 'O sole mio são duas frases de 8 compassos que começam iguais: a primeira fecha com a melodia no Sol (conclui pouco) e a segunda no Dó, depois do G7 (ponto final). Pergunta e resposta, na canção napolitana mais famosa." },
+    { piece: 'once-upon-a-dream', why: 'Once Upon a Dream, da Bela Adormecida, vem da valsa de Tchaikovsky: frases de 4 compassos que perguntam e respondem, com a cadência no fim de cada uma.' },
+    { song: 'u09-minueto', why: 'O Minuet in G (da Unidade 9) é feito de frases de 4 compassos, em pares, fechando com cadências: ouça agora onde cada frase respira. Na Unidade 9 você toca a música inteira.' },
   ],
   blocks: [
     {
@@ -674,6 +700,20 @@ O que não pode: nota fora do acorde no **tempo forte** sem resolver logo depois
     { kind: 'exercise', id: 'l56-completar', exercise: items('Complete a frase', 'Ouça e veja a frase sem a última nota. Antecedente para no V; consequente volta ao I.', complete, 8, 55, 84, 0.85, 'off') },
     { kind: 'exercise', id: 'l56-periodo', exercise: quickTimed('O período, no tempo', 'Melodia na direita, acordes em semibreve na esquerda, de 60 a 72 BPM. Pedal legato a cada compasso, se tiver.', () => twoHandTask(PERIOD_R, PERIOD_L, { bpm: 60, caption: 'Antecedente: C F C G · Consequente: C F G7 C.' }), { ladder: { from: 60, to: 72, step: 6 } }) },
     { kind: 'exercise', id: 'l56-quiz', exercise: quiz('Frase e período', 'Cinco perguntas rápidas.', PERIOD_Q) },
+    {
+      kind: 'text',
+      title: "A música da lição: 'O sole mio",
+      body: `**'O sole mio** (Eduardo di Capua, 1898), a canção napolitana que Caruso, Pavarotti e Elvis gravaram, tem a forma desta lição na estrofe:
+
+- **Compassos 1 a 8**: a primeira frase. Termina com a melodia no **Sol** (a 5ª do acorde de Dó): chega em casa, mas sem firmeza.
+- **Compassos 9 a 16**: a segunda começa **igual** à primeira e termina no **Dó**, depois do **G7**: cadência perfeita, ponto final.
+
+O refrão (compassos 17 a 32) é outro período, com um acorde de fora do tom nos compassos 26 e 27, o **Fá menor** (o Lá♭ da melodia). A Unidade 10 explica de onde ele vem; por enquanto, ouça como ele escurece a frase antes da volta para casa.
+
+A versão do app está em Dó maior, no ritmo original, com raiz e 5ª na esquerda. Comece pela estrofe, só a direita, no exercício abaixo.`,
+    },
+    { kind: 'exercise', id: 'l56-sole', exercise: quickTimed("'O sole mio: a estrofe", 'Os 16 compassos da estrofe, mão direita, de 50 a 66 BPM. Repare nas duas frases que começam iguais.', () => melodyTask(SOLE_VERSE, { bpm: 50, beatsPerBar: 2 }), { ladder: { from: 50, to: 66, step: 4 } }) },
+    { kind: 'song', songId: 'u07-sole', why: 'A canção inteira, estrofe e refrão, com raiz e 5ª na esquerda.' },
   ],
   review: [harmPeriod, complete, choice(PERIOD_Q, 'periodo')],
   checkpoint: [
@@ -697,6 +737,9 @@ const l57: Lesson = {
   objectives: [
     'Consigo passar no checkpoint misto da unidade 7, sem dicas.',
     'Consigo compor uma melodia de 16 compassos (período duplo) no campo de Dó, com cadências no lugar certo, e analisá-la em graus.',
+  ],
+  music: [
+    { song: 'u07-preludio', why: 'O Prelude in C de Bach é o campo harmônico tocado em acordes quebrados, um por compasso, com cadências e um longo pedal no V antes do fim. Agora inteiro e no ritmo original.' },
   ],
   blocks: [
     {
@@ -735,9 +778,9 @@ Depois de pronta, **analise**: escreva os graus embaixo de cada compasso e as ca
     {
       kind: 'text',
       title: 'A música final: o Prelude in C de Bach',
-      body: `Além do projeto, a unidade termina com uma música: os 8 primeiros compassos do **Prelude in C**, BWV 846, de Johann Sebastian Bach (1722). Cada compasso é **um acorde quebrado**, sempre com o mesmo desenho: a esquerda toca o baixo e a nota seguinte e segura; a direita repete três notas de cima, duas vezes.
+      body: `Além do projeto, a unidade termina com uma música inteira: o **Prelude in C**, BWV 846, de Johann Sebastian Bach (1722), os 35 compassos no ritmo original. Cada compasso é **um acorde quebrado**, sempre com o mesmo desenho em semicolcheias: a esquerda toca o baixo e a nota seguinte; a direita toca as três notas de cima duas vezes. E tudo isso se repete no segundo meio do compasso.
 
-Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7/B, C, Am/C, D7/C, G/B e C7M/B. Repare no baixo descendo por grau conjunto (Dó, Dó, Si, Dó, Dó, Dó, Si, Si) enquanto os acordes passeiam pelo campo de Dó. Troque o **pedal** a cada compasso, logo depois do baixo.`,
+Como o desenho não muda, a atenção vai toda para a **harmonia**. Os 8 primeiros compassos: C, Dm7/C, G7/B, C, Am/C, D7/C, G/B e C7M/B. Depois o baixo desce devagar e, a partir do compasso 24, fica parado no Sol (o V) por oito compassos, antes do Dó final: a maior meia cadência que você vai tocar. Repare no baixo descendo por grau conjunto (Dó, Dó, Si, Dó, Dó, Dó, Si, Si) enquanto os acordes passeiam pelo campo de Dó. Troque o **pedal** a cada compasso, logo depois do baixo.`,
     },
     {
       kind: 'callout',
@@ -745,8 +788,9 @@ Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7
       title: 'nota estranha no tempo forte',
       body: 'Uma nota fora do acorde no tempo 1 faz a melodia brigar com a harmonia. No tempo forte, uma nota do acorde; as outras ficam nos tempos fracos.',
     },
-    { kind: 'exercise', id: 'l57-preludio', exercise: quickTimed('Prelúdio, compassos 1 a 2', 'Os dois primeiros compassos com as duas mãos, a 50 BPM. Duas passadas boas.', () => twoHandTask(PRELUDE_R2, PRELUDE_L2, { bpm: 50, caption: 'C | Dm7/C. A esquerda toca o baixo e a nota seguinte e segura; a direita repete as três notas de cima.' }), { reps: 2 }) },
-    { kind: 'song', songId: 'u07-preludio', why: 'A música final da unidade: Bach construiu uma música inteira só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },
+    { kind: 'exercise', id: 'l57-preludio', exercise: quickTimed('Prelúdio, compassos 1 a 2', 'Os dois primeiros compassos com as duas mãos, em semicolcheias, de 40 a 56 BPM. Duas passadas boas.', () => twoHandTask(PRELUDE_R2, PRELUDE_L2, { bpm: 40, caption: 'C | Dm7/C. A esquerda toca o baixo e a nota seguinte; a direita repete as três notas de cima, duas vezes em cada meio compasso.' }), { reps: 2, ladder: { from: 40, to: 56, step: 4 } }) },
+    { kind: 'exercise', id: 'l57-preludio-8', exercise: quickTimed('Prelúdio, compassos 1 a 8', 'Os 8 primeiros compassos, duas mãos, de 40 a 60 BPM. A harmonia muda a cada compasso; o desenho, nunca.', () => twoHandTask(PRELUDE_R8, PRELUDE_L8, { bpm: 40, caption: 'C | Dm7/C | G7/B | C | Am/C | D7/C | G/B | C7M/B. Pedal a cada compasso.' }), { ladder: { from: 40, to: 60, step: 5 } }) },
+    { kind: 'song', songId: 'u07-preludio', why: 'A música final da unidade, inteira: Bach construiu 35 compassos só com acordes quebrados. Ouça a harmonia andar de compasso em compasso, e use o pedal a cada compasso.' },
   ],
   review: [fieldRandom, transpose, harmC, cadenceEar, royalLead, complete],
   checkpoint: [
@@ -787,8 +831,10 @@ Como o desenho não muda, a atenção vai toda para a **harmonia**: C, Dm7/C, G7
 
 // ---------- músicas ----------
 
-// Prelude in C, BWV 846 (J. S. Bach, Cravo Bem Temperado I, 1722): 8 primeiros compassos.
-// Arranjo do Fermata: o desenho de cada compasso aparece uma vez (não duas), em colcheias.
+// Prelude in C, BWV 846 (J. S. Bach, Cravo Bem Temperado I, 1722), inteiro. Fonte: Mutopia, BachJS/BWV846/wtk1-prelude1
+// (domínio público). Ritmo original: em cada meio compasso, o baixo, a nota do meio e as três de cima em semicolcheias.
+// O arranjo solta o baixo da esquerda logo depois de tocá-lo (no original as duas notas da esquerda ficam presas: o pedal
+// faz isso) e escreve os compassos 33 e 34 (o final sobre o pedal de Dó) com a esquerda segurando a nota de cima.
 const PRELUDE: [string, string, string[]][] = [
   ['C4', 'E4', ['G4', 'C5', 'E5']],
   ['C4', 'D4', ['A4', 'D5', 'F5']],
@@ -798,17 +844,52 @@ const PRELUDE: [string, string, string[]][] = [
   ['C4', 'D4', ['F#4', 'A4', 'D5']],
   ['B3', 'D4', ['G4', 'D5', 'G5']],
   ['B3', 'C4', ['E4', 'G4', 'C5']],
+  ['A3', 'C4', ['E4', 'G4', 'C5']],
+  ['D3', 'A3', ['D4', 'F#4', 'C5']],
+  ['G3', 'B3', ['D4', 'G4', 'B4']],
+  ['G3', 'Bb3', ['E4', 'G4', 'C#5']],
+  ['F3', 'A3', ['D4', 'A4', 'D5']],
+  ['F3', 'Ab3', ['D4', 'F4', 'B4']],
+  ['E3', 'G3', ['C4', 'G4', 'C5']],
+  ['E3', 'F3', ['A3', 'C4', 'F4']],
+  ['D3', 'F3', ['A3', 'C4', 'F4']],
+  ['G2', 'D3', ['G3', 'B3', 'F4']],
+  ['C3', 'E3', ['G3', 'C4', 'E4']],
+  ['C3', 'G3', ['Bb3', 'C4', 'E4']],
+  ['F2', 'F3', ['A3', 'C4', 'E4']],
+  ['F#2', 'C3', ['A3', 'C4', 'Eb4']],
+  ['Ab2', 'F3', ['B3', 'C4', 'D4']],
+  ['G2', 'F3', ['G3', 'B3', 'D4']],
+  ['G2', 'E3', ['G3', 'C4', 'E4']],
+  ['G2', 'D3', ['G3', 'C4', 'F4']],
+  ['G2', 'D3', ['G3', 'B3', 'F4']],
+  ['G2', 'Eb3', ['A3', 'C4', 'F#4']],
+  ['G2', 'E3', ['G3', 'C4', 'G4']],
+  ['G2', 'D3', ['G3', 'C4', 'F4']],
+  ['G2', 'D3', ['G3', 'B3', 'F4']],
+  ['C2', 'C3', ['G3', 'Bb3', 'E4']],
 ];
-const PRELUDE_R = PRELUDE.map(([, , up]) => `r:1 ${[...up, ...up].map((x) => `${x}:0.5`).join(' ')}`).join(' | ') + ' | C4+E4+G4+C5:4';
-const PRELUDE_L = PRELUDE.map(([a, b]) => `${a}:0.5 ${b}:3.5`).join(' | ') + ' | C3:4';
+const half = (up: string[]) => `r:0.5 ${[...up, ...up].map((x) => `${x}:0.25`).join(' ')}`;
+const PRELUDE_R = [
+  ...PRELUDE.map(([, , up]) => `${half(up)} ${half(up)}`),
+  'r:0.5 F3:0.25 A3:0.25 C4:0.25 F4:0.25 C4:0.25 A3:0.25 C4:0.25 A3:0.25 F3:0.25 A3:0.25 F3:0.25 D3:0.25 F3:0.25 D3:0.25',
+  'r:0.5 G4:0.25 B4:0.25 D5:0.25 F5:0.25 D5:0.25 B4:0.25 D5:0.25 B4:0.25 G4:0.25 B4:0.25 D4:0.25 F4:0.25 E4:0.25 D4:0.25',
+  'E4+G4+C5:4',
+].join(' | ');
+const PRELUDE_L = [
+  ...PRELUDE.map(([a, b]) => `${a}:0.25 ${b}:1.5 r:0.25 ${a}:0.25 ${b}:1.5 r:0.25`),
+  'C2:0.25 C3:3.5 r:0.25', 'C2:0.25 B2:3.5 r:0.25', 'C2+C3:4',
+].join(' | ');
+const PRELUDE_R8 = PRELUDE_R.split(' | ').slice(0, 8).join(' | ');
+const PRELUDE_L8 = PRELUDE_L.split(' | ').slice(0, 8).join(' | ');
 const PRELUDE_R2 = PRELUDE_R.split(' | ').slice(0, 2).join(' | ');
 const PRELUDE_L2 = PRELUDE_L.split(' | ').slice(0, 2).join(' | ');
 
 const prelude: SongSpec = {
   id: 'u07-preludio',
-  title: 'Prelude in C, BWV 846 (8 compassos)',
+  title: 'Prelude in C, BWV 846',
   composer: 'Johann Sebastian Bach',
-  arrangement: 'arranjo do Fermata: os 8 primeiros compassos, com o desenho de cada compasso uma vez em colcheias (no original ele se repete em semicolcheias) e um acorde final em Dó; pedal a cada compasso',
+  arrangement: 'o prelúdio inteiro (35 compassos) no ritmo original, pela edição do Mutopia; a esquerda solta o baixo logo depois de tocá-lo e a nota do meio uma semicolcheia antes do tempo, e o pedal a cada compasso segura as duas notas, como no original',
   bpm: 66,
   beatsPerBar: 4,
   fifths: 0,
@@ -825,10 +906,10 @@ const unit: Unit = {
   goal: 'Montar o campo harmônico de qualquer tom maior, analisar e transpor em graus, harmonizar por funções, reconhecer cadências e as progressões mais usadas.',
   technique: 'Escalas maiores e Lá menor harmônica em 2 oitavas, mãos juntas em movimento paralelo (Dó, Sol, Fá e Lá menor), em colcheias de 56 rumo a 80 BPM, variação abaixo de 35 ms (referência: RCM Level 2). Use a escada de andamento do treino nos dias sem lição nova.',
   lessons: [l50, l51, l52, l53, l54, l55, l56, l57],
-  songs: [prelude],
+  songs: [prelude, soleMio],
   final: {
     songId: 'u07-preludio',
-    brief: 'Os 8 primeiros compassos do Prelude in C de Bach: cada compasso é um acorde quebrado, e a harmonia anda pelo campo de Dó (I – ii7 – V7 – I – vi – Ré com Fá♯ – V – I7M) com o baixo quase parado. O Ré com Fá♯ é uma "dominante da dominante", que a Unidade 10 explica. É a música perfeita para ouvir funções e cadências, e para treinar o pedal a cada compasso.',
+    brief: 'O Prelude in C de Bach, inteiro e no ritmo original: cada compasso é um acorde quebrado, e a harmonia anda pelo campo de Dó (nos 8 primeiros compassos: I – ii7 – V7 – I – vi – Ré com Fá♯ – V – I7M) com o baixo quase parado. O Ré com Fá♯ é uma "dominante da dominante", que a Unidade 10 explica. É a música perfeita para ouvir funções e cadências, e para treinar o pedal a cada compasso.',
   },
 };
 

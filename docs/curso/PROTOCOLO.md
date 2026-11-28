@@ -39,7 +39,7 @@ Cada unidade tem `songs` (todas as músicas usadas) e `final` (o projeto final: 
 | 4 | Canon in D (Pachelbel), simplificado com baixo e acordes |
 | 5 | Für Elise, tema A (Lá menor) |
 | 6 | Uma canção em I–V–vi–IV pela cifra (arranjo próprio, melodia original ou folclórica) |
-| 7 | Prelude in C, BWV 846 (Bach), primeiros 8 compassos simplificados |
+| 7 | Prelude in C, BWV 846 (Bach), inteiro no ritmo original |
 | 8 | The Entertainer (Joplin) simplificado + blues de 12 compassos |
 | 9 | Minuet in G, BWV Anh. 114 |
 | 10 | Clementi, Sonatina Op. 36 nº 1, 1º movimento (trecho) |
