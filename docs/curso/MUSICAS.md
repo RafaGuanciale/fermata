@@ -14,7 +14,7 @@ Decisão de 27/11/2026, depois do Rafael chegar na unidade 3: o curso ensinava m
 
 ## Mapa por lição
 
-Unidades 3 a 8: feitas. Unidades 9 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
+Unidades 3 a 9: feitas. Unidades 10 a 12: a fazer (as rodadas seguem este mapa). "App" = domínio público, no código; "importar" = protegida, no catálogo.
 
 | Unidade | Lição | Música | Fonte | Foco |
 |---|---|---|---|---|
@@ -66,11 +66,14 @@ Unidades 3 a 8: feitas. Unidades 9 a 12: a fazer (as rodadas seguem este mapa). 
 | 8 | 63 | Another One Bites the Dust (riff do baixo) · Johnny B. Goode | importar | Pentatônica |
 | 8 | 64 | Stand By Me · Hound Dog | importar | Tirar de ouvido |
 | 8 | 65 | The Entertainer, tema A, no ritmo original (Mutopia) · Prelude in C · Let It Be | App · importar | Marco 2 |
-| 9 | 67 | Nessun dorma · Sonata K. 545 | App (Mutopia tem a K. 545) | Melodia sobre acompanhamento, Alberti |
-| 9 | 70 | Rondo alla Turca (tema) | App (Mutopia) | Ornamentos |
-| 9 | 71 | Minuet in G · Musette in D | App | Duas vozes |
-| 9 | 72 | The Entertainer, completo | App (Mutopia) | Saltos |
-| 9 | 73 | Für Elise, completa | App (`public/library`) | Projeto |
+| 9 | 66 | Minuet in G · Für Elise (tema A, unidade 5) | App | Notas estranhas |
+| 9 | 67 | Sonata facile K. 545, compassos 1 a 12 (Mutopia) · Nessun dorma | App · importar (domínio público, sem edição aberta conferida) | Alberti e equilíbrio |
+| 9 | 68 | O Haupt voll Blut und Wunden, BWV 244 nº 54 (corpus do music21) | App | Quatro vozes |
+| 9 | 69 | Musette in D, BWV Anh. 126 (Mutopia) | App | Primeira vista |
+| 9 | 70 | Rondo alla Turca, primeira parte (Mutopia) · Minuet in G | App | Ornamentos |
+| 9 | 71 | Musette in D · Minuet in G | App | Duas vozes |
+| 9 | 72 | The Entertainer, temas A e B (Mutopia) | App | Saltos |
+| 9 | 73 | Minuet in G (projeto) · Für Elise completa (`public/library`) | App | Projeto |
 | 10 | 77 | Moonlight Sonata, 1º movimento original · Toccata and Fugue in D minor (abertura) | App (`public/library`, Mutopia) | Diminutos, napolitano |
 | 10 | 80 | A Whole New World | importar | Modulação |
 | 11 | 82–89 | **Unidade 11 vira "Jazz e pop ao piano"** (decisão do Rafael, 27/11/2026). Mantém os conceitos (tensões, voicings sem fundamental, comping, modos, forma) e troca o Brasil por jazz e pop. Sugestão de roteiro: 82 padrões de balada pop na esquerda (Imagine, Hallelujah), 83 tensões (add9, 7M(9), 13), 84 voicings sem fundamental, 85 comping de jazz em swing (The Pink Panther Theme), 86 modos como cores (Eleanor Rigby dórico, Scarborough Fair dórico, Norwegian Wood mixolídio), 87 standard com melodia e comping (Fly Me to the Moon, Autumn Leaves), 88 pop rearmonizado com voicings modernos (Let It Be com add9, sus e baixo invertido), 89 projeto: arranjo solo de um standard ou de uma pop. Baião, Bossa em Fá e Tanguinho saem. Domínio público possível: Scarborough Fair (tradicional), St. Louis Blues (W. C. Handy, 1914), Maple Leaf Rag (Joplin) | App · importar | Jazz e pop |
@@ -91,7 +94,7 @@ Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com
 | 6 | pronta | 2026-11-28 00:19 |
 | 7 | pronta | 2026-11-28 00:31 |
 | 8 | pronta | 2026-11-28 01:22 |
-| 9 | em construção | 2026-11-28 01:37 |
+| 9 | pronta | 2026-11-28 01:39 |
 | 10 | a fazer | |
 | 11 | a fazer | |
 | 12 | a fazer | |

@@ -883,6 +883,9 @@ const l72: Lesson = {
     'Consigo tocar 2 contra 3 (uma mão em tercinas, a outra em colcheias) por 8 tempos, em ±50 ms.',
     'Consigo tocar saltos de registro na mão esquerda no tempo, com 85% de acerto.',
   ],
+  music: [
+    { song: 'u09-entertainer', why: 'The Entertainer completo, com os temas A e B: a esquerda do ragtime salta do baixo grave para o acorde no meio do teclado a cada colcheia. É o treino de saltos desta lição, numa música que todo mundo reconhece.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -930,6 +933,19 @@ Juntando as duas mãos, o desenho é: **1** (as duas juntas), **3** (direita), *
 Comece devagar, a ponto de não errar nenhum salto; a velocidade vem da segurança.`,
     },
     { kind: 'exercise', id: 'l72-saltos', exercise: quickTimed('Saltos na esquerda', 'Baixo grave no tempo, acorde no meio do teclado no tempo seguinte. De 56 a 76 BPM.', () => melodyTask(JUMPS, { bpm: 56, clef: 'bass' }), { ladder: { from: 56, to: 76, step: 5 }, window: 80 }) },
+    {
+      kind: 'text',
+      title: 'The Entertainer, temas A e B',
+      body: `Na unidade 8 você tocou o tema A de **The Entertainer**. A música continua com o **tema B**, e depois o A volta (forma A B A):
+
+- No **B**, a melodia sobe uma oitava (no original ela vem em oitavas; o app escreve a nota de cima) e começa com Sol–Lá–Sol, sincopado como no A.
+- A **esquerda** do B é o salto puro: Dó2 grave, acorde Sol–Dó–Mi no meio do teclado, Sol2 grave, acorde de novo. Mais de uma oitava a cada colcheia.
+- No compasso 8 do B, a esquerda desce em oitavas acentuadas (Fá, Mi, Ré): aqui o app pede só a nota de baixo.
+
+Estude a esquerda do B sozinha no exercício abaixo, com as regras dos saltos: olhos antes, braço levando a mão já na forma do acorde.`,
+    },
+    { kind: 'exercise', id: 'l72-ent-b', exercise: quickTimed('The Entertainer, a esquerda do tema B', 'Os 4 primeiros compassos do B, só a esquerda, de 48 a 72 BPM. Baixo grave e acorde no meio, em colcheias.', () => melodyTask(ENT_B_L.slice(0, 4).join(' | '), { bpm: 48, beatsPerBar: 2, clef: 'bass' }), { ladder: { from: 48, to: 72, step: 8 }, window: 80 }) },
+    { kind: 'song', songId: 'u09-entertainer', why: 'The Entertainer com os temas A, B e A. O alvo é 72 BPM; comece pelo B no modo Estudar.' },
     { kind: 'exercise', id: 'l72-quiz', exercise: quiz('2 contra 3 e saltos', 'Três perguntas rápidas.', POLY_Q, 0.66) },
   ],
   review: [choice(POLY_Q, 'contraponto')],
@@ -948,6 +964,10 @@ const l73: Lesson = {
   objectives: [
     'Consigo passar no checkpoint misto da unidade 9, sem dicas.',
     'Consigo tocar o Minuet in G com 95% das notas no andamento escolhido e escrever sua análise de forma e harmonia.',
+  ],
+  music: [
+    { song: 'u09-minueto', why: 'O Minuet in G é o projeto final da unidade: tocado com as duas mãos e analisado, compasso por compasso.' },
+    { song: 'u09-fur-elise', why: 'Für Elise completa, os 126 compassos: o tema A da unidade 5, o episódio em Fá maior, o trecho dramático sobre o Lá do baixo e a volta do tema. A meta maior do repertório clássico deste nível.' },
   ],
   blocks: [
     {
@@ -981,6 +1001,17 @@ O projeto é o **Minuet in G**, tocado e **analisado**. Analisar uma música é 
       body: 'Gravar e regravar ensina menos do que gravar, ouvir e anotar onde travou. Use "Estudar os compassos" no trecho fraco e grave de novo depois.',
     },
     { kind: 'song', songId: 'u09-minueto', why: 'O projeto final: toque com as duas mãos até 95% das notas no andamento que escolher (a referência é 96 BPM).' },
+    {
+      kind: 'text',
+      title: 'Für Elise inteira',
+      body: `Depois do minueto, a meta maior: **Für Elise completa**. Você já toca o tema A (unidade 5), que volta três vezes. O resto são duas seções novas, e a análise desta lição serve para elas também:
+
+- **B** (compassos 45 a 61, contando as repetições): em **Fá maior**, a esquerda em colcheias e a direita com escalas em fusas (no app, semicolcheias, porque a música é escrita contando colcheias). Termina num vaivém Mi–Ré♯ que traz o tema de volta.
+- **C** (compassos 82 a 104): o **Lá repetido** no baixo, uma nota pedal (lição 66), com acordes que sobem por cima e diminutos de suspense, e um arpejo em tercinas que sobe três oitavas e desce cromático até o tema.
+
+Estude por seção, no modo Estudar, mãos separadas. O alvo é 120 BPM, como no tema A.`,
+    },
+    { kind: 'song', songId: 'u09-fur-elise', why: 'Für Elise completa. Estude uma seção por vez; o tema A você já sabe.' },
   ],
   review: [strangePlay, fourVoices, choice([...STRANGE_Q, ...ORN_Q, ...CANON_Q, ...POLY_Q])],
   checkpoint: [
