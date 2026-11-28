@@ -65,8 +65,25 @@ Unidades 3 e 4: feitas. Unidades 5 a 12: a fazer (as rodadas seguem este mapa). 
 | 9 | 73 | Für Elise, completa | App (`public/library`) | Projeto |
 | 10 | 77 | Moonlight Sonata, 1º movimento original · Toccata and Fugue in D minor (abertura) | App (`public/library`, Mutopia) | Diminutos, napolitano |
 | 10 | 80 | A Whole New World | importar | Modulação |
-| 11 | — | **a decidir com o Rafael**: músicas brasileiras famosas (Tico-Tico no Fubá, Aquarela do Brasil) ou jazz e pop com voicings modernos | — | — |
+| 11 | 82–89 | **Unidade 11 vira "Jazz e pop ao piano"** (decisão do Rafael, 27/11/2026). Mantém os conceitos (tensões, voicings sem fundamental, comping, modos, forma) e troca o Brasil por jazz e pop. Sugestão de roteiro: 82 padrões de balada pop na esquerda (Imagine, Hallelujah), 83 tensões (add9, 7M(9), 13), 84 voicings sem fundamental, 85 comping de jazz em swing (The Pink Panther Theme), 86 modos como cores (Eleanor Rigby dórico, Scarborough Fair dórico, Norwegian Wood mixolídio), 87 standard com melodia e comping (Fly Me to the Moon, Autumn Leaves), 88 pop rearmonizado com voicings modernos (Let It Be com add9, sus e baixo invertido), 89 projeto: arranjo solo de um standard ou de uma pop. Baião, Bossa em Fá e Tanguinho saem. Domínio público possível: Scarborough Fair (tradicional), St. Louis Blues (W. C. Handy, 1914), Maple Leaf Rag (Joplin) | App · importar | Jazz e pop |
 | 12 | 91 | Bohemian Rhapsody (balada) | importar | Arranjo solo |
 | 12 | 94 | Prelúdio Op. 28 nº 4 (Chopin) | App (Mutopia) | Pedal no romântico |
 | 12 | 95 | Nocturne Op. 9 nº 2 · Clair de lune (abertura) · Rhapsody on a Theme of Paganini, Var. 18 | App (Mutopia, `public/library`) · importar | Romântico e impressionista |
 | 12 | 100 | Moonlight Sonata + Gymnopédie No. 1 + DAN DAN Kokoro Hikareteku; Clair de lune como meta | App · importar | Recital final |
+
+## Andamento da troca de músicas
+
+Uma linha por unidade. A rodada que pega uma unidade marca "em construção" com data e hora (commit + push antes de escrever) e "pronta" no fim. "Em construção" há mais de 3 horas = abandonada, pode ser retomada.
+
+| Unidade | Estado | Atualizado |
+|---|---|---|
+| 3 | pronta | 2026-11-27 |
+| 4 | pronta | 2026-11-27 |
+| 5 | a fazer | |
+| 6 | a fazer | |
+| 7 | a fazer | |
+| 8 | a fazer | |
+| 9 | a fazer | |
+| 10 | a fazer | |
+| 11 | a fazer | |
+| 12 | a fazer | |
