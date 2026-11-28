@@ -1416,7 +1416,7 @@ const l100: Lesson = {
   music: [
     { song: 'u12-gymnopedie', why: 'A Gymnopédie No. 1 de Satie fecha o curso: dois acordes que balançam, uma melodia lenta por cima e o pedal a cada compasso. É a peça clássica do recital.' },
     { piece: 'moonlight-1', why: 'A Moonlight Sonata, 1º movimento original, a partitura completa do seu caminho de repertório: as tercinas da unidade 5, os diminutos e o napolitano da unidade 10, o pedal desta unidade. A outra opção de clássica para o recital.' },
-    { piece: 'dan-dan', why: 'DAN DAN Kokoro Hikareteku, a abertura de Dragon Ball GT, é a sua música do caminho: a de trilha e anime no recital, com a síncope da unidade 4 e a melodia no topo do arranjo solo.' },
+    { piece: 'dan-dan', why: 'Sorriso Resplandecente (DAN DAN Kokoro Hikareteku), a abertura de Dragon Ball GT, é a sua música do caminho: a de trilha e anime no recital, com a síncope da unidade 4 e a melodia no topo do arranjo solo.' },
     { piece: 'clair-de-lune', why: 'Clair de lune fica como meta para depois do curso: o pedal, o pianíssimo e as cores do impressionismo da lição 95, numa das peças mais bonitas do piano. A partitura está no seu caminho.' },
   ],
   blocks: [
@@ -1427,7 +1427,7 @@ const l100: Lesson = {
 
 1. **Recital** de 3 músicas, gravado em sequência:
    - **clássica**: a **Gymnopédie nº 1** (abertura, nesta lição) ou, se preferir, a **Moonlight Sonata** (a do seu caminho), o Prelúdio em Mi menor de Chopin (lição 95) ou o Minuet in G (unidade 9);
-   - **trilha ou anime**: **DAN DAN Kokoro Hikareteku** (importe a sua partitura) ou a trilha que você transcreveu;
+   - **trilha ou anime**: **Sorriso Resplandecente** (importe a sua partitura) ou a trilha que você transcreveu;
    - **jazz ou ragtime**: o **Maple Leaf Rag** (unidade 11) ou o seu arranjo solo de um standard.
 2. **Arranjo próprio** de uma melodia, com intro e final.
 3. **Análise harmônica escrita** de uma das músicas.
@@ -1518,7 +1518,7 @@ Termine com uma reflexão curta: o que mudou mais, o que ainda falta e qual é a
   ],
   project: {
     title: 'Recital final: três mundos, um arranjo e uma análise',
-    brief: 'Grave em sequência, sem recomeçar, uma música clássica (a Gymnopédie nº 1 ou outra do curso), uma de trilha ou anime (DAN DAN Kokoro Hikareteku ou a sua transcrição) e uma de jazz ou ragtime (o Maple Leaf Rag ou o seu arranjo de um standard). Depois, toque o seu arranjo próprio, escreva a análise harmônica de uma das músicas e compare as gravações das lições 1, 33, 65 e 100.',
+    brief: 'Grave em sequência, sem recomeçar, uma música clássica (a Gymnopédie nº 1 ou outra do curso), uma de trilha ou anime (Sorriso Resplandecente ou a sua transcrição) e uma de jazz ou ragtime (o Maple Leaf Rag ou o seu arranjo de um standard). Depois, toque o seu arranjo próprio, escreva a análise harmônica de uma das músicas e compare as gravações das lições 1, 33, 65 e 100.',
     steps: [
       'Passe as três músicas no "Tocar a música" com 95% das notas no andamento escolhido.',
       'Escreva o mapa e a cifra do arranjo próprio (forma, intro, turnaround, final, uma cor) e ensaie.',

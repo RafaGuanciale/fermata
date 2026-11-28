@@ -132,7 +132,7 @@ let syncing: Promise<void> | null = null;
 
 /**
  * Deixa o caminho no repertório: põe as músicas que faltam (uma vez por aparelho, depois da primeira
- * sincronização; se você apagar uma depois, ela não volta) e troca os títulos antigos traduzidos pelo original,
+ * sincronização; se você apagar uma depois, ela não volta) e troca os títulos antigos pelo atual (`OLD_PATH_TITLES`),
  * com a partitura nova junto.
  */
 export function syncPath(): Promise<void> {

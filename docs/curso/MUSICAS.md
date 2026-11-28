@@ -100,7 +100,7 @@ Unidades 3 a 12: feitas. "App" = domínio público, no código; "importar" = pro
 | 12 | 97 | Comptine d'un autre été · Interstellar · River Flows in You | importar | Ostinato e trilhas |
 | 12 | 98 | So What · Fly Me to the Moon · Autumn Leaves | importar | Quartais, upper structures, notas-alvo |
 | 12 | 99 | Gymnopédie No. 1 (preparo) · Für Elise completa · Canon in D | App | Revisão final |
-| 12 | 100 | Gymnopédie No. 1 · Moonlight Sonata, 1º movimento (partitura do caminho) · DAN DAN Kokoro Hikareteku; Clair de lune como meta | App · importar | Recital final |
+| 12 | 100 | Gymnopédie No. 1 · Moonlight Sonata, 1º movimento (partitura do caminho) · Sorriso Resplandecente; Clair de lune como meta | App · importar | Recital final |
 
 ## Andamento da troca de músicas
 

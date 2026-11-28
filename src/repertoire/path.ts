@@ -67,13 +67,13 @@ export const PATH_SONGS: PathSong[] = [
   {
     id: 'sorriso',
     phase: 2,
-    title: 'DAN DAN Kokoro Hikareteku',
+    title: 'Sorriso Resplandecente',
     people: ['Field of View'],
     categories: ['filmes'],
     level: 'facil',
     teaches: 'Síncopa (nota que entra antes do tempo), mudar a mão de posição, ritmo mais rápido.',
     why: 'A sua música. Primeiro um arranjo fácil; na fase 4, o arranjo completo.',
-    aliases: ['sorriso resplandecente', 'dan dan', 'dragon ball gt'],
+    aliases: ['dan dan kokoro hikareteku', 'dan dan', 'dragon ball gt'],
   },
   {
     id: 'interstellar',
@@ -161,10 +161,13 @@ export const PATH_SONGS: PathSong[] = [
   },
 ];
 
-/** Títulos antigos (traduzidos) de músicas que já entraram no repertório pelo caminho: viram o original. */
+/**
+ * Títulos antigos de músicas que já entraram no repertório pelo caminho: viram o título atual.
+ * Quase sempre o traduzido vira o original; Sorriso Resplandecente é a exceção (o Rafael quer o nome brasileiro).
+ */
 export const OLD_PATH_TITLES: Record<string, string[]> = {
   ode: ['Ode à Alegria'],
-  sorriso: ['Sorriso Resplandecente'],
+  sorriso: ['DAN DAN Kokoro Hikareteku'],
   gymnopedie: ['Gymnopédie nº 1'],
   moonlight: ['Sonata ao Luar, 1º movimento'],
 };
