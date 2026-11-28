@@ -2,12 +2,16 @@
 
 ## Noite de 2026-11-27
 
-- **00:10 (já dia 28)** — Unidade 6, "Tríades, inversões e condução": troca de músicas **em andamento** (lições 42 e 43 prontas).
+- **00:10 (já dia 28)** — Unidade 6, "Tríades, inversões e condução": troca de músicas **em andamento** (lições 42 a 45 prontas).
   - **Lição 42 (os quatro tipos de tríade)**: **Oh! Darling** (Beatles), para importar: ela abre com um acorde aumentado.
   - **Lição 43 (inversões)**: o **Canon in D** volta numa **versão longa** (novo no app, notas da edição do Mutopia feita a partir do original no IMSLP): os oito acordes com inversões na introdução e as oito primeiras variações do violino no ritmo original, com a descida famosa em semicolcheias, alvo 54 BPM. Exercício novo: os acordes do Cânone invertidos na direita com o baixo na esquerda (46 a 54 BPM).
+  - **Lição 44 (condução de vozes)**: **Let It Be** (C – G – Am – F, o mesmo I–V–vi–IV da lição; você já tem a partitura da Unidade 4) e **Can You Feel the Love Tonight**, para importar.
+  - **Lição 45 (sus2, sus4, add9)**: **Jump** (Van Halen), para importar: o riff é feito de suspensões que resolvem.
   - Para testar: o exercício novo da lição 43 e a versão longa do Cânone no "Tocar a música" (veja se as semicolcheias dos compassos 11 a 14 ficam tocáveis devagar).
   - Músicas protegidas novas até aqui:
     - Oh! Darling (The Beatles) - Partitura - XML
+    - Can You Feel the Love Tonight (Elton John) - Partitura - XML
+    - Jump (Van Halen) - Partitura - XML
 
 - **23:10 às 23:23** — Unidade 5, "Modo menor e intervalos": troca de músicas **pronta**. Todas as 8 lições (34 a 41) começam com as músicas que ensinam.
   - **Lição 34**: a música da lição é a **Marcha Imperial** (Star Wars), para importar.

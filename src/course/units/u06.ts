@@ -353,6 +353,10 @@ const l44: Lesson = {
     'Consigo fazer isso em Dó, Sol, Fá e Ré maior, com no máximo 2 semitons a mais que o caminho mais curto em cada troca.',
     'Consigo trocar os acordes no tempo, com a fundamental na mão esquerda.',
   ],
+  music: [
+    { piece: 'let-it-be', why: 'Let It Be anda em C – G – Am – F, exatamente o I–V–vi–IV em Dó desta lição. Com as vozes conduzidas, a direita toca o acompanhamento inteiro sem sair do lugar.' },
+    { piece: 'can-you-feel', why: 'Can You Feel the Love Tonight, do Rei Leão, é uma balada de piano feita de acordes encadeados com o baixo andando por baixo: o jeito de Elton John de conduzir as vozes.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -406,6 +410,15 @@ A troca precisa acontecer **no tempo 1**, com as duas mãos juntas. Para isso, p
     },
     { kind: 'exercise', id: 'l44-tempo', exercise: quickTimed('I–V–vi–IV no tempo', 'Dois ciclos em tom sorteado, a 66 BPM. Trocas em ±80 ms.', (rng) => popTimed(pick(rng, ['C', 'G', 'F', 'D']), 2, 66), { window: 80, reps: 2 }) },
     { kind: 'exercise', id: 'l44-quiz', exercise: quiz('Condução de vozes', 'Cinco perguntas rápidas.', VOICE) },
+    {
+      kind: 'text',
+      title: 'As músicas da lição: Let It Be e Can You Feel the Love Tonight',
+      body: `**Let It Be** (The Beatles, 1970) é o exercício desta lição com voz por cima: o verso inteiro gira em **C – G – Am – F**. Toque com as posições conduzidas que você acabou de treinar (Dó–Mi–Sol, Si–Ré–Sol, Dó–Mi–Lá, Dó–Fá–Lá) e o baixo na esquerda, e cante ou toque a melodia por cima.
+
+**Can You Feel the Love Tonight** (Elton John, 1994) vai um passo além: muitos acordes trocam com uma voz só andando, e o baixo desce ou sobe por grau conjunto. Na partitura, procure as notas que ficam presas de um acorde para o outro: são elas que fazem a balada soar lisa.
+
+As duas são protegidas: importe as partituras no Repertório pelo cartão no começo da lição.`,
+    },
   ],
   review: [leadAny, inv1, choice(VOICE, 'conducao')],
   checkpoint: [
@@ -493,6 +506,9 @@ const l45: Lesson = {
     'Consigo resolver uma suspensão: a 4ª desce para a 3ª (ou a 2ª sobe), movendo uma nota só.',
     'Consigo compor 4 compassos em que toda suspensão resolve.',
   ],
+  music: [
+    { piece: 'jump', why: 'O riff de teclado de Jump, do Van Halen, é feito de acordes com a 4ª suspensa que resolvem na 3ª: o sus4 → maior desta lição, em ritmo de rock, com uma nota só andando dentro da mão.' },
+  ],
   blocks: [
     {
       kind: 'text',
@@ -565,6 +581,13 @@ Repare que o Fadd9 não é suspensão (ele tem a 3ª, o Lá), então não precis
       },
     },
     { kind: 'exercise', id: 'l45-quiz', exercise: quiz('Cores', 'Seis perguntas rápidas.', COLORS) },
+    {
+      kind: 'text',
+      title: 'A música da lição: Jump',
+      body: `**Jump** (Van Halen, 1984) é um dos riffs de teclado mais famosos do rock, e é construído sobre **suspensões que resolvem**: o acorde aparece com a 4ª no lugar da 3ª e, logo depois, a 4ª desce meio tom para a 3ª. É o Csus4 → C desta lição, repetido em ritmo de rock e com o baixo quase parado.
+
+Como ela é protegida, importe a partitura no Repertório. Antes de tocar no andamento, toque cada acorde do riff devagar e diga em voz alta: "sus4... resolve". Procure a nota que anda: é sempre uma só.`,
+    },
   ],
   review: [colorChords, resolveSus, choice(COLORS, 'cores')],
   checkpoint: [
